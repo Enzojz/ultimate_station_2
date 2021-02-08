@@ -1,0 +1,63 @@
+function data() return {
+    order = 0,
+    params = {
+        fade_out_range = {
+            fadeOutEndDist = 20000,
+            fadeOutStartDist = 10000
+        },
+        map_albedo = {
+            compressionAllowed = true,
+            fileName = "models/ust/albedo/asphalt.dds",
+            magFilter = "LINEAR",
+            minFilter = "LINEAR_MIPMAP_LINEAR",
+            mipmapAlphaScale = 0,
+            type = "TWOD",
+            wrapS = "REPEAT",
+            wrapT = "REPEAT"
+        },
+        map_metal_gloss_ao = {
+            compressionAllowed = true,
+            fileName = "models/ust/gloss_ao/asphalt.dds",
+            magFilter = "LINEAR",
+            minFilter = "LINEAR_MIPMAP_LINEAR",
+            mipmapAlphaScale = 0,
+            type = "TWOD",
+            wrapS = "REPEAT",
+            wrapT = "REPEAT"
+        },
+        map_normal = {
+            compressionAllowed = true,
+            fileName = "models/ust/normal/asphalt.dds",
+            magFilter = "LINEAR",
+            minFilter = "LINEAR_MIPMAP_LINEAR",
+            mipmapAlphaScale = 0,
+            redGreen = true,
+            type = "TWOD",
+            wrapS = "REPEAT",
+            wrapT = "REPEAT"
+        },
+        normal_scale = {
+            normalScale = 1
+        },
+        polygon_offset = {
+            factor = 0,
+            units = 0
+        },
+        two_sided = {
+            flipNormal = false,
+            twoSided = false
+        },
+        map_op_1 = {
+            fileName = "models/ust/op/xy.dds",
+            magFilter = "LINEAR",
+            minFilter = "LINEAR_MIPMAP_LINEAR"
+        },
+        operation_1 = {
+            mode = "NORMAL",
+            op = "MULTIPLICATION",
+            opacity = -256,
+            scale = {1, 1}
+        },
+    },
+    type = "PHYSICAL_NRML_MAP_OP"
+} end

@@ -1,0 +1,42 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local general = require "ust/general"
+
+local unpack = table.unpack
+local ma = math
+local pi = ma.pi
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM"),
+            description = _("MENU_MODULE_PLATFORM_DESC"),
+        },
+        category = {
+            categories = {"ust_data"},
+        },
+        type = "platform",
+        order = {
+            value = 260,
+        },
+        metadata = {
+        },
+        
+        updateFn = function(result, transform, tag, slotId, addModelFn, params)
+        end,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

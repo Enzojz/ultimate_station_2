@@ -1,0 +1,32 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { -0.000000, -0.000000, 0.000004 },
+      bbMin = { -0.800000, -5.000000, -1.930000 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "station/train/passenger/trainstation_1990_borders_3.mtl", "ust/concrete.mtl", "ust/xy/asphalt.mtl" },
+            mesh = "ust/platform/corner_tr.msh",
+            name = "corner_tr",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 2000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

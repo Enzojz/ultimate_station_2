@@ -1,0 +1,123 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local general = require "ust/general"
+local ust = require "ust"
+local dump = require "luadump"
+
+local unpack = table.unpack
+
+local function classifyModules(params)
+    local result = {}
+    for slotId,m in pairs(params) do
+        local type = slotId % 100
+        local id = (slotId - type) / 100 % 1000
+        m.typeId = type
+        if not result[id] then result[id] = { info = {} } end
+        if (type < 50) then
+            result[id].type = type
+        else
+            local data = math.floor(slotId / 1000000)
+            result[id].info[type] = data
+        end
+    end
+    return result
+end
+
+function data()
+    local constructionTemplates =
+        {
+            {
+                constructionType = "RAIL_STATION",
+                type = "DYNAMIC",
+                availability = {
+                    yearFrom = 0,
+                    yearTo = 0
+                },
+                description = {
+                    name = _("MENU_NAME"),
+                    description = _("MENU_NAME")
+                },
+                data = {
+                    params = {}
+                },
+            }
+        }
+    
+    local createTemplateFn = function(_)
+        local result = {
+            [102] = "station/rail/ust/ust_platform.module",
+            [1000151] = "station/rail/ust/ust_data.module",
+            [1000152] = "station/rail/ust/ust_data.module",
+            [153] = "station/rail/ust/ust_data.module",
+            -- [154] = "station/rail/ust/ust_data.module",
+            [20000155] = "station/rail/ust/ust_data.module",
+            [5000156] = "station/rail/ust/ust_data.module",
+            
+            -- [201] = "station/rail/ust/ust_track.module",
+            -- [10251] = "station/rail/ust/ust_data.module",
+            -- [20252] = "station/rail/ust/ust_data.module",
+            -- [253] = "station/rail/ust/ust_data.module",
+            -- -- [254] = "station/rail/ust/ust_data.module",
+            -- [20255] = "station/rail/ust/ust_data.module",
+        }
+        
+        return result
+    end
+    
+    local upgradeFn = function(_) end
+    
+    local updateFn = function(params)
+
+        local result = {
+            entryConnectors = {},
+            colliders = {},
+            terrainAlignmentLists = {},
+            groundFaces = {},
+            terminalGroups = {},
+            stations = {},
+            dependentSlots = {},
+            edgeLists = {},
+            slotConfig = {},
+            occupied = {{}, {}, {}, {}},
+            cost = 0,
+            models = pipe.new * {},
+            slots = {},
+        }
+
+        params.classedModules = classifyModules(params.modules)
+        dump()(params.classedModules)
+        
+        for slotId, modules in pairs(params.modules) do
+            table.insert(result.slots, {
+                id = slotId,
+                transf = modules.transf or coor.I(),
+                type = ust.typeList[modules.typeId] or "ust_data",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+        end
+        
+        result.terminateConstructionHook = function()
+            end
+        return result
+    end
+    
+    return {
+        type = "RAIL_STATION",
+        description = {
+            name = _("MENU_NAME"),
+            description = _("MENU_NAME")
+        },
+        availability = {
+            yearFrom = 0,
+            yearTo = 0
+        },
+        order = 1000,
+        constructionTemplates = constructionTemplates,
+        createTemplateFn = createTemplateFn,
+        params = {
+        },
+        upgradeFn = upgradeFn,
+        updateFn = updateFn
+    }
+end

@@ -1,0 +1,32 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 3.400000, -0.000001, -0.000000 },
+      bbMin = { 0.000000, -5.000000, -0.000000 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/xy/asphalt.mtl" },
+            mesh = "ust/platform/surface_tl.msh",
+            name = "surface_tl",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 2000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

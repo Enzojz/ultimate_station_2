@@ -1,0 +1,98 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local ust = require "ust"
+local general = require "ust/general"
+local dump = require "luadump"
+
+local unpack = table.unpack
+local ma = math
+local pi = ma.pi
+
+local fitModels = {
+    surface = ust.fitModel(3.4, 5, -1.93, true, true),
+    extremity = ust.fitModel(3.4, 5, -1.93, true, true),
+    edge = ust.fitModel(0.8, 5, -1.93, true, true),
+    cornerLeft = ust.fitModel(0.8, 5, -1.93, true, true),
+    cornerRight = ust.fitModel(0.8, 5, -1.93, true, false),
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+
+    local info = ust.slotInfo(slotId, params.classedModules)
+
+    local nSeg = math.floor(0.5 + info.length / 5)
+    local segLength = info.length / nSeg
+    local width = {
+        surface = info.width - 1.6,
+        edge = 0.8
+    }
+
+    for i = 0, nSeg - 1 do
+        local y = {i * segLength, i * segLength + segLength}
+        
+        local sizeSurface = {
+            lb = coor.xyz(-width.surface * 0.5, y[1], 1.93),
+            rb = coor.xyz(width.surface * 0.5, y[1], 1.93),
+            lt = coor.xyz(-width.surface * 0.5, y[2], 1.93),
+            rt = coor.xyz(width.surface * 0.5, y[2], 1.93),
+        }
+        
+        table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", fitModels.surface(sizeSurface, true)));
+        table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", fitModels.surface(sizeSurface, false)));
+        
+        
+        local edgeLeft = {
+            lb = coor.xyz(-width.surface * 0.5 - 0.8, y[1], 1.93),
+            rb = coor.xyz(-width.surface * 0.5, y[1], 1.93),
+            lt = coor.xyz(-width.surface * 0.5 - 0.8, y[2], 1.93),
+            rt = coor.xyz(-width.surface * 0.5, y[2], 1.93),
+        }
+        
+        table.insert(result.models, general.newModel("ust/platform/edge_tl.mdl", fitModels.edge(edgeLeft, true)));
+        table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", fitModels.edge(edgeLeft, false)));
+        
+        local edgeRight = {
+            lb = coor.xyz(width.surface * 0.5, y[1], 1.93),
+            rb = coor.xyz(width.surface * 0.5 + 0.8, y[1], 1.93),
+            lt = coor.xyz(width.surface * 0.5, y[2], 1.93),
+            rt = coor.xyz(width.surface * 0.5 + 0.8, y[2], 1.93),
+        }
+        
+        table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", coor.flipX(), coor.flipY(), fitModels.edge(edgeRight, true)));
+        table.insert(result.models, general.newModel("ust/platform/edge_tl.mdl", coor.flipX(), coor.flipY(), fitModels.edge(edgeRight, false)));
+    
+    end
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM"),
+            description = _("MENU_MODULE_PLATFORM_DESC"),
+        },
+        category = {
+            categories = {"ust_platform"},
+        },
+        type = "platform",
+        order = {
+            value = 260,
+        },
+        metadata = {
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

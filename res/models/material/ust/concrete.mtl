@@ -1,0 +1,56 @@
+function data()
+    return {
+        params = {
+            fade_out_range = {
+                fadeOutEndDist = 20000,
+                fadeOutStartDist = 10000,
+            
+            },
+            map_albedo = {
+                compressionAllowed = true,
+                fileName = "models/ust/albedo/concrete.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            map_metal_gloss_ao = {
+                compressionAllowed = true,
+                fileName = "models/ust/gloss_ao/concrete.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            map_normal = {
+                compressionAllowed = true,
+                fileName = "models/ust/normal/concrete.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            polygon_offset = {
+                factor = 0,
+                units = 0,
+            
+            },
+            two_sided = {
+                twoSided = false,
+            
+            },
+        
+        },
+        type = "PHYSICAL_NRML_MAP",
+    
+    }
+end
