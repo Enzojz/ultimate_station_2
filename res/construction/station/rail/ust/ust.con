@@ -9,13 +9,15 @@ local unpack = table.unpack
 
 local function classifyModules(params)
     local result = {}
-    for slotId,m in pairs(params) do
+    for slotId, m in pairs(params) do
         local type = slotId % 100
         local id = (slotId - type) / 100 % 1000
         m.typeId = type
-        if not result[id] then result[id] = { info = {} } end
+        if not result[id] then result[id] = {info = {}} end
         if (type < 50) then
             result[id].type = type
+            result[id].slotId = slotId
+            result[id].data = math.floor(slotId / 1000000)
         else
             local data = math.floor(slotId / 1000000)
             result[id].info[type] = data
@@ -24,83 +26,200 @@ local function classifyModules(params)
     return result
 end
 
-function data()
-    local constructionTemplates =
+local constructionTemplates =
+    {
         {
-            {
-                constructionType = "RAIL_STATION",
-                type = "DYNAMIC",
-                availability = {
-                    yearFrom = 0,
-                    yearTo = 0
-                },
-                description = {
-                    name = _("MENU_NAME"),
-                    description = _("MENU_NAME")
-                },
-                data = {
-                    params = {}
-                },
-            }
+            constructionType = "RAIL_STATION",
+            type = "DYNAMIC",
+            availability = {
+                yearFrom = 0,
+                yearTo = 0
+            },
+            description = {
+                name = _("MENU_NAME"),
+                description = _("MENU_NAME")
+            },
+            data = {
+                params = {}
+            },
         }
+    }
+
+local createTemplateFn = function(_)
+    local result = {
+        [102] = "station/rail/ust/ust_platform.module",
+        [1000151] = "station/rail/ust/ust_data.module",
+        [1000152] = "station/rail/ust/ust_data.module",
+        [153] = "station/rail/ust/ust_data.module",
+        -- [154] = "station/rail/ust/ust_data.module",
+        [20000155] = "station/rail/ust/ust_data.module",
+        [5000156] = "station/rail/ust/ust_data.module",
     
-    local createTemplateFn = function(_)
-        local result = {
-            [102] = "station/rail/ust/ust_platform.module",
-            [1000151] = "station/rail/ust/ust_data.module",
-            [1000152] = "station/rail/ust/ust_data.module",
-            [153] = "station/rail/ust/ust_data.module",
-            -- [154] = "station/rail/ust/ust_data.module",
-            [20000155] = "station/rail/ust/ust_data.module",
-            [5000156] = "station/rail/ust/ust_data.module",
-            
-            -- [201] = "station/rail/ust/ust_track.module",
-            -- [10251] = "station/rail/ust/ust_data.module",
-            -- [20252] = "station/rail/ust/ust_data.module",
-            -- [253] = "station/rail/ust/ust_data.module",
-            -- -- [254] = "station/rail/ust/ust_data.module",
-            -- [20255] = "station/rail/ust/ust_data.module",
-        }
-        
-        return result
+    -- [202] = "station/rail/ust/ust_platform.module",
+    -- [11000251] = "station/rail/ust/ust_data.module",
+    -- [11000252] = "station/rail/ust/ust_data.module",
+    -- [253] = "station/rail/ust/ust_data.module",
+    -- -- [154] = "station/rail/ust/ust_data.module",
+    -- [20000255] = "station/rail/ust/ust_data.module",
+    -- [5000256] = "station/rail/ust/ust_data.module",
+    -- [201] = "station/rail/ust/ust_track.module",
+    -- [10251] = "station/rail/ust/ust_data.module",
+    -- [20252] = "station/rail/ust/ust_data.module",
+    -- [253] = "station/rail/ust/ust_data.module",
+    -- -- [254] = "station/rail/ust/ust_data.module",
+    -- [20255] = "station/rail/ust/ust_data.module",
+    }
+    
+    return result
+end
+
+local surrendingModules = function(slotId, classedModules)
+    local info = ust.slotInfo(slotId, classedModules)
+    local xn = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(-1, 0, 0)}))
+    local xp = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(1, 0, 0)}))
+    local yn = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(0, -1, 0)}))
+    local yp = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(0, 1, 0)}))
+
+end
+
+local preProcessFn = function(modules, change)
+    local classedModules = classifyModules(modules)
+    
+    local maxId = 0
+    for slotId, module in pairs(modules) do
+        module.info = ust.slotInfo(slotId, classedModules)
+        if maxId < module.info.id then
+            maxId = module.info.id
+        end
     end
     
-    local upgradeFn = function(_) end
+    if change.added then
+        local info = ust.slotInfo(change.slotId, classedModules)
+        local data = math.floor(change.slotId / 1000000)
+        if (data < 5) then
+            local dpos = ({
+                coor.xyz(-1, 0, 0),
+                coor.xyz(1, 0, 0),
+                coor.xyz(0, -1, 0),
+                coor.xyz(0, 1, 0)
+            })[data]
+            local newInfo = {
+                id = maxId + 1,
+                type = change.module.metadata.typeId,
+                pos = info.pos + dpos,
+                length = 20,
+                width = 5
+            }
+            local slotId, dataIds = ust.slotIds(newInfo)
+            modules[slotId] = change.module
+            
+            for key, slotId in pairs(dataIds) do
+                modules[slotId] = {
+                    metadata = {isData = true},
+                    name = "station/rail/ust/ust_data.module",
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            end
+        end
+    end
+    return modules
+end
+
+local upgradeFn = function(_) end
+
+local updateFn = function(params)
+    local result = {
+        entryConnectors = {},
+        colliders = {},
+        terrainAlignmentLists = {},
+        groundFaces = {},
+        terminalGroups = {},
+        stations = {},
+        dependentSlots = {},
+        edgeLists = {},
+        slotConfig = {},
+        occupied = {{}, {}, {}, {}},
+        cost = 0,
+        models = pipe.new * {},
+        slots = {},
+    }
     
-    local updateFn = function(params)
 
-        local result = {
-            entryConnectors = {},
-            colliders = {},
-            terrainAlignmentLists = {},
-            groundFaces = {},
-            terminalGroups = {},
-            stations = {},
-            dependentSlots = {},
-            edgeLists = {},
-            slotConfig = {},
-            occupied = {{}, {}, {}, {}},
-            cost = 0,
-            models = pipe.new * {},
-            slots = {},
-        }
-
-        params.classedModules = classifyModules(params.modules)
-        dump()(params.classedModules)
+    params.classedModules = classifyModules(params.modules)
+    dump()(params.modules)
+    dump()(params.classedModules)
+    for slotId, module in pairs(params.modules) do
+        dump()(slotId, module)
+        module.info = ust.slotInfo(slotId, params.classedModules)
+    end
+    
+    
+    local grid = {}
+    for slotId, module in pairs(params.modules) do
+        if not module.metadata.isData then
+            local info = module.info
+            if not grid[info.pos.z] then grid[info.pos.z] = {} end
+            if not grid[info.pos.z][info.pos.x] then grid[info.pos.z][info.pos.x] = {} end
+            grid[info.pos.z][info.pos.x][info.pos.y] = slotId
+        end
+    end
+    
+    for slotId, module in pairs(params.modules) do
+        table.insert(result.slots, {
+            id = slotId,
+            transf = module.transf or coor.I(),
+            type = ust.typeList[module.typeId] or "ust_data",
+            spacing = {2.5, 2.5, 2.5, 2.5}
+        })
         
-        for slotId, modules in pairs(params.modules) do
+        if not module.metadata.isData then
             table.insert(result.slots, {
-                id = slotId,
-                transf = modules.transf or coor.I(),
-                type = ust.typeList[modules.typeId] or "ust_data",
+                id = ust.mixData(slotId, 1, true),
+                transf = coor.trans(coor.xyz(-5, 0, 0) .. (module.transf or coor.I())),
+                type = "ust_platform",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+            table.insert(result.slots, {
+                id = ust.mixData(slotId, 2, true),
+                transf = coor.trans(coor.xyz(5, 0, 0) .. (module.transf or coor.I())),
+                type = "ust_platform",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+            table.insert(result.slots, {
+                id = ust.mixData(slotId, 3, true),
+                transf = coor.trans(coor.xyz(0, -20, 0) .. (module.transf or coor.I())),
+                type = "ust_platform",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+            table.insert(result.slots, {
+                id = ust.mixData(slotId, 4, true),
+                transf = coor.trans(coor.xyz(0, 20, 0) .. (module.transf or coor.I())),
+                type = "ust_platform",
                 spacing = {2.5, 2.5, 2.5, 2.5}
             })
         end
-        
-        result.terminateConstructionHook = function()
-            end
-        return result
     end
+    
+    
+    for z, gridx in pairs(grid) do
+        for x, gridy in pairs(gridx) do
+            local ys = func.keys(gridy)
+            local min = func.min(ys)
+            local max = func.max(ys)
+        
+        end
+    end
+    
+    result.terminateConstructionHook = function()
+        end
+    return result
+end
+
+function data()
     
     return {
         type = "RAIL_STATION",
@@ -118,6 +237,7 @@ function data()
         params = {
         },
         upgradeFn = upgradeFn,
-        updateFn = updateFn
+        updateFn = updateFn,
+        preProcessFn = preProcessFn
     }
 end

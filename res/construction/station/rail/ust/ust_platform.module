@@ -21,6 +21,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
 
     local info = ust.slotInfo(slotId, params.classedModules)
 
+    local offset = coor.xyz(info.pos.x * 5, info.pos.y * 20, 0)
+    
     local nSeg = math.floor(0.5 + info.length / 5)
     local segLength = info.length / nSeg
     local width = {
@@ -28,14 +30,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         edge = 0.8
     }
 
+
     for i = 0, nSeg - 1 do
         local y = {i * segLength, i * segLength + segLength}
         
         local sizeSurface = {
-            lb = coor.xyz(-width.surface * 0.5, y[1], 1.93),
-            rb = coor.xyz(width.surface * 0.5, y[1], 1.93),
-            lt = coor.xyz(-width.surface * 0.5, y[2], 1.93),
-            rt = coor.xyz(width.surface * 0.5, y[2], 1.93),
+            lb = offset + coor.xyz(-width.surface * 0.5, y[1], 1.93),
+            rb = offset + coor.xyz(width.surface * 0.5, y[1], 1.93),
+            lt = offset + coor.xyz(-width.surface * 0.5, y[2], 1.93),
+            rt = offset + coor.xyz(width.surface * 0.5, y[2], 1.93),
         }
         
         table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", fitModels.surface(sizeSurface, true)));
@@ -43,20 +46,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         
         local edgeLeft = {
-            lb = coor.xyz(-width.surface * 0.5 - 0.8, y[1], 1.93),
-            rb = coor.xyz(-width.surface * 0.5, y[1], 1.93),
-            lt = coor.xyz(-width.surface * 0.5 - 0.8, y[2], 1.93),
-            rt = coor.xyz(-width.surface * 0.5, y[2], 1.93),
+            lb = offset + coor.xyz(-width.surface * 0.5 - 0.8, y[1], 1.93),
+            rb = offset + coor.xyz(-width.surface * 0.5, y[1], 1.93),
+            lt = offset + coor.xyz(-width.surface * 0.5 - 0.8, y[2], 1.93),
+            rt = offset + coor.xyz(-width.surface * 0.5, y[2], 1.93),
         }
         
         table.insert(result.models, general.newModel("ust/platform/edge_tl.mdl", fitModels.edge(edgeLeft, true)));
         table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", fitModels.edge(edgeLeft, false)));
         
         local edgeRight = {
-            lb = coor.xyz(width.surface * 0.5, y[1], 1.93),
-            rb = coor.xyz(width.surface * 0.5 + 0.8, y[1], 1.93),
-            lt = coor.xyz(width.surface * 0.5, y[2], 1.93),
-            rt = coor.xyz(width.surface * 0.5 + 0.8, y[2], 1.93),
+            lb = offset + coor.xyz(width.surface * 0.5, y[1], 1.93),
+            rb = offset + coor.xyz(width.surface * 0.5 + 0.8, y[1], 1.93),
+            lt = offset + coor.xyz(width.surface * 0.5, y[2], 1.93),
+            rt = offset + coor.xyz(width.surface * 0.5 + 0.8, y[2], 1.93),
         }
         
         table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", coor.flipX(), coor.flipY(), fitModels.edge(edgeRight, true)));
@@ -79,13 +82,15 @@ function data()
             description = _("MENU_MODULE_PLATFORM_DESC"),
         },
         category = {
-            categories = {"ust_platform"},
+            categories = {"platform"},
         },
-        type = "platform",
+        type = "ust_platform",
         order = {
             value = 260,
         },
         metadata = {
+            isPlatform = true,
+            typeId = 2
         },
         
         updateFn = updateFn,

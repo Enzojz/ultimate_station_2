@@ -20,7 +20,7 @@ local function readData(data)
     if data % 2 == 0 then
         return data / 10
     else
-        return (data - 1) / 10
+        return (1 - data) / 10
     end
 end
 
@@ -28,6 +28,23 @@ ust.typeList = {
     [1] = "ust_track",
     [2] = "ust_platform",
 }
+
+ust.mixData = function(base, data, ignoreNeg)
+    local data = ignoreNeg and data or (data > 0 and data * 10 or data * 10 + 1)
+    return base + 1000000 * data
+end
+
+ust.slotIds = function(info)
+    local base = info.type + info.id * 100
+    return base, {
+        posX = ust.mixData(51 + info.id * 100, info.pos.x),
+        posY = ust.mixData(52 + info.id * 100, info.pos.y),
+        posZ = ust.mixData(53 + info.id * 100, info.pos.z),
+        radius = info.radius and ust.mixData(54 + info.id * 100, info.radius) or nil,
+        length = ust.mixData(55 + info.id * 100, info.length, true),
+        width = ust.mixData(56 + info.id * 100, info.width, true)
+    }
+end
 
 ust.slotInfo = function(slotId, classedModules)
         -- Platform/track
@@ -44,10 +61,11 @@ ust.slotInfo = function(slotId, classedModules)
             local info = classedModules[id].info
             local x = readData(info[51])
             local y = readData(info[52])
-            local z = readData(info[53])
-            local radius = info[54] and readData(info[54]) or 10e8
+            local z = readData(info[53]) or 0
+            local radius = info[54] and readData(info[54])
             local length = info[55] or 20
             local width = info[56]
+            local data = classedModules[id].data
             
             return {
                 type = type,
@@ -55,7 +73,8 @@ ust.slotInfo = function(slotId, classedModules)
                 pos = coor.xyz(x, y, z),
                 radius = radius,
                 length = length,
-                width = width
+                width = width,
+                data = data
             }
         else
             return {
@@ -295,7 +314,7 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
     end)
     
     local mXI = func.map(mX, coor.inv)
-
+    
     local fitTop = {fitTop, not fitTop}
     local fitLeft = {fitLeft, not fitLeft}
     
@@ -512,7 +531,6 @@ end
 -- ust.createTemplateFn = function(params)
 --     local radius = ustm.rList[params.radius + 1] * 1000
 --     local length = min(ustm.trackLengths[params.lPlatform + 1], abs(radius * pi * 1.5))
-    
 --     local nbTracks = ustm.trackNumberList[params.trackNb + 1]
 --     local layout = makeLayout(nbTracks, params.platformLeft == 0, params.platformRight == 0)
 --     local midPos = ceil(#layout / 2)
@@ -531,9 +549,6 @@ end
 --             result[slot + 2000 + (stair + 1) * 100000] = "station/rail/ust_platform_upstair.module"
 --         end
 --     end
-    
 --     return result
 -- end
-
-
 return ust
