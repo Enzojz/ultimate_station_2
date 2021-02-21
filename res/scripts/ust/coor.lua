@@ -147,12 +147,11 @@ end
 
 coor.xyzAvg = vecXyAvg
 
-function coor.xyz(x, y, z, w)
+function coor.xyz(x, y, z)
     local result = {
-        x = w and x / w or x,
-        y = w and y / w or y,
-        z = w and z / w or z or 0,
-        w = 1,
+        x = x,
+        y = y,
+        z = z or 0,
         length = vecXyzLength,
         length2 = vecXyzLength2,
         normalized = vecXyzNormalized,
@@ -266,11 +265,11 @@ function coor.decomposite(m)
     return vecTrans, coor.I() * mRot, coor.xyz(sx, sy, sz)
 end
 
-function coor.apply(vec, trans, withW)
+function coor.apply(vec, trans)
     local applyVal = function(col)
         return vec.x * trans[0 + col] + vec.y * trans[4 + col] + vec.z * trans[8 + col] + trans[12 + col]
     end
-    return coor.xyz(applyVal(1), applyVal(2), applyVal(3), withW and applyVal(4) or nil)
+    return coor.xyz(applyVal(1), applyVal(2), applyVal(3))
 end
 
 function coor.applyEdge(mpt, mvec)

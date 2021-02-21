@@ -1,0 +1,80 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local ust = require "ust"
+local general = require "ust/general"
+local dump = require "luadump"
+
+local unpack = table.unpack
+local ma = math
+local pi = ma.pi
+
+local fitModels = {
+    surface = ust.fitModel(3.4, 5, -1.93, true, true),
+    extremity = ust.fitModel(3.4, 5, -1.93, true, true),
+    edge = ust.fitModel(0.8, 5, -1.93, true, true),
+    cornerLeft = ust.fitModel(0.8, 5, -1.93, true, true),
+    cornerRight = ust.fitModel(0.8, 5, -1.93, true, false),
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+
+    local info = params.modules[slotId].info
+    
+    local ar = info.arcs.center
+    
+    local e = pipe.new * {{ar:pt(ar.inf), ar:tangent(ar.inf) * info.length}, {ar:pt(ar.sup), ar:tangent(ar.sup) * info.length}} * pipe.map(pipe.map(coor.vec2Tuple))
+    dump()(e)
+    local edges = {
+        type = "TRACK",
+        alignTerrain = true,
+        params = {
+            type = "standard.lua",
+            catenary = false,
+        },
+        edges = e,
+        snapNodes = {},
+        freeNodes = {},
+        tag2nodes = {
+            [tag] = func.seq(0, #e - 1)
+        },
+        slot = slotId
+    }
+
+    table.insert(result.edgeLists, edges)
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM"),
+            description = _("MENU_MODULE_PLATFORM_DESC"),
+        },
+        category = {
+            categories = {"tracks"},
+        },
+        type = "ust_track",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isTrack = true,
+            typeId = 2,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

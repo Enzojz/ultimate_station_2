@@ -47,13 +47,20 @@ local constructionTemplates =
 
 local createTemplateFn = function(_)
     local result = {
-        [102] = "station/rail/ust/ust_platform.module",
+        [101] = "station/rail/ust/ust_track.module",
         [1000151] = "station/rail/ust/ust_data.module",
         [1000152] = "station/rail/ust/ust_data.module",
         [153] = "station/rail/ust/ust_data.module",
-        -- [154] = "station/rail/ust/ust_data.module",
+        [100000000154] = "station/rail/ust/ust_data.module",
         [20000155] = "station/rail/ust/ust_data.module",
-        [5000156] = "station/rail/ust/ust_data.module",
+        
+        [201] = "station/rail/ust/ust_track.module",
+        [1000251] = "station/rail/ust/ust_data.module",
+        [2000252] = "station/rail/ust/ust_data.module",
+        [253] = "station/rail/ust/ust_data.module",
+        [500000254] = "station/rail/ust/ust_data.module",
+        [20000255] = "station/rail/ust/ust_data.module",
+        -- [5000156] = "station/rail/ust/ust_data.module",
     
     -- [202] = "station/rail/ust/ust_platform.module",
     -- [11000251] = "station/rail/ust/ust_data.module",
@@ -71,15 +78,6 @@ local createTemplateFn = function(_)
     }
     
     return result
-end
-
-local surrendingModules = function(slotId, classedModules)
-    local info = ust.slotInfo(slotId, classedModules)
-    local xn = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(-1, 0, 0)}))
-    local xp = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(1, 0, 0)}))
-    local yn = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(0, -1, 0)}))
-    local yp = ust.slotIds(func.with(info, {pos = info.pos + coor.xyz(0, 1, 0)}))
-
 end
 
 local preProcessFn = function(modules, change)
@@ -131,6 +129,8 @@ end
 
 local upgradeFn = function(_) end
 
+
+
 local updateFn = function(params)
     local result = {
         entryConnectors = {},
@@ -150,10 +150,7 @@ local updateFn = function(params)
     
 
     params.classedModules = classifyModules(params.modules)
-    dump()(params.modules)
-    dump()(params.classedModules)
     for slotId, module in pairs(params.modules) do
-        dump()(slotId, module)
         module.info = ust.slotInfo(slotId, params.classedModules)
     end
     
@@ -167,7 +164,65 @@ local updateFn = function(params)
             grid[info.pos.z][info.pos.x][info.pos.y] = slotId
         end
     end
-    
+
+    for z, zv in pairs(grid) do
+        local xPos = func.sort(func.filter(func.keys(zv), function(k) return k >= 0 end))
+        local xNeg = func.rev(func.sort(func.filter(func.keys(zv), function(k) return k < 0 end)))
+        local xRef = 0
+        for _, x in ipairs(xPos) do
+            local yRef = 0
+
+            local yPos = func.sort(func.filter(func.keys(grid[z][x]), function(k) return k >= 0 end))
+            local yNeg = func.rev(func.sort(func.filter(func.keys(grid[z][x]), function(k) return k < 0 end)))
+            
+            local state = false
+            for _, y in ipairs(func.sort(yPos)) do
+                local slotId = grid[z][x][y]
+                local m = params.modules[slotId]
+
+                if (not state) then
+                    local width = m.info.width or m.metadata.width or 5
+                    state = {
+                        pos = coor.xyz(xRef + width * 0.5, 0 , 0),
+                        vec = coor.xyz(0, 1, 0),
+                        width = width, 
+                        radius = m.info.radius or 10e8,
+                        length = m.info.length
+                    }
+                end
+
+                if m.info.radius then
+                    state.radius = m.info.radius
+                end
+
+                dump()(state)
+                local ar, arL, arR = 
+                    ust.arcPacker(state.pos, state.vec, state.length, state.radius)(-state.width * 0.5, state.width * 0.5)
+
+                local refArc = {
+                    left = arL,
+                    right = arR,
+                    center = ar
+                }
+
+                params.modules[slotId].info.arcs = refArc
+
+                params.modules[slotId].info.pts = {
+                    refArc.center:pt(refArc.center.inf),
+                    refArc.center:tangent(refArc.center.inf),
+                    refArc.center:pt(refArc.center.sup),
+                    refArc.center:tangent(refArc.center.sup)
+                }
+
+                state.vec = refArc.center:tangent(refArc.center.sup)
+                state.pos = refArc.center:pt(refArc.center.sup)
+            end
+            if state and state.width then
+                xRef = xRef + state.width
+            end
+        end
+    end
+
     for slotId, module in pairs(params.modules) do
         table.insert(result.slots, {
             id = slotId,

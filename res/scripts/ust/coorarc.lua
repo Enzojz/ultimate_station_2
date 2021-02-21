@@ -59,8 +59,6 @@ function arc.rev(ar)
     return ar:withLimits({
         inf = ar.sup,
         sup = ar.inf,
-        fz = ar.fz,
-        fs = function(rad) return -ar.fs(rad) end,
         o = ar.o:withZ(ar:pt(ar.sup).z)
     })
 end
@@ -117,7 +115,7 @@ function arc.ptByRad(arc, rad)
         coor.xyz(
             cos(rad) * arc.r,
             sin(rad) * arc.r,
-            arc.fz and arc.fz(rad) or 0
+            0
         ) + arc.o
 end
 
@@ -136,7 +134,7 @@ function arc.ptByPt(arc, pt)
 end
 
 function arc.tangent(arc, rad)
-    return (coor.xyz(0, (arc.sup < arc.inf) and -1 or 1, arc.fs(rad)) .. coor.rotZ(rad)):normalized()
+    return (coor.xyz(0, (arc.sup < arc.inf) and -1 or 1, 0) .. coor.rotZ(rad)):normalized()
 end
 
 

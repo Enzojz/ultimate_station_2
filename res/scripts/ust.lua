@@ -119,31 +119,25 @@ ust.arc2Edges = function(arc)
     }
 end
 
-ust.arcPacker = function(length, slope, r)
-    return function(radius, o)
-        local initRad = (radius > 0 and pi or 0)
-        return function(z)
-            local z = z or 0
-            return function(lengthOverride)
-                local l = lengthOverride and lengthOverride(length) or length
-                return function(xDr)
-                    local dr = xDr or 0
-                    local ar = arc.byOR(o + coor.xyz(0, 0, z), abs(radius - dr))
-                    local rad = l / r * 0.5
-                    return pipe.new
-                        / ar:withLimits({
-                            sup = initRad - rad,
-                            inf = initRad,
-                            slope = -slope
-                        })
-                        / ar:withLimits({
-                            inf = initRad,
-                            sup = initRad + rad,
-                            slope = slope
-                        })
-                end
-            end
-        end
+ust.arcPacker = function(pt, vec, length, radius)
+    local nVec = vec:withZ(0):normalized()
+    local tVec = radius > 0 and coor.xyz(-nVec.y, nVec.x, 0) or coor.xyz(nVec.y, nVec.x, 0)
+    local o = pt + tVec * radius
+    local ar = arc.byOR(o, abs(radius))
+    local inf = ar:rad(pt)
+    local sup = inf + length / radius
+    ar = ar:withLimits({
+        sup = sup,
+        inf = inf
+    })
+    return function(...)
+        local result = func.map({...}, function(dr)
+            return arc.byOR(o, abs(radius - dr), {
+                sup = sup,
+                inf = inf
+            })
+        end)
+        return ar, table.unpack(result)
     end
 end
 
