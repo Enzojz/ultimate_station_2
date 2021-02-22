@@ -1,11 +1,13 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
+local arc = require "ust/coorarc"
 local pipe = require "ust/pipe"
 local general = require "ust/general"
 local ust = require "ust"
 local dump = require "luadump"
 
 local unpack = table.unpack
+local abs = math.abs
 
 local function classifyModules(params)
     local result = {}
@@ -45,23 +47,81 @@ local constructionTemplates =
         }
     }
 
+local arcPacker = function(pt, vec, length, radius)
+    local nVec = vec:withZ(0):normalized()
+    local tVec = coor.xyz(-nVec.y, nVec.x, 0)
+    local o = pt + tVec * radius
+    local ar = arc.byOR(o, abs(radius))
+    local inf = ar:rad(pt)
+    local sup = inf + length / radius
+    ar = ar:withLimits({
+        sup = sup,
+        inf = inf
+    })
+    return function(...)
+        local result = func.map({...}, function(dr)
+            return arc.byOR(o, abs(radius - dr), {
+                sup = sup,
+                inf = inf
+            })
+        end)
+        return ar, table.unpack(result)
+    end
+end
+
 local createTemplateFn = function(_)
     local result = {
-        [101] = "station/rail/ust/ust_track.module",
-        [1000151] = "station/rail/ust/ust_data.module",
-        [1000152] = "station/rail/ust/ust_data.module",
-        [153] = "station/rail/ust/ust_data.module",
-        [100000000154] = "station/rail/ust/ust_data.module",
-        [20000155] = "station/rail/ust/ust_data.module",
-        
-        [201] = "station/rail/ust/ust_track.module",
-        [1000251] = "station/rail/ust/ust_data.module",
-        [2000252] = "station/rail/ust/ust_data.module",
-        [253] = "station/rail/ust/ust_data.module",
-        [500000254] = "station/rail/ust/ust_data.module",
-        [20000255] = "station/rail/ust/ust_data.module",
-        -- [5000156] = "station/rail/ust/ust_data.module",
-    
+            
+            [401] = "station/rail/ust/ust_track.module",
+            [10000451] = "station/rail/ust/ust_data.module",
+            [11000452] = "station/rail/ust/ust_data.module",
+            [453] = "station/rail/ust/ust_data.module",
+            [500000454] = "station/rail/ust/ust_data.module",
+            [20000455] = "station/rail/ust/ust_data.module",
+            
+            [101] = "station/rail/ust/ust_track.module",
+            [10000151] = "station/rail/ust/ust_data.module",
+            [10000152] = "station/rail/ust/ust_data.module",
+            [153] = "station/rail/ust/ust_data.module",
+            [500000154] = "station/rail/ust/ust_data.module",
+            [20000155] = "station/rail/ust/ust_data.module",
+            
+            [201] = "station/rail/ust/ust_track.module",
+            [10000251] = "station/rail/ust/ust_data.module",
+            [20000252] = "station/rail/ust/ust_data.module",
+            [253] = "station/rail/ust/ust_data.module",
+            [500000254] = "station/rail/ust/ust_data.module",
+            [20000255] = "station/rail/ust/ust_data.module",
+            -- [5000156] = "station/rail/ust/ust_data.module",
+            [301] = "station/rail/ust/ust_track.module",
+            [10000351] = "station/rail/ust/ust_data.module",
+            [30000352] = "station/rail/ust/ust_data.module",
+            [353] = "station/rail/ust/ust_data.module",
+            [500000354] = "station/rail/ust/ust_data.module",
+            [20000355] = "station/rail/ust/ust_data.module",
+            -- [5000156] = "station/rail/ust/ust_data.module",
+
+            [501] = "station/rail/ust/ust_track.module",
+            [20000551] = "station/rail/ust/ust_data.module",
+            [10000552] = "station/rail/ust/ust_data.module",
+            [553] = "station/rail/ust/ust_data.module",
+            [20000555] = "station/rail/ust/ust_data.module",
+            
+            [601] = "station/rail/ust/ust_track.module",
+            [20000651] = "station/rail/ust/ust_data.module",
+            [20000652] = "station/rail/ust/ust_data.module",
+            [653] = "station/rail/ust/ust_data.module",
+            [20000655] = "station/rail/ust/ust_data.module",
+            [701] = "station/rail/ust/ust_track.module",
+            [20000751] = "station/rail/ust/ust_data.module",
+            [30000752] = "station/rail/ust/ust_data.module",
+            [753] = "station/rail/ust/ust_data.module",
+            [20000755] = "station/rail/ust/ust_data.module",
+            [801] = "station/rail/ust/ust_track.module",
+            [20000851] = "station/rail/ust/ust_data.module",
+            [11000852] = "station/rail/ust/ust_data.module",
+            [853] = "station/rail/ust/ust_data.module",
+            [20000855] = "station/rail/ust/ust_data.module",
     -- [202] = "station/rail/ust/ust_platform.module",
     -- [11000251] = "station/rail/ust/ust_data.module",
     -- [11000252] = "station/rail/ust/ust_data.module",
@@ -148,7 +208,7 @@ local updateFn = function(params)
         slots = {},
     }
     
-
+    
     params.classedModules = classifyModules(params.modules)
     for slotId, module in pairs(params.modules) do
         module.info = ust.slotInfo(slotId, params.classedModules)
@@ -164,65 +224,141 @@ local updateFn = function(params)
             grid[info.pos.z][info.pos.x][info.pos.y] = slotId
         end
     end
-
     for z, zv in pairs(grid) do
         local xPos = func.sort(func.filter(func.keys(zv), function(k) return k >= 0 end))
         local xNeg = func.rev(func.sort(func.filter(func.keys(zv), function(k) return k < 0 end)))
-        local xRef = 0
+        local xState = false
         for _, x in ipairs(xPos) do
-            local yRef = 0
-
+            
+            if (not xState) then
+                xState = {
+                    pos = 0,
+                    radius = 10e8,
+                    refList = {},
+                    yStates = {}
+                }
+            end
+            
+            xState.refList[x] = xState.pos
+            xState.yStates[x] = {}
+            
             local yPos = func.sort(func.filter(func.keys(grid[z][x]), function(k) return k >= 0 end))
             local yNeg = func.rev(func.sort(func.filter(func.keys(grid[z][x]), function(k) return k < 0 end)))
             
-            local state = false
+            local yState = false
             for _, y in ipairs(func.sort(yPos)) do
                 local slotId = grid[z][x][y]
                 local m = params.modules[slotId]
-
-                if (not state) then
+                
+                if (not yState) then
                     local width = m.info.width or m.metadata.width or 5
-                    state = {
-                        pos = coor.xyz(xRef + width * 0.5, 0 , 0),
+                    yState = {
+                        pos = coor.xyz(xState.pos + width * 0.5, 0, 0),
                         vec = coor.xyz(0, 1, 0),
-                        width = width, 
+                        width = width,
                         radius = m.info.radius or 10e8,
                         length = m.info.length
                     }
+                    yState.ref = func.with(yState, {})
                 end
 
                 if m.info.radius then
-                    state.radius = m.info.radius
+                    yState.radius = m.info.radius
+                else
+                    for i = x - 1, 0, -1 do
+                        if xState.yStates[i] and xState.yStates[i][y] then
+                            yState.radius = xState.yStates[i][y].radius + (xState.pos - xState.refList[i])
+                            break
+                        end
+                    end
                 end
-
-                dump()(state)
-                local ar, arL, arR = 
-                    ust.arcPacker(state.pos, state.vec, state.length, state.radius)(-state.width * 0.5, state.width * 0.5)
-
+                                
+                xState.yStates[x][y] = yState
+                
+                local ar, arL, arR =
+                    arcPacker(yState.pos, yState.vec, yState.length, yState.radius)(-yState.width * 0.5, yState.width * 0.5)
+                
                 local refArc = {
                     left = arL,
                     right = arR,
                     center = ar
                 }
-
+                
                 params.modules[slotId].info.arcs = refArc
-
+                
                 params.modules[slotId].info.pts = {
                     refArc.center:pt(refArc.center.inf),
                     refArc.center:tangent(refArc.center.inf),
                     refArc.center:pt(refArc.center.sup),
                     refArc.center:tangent(refArc.center.sup)
                 }
-
-                state.vec = refArc.center:tangent(refArc.center.sup)
-                state.pos = refArc.center:pt(refArc.center.sup)
+                
+                yState.vec = refArc.center:tangent(refArc.center.sup)
+                yState.pos = refArc.center:pt(refArc.center.sup)
             end
-            if state and state.width then
-                xRef = xRef + state.width
+            
+            yState = yState and yState.ref or false
+            
+            for _, y in ipairs(func.sort(yNeg)) do
+                local slotId = grid[z][x][y]
+                local m = params.modules[slotId]
+                
+                if (not yState) then
+                    local width = m.info.width or m.metadata.width or 5
+                    yState = {
+                        pos = coor.xyz(xState.pos + width * 0.5, 0, 0),
+                        vec = coor.xyz(0, -1, 0),
+                        width = width,
+                        radius = m.info.radius or 10e8,
+                        length = m.info.length
+                    }
+                else
+                    yState.vec = -yState.vec
+                end
+                
+                if m.info.radius then
+                    yState.radius = m.info.radius
+                else
+                    for i = x - 1, 0, -1 do
+                        if xState.yStates[i] and xState.yStates[i][y] then
+                            yState.radius = xState.yStates[i][y].radius + (xState.pos - xState.refList[i])
+                            break
+                        end
+                    end
+                end
+                                
+                xState.yStates[x][y] = yState
+                
+                xState.yStates[x][y] = yState
+                
+                local ar, arL, arR =
+                    arcPacker(yState.pos, yState.vec, yState.length, -yState.radius)(-yState.width * 0.5, yState.width * 0.5)
+                
+                local refArc = {
+                    left = arL,
+                    right = arR,
+                    center = ar
+                }
+                
+                params.modules[slotId].info.arcs = refArc
+                
+                params.modules[slotId].info.pts = {
+                    refArc.center:pt(refArc.center.inf),
+                    refArc.center:tangent(refArc.center.inf),
+                    refArc.center:pt(refArc.center.sup),
+                    refArc.center:tangent(refArc.center.sup)
+                }
+                
+                yState.vec = refArc.center:tangent(refArc.center.sup)
+                yState.pos = refArc.center:pt(refArc.center.sup)
+            end
+            
+            if yState and yState.width then
+                xState.pos = xState.pos + yState.width
             end
         end
     end
-
+    
     for slotId, module in pairs(params.modules) do
         table.insert(result.slots, {
             id = slotId,

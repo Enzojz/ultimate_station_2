@@ -24,7 +24,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local ar = info.arcs.center
     
     local e = pipe.new * {{ar:pt(ar.inf), ar:tangent(ar.inf) * info.length}, {ar:pt(ar.sup), ar:tangent(ar.sup) * info.length}} * pipe.map(pipe.map(coor.vec2Tuple))
-    dump()(e)
     local edges = {
         type = "TRACK",
         alignTerrain = true,
