@@ -30,7 +30,7 @@ ust.typeList = {
 }
 
 ust.mixData = function(base, data, ignoreNeg)
-    local data = ignoreNeg and data or (data > 0 and data * 10 or data * 10 + 1)
+    local data = ignoreNeg and data or (data < 0 and (-data * 10 + 1) or data * 10)
     return base + 1000000 * data
 end
 
