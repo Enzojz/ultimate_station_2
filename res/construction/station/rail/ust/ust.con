@@ -6,7 +6,8 @@ local pipe = require "ust/pipe"
 local general = require "ust/general"
 local ust = require "ust"
 local dump = require "luadump"
-local livetext = require "livetext"
+
+local livetext = require "ust/livetext"
 
 local unpack = table.unpack
 local abs = math.abs
@@ -17,7 +18,7 @@ local function classifyModules(params)
         local type = slotId % 100
         local id = (slotId - type) / 100 % 1000
         m.typeId = type
-        if not result[id] then result[id] = {info = {}} end
+        if not result[id] then result[id] = {info = {}, slot = {}} end
         if (type < 50) then
             result[id].type = type
             result[id].slotId = slotId
@@ -25,6 +26,7 @@ local function classifyModules(params)
         else
             local data = math.floor(slotId / 1000000)
             result[id].info[type] = data
+            result[id].slot[type] = slotId
         end
     end
     return result
@@ -112,7 +114,7 @@ local preProcessFn = function(modules, change)
     if change.added then
         local info = ust.slotInfo(change.slotId, classedModules)
         local data = math.floor(change.slotId / 1000000)
-        dump()(change)
+        
         if (info.type == 1 and data < 5 and data > 0) then
             local dpos = ({
                 coor.xyz(-1, 0, 0),
@@ -129,7 +131,7 @@ local preProcessFn = function(modules, change)
             }
             
             local slotId, dataIds = ust.slotIds(newInfo)
-            dump()(slotId)
+            
             modules[slotId] = change.module
             
             for key, slotId in pairs(dataIds) do
@@ -145,8 +147,23 @@ local preProcessFn = function(modules, change)
             end
         elseif info.type == 80 and data == 1 then
             modules[info.id * 100 + 80] = nil
+        elseif info.type == 81 then
+            local id = info.id
+            local removeSlot = classedModules[id].slot[54]
+            modules[removeSlot] = nil
+
+            local addSlot = change.slotId - 27
+            modules[addSlot] = {
+                metadata = {isData = true},
+                name = "station/rail/ust/ust_data.module",
+                updateScript = {
+                    fileName = "",
+                    params = {}
+                },
+                variant = 0
+            }
         else
-            -- modules[change.slotId] = change.module
+            modules[change.slotId] = change.module
         end
     end
     return modules
@@ -381,6 +398,47 @@ local updateFn = function(params)
                     spacing = {1.5, 1.5, 1.5, 1.5}
                 })
                 
+                local arcs = module.info.arcs
+                
+                local step = (arcs.center.sup - arcs.center.inf) / 7
+                
+                local base = 1
+                for i = 1, 6 do
+                    local rad = arcs.center.inf + step * i
+                    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+                    local vec = (posR - posL):normalized()
+                    local posP = posR + vec * 2
+                    local posN = posL - vec * 2
+                    
+                    table.insert(result.slots, {
+                        id = ust.mixData(module.info.id * 100 + 81, base + module.info.radius),
+                        transf = coor.rotZ(rad) * coor.trans(posP) * coor.transZ(0),
+                        type = "ust_modifier",
+                        spacing = {1, 1, 1, 1}
+                    })
+                    
+                    local nameModelsF, width = livetext(2)(string.format("+%d", base))
+                    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-width - 2, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(posP + coor.xyz(0, 0, 2)) end)) do
+                        table.insert(result.models, m)
+                    end
+                    
+                    
+                    table.insert(result.slots, {
+                        id = ust.mixData(module.info.id * 100 + 81, -base + module.info.radius),
+                        transf = coor.rotZ(rad) * coor.trans(posN) * coor.transZ(0),
+                        type = "ust_modifier",
+                        spacing = {1, 1, 1, 1}
+                    })
+                    
+                    local nameModelsF, width = livetext(2)(string.format("-%d", base))
+                    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(2, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(posN + coor.xyz(0, 0, 2)) end)) do
+                        table.insert(result.models, m)
+                    end
+                    
+                    base = base * 10
+                end
+            
+            
             end
             
             if not (grid[pos.z][pos.x - 1] and (grid[pos.z][pos.x - 1][pos.y + 1] or grid[pos.z][pos.x - 1][pos.y - 1])) then
@@ -440,10 +498,10 @@ local updateFn = function(params)
         
         end
     end
-
     
-
-
+    
+    
+    
     result.terminateConstructionHook = function()
         end
     return result

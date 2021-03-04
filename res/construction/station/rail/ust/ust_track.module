@@ -5,7 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local dump = require "luadump"
 
-local livetext = require "livetext"
+local livetext = require "ust/livetext"
 
 
 local unpack = table.unpack
@@ -105,10 +105,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local midPt = arcc:pt(mid)
         
 
-        
-        local nameModelsF, width = livetext(2)(string.format("R%d", info.radius))
-        for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(mid) * coor.trans(midPt + coor.xyz(0, 0, 1)) end)) do
-            table.insert(result.models, m)
+        if info.canModifyRadius then
+            local nameModelsF, width = livetext(2)(string.format("R%d", info.radius))
+            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(mid) * coor.trans(midPt + coor.xyz(0, 0, 1)) end)) do
+                table.insert(result.models, m)
+            end
         end
         
 end
