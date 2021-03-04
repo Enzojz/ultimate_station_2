@@ -27,10 +27,11 @@ general.withTag = function(tag)
     end)
 end
 
-general.newModel = function(m, ...)
+general.newModel = function(m, tag, ...)
     return {
         id = m,
-        transf = coor.mul(...)
+        transf = coor.mul(...),
+        tag = tag
     }
 end
 

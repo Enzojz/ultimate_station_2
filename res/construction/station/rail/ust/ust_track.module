@@ -5,6 +5,9 @@ local ust = require "ust"
 local general = require "ust/general"
 local dump = require "luadump"
 
+local livetext = require "livetext"
+
+
 local unpack = table.unpack
 local ma = math
 local pi = ma.pi
@@ -18,29 +21,96 @@ local fitModels = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+        
+        local info = params.modules[slotId].info
+        
+        local pts = info.pts
+        
+        local e = {{}, {}}
+        
+        if (info.pos.y > 0) then
+            e = {
+                info.prev and {
+                    pts[1][1]:avg(params.modules[info.prev].info.pts[2][1]),
+                    pts[1][2]:avg(params.modules[info.prev].info.pts[2][2])
+                } or pts[1],
+                
+                info.next and {
+                    pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
+                    pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+                } or pts[2]
+            }
+        elseif (info.pos.y == 0) then
+            e = {
+                info.prev and {
+                    pts[1][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                    pts[1][2]:avg(-params.modules[info.prev].info.pts[1][2])
+                } or pts[1],
+                
+                info.next and {
+                    pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
+                    pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+                } or pts[2]
+            }
+        elseif (info.pos.y == -1) then
+            e = {
+                info.next and {
+                    pts[1][1]:avg(params.modules[info.next].info.pts[1][1]),
+                    pts[1][2]:avg(-params.modules[info.next].info.pts[1][2])
+                } or pts[1],
+                
+                info.prev and {
+                    pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                    pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+                } or pts[2],
+            
+            }
+        else
+            e = {
+                info.next and {
+                    pts[1][1]:avg(params.modules[info.next].info.pts[2][1]),
+                    pts[1][2]:avg(params.modules[info.next].info.pts[2][2])
+                } or pts[1],
+                
+                info.prev and {
+                    pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                    pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+                } or pts[2],
+            
+            }
+        end
+        
+        local e = pipe.new * e * pipe.map(function(e) return {e[1], e[2] * info.length} end) * pipe.map(pipe.map(coor.vec2Tuple))
+        
+        local edges = {
+            type = "TRACK",
+            alignTerrain = true,
+            params = {
+                type = "standard.lua",
+                catenary = false,
+            },
+            edges = e,
+            snapNodes = {},
+            freeNodes = {},
+            tag2nodes = {
+                [tag] = func.seq(0, #e - 1)
+            },
+            slot = slotId
+        }
+        
+        table.insert(result.edgeLists, edges)
+        
+        local arcc = info.arcs.center
+        local mid = 0.5 * (arcc.sup + arcc.inf)
+        local midPt = arcc:pt(mid)
+        
 
-    local info = params.modules[slotId].info
-    
-    local ar = info.arcs.center
-    
-    local e = pipe.new * {{ar:pt(ar.inf), ar:tangent(ar.inf) * info.length}, {ar:pt(ar.sup), ar:tangent(ar.sup) * info.length}} * pipe.map(pipe.map(coor.vec2Tuple))
-    local edges = {
-        type = "TRACK",
-        alignTerrain = true,
-        params = {
-            type = "standard.lua",
-            catenary = false,
-        },
-        edges = e,
-        snapNodes = {},
-        freeNodes = {},
-        tag2nodes = {
-            [tag] = func.seq(0, #e - 1)
-        },
-        slot = slotId
-    }
-
-    table.insert(result.edgeLists, edges)
+        
+        local nameModelsF, width = livetext(2)(string.format("R%d", info.radius))
+        for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(mid) * coor.trans(midPt + coor.xyz(0, 0, 1)) end)) do
+            table.insert(result.models, m)
+        end
+        
 end
 function data()
     return {
@@ -65,7 +135,7 @@ function data()
         },
         metadata = {
             isTrack = true,
-            typeId = 2,
+            typeId = 1,
             width = 5
         },
         

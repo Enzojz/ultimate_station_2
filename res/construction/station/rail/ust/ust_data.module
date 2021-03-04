@@ -13,16 +13,17 @@ function data()
             yearFrom = 0,
             yearTo = 0,
         },
+		visible = false,
         buildMode = "SINGLE",
         cost = {
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_PLATFORM"),
-            description = _("MENU_MODULE_PLATFORM_DESC"),
+            name = "HIDDEN_MODULE",
+            description = "NOTHING",
         },
         category = {
-            categories = {"data"},
+            categories = {},
         },
         type = "ust_data",
         order = {

@@ -1,0 +1,28 @@
+function data()
+  return {
+    order = 0,
+    params = {
+      emissive_scale = {
+        emissiveScale = { 1.3, 1.3, 1.3 },
+      },
+      fade_out_range = {
+        fadeOutEndDist = 250,
+        fadeOutStartDist = 100,
+      },
+      map_emissive = {
+        fileName = "models/ust/albedo/white.dds",
+        type = "TWOD",
+      },
+      polygon_offset = {
+        factor = 0,
+        units = 0,
+      },
+      two_sided = {
+        flipNormal = false,
+        twoSided = false,
+      },
+    },
+    type = "EMISSIVE",
+  }
+  end
+  

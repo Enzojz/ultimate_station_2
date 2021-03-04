@@ -65,6 +65,8 @@ ust.slotInfo = function(slotId, classedModules)
             local radius = info[54] and readData(info[54])
             local length = info[55] or 20
             local width = info[56]
+            local canModifyRadius = info[80] and true or false
+            local deltaRadius = info[81] and readData(info[81]) or 0
             local data = classedModules[id].data
             
             return {
@@ -74,7 +76,9 @@ ust.slotInfo = function(slotId, classedModules)
                 radius = radius,
                 length = length,
                 width = width,
-                data = data
+                data = data,
+                canModifyRadius = canModifyRadius,
+                deltaRadius = deltaRadius
             }
         else
             return {

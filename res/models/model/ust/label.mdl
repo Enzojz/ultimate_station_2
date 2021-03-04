@@ -1,0 +1,44 @@
+local coor = require "ust/coor"
+function data()
+    return {
+        collider = {
+            params = {},
+            type = "MESH"
+        },
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            name = "name_board",
+                            transf = coor.I()
+                        }
+                    },
+                    name = "RootNode",
+                    transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 5000
+            }
+        },
+        metadata = {
+            labelList = {
+                labels = {
+                    {
+                        transf = coor.transY(-0.65) * coor.rotZ(math.pi * 0.5),
+                        size = { 0, 2 },
+                        type = "CUSTOM",
+                        alphaMode = "BLEND",
+                        renderMode = "EMISSIVE",
+                        alignment = "CENTER",
+                        verticalAlignment = "CENTER",
+                        fitting = "NONE",
+                        childId = "RootNode"
+                    }
+                },
+            },
+        },
+        version = 1
+    }
+end
