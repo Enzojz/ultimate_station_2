@@ -15,17 +15,18 @@ local abs = math.abs
 local function classifyModules(params)
     local result = {}
     for slotId, m in pairs(params) do
-        local type = slotId % 100
-        local id = (slotId - type) / 100 % 10000
+        local slotIdAbs = math.abs(slotId)
+        local type = slotIdAbs % 100
+        local id = (slotIdAbs - type) / 100 % 10000
         m.typeId = type
         if not result[id] then result[id] = {info = {}, slot = {}} end
         if (type < 50) then
             result[id].type = type
             result[id].slotId = slotId
-            result[id].data = math.floor(slotId / 1000000)
+            result[id].data = slotId > 0 and math.floor(slotIdAbs / 1000000) or -math.floor(slotIdAbs / 1000000)
         else
-            local data = math.floor(slotId / 1000000)
-            result[id].info[type] = data < 1000 and data or (1000 - data)
+            local data = slotId > 0 and math.floor(slotIdAbs / 1000000) or -math.floor(slotIdAbs / 1000000)
+            result[id].info[type] = data
             result[id].slot[type] = slotId
         end
     end
@@ -91,9 +92,9 @@ local createTemplateFn = function(_)
         -- [20000255] = "station/rail/ust/ust_data.module",
         [301] = "station/rail/ust/ust_track.module",
         [351] = "station/rail/ust/ust_data.module",
-        [1001000352] = "station/rail/ust/ust_data.module",
+        [-001000352] = "station/rail/ust/ust_data.module",
         [353] = "station/rail/ust/ust_data.module",
-        [1100000354] = "station/rail/ust/ust_data.module",
+        [-100000354] = "station/rail/ust/ust_data.module",
         [20000355] = "station/rail/ust/ust_data.module",
     }
     
@@ -191,8 +192,15 @@ local updateFn = function(params)
     
     
     params.classedModules = classifyModules(params.modules)
-    for slotId, module in pairs(params.modules) do
-        module.info = ust.slotInfo(slotId, params.classedModules)
+    dump()(params.modules)
+    dump()(params.classedModules)
+
+    for id, info in pairs(params.classedModules) do
+        params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
+        for id, slotId in pairs(info.slot) do
+            dump()(slotId)
+            params.modules[slotId].info = ust.slotInfo(slotId, params.classedModules)
+        end
     end
     
     

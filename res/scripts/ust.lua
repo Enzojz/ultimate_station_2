@@ -22,8 +22,8 @@ ust.typeList = {
 }
 
 ust.mixData = function(base, data)
-    local data = data > 0 and data or (1000 - data)
-    return base + 1000000 * data
+    -- local data = data > 0 and data or (1000 - data)
+    return (data > 0 and base or -base) + 1000000 * data
 end
 
 ust.slotIds = function(info)
@@ -46,8 +46,9 @@ ust.slotInfo = function(slotId, classedModules)
         -- 1 ~ 2 : 51 x 52 y 53 z 54 radius 55 length 56 width
         -- 3 ~ 6 : id
         -- > 6: data
-        local type = slotId % 100
-        local id = (slotId - type) / 100 % 1000
+        local slotIdAbs = math.abs(slotId)
+        local type = slotIdAbs % 100
+        local id = (slotIdAbs - type) / 100 % 1000
         
         if (type < 50) then
             local info = classedModules[id].info
