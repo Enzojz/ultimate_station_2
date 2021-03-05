@@ -79,8 +79,8 @@ local createTemplateFn = function(_)
         [151] = "station/rail/ust/ust_data.module",
         [152] = "station/rail/ust/ust_data.module",
         [153] = "station/rail/ust/ust_data.module",
-        -- [100000154] = "station/rail/ust/ust_data.module",
-        -- [-155] = "station/rail/ust/ust_data.module",
+        [100000154] = "station/rail/ust/ust_data.module",
+        [-155] = "station/rail/ust/ust_data.module",
         [20000157] = "station/rail/ust/ust_data.module",
         
         [301] = "station/rail/ust/ust_track.module",
@@ -192,6 +192,10 @@ local preProcessFn = function(modules, change)
                 modules[classedModules[id].slot[55]] = nil
             end
             
+            if classedModules[id].slot[56] then
+                modules[classedModules[id].slot[56]] = nil
+            end
+            
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
             if data == 0 then
@@ -242,9 +246,7 @@ local updateFn = function(params)
             params.modules[slotId].info = ust.slotInfo(slotId, params.classedModules)
         end
     end
-    
-    dump()(params.classedModules)
-    dump()(params.modules)
+
     local grid = {}
     for slotId, module in pairs(params.modules) do
         if not module.metadata.isData then
@@ -254,7 +256,7 @@ local updateFn = function(params)
             grid[info.pos.z][info.pos.x][info.pos.y] = slotId
         end
     end
-    
+    dump()(params.modules)
     for z, zv in pairs(grid) do
         local xPos = func.sort(func.filter(func.keys(zv), function(k) return k >= 0 end))
         local xNeg = func.rev(func.sort(func.filter(func.keys(zv), function(k) return k < 0 end)))
@@ -264,7 +266,6 @@ local updateFn = function(params)
             if (not xState) then
                 xState = {
                     pos = 0,
-                    radius = 10e8,
                     refList = {},
                 }
             end
@@ -322,7 +323,7 @@ local updateFn = function(params)
                         pos = params.modules[ref].info.pts[2][1],
                         vec = params.modules[ref].info.pts[2][2],
                         width = width,
-                        radius = m.info.radius or params.modules[ref].info.radius,
+                        radius = m.info.straight and 10e8 or (m.info.radius or params.modules[ref].info.radius),
                         length = m.info.length
                     }
                 else
@@ -359,6 +360,9 @@ local updateFn = function(params)
                                 break
                             end
                         end
+                    end
+                    if not yState.radius then
+                        yState.radius = 10e8
                     end
                 end
                 m.info.radius = yState.radius
@@ -403,9 +407,9 @@ local updateFn = function(params)
         for _, x in ipairs(xNeg) do processX(x) end
     end
     
-    local anyRadiusModifiable = false
+    params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
-        anyRadiusModifiable = anyRadiusModifiable or module.info.canModifyRadius
+        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
     end
     
     for slotId, module in pairs(params.modules) do
@@ -424,7 +428,7 @@ local updateFn = function(params)
                 spacing = {2.5, 2.5, 2.5, 2.5}
             })
             
-            if (not anyRadiusModifiable) then
+            if (not params.anyRadiusModifiable) then
                 table.insert(result.slots, {
                     id = module.info.id * 100 + 80,
                     transf = baseTransf * coor.transZ(1),
@@ -452,7 +456,7 @@ local updateFn = function(params)
                 
                 local base = 1
                 for i = 0, 5 do
-                    local rad = arcs.center.inf + step * i
+                    local rad = arcs.center.inf + step * (i + 1)
                     local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
                     local vec = (posR - posL):normalized()
                     local posP = posL - vec * 2
@@ -513,7 +517,7 @@ local updateFn = function(params)
                         for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-width, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(pos + coor.xyz(-2, 0, 2)) end)) do
                             table.insert(result.models, m)
                         end
-                    elseif (i == 5) then
+                    elseif i == 5 and (params.classedModules[module.info.id].slot[54] or params.classedModules[module.info.id].slot[55] or params.classedModules[module.info.id].slot[56]) then
                         local pos = posR + vec * 3
                         
                         table.insert(result.slots, {

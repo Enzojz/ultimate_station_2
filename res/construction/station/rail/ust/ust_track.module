@@ -105,9 +105,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local midPt = arcc:pt(mid)
         
 
-        if info.canModifyRadius then
-            local nameModelsF, width = livetext(2)(info.radius == 10e8 and "R∞" or string.format("R%d", info.radius))
+        if params.anyRadiusModifiable then
+            local nameModelsF, width = livetext(2)(info.radius == 10e8 and "R∞" or string.format("R%d", math.abs(info.radius)))
             for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(mid) * coor.trans(midPt + coor.xyz(0, 0, 1)) end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        if info.canModifyRadius then
+            local nameModelsF, width = livetext(2)("⊻")
+            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(arcc.inf) * coor.trans(info.pts[1][1] + coor.xyz(0, 0, 1)) end)) do
+                table.insert(result.models, m)
+            end
+            local nameModelsF, width = livetext(2)("⊼")
+            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(arcc.sup) * coor.trans(info.pts[2][1] + coor.xyz(0, 0, 1)) end)) do
                 table.insert(result.models, m)
             end
         end

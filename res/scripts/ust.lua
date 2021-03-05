@@ -68,7 +68,7 @@ ust.slotInfo = function(slotId, classedModules)
             local canModifyRadius = info[80] and true or false
             local data = classedModules[id].data
             
-            if straight then
+            if straight or radius == 0 then
                 radius = nil
             end
 
