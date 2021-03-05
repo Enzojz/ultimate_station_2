@@ -3,7 +3,7 @@ local coor = require "ust/coor"
 local arc = require "ust/coorarc"
 local general = require "ust/general"
 local pipe = require "ust/pipe"
-local dump = require "luadump"
+-- local dump = require "luadump"
 local ust = {}
 
 local math = math
@@ -21,6 +21,10 @@ ust.typeList = {
     [2] = "ust_platform",
 }
 
+ust.base = function(id, type)
+    return id * 100 + type
+end
+
 ust.mixData = function(base, data)
     -- local data = data > 0 and data or (1000 - data)
     return (data > 0 and base or -base) + 1000000 * data
@@ -32,9 +36,11 @@ ust.slotIds = function(info)
         posX = ust.mixData(51 + info.id * 100, info.pos.x),
         posY = ust.mixData(52 + info.id * 100, info.pos.y),
         posZ = ust.mixData(53 + info.id * 100, info.pos.z),
-        radius = info.radius and ust.mixData(54 + info.id * 100, info.radius) or nil,
-        length = ust.mixData(55 + info.id * 100, info.length, true),
-        width = ust.mixData(56 + info.id * 100, info.width, true)
+        radiusLow = info.radius and ust.mixData(54 + info.id * 100, info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)) or nil,
+        radiusHigh = info.radius and ust.mixData(55 + info.id * 100, info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))) or nil,
+        straight = info.straight and ust.mixData(56 + info.id * 100, 0) or nil,
+        length = ust.mixData(57 + info.id * 100, info.length),
+        width = ust.mixData(58 + info.id * 100, info.width)
     }
 end
 
@@ -55,23 +61,27 @@ ust.slotInfo = function(slotId, classedModules)
             local x = info[51]
             local y = info[52]
             local z = info[53] or 0
-            local radius = info[54]
-            local length = info[55] or 20
-            local width = info[56]
+            local radius = (info[54] or 0) + (info[55] or 0) * 1000
+            local straight = info[56] and true or nil
+            local length = info[57] or 20
+            local width = info[58]
             local canModifyRadius = info[80] and true or false
-            local deltaRadius = info[81] or nil
             local data = classedModules[id].data
             
+            if straight then
+                radius = nil
+            end
+
             return {
                 type = type,
                 id = id,
                 pos = coor.xyz(x, y, z),
                 radius = radius,
+                straight = straight,
                 length = length,
                 width = width,
                 data = data,
                 canModifyRadius = canModifyRadius,
-                deltaRadius = deltaRadius
             }
         else
             return {

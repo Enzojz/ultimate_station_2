@@ -1,4 +1,4 @@
-local dump = require "luadump"
+-- local dump = require "luadump"
 local script = {
     
     guiHandleEvent = function(id, name, param)
