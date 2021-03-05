@@ -16,7 +16,7 @@ local function classifyModules(params)
     local result = {}
     for slotId, m in pairs(params) do
         local type = slotId % 100
-        local id = (slotId - type) / 100 % 1000
+        local id = (slotId - type) / 100 % 10000
         m.typeId = type
         if not result[id] then result[id] = {info = {}, slot = {}} end
         if (type < 50) then
@@ -25,7 +25,7 @@ local function classifyModules(params)
             result[id].data = math.floor(slotId / 1000000)
         else
             local data = math.floor(slotId / 1000000)
-            result[id].info[type] = data
+            result[id].info[type] = data < 1000 and data or (1000 - data)
             result[id].slot[type] = slotId
         end
     end
@@ -79,7 +79,7 @@ local createTemplateFn = function(_)
         [151] = "station/rail/ust/ust_data.module",
         [152] = "station/rail/ust/ust_data.module",
         [153] = "station/rail/ust/ust_data.module",
-        [1000000154] = "station/rail/ust/ust_data.module",
+        [100000154] = "station/rail/ust/ust_data.module",
         [20000155] = "station/rail/ust/ust_data.module",
         
         
@@ -91,9 +91,9 @@ local createTemplateFn = function(_)
         -- [20000255] = "station/rail/ust/ust_data.module",
         [301] = "station/rail/ust/ust_track.module",
         [351] = "station/rail/ust/ust_data.module",
-        [11000352] = "station/rail/ust/ust_data.module",
+        [1001000352] = "station/rail/ust/ust_data.module",
         [353] = "station/rail/ust/ust_data.module",
-        [1001000354] = "station/rail/ust/ust_data.module",
+        [1100000354] = "station/rail/ust/ust_data.module",
         [20000355] = "station/rail/ust/ust_data.module",
     }
     
@@ -385,7 +385,7 @@ local updateFn = function(params)
                 })
             elseif (module.info.canModifyRadius) then
                 table.insert(result.slots, {
-                    id = ust.mixData(module.info.id * 100 + 80, 1, true),
+                    id = ust.mixData(module.info.id * 100 + 80, 1),
                     transf = baseTransf * coor.transZ(1),
                     type = "ust_modifier",
                     spacing = {1.5, 1.5, 1.5, 1.5}
@@ -443,7 +443,7 @@ local updateFn = function(params)
             
             if not (grid[pos.z][pos.x - 1] and (grid[pos.z][pos.x - 1][pos.y + 1] or grid[pos.z][pos.x - 1][pos.y - 1])) then
                 table.insert(result.slots, {
-                    id = ust.mixData(slotId, 1, true),
+                    id = ust.mixData(slotId, 1),
                     transf = coor.trans(coor.xyz(-module.metadata.width, 0, 0)) * baseTransf,
                     type = "ust_track",
                     spacing = {1.5, 1.5, 1.5, 1.5}
@@ -452,7 +452,7 @@ local updateFn = function(params)
             
             if not (grid[pos.z][pos.x + 1] and (grid[pos.z][pos.x + 1][pos.y + 1] or grid[pos.z][pos.x + 1][pos.y - 1])) then
                 table.insert(result.slots, {
-                    id = ust.mixData(slotId, 2, true),
+                    id = ust.mixData(slotId, 2),
                     transf = coor.trans(coor.xyz(module.metadata.width, 0, 0)) * baseTransf,
                     type = "ust_track",
                     spacing = {1.5, 1.5, 1.5, 1.5}
@@ -463,7 +463,7 @@ local updateFn = function(params)
             if not grid[pos.z][pos.x][pos.y + (pos.y < 0 and 1 or -1)] then
                 local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
                 table.insert(result.slots, {
-                    id = ust.mixData(slotId, 3, true),
+                    id = ust.mixData(slotId, 3),
                     transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt)),
                     type = "ust_track",
                     spacing = {1.5, 1.5, 1.5, 1.5}
@@ -473,7 +473,7 @@ local updateFn = function(params)
             if not grid[pos.z][pos.x][pos.y + (pos.y < 0 and -1 or 1)] then
                 local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
                 table.insert(result.slots, {
-                    id = ust.mixData(slotId, 4, true),
+                    id = ust.mixData(slotId, 4),
                     transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt)),
                     type = "ust_track",
                     spacing = {1.5, 1.5, 1.5, 1.5}

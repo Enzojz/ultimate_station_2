@@ -16,21 +16,13 @@ local min = math.min
 
 local segmentLength = 20
 
-local function readData(data)
-    if data % 2 == 0 then
-        return data / 10
-    else
-        return (1 - data) / 10
-    end
-end
-
 ust.typeList = {
     [1] = "ust_track",
     [2] = "ust_platform",
 }
 
-ust.mixData = function(base, data, ignoreNeg)
-    local data = ignoreNeg and data or (data < 0 and (-data * 10 + 1) or data * 10)
+ust.mixData = function(base, data)
+    local data = data > 0 and data or (1000 - data)
     return base + 1000000 * data
 end
 
@@ -59,14 +51,14 @@ ust.slotInfo = function(slotId, classedModules)
         
         if (type < 50) then
             local info = classedModules[id].info
-            local x = readData(info[51])
-            local y = readData(info[52])
-            local z = readData(info[53]) or 0
-            local radius = info[54] and readData(info[54])
+            local x = info[51]
+            local y = info[52]
+            local z = info[53] or 0
+            local radius = info[54]
             local length = info[55] or 20
             local width = info[56]
             local canModifyRadius = info[80] and true or false
-            local deltaRadius = info[81] and readData(info[81]) or 0
+            local deltaRadius = info[81] or nil
             local data = classedModules[id].data
             
             return {
