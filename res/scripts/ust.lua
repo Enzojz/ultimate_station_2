@@ -27,7 +27,7 @@ end
 
 ust.mixData = function(base, data)
     -- local data = data > 0 and data or (1000 - data)
-    return (data > 0 and base or -base) + 1000000 * data
+    return (data < 0 and -base or base) + 1000000 * data
 end
 
 ust.slotIds = function(info)
