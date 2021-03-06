@@ -272,6 +272,7 @@ local createTemplateFn = function(_)
 end
 
 local preProcessFn = function(modules, change)
+    dump()(change)
     local classedModules = classifyModules(modules)
     
     local maxId = 0
@@ -335,8 +336,11 @@ local preProcessFn = function(modules, change)
             
             local radius = m.info.radius
             local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
-            radius = radius + delta
-            
+            if m.info.radius == 10e8 or m.info.straight then
+                radius = delta
+            else
+                radius = radius + delta
+            end
             if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
             
             local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
@@ -391,6 +395,9 @@ local preProcessFn = function(modules, change)
         else
             modules[change.slotId] = change.module
         end
+    else
+        dump()(change)
+        modules[change.slotId] = nil
     end
     return modules
 end
@@ -502,7 +509,8 @@ local updateFn = function(params)
     
     
     result.terminateConstructionHook = function()
-        end
+            dump()(result)
+    end
     return result
 end
 
