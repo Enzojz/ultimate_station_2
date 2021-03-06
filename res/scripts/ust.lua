@@ -33,14 +33,14 @@ end
 ust.slotIds = function(info)
     local base = info.type + info.id * 100
     return base, {
-        posX = ust.mixData(51 + info.id * 100, info.pos.x),
-        posY = ust.mixData(52 + info.id * 100, info.pos.y),
-        posZ = ust.mixData(53 + info.id * 100, info.pos.z),
-        radiusLow = info.radius and ust.mixData(54 + info.id * 100, info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)) or nil,
-        radiusHigh = info.radius and ust.mixData(55 + info.id * 100, info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))) or nil,
-        straight = info.straight and ust.mixData(56 + info.id * 100, 0) or nil,
-        length = ust.mixData(57 + info.id * 100, info.length),
-        width = ust.mixData(58 + info.id * 100, info.width)
+        posX = ust.mixData(ust.base(info.id, 51), info.pos.x),
+        posY = ust.mixData(ust.base(info.id, 52), info.pos.y),
+        posZ = ust.mixData(ust.base(info.id, 53), info.pos.z),
+        radiusLow = info.radius and ust.mixData(ust.base(info.id, 54), info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)) or nil,
+        radiusHigh = info.radius and ust.mixData(ust.base(info.id, 55), info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))) or nil,
+        straight = info.straight and ust.mixData(ust.base(info.id, 56), 0) or nil,
+        length = ust.mixData(ust.base(info.id, 57), info.length),
+        width = ust.mixData(ust.base(info.id, 58), info.width)
     }
 end
 

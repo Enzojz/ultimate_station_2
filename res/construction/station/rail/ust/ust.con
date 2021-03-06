@@ -161,7 +161,7 @@ local preProcessFn = function(modules, change)
             
             if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
             
-            local addSlot = ust.mixData(id * 100 + 54, radius > 0 and radius % 1000 or -(-radius % 1000))
+            local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
             modules[addSlot] = {
                 metadata = {isData = true},
                 name = "station/rail/ust/ust_data.module",
@@ -172,7 +172,7 @@ local preProcessFn = function(modules, change)
                 variant = 0
             }
             
-            local addSlot = ust.mixData(id * 100 + 55, radius > 0 and math.floor(radius / 1000) or -(math.floor(-radius / 1000)))
+            local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and math.floor(radius / 1000) or -(math.floor(-radius / 1000)))
             modules[addSlot] = {
                 metadata = {isData = true},
                 name = "station/rail/ust/ust_data.module",
@@ -199,7 +199,7 @@ local preProcessFn = function(modules, change)
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
             if data == 0 then
-                local addSlot = ust.mixData(id * 100 + 56, 0)
+                local addSlot = ust.mixData(ust.base(id, 56), 0)
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/ust_data.module",
@@ -242,6 +242,9 @@ local updateFn = function(params)
     
     for id, info in pairs(params.classedModules) do
         params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
+        params.modules[info.slotId].makeData = function(type, data)
+            return ust.mixData(ust.base(id, type), data)
+        end
         for id, slotId in pairs(info.slot) do
             params.modules[slotId].info = ust.slotInfo(slotId, params.classedModules)
         end
@@ -396,7 +399,6 @@ local updateFn = function(params)
             for _, y in ipairs(yPos) do processY(y) end
             yState = false
             for _, y in ipairs(yNeg) do processY(y) end
-        
         end
         
         for _, x in ipairs(xPos) do processX(x) end
@@ -437,7 +439,7 @@ local updateFn = function(params)
                 })
             elseif (module.info.canModifyRadius) then
                 table.insert(result.slots, {
-                    id = ust.mixData(module.info.id * 100 + 80, 1),
+                    id = ust.mixData(ust.base(module.info.id, 80), 1),
                     transf = baseTransf * coor.transZ(1),
                     type = "ust_modifier",
                     spacing = {1.5, 1.5, 1.5, 1.5}
