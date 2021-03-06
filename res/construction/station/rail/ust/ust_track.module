@@ -3,8 +3,8 @@ local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
--- local dump = require "luadump"
-
+local quat = require "ust/quaternion"
+local dump = require "luadump"
 local livetext = require "ust/livetext"
 
 
@@ -21,108 +21,152 @@ local fitModels = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-        
-        local info = params.modules[slotId].info
-        
-        local pts = info.pts
-        
-        local e = {{}, {}}
-        
-        if (info.pos.y > 0) then
-            e = {
-                info.prev and {
-                    pts[1][1]:avg(params.modules[info.prev].info.pts[2][1]),
-                    pts[1][2]:avg(params.modules[info.prev].info.pts[2][2])
-                } or pts[1],
-                
-                info.next and {
-                    pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
-                    pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
-                } or pts[2]
-            }
-        elseif (info.pos.y == 0) then
-            e = {
-                info.prev and {
-                    pts[1][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                    pts[1][2]:avg(-params.modules[info.prev].info.pts[1][2])
-                } or pts[1],
-                
-                info.next and {
-                    pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
-                    pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
-                } or pts[2]
-            }
-        elseif (info.pos.y == -1) then
-            e = {
-                info.next and {
-                    pts[1][1]:avg(params.modules[info.next].info.pts[1][1]),
-                    pts[1][2]:avg(-params.modules[info.next].info.pts[1][2])
-                } or pts[1],
-                
-                info.prev and {
-                    pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                    pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
-                } or pts[2],
+    local info = params.modules[slotId].info
+    
+    local pts = info.pts
+    
+    local e = {{}, {}}
+    
+    if (info.pos.y > 0) then
+        e = {
+            info.prev and {
+                pts[1][1]:avg(params.modules[info.prev].info.pts[2][1]),
+                pts[1][2]:avg(params.modules[info.prev].info.pts[2][2])
+            } or pts[1],
             
-            }
-        else
-            e = {
-                info.next and {
-                    pts[1][1]:avg(params.modules[info.next].info.pts[2][1]),
-                    pts[1][2]:avg(params.modules[info.next].info.pts[2][2])
-                } or pts[1],
-                
-                info.prev and {
-                    pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                    pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
-                } or pts[2],
-            
-            }
-        end
-        
-        local e = pipe.new * e * pipe.map(function(e) return {e[1], e[2] * info.length} end) * pipe.map(pipe.map(coor.vec2Tuple))
-        
-        local edges = {
-            type = "TRACK",
-            alignTerrain = true,
-            params = {
-                type = "standard.lua",
-                catenary = false,
-            },
-            edges = e,
-            snapNodes = {},
-            freeNodes = {},
-            tag2nodes = {
-                [tag] = func.seq(0, #e - 1)
-            },
-            slot = slotId
+            info.next and {
+                pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+            } or pts[2]
         }
+    elseif (info.pos.y == 0) then
+        e = {
+            info.prev and {
+                pts[1][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                pts[1][2]:avg(-params.modules[info.prev].info.pts[1][2])
+            } or pts[1],
+            
+            info.next and {
+                pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+            } or pts[2]
+        }
+    elseif (info.pos.y == -1) then
+        e = {
+            info.next and {
+                pts[1][1]:avg(params.modules[info.next].info.pts[1][1]),
+                pts[1][2]:avg(-params.modules[info.next].info.pts[1][2])
+            } or pts[1],
+            
+            info.prev and {
+                pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+            } or pts[2],
         
-        table.insert(result.edgeLists, edges)
+        }
+    else
+        e = {
+            info.next and {
+                pts[1][1]:avg(params.modules[info.next].info.pts[2][1]),
+                pts[1][2]:avg(params.modules[info.next].info.pts[2][2])
+            } or pts[1],
+            
+            info.prev and {
+                pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+            } or pts[2],
         
-        local arcc = info.arcs.center
-        local mid = 0.5 * (arcc.sup + arcc.inf)
-        local midPt = arcc:pt(mid)
+        }
+    end
+    
+    local e = pipe.new * e * pipe.map(function(e) return {e[1], e[2] * info.length} end) * pipe.map(pipe.map(coor.vec2Tuple))
+    
+    local edges = {
+        type = "TRACK",
+        alignTerrain = true,
+        params = {
+            type = "standard.lua",
+            catenary = false,
+        },
+        edges = e,
+        snapNodes = {},
+        freeNodes = {},
+        tag2nodes = {
+            [tag] = func.seq(0, #e - 1)
+        },
+        slot = slotId
+    }
+    
+    table.insert(result.edgeLists, edges)
+    
+    if info.canModifyRadius then
+        local arcs = info.arcs
+        local step = (arcs.center.sup - arcs.center.inf) / 7
+        local base = 1
         
+        for i = 0, 6 do
+            local rad = arcs.center.inf + step * (i + 1)
+            local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+            local vec = (posR - posL):normalized()
+            local posP = posR + vec * 2
+            local posN = posR + vec * 5
+            local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+            
+            local addText = function(label, pos, fAlign)
+                local nameModelsF, width = livetext(2)(label)
+                for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * math.pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 2)) end)) do
+                    table.insert(result.models, m)
+                end
+            end
 
-        if params.anyRadiusModifiable then
-            local nameModelsF, width = livetext(2)(info.radius == 10e8 and "R∞" or string.format("R%d", math.abs(info.radius)))
-            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(mid) * coor.trans(midPt + coor.xyz(0, 0, 1)) end)) do
-                table.insert(result.models, m)
+            local addSlot = function(id, data, pos)
+                table.insert(result.slots, {
+                    id = ust.mixData(info.id * 100 + id, data),
+                    transf = coor.rotZ(rad) * coor.trans(pos) * coor.transZ(2),
+                    type = "ust_modifier",
+                    spacing = {1, 1, 1, 1}
+                })
+            end
+            
+            local var = params.modules[params.classedModules[info.id].slot[80]].variant
+            if (i > 0 and i < 6) then
+                if (info.radius > 0 or info.radius + math.pow(10, i - 1) < 0) then
+                    addSlot(81 + var, i, posP)
+                end
+                
+                if (info.radius < 0 or info.radius - math.pow(10, i - 1) > 0) then
+                    addSlot(81 + var, -i, posN)
+                end
+                
+                addText(string.format("%d", base), posN, function(w) return coor.xyz(2, 0, -1) end)
+                
+                base = base * 10
+            else
+                addText("+", posP, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+                addText("-", posN, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            end
+            
+            if (i == 0 and info.canModifyRadius) then
+                local pos = (posL + posR) * 0.5
+                addText("⊻", pos, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            elseif (i == 3) then
+                local pos = (posL + posR) * 0.5
+                addText(info.radius == 10e8 and "R∞" or string.format("R%d", math.abs(info.radius)), pos, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            elseif i == 6 and info.canModifyRadius then
+                local pos = (posL + posR) * 0.5
+                addText("⊼", pos, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            elseif (i == 4 and info.canModifyRadius) then
+                local pos = posL - vec * 3
+                addSlot(83 + var, 0, pos)
+                addText("−", pos, function(w) return coor.xyz(-w - 2, 0, -1) end)
+            elseif i == 5 and info.canModifyRadius and (params.classedModules[info.id].slot[54] or params.classedModules[info.id].slot[55] or params.classedModules[info.id].slot[56]) then
+                local pos = posL - vec * 3
+                addSlot(83 + var, 1, pos)
+                addText("∗", pos, function(w) return coor.xyz(-w - 2, 0, -1) end)
             end
         end
-        
-        if info.canModifyRadius then
-            local nameModelsF, width = livetext(2)("⊻")
-            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(arcc.inf) * coor.trans(info.pts[1][1] + coor.xyz(0, 0, 1)) end)) do
-                table.insert(result.models, m)
-            end
-            local nameModelsF, width = livetext(2)("⊼")
-            for _, m in ipairs(nameModelsF(function() return coor.transX(-0.5 * width) * coor.rotX(-0.5 * math.pi) * coor.rotZ(arcc.sup) * coor.trans(info.pts[2][1] + coor.xyz(0, 0, 1)) end)) do
-                table.insert(result.models, m)
-            end
-        end
-        
+    end
+
 end
 function data()
     return {

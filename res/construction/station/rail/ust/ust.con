@@ -64,7 +64,7 @@ local arcPacker = function(pt, vec, length, radius)
     })
     return function(...)
         local result = func.map({...}, function(dr)
-            return arc.byOR(o, abs(radius - dr), {
+            return arc.byOR(o, abs(radius + dr), {
                 sup = sup,
                 inf = inf
             })
@@ -369,7 +369,7 @@ local updateFn = function(params)
                 
                 local ar, arL, arR =
                     arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)(-yState.width * 0.5, yState.width * 0.5)
-                
+                if y < 0 then arL, arR = arR, arL end
                 local refArc = {
                     left = arL,
                     right = arR,
@@ -449,92 +449,6 @@ local updateFn = function(params)
                     type = "ust_modifier",
                     spacing = {1.5, 1.5, 1.5, 1.5}
                 })
-                
-                local arcs = module.info.arcs
-                
-                local step = (arcs.center.sup - arcs.center.inf) / 7
-                
-                local base = 1
-                for i = 0, 5 do
-                    local rad = arcs.center.inf + step * (i + 1)
-                    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-                    local vec = (posR - posL):normalized()
-                    local posP = posL - vec * 2
-                    local posN = posL - vec * 5
-                    
-                    local var = params.modules[params.classedModules[module.info.id].slot[80]].variant
-                    
-                    if (i > 0) then
-                        if (module.info.radius > 0 or module.info.radius + math.pow(10, i - 1) < 0) then
-                            table.insert(result.slots, {
-                                id = ust.mixData(module.info.id * 100 + 81 + var, i),
-                                transf = coor.rotZ(rad) * coor.trans(posP) * coor.transZ(0),
-                                type = "ust_modifier",
-                                spacing = {1, 1, 1, 1}
-                            })
-                            
-                        end
-
-                        if (module.info.radius < 0 or module.info.radius - math.pow(10, i - 1) > 0) then
-                            table.insert(result.slots, {
-                                id = ust.mixData(module.info.id * 100 + 81 + var, -i),
-                                transf = coor.rotZ(rad) * coor.trans(posN) * coor.transZ(0),
-                                type = "ust_modifier",
-                                spacing = {1, 1, 1, 1}
-                            })
-                            
-                        end
-                        
-                        local nameModelsF, width = livetext(2)(string.format("%d", base))
-                        for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(0, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(posN + coor.xyz(2, 0, 2)) end)) do
-                            table.insert(result.models, m)
-                        end
-                        
-                        base = base * 10
-                    else
-                        local nameModelsF, width = livetext(2)("+")
-                        for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(posP + coor.xyz(0, 0, 2)) end)) do
-                            table.insert(result.models, m)
-                        end
-                        
-                        local nameModelsF, width = livetext(2)("-")
-                        for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(posN + coor.xyz(0, 0, 2)) end)) do
-                            table.insert(result.models, m)
-                        end
-                    end
-
-                    if (i == 4) then
-                        local pos = posR + vec * 3
-                        
-                        table.insert(result.slots, {
-                            id = ust.mixData(module.info.id * 100 + 83 + var, 0),
-                            transf = coor.rotZ(rad) * coor.trans(pos) * coor.transZ(0),
-                            type = "ust_modifier",
-                            spacing = {1, 1, 1, 1}
-                        })
-
-                        local nameModelsF, width = livetext(2)("−")
-                        for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-width, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(pos + coor.xyz(-2, 0, 2)) end)) do
-                            table.insert(result.models, m)
-                        end
-                    elseif i == 5 and (params.classedModules[module.info.id].slot[54] or params.classedModules[module.info.id].slot[55] or params.classedModules[module.info.id].slot[56]) then
-                        local pos = posR + vec * 3
-                        
-                        table.insert(result.slots, {
-                            id = ust.mixData(module.info.id * 100 + 83 + var, 1),
-                            transf = coor.rotZ(rad) * coor.trans(pos) * coor.transZ(0),
-                            type = "ust_modifier",
-                            spacing = {1, 1, 1, 1}
-                        })
-
-                        local nameModelsF, width = livetext(2)("∗")
-                        for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-width, 0, -1)) * coor.rotX(-0.5 * math.pi) * coor.rotZ(rad) * coor.trans(pos + coor.xyz(-2, 0, 2)) end)) do
-                            table.insert(result.models, m)
-                        end
-                    end
-                end
-            
-            
             end
             
             if not (grid[pos.z][pos.x - 1] and (grid[pos.z][pos.x - 1][pos.y + 1] or grid[pos.z][pos.x - 1][pos.y - 1])) then
