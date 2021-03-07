@@ -1,0 +1,44 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local general = require "ust/general"
+
+local unpack = table.unpack
+local ma = math
+local pi = ma.pi
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+		visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = "HIDDEN_MODULE",
+            description = "NOTHING",
+        },
+        category = {
+            categories = { "remover" },
+        },
+        type = "ust_remove",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isData = true
+        },
+        
+        updateFn = function(result, transform, tag, slotId, addModelFn, params)
+        end,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -272,7 +272,6 @@ local createTemplateFn = function(_)
 end
 
 local preProcessFn = function(modules, change)
-    dump()(change)
     local classedModules = classifyModules(modules)
     
     local maxId = 0
@@ -283,9 +282,9 @@ local preProcessFn = function(modules, change)
         end
     end
     
+    local info = ust.slotInfo(change.slotId, classedModules)
+    local data = change.slotId > 0 and floor(change.slotId / 1000000) or -floor(-change.slotId / 1000000)
     if change.added then
-        local info = ust.slotInfo(change.slotId, classedModules)
-        local data = change.slotId > 0 and floor(change.slotId / 1000000) or -floor(-change.slotId / 1000000)
         
         if (info.type == 1 and data < 5 and data > 0) then
             local dpos = ({
@@ -314,6 +313,12 @@ local preProcessFn = function(modules, change)
                     variant = 0
                 }
             end
+        elseif info.type == 99 and info.id ~= 1 then
+            for _, slotId in pairs(classedModules[info.id].slot) do
+                modules[slotId] = nil
+            end
+            modules[classedModules[info.id].slotId] = nil
+            modules[change.slotId] = nil
         elseif info.type == 80 and data == 1 then
             modules[ust.base(info.id, 80)] = nil
         elseif info.type == 81 or info.type == 82 then
@@ -396,9 +401,14 @@ local preProcessFn = function(modules, change)
             modules[change.slotId] = change.module
         end
     else
-        dump()(change)
-        modules[change.slotId] = nil
+        if (info.type == 1 and data == 0) then
+            for _, slotId in pairs(classedModules[info.id].slot) do
+                modules[slotId] = nil
+            end
+            modules[change.slotId] = nil
+        end
     end
+    
     return modules
 end
 
@@ -408,7 +418,7 @@ local updateFn = function(params)
     local result = {
         entryConnectors = {},
         colliders = {},
-        terrainAlignmentLists = {},
+        terrainAlignmentLists = {{type = "EQUAL", faces = {}}},
         groundFaces = {},
         terminalGroups = {},
         stations = {},
@@ -447,7 +457,6 @@ local updateFn = function(params)
         if not module.metadata.isData then
             local refArc = module.info.arcs.center
             local midPt = 0.5 * (refArc.sup + refArc.inf)
-            local pos = module.info.pos
             local baseTransf =
                 quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), refArc:tangent(midPt)):mRot() *
                 coor.trans(refArc:pt(midPt))
@@ -459,28 +468,7 @@ local updateFn = function(params)
                 spacing = {2.5, 2.5, 2.5, 2.5}
             })
             
-            if (not params.anyRadiusModifiable) then
-                insert(result.slots, {
-                    id = module.makeData(80, 0),
-                    transf = baseTransf * coor.transZ(1),
-                    type = "ust_modifier",
-                    spacing = {1.5, 1.5, 1.5, 1.5}
-                })
-            elseif (module.info.canModifyRadius) then
-                insert(result.slots, {
-                    id = module.makeData(80, 1),
-                    transf = baseTransf * coor.transZ(1),
-                    type = "ust_modifier",
-                    spacing = {1.5, 1.5, 1.5, 1.5}
-                })
-                
-                insert(result.slots, {
-                    id = module.makeData(80, 0),
-                    transf = baseTransf * coor.transZ(2),
-                    type = "ust_modifier",
-                    spacing = {1.5, 1.5, 1.5, 1.5}
-                })
-            end
+            result.dependentSlots[slotId] = {}
         
         else
             insert(result.slots, {
@@ -490,9 +478,6 @@ local updateFn = function(params)
                 spacing = {1.5, 1.5, 1.5, 1.5}
             })
         end
-    
-    
-    
     end
     
     
@@ -501,7 +486,6 @@ local updateFn = function(params)
             local ys = func.keys(gridy)
             local min = func.min(ys)
             local max = func.max(ys)
-        
         end
     end
     
@@ -509,8 +493,7 @@ local updateFn = function(params)
     
     
     result.terminateConstructionHook = function()
-            dump()(result)
-    end
+        end
     return result
 end
 
