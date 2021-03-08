@@ -65,7 +65,8 @@ ust.slotInfo = function(slotId, classedModules)
             local straight = info[56] and true or nil
             local length = info[57] or 20
             local width = info[58]
-            local canModifyRadius = info[80] and true or false
+            local canModifyRadius = info[80] == 0 and true or false
+            local canModifyDest = info[80] == 1 and true or false
             local data = classedModules[id].data
             
             if straight or radius == 0 then
@@ -82,6 +83,7 @@ ust.slotInfo = function(slotId, classedModules)
                 width = width,
                 data = data,
                 canModifyRadius = canModifyRadius,
+                canModifyDest = canModifyDest
             }
         else
             return {

@@ -321,10 +321,14 @@ local preProcessFn = function(modules, change)
             modules[change.slotId] = nil
         elseif info.type == 80 and data == 1 then
             modules[ust.base(info.id, 80)] = nil
-        elseif info.type == 81 or info.type == 82 then
+            modules[change.slotId] = change.module
+        elseif info.type == 80 and data == 2 then
+            modules[ust.mixData(ust.base(info.id, 80), 1)] = nil
+        elseif info.type >= 81 and info.type <= 86 then
             local grid = gridization(modules, classedModules)
             local id = info.id
             local m = modules[classedModules[id].slotId]
+            
             if classedModules[id].slot[54] then
                 modules[classedModules[id].slot[54]] = nil
             end
@@ -339,54 +343,27 @@ local preProcessFn = function(modules, change)
             
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
-            local radius = m.info.radius
-            local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
-            if m.info.radius == 10e8 or m.info.straight then
-                radius = delta
-            else
-                radius = radius + delta
-            end
-            if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
-            
-            local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
-            modules[addSlot] = {
-                metadata = {isData = true},
-                name = "station/rail/ust/ust_data.module",
-                updateScript = {
-                    fileName = "",
-                    params = {}
-                },
-                variant = 0
-            }
-            
-            local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
-            modules[addSlot] = {
-                metadata = {isData = true},
-                name = "station/rail/ust/ust_data.module",
-                updateScript = {
-                    fileName = "",
-                    params = {}
-                },
-                variant = 0
-            }
-        elseif info.type == 83 or info.type == 84 then
-            local id = info.id
-            if classedModules[id].slot[54] then
-                modules[classedModules[id].slot[54]] = nil
-            end
-            
-            if classedModules[id].slot[55] then
-                modules[classedModules[id].slot[55]] = nil
-            end
-            
-            if classedModules[id].slot[56] then
-                modules[classedModules[id].slot[56]] = nil
-            end
-            
-            modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
-            
-            if data == 0 then
-                local addSlot = ust.mixData(ust.base(id, 56), 0)
+            if info.type >= 81 and info.type <= 84 then
+                
+                local radius = m.info.radius
+                
+                if info.type == 81 or info.type == 82 then
+                    local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
+                    if m.info.radius == 10e8 or m.info.straight then
+                        radius = delta
+                    else
+                        radius = radius + delta
+                    end
+                else
+                    local refArc = m.info.arcs.center
+                    local i = data
+                    local rad = (refArc.inf - refArc.sup) + i * pi / 180
+                    radius = -floor(20 / rad)
+                end
+                
+                if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
+                
+                local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/ust_data.module",
@@ -396,6 +373,31 @@ local preProcessFn = function(modules, change)
                     },
                     variant = 0
                 }
+                
+                local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
+                modules[addSlot] = {
+                    metadata = {isData = true},
+                    name = "station/rail/ust/ust_data.module",
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            elseif info.type == 85 or info.type == 86 then
+                
+                if data == 0 then
+                    local addSlot = ust.mixData(ust.base(id, 56), 0)
+                    modules[addSlot] = {
+                        metadata = {isData = true},
+                        name = "station/rail/ust/ust_data.module",
+                        updateScript = {
+                            fileName = "",
+                            params = {}
+                        },
+                        variant = 0
+                    }
+                end
             end
         else
             modules[change.slotId] = change.module
@@ -450,7 +452,7 @@ local updateFn = function(params)
     
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
-        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
+        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
     end
     
     for slotId, module in pairs(params.modules) do
