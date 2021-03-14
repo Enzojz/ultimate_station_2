@@ -59,26 +59,42 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     elseif trackLeft then
         local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
+        local rightPts, rightPtsRef, rightVecs = basePts(info.arcs.right, info.arcs.center)
 
         for i = 1, 4 do
             local sizeSurface = {
                 lb = leftPts[i] + coor.xyz(0, 0, 1),
-                rb = leftPts[i] + leftVecs[i] * width + coor.xyz(0, 0, 1),
+                rb = rightPts[i] + coor.xyz(0, 0, 1),
                 lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-                rt = leftPts[i + 1] + leftVecs[i + 1] * width + coor.xyz(0, 0, 1),
+                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
             }
             table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
             table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
         end
 
     elseif trackRight then
+        local leftPts, leftPtsRef, leftVecs = basePts(info.arcs.left, info.arcs.center)
         local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
 
         for i = 1, 4 do
             local sizeSurface = {
-                lb = rightPts[i] + rightVecs[i] * 5 + coor.xyz(0, 0, 1),
+                lb = leftPts[i] + coor.xyz(0, 0, 1),
                 rb = rightPts[i] + coor.xyz(0, 0, 1),
-                lt = rightPts[i + 1] + rightVecs[i + 1] * 5 + coor.xyz(0, 0, 1),
+                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
+                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
+            }
+            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
+            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+        end
+    else
+        local leftPts, leftPtsRef, leftVecs = basePts(info.arcs.left, info.arcs.center)
+        local rightPts, rightPtsRef, rightVecs = basePts(info.arcs.right, info.arcs.center)
+        
+        for i = 1, 4 do
+            local sizeSurface = {
+                lb = leftPts[i] + coor.xyz(0, 0, 1),
+                rb = rightPts[i] + coor.xyz(0, 0, 1),
+                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
                 rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
             }
             table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));

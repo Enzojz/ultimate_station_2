@@ -160,7 +160,7 @@ local function gridization(modules, classedModules)
                     end
                 end
                 
-                if (m.info.type == 1) then
+                if (m.info.type == 1 or m.info.type == 2) then
                     if not m.info.width then
                         m.info.width = m.metadata.width or 5
                     end
@@ -258,8 +258,7 @@ local function gridization(modules, classedModules)
                     
                     yState.vec = y < 0 and -refArc.center:tangent(refArc.center.sup) or refArc.center:tangent(refArc.center.sup)
                     yState.pos = refArc.center:pt(refArc.center.sup)
-                elseif m.info.type == 2 then
-                    end
+                end
             end
             
             for _, y in ipairs(yPos) do processY(y) end
@@ -540,6 +539,8 @@ local updateFn = function(params)
     
     local grid = gridization(params.modules, params.classedModules)
     params.grid = grid
+    params.slotGrid = {}
+    
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
         params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
@@ -565,12 +566,11 @@ local updateFn = function(params)
             -- if left and right then
             --     local pt = left.info.gravity[1]:avg(right.info.gravity[1])
             --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
-                
             --     baseTransf =
             --         quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), vec):mRot() *
             --         coor.trans(pt)
             -- elseif left then
-            --     local pt = left.info.gravity[1] + 
+            --     local pt = left.info.gravity[1] +
             --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
             --     elseif right then
             --     else
@@ -604,7 +604,16 @@ local updateFn = function(params)
     
     
     result.terminateConstructionHook = function()
+        for _, z in pairs(params.slotGrid) do
+            for _, x in pairs(z) do
+                for _, y in pairs(x) do
+                    for _, s in pairs(y) do
+                        insert(result.slots, s)
+                    end
+                end
+            end
         end
+    end
     return result
 end
 
