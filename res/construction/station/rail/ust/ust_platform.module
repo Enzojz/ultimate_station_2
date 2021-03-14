@@ -3,8 +3,8 @@ local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
--- local dump = require "luadump"
-
+local quat = require "ust/quaternion"
+local dump = require "luadump"
 local unpack = table.unpack
 local ma = math
 local pi = ma.pi
@@ -17,55 +17,95 @@ local fitModels = {
     cornerRight = ust.fitModel(0.8, 5, -1.93, true, false),
 }
 
+local function basePts(arc, arcRef)
+    local radDelta = (arc.sup - arc.inf) / 4
+    local rads = func.map(func.seq(0, 4), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    local ptsRef = func.map(rads, function(rad) return arcRef:pt(rad) end)
+    local vecs = func.map2(pts, ptsRef, function(pt, ptRef) return (pt - ptRef):normalized() end)
+    return pts, ptsRef, vecs
+end
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-
-    local info = ust.slotInfo(slotId, params.classedModules)
-
-    local offset = coor.xyz(info.pos.x * 5, info.pos.y * 20, 0)
+    local info = params.modules[slotId].info
+    local makeData = params.modules[slotId].makeData
     
-    local nSeg = math.floor(0.5 + info.length / 5)
-    local segLength = info.length / nSeg
-    local width = {
-        surface = info.width - 1.6,
-        edge = 0.8
-    }
-
-
-    for i = 0, nSeg - 1 do
-        local y = {i * segLength, i * segLength + segLength}
-        
-        local sizeSurface = {
-            lb = offset + coor.xyz(-width.surface * 0.5, y[1], 1.93),
-            rb = offset + coor.xyz(width.surface * 0.5, y[1], 1.93),
-            lt = offset + coor.xyz(-width.surface * 0.5, y[2], 1.93),
-            rt = offset + coor.xyz(width.surface * 0.5, y[2], 1.93),
-        }
-        
-        table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", fitModels.surface(sizeSurface, true)));
-        table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", fitModels.surface(sizeSurface, false)));
-        
-        
-        local edgeLeft = {
-            lb = offset + coor.xyz(-width.surface * 0.5 - 0.8, y[1], 1.93),
-            rb = offset + coor.xyz(-width.surface * 0.5, y[1], 1.93),
-            lt = offset + coor.xyz(-width.surface * 0.5 - 0.8, y[2], 1.93),
-            rt = offset + coor.xyz(-width.surface * 0.5, y[2], 1.93),
-        }
-        
-        table.insert(result.models, general.newModel("ust/platform/edge_tl.mdl", fitModels.edge(edgeLeft, true)));
-        table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", fitModels.edge(edgeLeft, false)));
-        
-        local edgeRight = {
-            lb = offset + coor.xyz(width.surface * 0.5, y[1], 1.93),
-            rb = offset + coor.xyz(width.surface * 0.5 + 0.8, y[1], 1.93),
-            lt = offset + coor.xyz(width.surface * 0.5, y[2], 1.93),
-            rt = offset + coor.xyz(width.surface * 0.5 + 0.8, y[2], 1.93),
-        }
-        
-        table.insert(result.models, general.newModel("ust/platform/edge_br.mdl", coor.flipX(), coor.flipY(), fitModels.edge(edgeRight, true)));
-        table.insert(result.models, general.newModel("ust/platform/edge_tl.mdl", coor.flipX(), coor.flipY(), fitModels.edge(edgeRight, false)));
+    local grid = params.grid
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
     
+    local width = info.width or metadata.width or 5
+    
+    local trackLeft = info.left and params.modules[info.left].metadata.isTrack and params.modules[info.left] or false
+    local trackRight = info.right and params.modules[info.right].metadata.isTrack and params.modules[info.right] or false
+    
+    local transfPos = nil
+    
+    if (trackLeft and trackRight) then
+        local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
+        local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
+        
+        transfPos = quat.byVec(coor.xyz(1, 0, 0), leftPts[3] - rightPts[3]):mRot() * coor.trans(leftPts[3]:avg(rightPts[3]))
+        
+        for i = 1, 4 do
+            local sizeSurface = {
+                lb = leftPts[i] + coor.xyz(0, 0, 1),
+                rb = rightPts[i] + coor.xyz(0, 0, 1),
+                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
+                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
+            }
+            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
+            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+        end
+    elseif trackLeft then
+        local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
+
+        for i = 1, 4 do
+            local sizeSurface = {
+                lb = leftPts[i] + coor.xyz(0, 0, 1),
+                rb = leftPts[i] + leftVecs[i] * width + coor.xyz(0, 0, 1),
+                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
+                rt = leftPts[i + 1] + leftVecs[i + 1] * width + coor.xyz(0, 0, 1),
+            }
+            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
+            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+        end
+
+    elseif trackRight then
+        local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
+
+        for i = 1, 4 do
+            local sizeSurface = {
+                lb = rightPts[i] + rightVecs[i] * 5 + coor.xyz(0, 0, 1),
+                rb = rightPts[i] + coor.xyz(0, 0, 1),
+                lt = rightPts[i + 1] + rightVecs[i + 1] * 5 + coor.xyz(0, 0, 1),
+                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
+            }
+            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
+            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+        end
     end
+    
+    -- if not (info.left or info.leftPrev or info.leftNext) then
+    --     local transf = coor.trans(coor.xyz(-width, 0, 0)) * transfPos
+    --     table.insert(result.slots, {
+    --         id = makeData(1, 1),
+    --         transf = transf,
+    --         type = "ust_track",
+    --         spacing = {1.5, 1.5, 1.5, 1.5}
+    --     })
+    -- end
+    
+    -- if not (info.right or info.rightPrev or info.rightNext) then
+    --     local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPos
+    --     table.insert(result.slots, {
+    --         id = makeData(1, 2),
+    --         transf = transf,
+    --         type = "ust_track",
+    --         spacing = {1.5, 1.5, 1.5, 1.5}
+    --     })
+    -- end
+    
 end
 function data()
     return {
@@ -90,7 +130,8 @@ function data()
         },
         metadata = {
             isPlatform = true,
-            typeId = 2
+            typeId = 2,
+            width = 5
         },
         
         updateFn = updateFn,

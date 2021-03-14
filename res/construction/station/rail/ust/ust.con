@@ -95,124 +95,171 @@ local function gridization(modules, classedModules)
             local yPos = func.sort(func.filter(func.keys(grid[z][x]), function(k) return k >= 0 end))
             local yNeg = func.rev(func.sort(func.filter(func.keys(grid[z][x]), function(k) return k < 0 end)))
             
+            local width = nil
             for _, y in ipairs(func.rev(func.concat(yNeg, yPos))) do
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
                 local w = m.info.width or m.metadata.width
-                if w then
-                    if xState.width then
-                        xState.pos = xState.pos + xState.width * (x < 0 and -0.5 or 0.5)
-                    end
-                    xState.width = w
-                    xState.pos = xState.pos + xState.width * (x < 0 and -0.5 or 0.5)
-                    xState.refList[x] = xState.pos
-                    break
+                if not width or width < w then
+                    width = w
                 end
+            end
+            
+            if width then
+                if xState.width then
+                    xState.pos = xState.pos + xState.width * (x < 0 and -0.5 or 0.5)
+                end
+                xState.width = width
+                xState.pos = xState.pos + xState.width * (x < 0 and -0.5 or 0.5)
+                xState.refList[x] = xState.pos
             end
             
             local processY = function(y)
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
                 
-                if grid[z][x][y - 1] then
-                    modules[grid[z][x][y - 1]].info.next = slotId
-                    m.info.prev = grid[z][x][y - 1]
-                end
-                
-                if grid[z][x][y + 1] then
-                    modules[grid[z][x][y + 1]].info.prev = slotId
-                    m.info.next = grid[z][x][y + 1]
-                end
-                
-                if not m.info.width then
-                    m.info.width = m.metadata.width or 5
-                end
-                
-                local yState = {}
-                
-                local width = m.info.width
-                local ref = (y > 0 and grid[z][x][y - 1]) or (y < 0 and grid[z][x][y + 1])
-                if y == 0 or y == -1 then
-                    yState = {
-                        pos = coor.xyz(xState.pos, 0, 0),
-                        vec = coor.xyz(0, y < 0 and -1 or 1, 0),
-                        width = width,
-                        radius = m.info.straight and 10e8 or m.info.radius,
-                        length = m.info.length
-                    }
-                elseif ref then
-                    yState = {
-                        pos = modules[ref].info.pts[2][1],
-                        vec = modules[ref].info.pts[2][2],
-                        width = width,
-                        radius = m.info.straight and 10e8 or (m.info.radius or modules[ref].info.radius),
-                        length = m.info.length
-                    }
-                else
-                    for ix = x + (x < 0 and 1 or -1), 0, (x < 0 and 1 or -1) do
-                        if grid[z][ix][y] then
-                            local pos = modules[grid[z][ix][y]].info.pts[1][1]
-                            local vec = modules[grid[z][ix][y]].info.pts[1][2]
-                            
-                            yState = {
-                                pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (xState.pos - xState.refList[ix]),
-                                vec = vec,
-                                width = width,
-                                radius = m.info.straight and 10e8 or m.info.radius,
-                                length = m.info.length
-                            }
-                            break
-                        end
+                do
+                    if grid[z][x][y - 1] then
+                        modules[grid[z][x][y - 1]].info.next = slotId
+                        m.info.prev = grid[z][x][y - 1]
+                    end
+                    
+                    if grid[z][x][y + 1] then
+                        modules[grid[z][x][y + 1]].info.prev = slotId
+                        m.info.next = grid[z][x][y + 1]
+                    end
+                    
+                    if grid[z][x - 1] and grid[z][x - 1][y] then
+                        modules[grid[z][x - 1][y]].info.right = slotId
+                        m.info.left = grid[z][x - 1][y]
+                    end
+                    
+                    if grid[z][x + 1] and grid[z][x + 1][y] then
+                        modules[grid[z][x + 1][y]].info.left = slotId
+                        m.info.right = grid[z][x + 1][y]
+                    end
+                    
+                    if grid[z][x - 1] and grid[z][x - 1][y - 1] then
+                        modules[grid[z][x - 1][y - 1]].info.rightNext = slotId
+                        m.info.leftPrev = grid[z][x - 1][y - 1]
+                    end
+                    
+                    if grid[z][x + 1] and grid[z][x + 1][y - 1] then
+                        modules[grid[z][x + 1][y - 1]].info.leftNext = slotId
+                        m.info.rightPrev = grid[z][x + 1][y - 1]
+                    end
+                    
+                    if grid[z][x - 1] and grid[z][x - 1][y + 1] then
+                        modules[grid[z][x - 1][y + 1]].info.rightPrev = slotId
+                        m.info.leftNext = grid[z][x - 1][y + 1]
+                    end
+                    
+                    if grid[z][x + 1] and grid[z][x + 1][y + 1] then
+                        modules[grid[z][x + 1][y + 1]].info.leftPrev = slotId
+                        m.info.rightNext = grid[z][x + 1][y + 1]
                     end
                 end
                 
-                if not yState.radius then
-                    if ref then
-                        for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
-                            if grid[z][x] and grid[z][x][i] then
-                                yState.radius = modules[grid[z][x][i]].info.radius
+                if (m.info.type == 1) then
+                    if not m.info.width then
+                        m.info.width = m.metadata.width or 5
+                    end
+                    
+                    local yState = {}
+                    
+                    local width = m.info.width
+                    local ref = y < 0 and m.info.next or (y > 0 and m.info.prev)
+                    if ref and modules[ref].info.type ~= 1 then
+                        ref = nil
+                    end
+                    if y == 0 or y == -1 then
+                        yState = {
+                            pos = coor.xyz(xState.pos, 0, 0),
+                            vec = coor.xyz(0, y < 0 and -1 or 1, 0),
+                            width = width,
+                            radius = m.info.straight and 10e8 or m.info.radius,
+                            length = m.info.length
+                        }
+                    elseif ref then
+                        yState = {
+                            pos = modules[ref].info.pts[2][1],
+                            vec = modules[ref].info.pts[2][2],
+                            width = width,
+                            radius = m.info.straight and 10e8 or (m.info.radius or modules[ref].info.radius),
+                            length = m.info.length
+                        }
+                    else
+                        for ix = x + (x < 0 and 1 or -1), 0, (x < 0 and 1 or -1) do
+                            if grid[z][ix][y] then
+                                local pos = modules[grid[z][ix][y]].info.pts[1][1]
+                                local vec = modules[grid[z][ix][y]].info.pts[1][2]
+                                
+                                yState = {
+                                    pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (xState.pos - xState.refList[ix]),
+                                    vec = vec,
+                                    width = width,
+                                    radius = m.info.straight and 10e8 or m.info.radius,
+                                    length = m.info.length
+                                }
                                 break
                             end
                         end
                     end
+                    
                     if not yState.radius then
-                        for i = x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1) do
-                            if grid[z][i] and grid[z][i][y] then
-                                yState.radius = modules[grid[z][i][y]].info.radius + (xState.pos - xState.refList[i])
-                                break
+                        if ref then
+                            for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
+                                if grid[z][x] and grid[z][x][i] then
+                                    yState.radius = modules[grid[z][x][i]].info.radius
+                                    break
+                                end
                             end
                         end
+                        if not yState.radius then
+                            for i = x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1) do
+                                if grid[z][i] and grid[z][i][y] then
+                                    yState.radius = modules[grid[z][i][y]].info.radius + (xState.pos - xState.refList[i])
+                                    break
+                                end
+                            end
+                        end
+                        if not yState.radius then
+                            yState.radius = 10e8
+                        end
                     end
-                    if not yState.radius then
-                        yState.radius = 10e8
-                    end
-                end
-                m.info.radius = yState.radius
-                
-                local ar, arL, arR =
-                    arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)(-yState.width * 0.5, yState.width * 0.5)
-                if y < 0 then arL, arR = arR, arL end
-                local refArc = {
-                    left = arL,
-                    right = arR,
-                    center = ar
-                }
-                
-                modules[slotId].info.arcs = refArc
-                
-                modules[slotId].info.pts = {
-                    {
-                        refArc.center:pt(refArc.center.inf),
-                        refArc.center:tangent(refArc.center.inf)
-                    },
-                    {
-                        refArc.center:pt(refArc.center.sup),
-                        refArc.center:tangent(refArc.center.sup)
+                    m.info.radius = yState.radius
+                    
+                    local packer = arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                    local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
+                    if y < 0 then arL, arR = arR, arL end
+                    local refArc = {
+                        left = arL,
+                        right = arR,
+                        center = ar
                     }
-                }
-                
-                yState.vec = y < 0 and -refArc.center:tangent(refArc.center.sup) or refArc.center:tangent(refArc.center.sup)
-                yState.pos = refArc.center:pt(refArc.center.sup)
+                    
+                    modules[slotId].info.arcs = refArc
+                    
+                    modules[slotId].info.pts = {
+                        {
+                            refArc.center:pt(refArc.center.inf),
+                            refArc.center:tangent(refArc.center.inf)
+                        },
+                        {
+                            refArc.center:pt(refArc.center.sup),
+                            refArc.center:tangent(refArc.center.sup)
+                        }
+                    }
+                    
+                    modules[slotId].info.gravity = {
+                        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                    }
+                    
+                    yState.vec = y < 0 and -refArc.center:tangent(refArc.center.sup) or refArc.center:tangent(refArc.center.sup)
+                    yState.pos = refArc.center:pt(refArc.center.sup)
+                elseif m.info.type == 2 then
+                    end
             end
             
             for _, y in ipairs(yPos) do processY(y) end
@@ -258,14 +305,31 @@ local createTemplateFn = function(_)
         [100000154] = "station/rail/ust/ust_data.module",
         [-155] = "station/rail/ust/ust_data.module",
         [20000157] = "station/rail/ust/ust_data.module",
-        
-        [301] = "station/rail/ust/ust_track.module",
-        [351] = "station/rail/ust/ust_data.module",
-        [-001000352] = "station/rail/ust/ust_data.module",
-        [353] = "station/rail/ust/ust_data.module",
-        [-100000354] = "station/rail/ust/ust_data.module",
-        [-001000355] = "station/rail/ust/ust_data.module",
-        [20000357] = "station/rail/ust/ust_data.module",
+    
+    -- [201] = "station/rail/ust/ust_platform.module",
+    -- [1000251] = "station/rail/ust/ust_data.module",
+    -- [252] = "station/rail/ust/ust_data.module",
+    -- [253] = "station/rail/ust/ust_data.module",
+    -- [20000257] = "station/rail/ust/ust_data.module",
+    -- [10000258] = "station/rail/ust/ust_data.module",
+    -- [502] = "station/rail/ust/ust_track.module",
+    -- [1000551] = "station/rail/ust/ust_data.module",
+    -- [-1000552] = "station/rail/ust/ust_data.module",
+    -- [553] = "station/rail/ust/ust_data.module",
+    -- [20000557] = "station/rail/ust/ust_data.module",
+    -- [10000558] = "station/rail/ust/ust_data.module",
+    -- [401] = "station/rail/ust/ust_track.module",
+    -- [2000451] = "station/rail/ust/ust_data.module",
+    -- [452] = "station/rail/ust/ust_data.module",
+    -- [453] = "station/rail/ust/ust_data.module",
+    -- [20000457] = "station/rail/ust/ust_data.module",
+    -- [301] = "station/rail/ust/ust_track.module",
+    -- [351] = "station/rail/ust/ust_data.module",
+    -- [-001000352] = "station/rail/ust/ust_data.module",
+    -- [353] = "station/rail/ust/ust_data.module",
+    -- [-100000354] = "station/rail/ust/ust_data.module",
+    -- [-001000355] = "station/rail/ust/ust_data.module",
+    -- [20000357] = "station/rail/ust/ust_data.module",
     }
     
     return result
@@ -287,6 +351,33 @@ local preProcessFn = function(modules, change)
     if change.added then
         
         if (info.type == 1 and data < 5 and data > 0) then
+            local dpos = ({
+                coor.xyz(-1, 0, 0),
+                coor.xyz(1, 0, 0),
+                coor.xyz(0, info.pos.y < 0 and 1 or -1, 0),
+                coor.xyz(0, info.pos.y < 0 and -1 or 1, 0)
+            })[data]
+            local newInfo = {
+                id = maxId + 1,
+                type = change.module.metadata.typeId,
+                pos = info.pos + dpos,
+                length = 20,
+                width = 5
+            }
+            local slotId, dataIds = ust.slotIds(newInfo)
+            modules[slotId] = change.module
+            for key, slotId in pairs(dataIds) do
+                modules[slotId] = {
+                    metadata = {isData = true},
+                    name = "station/rail/ust/ust_data.module",
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            end
+        elseif (info.type == 2 and data < 5 and data > 0) then
             local dpos = ({
                 coor.xyz(-1, 0, 0),
                 coor.xyz(1, 0, 0),
@@ -449,35 +540,53 @@ local updateFn = function(params)
     
     local grid = gridization(params.modules, params.classedModules)
     params.grid = grid
-    
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
         params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
     end
     
     for slotId, module in pairs(params.modules) do
-        if not module.metadata.isData then
-            local refArc = module.info.arcs.center
-            local midPt = 0.5 * (refArc.sup + refArc.inf)
+        if module.metadata.isTrack then
             local baseTransf =
-                quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), refArc:tangent(midPt)):mRot() *
-                coor.trans(refArc:pt(midPt))
+                quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), module.info.gravity[2]):mRot() *
+                coor.trans(module.info.gravity[1])
             
             insert(result.slots, {
                 id = slotId,
                 transf = baseTransf,
-                type = ust.typeList[module.typeId] or "ust_data",
+                type = "ust_track",
                 spacing = {2.5, 2.5, 2.5, 2.5}
             })
-            
-            result.dependentSlots[slotId] = {}
-        
-        else
+        elseif module.metadata.isPlatform then
+            local pos = module.info.pos
+            local left = grid[pos.z][pos.x - 1] and grid[pos.z][pos.x - 1][pos.y] and params.modules[grid[pos.z][pos.x - 1][pos.y]]
+            local right = grid[pos.z][pos.x + 1] and grid[pos.z][pos.x + 1][pos.y] and params.modules[grid[pos.z][pos.x + 1][pos.y]]
+            -- local baseTransf = nil
+            -- if left and right then
+            --     local pt = left.info.gravity[1]:avg(right.info.gravity[1])
+            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
+                
+            --     baseTransf =
+            --         quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), vec):mRot() *
+            --         coor.trans(pt)
+            -- elseif left then
+            --     local pt = left.info.gravity[1] + 
+            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
+            --     elseif right then
+            --     else
+            --         end
+            insert(result.slots, {
+                id = slotId,
+                transf = coor.I(),
+                type = "ust_platform",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+        elseif module.metadata.isData then
             insert(result.slots, {
                 id = slotId,
                 transf = coor.I(),
                 type = "ust_data",
-                spacing = {1.5, 1.5, 1.5, 1.5}
+                spacing = {0, 0, 0, 0}
             })
         end
     end
