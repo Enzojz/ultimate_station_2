@@ -38,44 +38,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local trackLeft = info.left and params.modules[info.left].metadata.isTrack and params.modules[info.left] or false
     local trackRight = info.right and params.modules[info.right].metadata.isTrack and params.modules[info.right] or false
-    
-    local transfPos = nil
-    
+    dump()(trackLeft)
+    dump()(trackRight)
+    dump()(slotId)
     if (trackLeft and trackRight) then
         local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
         local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
         
         transfPos = quat.byVec(coor.xyz(1, 0, 0), leftPts[3] - rightPts[3]):mRot() * coor.trans(leftPts[3]:avg(rightPts[3]))
         
-        for i = 1, 4 do
-            local sizeSurface = {
-                lb = leftPts[i] + coor.xyz(0, 0, 1),
-                rb = rightPts[i] + coor.xyz(0, 0, 1),
-                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
-            }
-            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
-            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
-        end
-    elseif trackLeft then
-        local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
-        local rightPts, rightPtsRef, rightVecs = basePts(info.arcs.right, info.arcs.center)
-
-        for i = 1, 4 do
-            local sizeSurface = {
-                lb = leftPts[i] + coor.xyz(0, 0, 1),
-                rb = rightPts[i] + coor.xyz(0, 0, 1),
-                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
-            }
-            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
-            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
-        end
-
-    elseif trackRight then
-        local leftPts, leftPtsRef, leftVecs = basePts(info.arcs.left, info.arcs.center)
-        local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
-
         for i = 1, 4 do
             local sizeSurface = {
                 lb = leftPts[i] + coor.xyz(0, 0, 1),
@@ -102,25 +73,96 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    -- if not (info.left or info.leftPrev or info.leftNext) then
-    --     local transf = coor.trans(coor.xyz(-width, 0, 0)) * transfPos
-    --     table.insert(result.slots, {
-    --         id = makeData(1, 1),
-    --         transf = transf,
-    --         type = "ust_track",
-    --         spacing = {1.5, 1.5, 1.5, 1.5}
-    --     })
-    -- end
+    local grid = params.grid
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    local arcs = info.arcs
+    local refArc = arcs.center
+    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local transfPosC = rotZ * coor.trans(posC)
     
-    -- if not (info.right or info.rightPrev or info.rightNext) then
-    --     local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPos
-    --     table.insert(result.slots, {
-    --         id = makeData(1, 2),
-    --         transf = transf,
-    --         type = "ust_track",
-    --         spacing = {1.5, 1.5, 1.5, 1.5}
-    --     })
-    -- end
+    if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
+    if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
+
+    if not (info.left) then
+        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
+            id = makeData(1, 1),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
+            id = makeData(2, 1),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    if not (info.right) then
+        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        
+        params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
+            id = makeData(1, 2),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
+            id = makeData(2, 2),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    
+    if not ((pos.y < 0 and info.next) or (pos.y > 0 and info.prev)) then
+        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
+            id = makeData(1, 3),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
+            id = makeData(2, 3),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    if not ((pos.y < 0 and info.prev) or (pos.y > 0 and info.next)) then
+        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
+            id = makeData(1, 4),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
+            id = makeData(2, 4),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
     
 end
 function data()

@@ -84,6 +84,170 @@ local function gridization(modules, classedModules)
         local xNeg = func.rev(func.sort(func.filter(func.keys(zv), function(k) return k < 0 end)))
         local xState = false
         
+        
+        local processY = function(x, y, xState)
+            local slotId = grid[z][x][y]
+            local m = modules[slotId]
+            
+            do
+                if grid[z][x][y - 1] then
+                    modules[grid[z][x][y - 1]].info.next = slotId
+                    m.info.prev = grid[z][x][y - 1]
+                end
+                
+                if grid[z][x][y + 1] then
+                    modules[grid[z][x][y + 1]].info.prev = slotId
+                    m.info.next = grid[z][x][y + 1]
+                end
+                
+                if grid[z][x - 1] and grid[z][x - 1][y] then
+                    modules[grid[z][x - 1][y]].info.right = slotId
+                    m.info.left = grid[z][x - 1][y]
+                end
+                
+                if grid[z][x + 1] and grid[z][x + 1][y] then
+                    modules[grid[z][x + 1][y]].info.left = slotId
+                    m.info.right = grid[z][x + 1][y]
+                end
+                
+                if grid[z][x - 1] and grid[z][x - 1][y - 1] then
+                    modules[grid[z][x - 1][y - 1]].info.rightNext = slotId
+                    m.info.leftPrev = grid[z][x - 1][y - 1]
+                end
+                
+                if grid[z][x + 1] and grid[z][x + 1][y - 1] then
+                    modules[grid[z][x + 1][y - 1]].info.leftNext = slotId
+                    m.info.rightPrev = grid[z][x + 1][y - 1]
+                end
+                
+                if grid[z][x - 1] and grid[z][x - 1][y + 1] then
+                    modules[grid[z][x - 1][y + 1]].info.rightPrev = slotId
+                    m.info.leftNext = grid[z][x - 1][y + 1]
+                end
+                
+                if grid[z][x + 1] and grid[z][x + 1][y + 1] then
+                    modules[grid[z][x + 1][y + 1]].info.leftPrev = slotId
+                    m.info.rightNext = grid[z][x + 1][y + 1]
+                end
+            end
+            
+            if m.info.type == 1 or m.info.type == 2 then
+                if not m.info.width then
+                    m.info.width = m.metadata.width or 5
+                end
+                
+                local yState = {}
+                
+                local width = m.info.width
+                local yRef = y < 0 and m.info.next or (y > 0 and m.info.prev)
+                
+                if y == 0 or y == -1 then
+                    yState = {
+                        pos = coor.xyz(xState.refList[x], 0, 0),
+                        vec = coor.xyz(0, y < 0 and -1 or 1, 0),
+                        width = width,
+                        radius = m.info.straight and 10e8 or m.info.radius,
+                        length = m.info.length
+                    }
+                elseif yRef then
+                    yState = {
+                        pos = modules[yRef].info.pts[2][1],
+                        vec = modules[yRef].info.pts[2][2],
+                        width = width,
+                        radius = m.info.straight and 10e8 or (m.info.radius or modules[yRef].info.radius),
+                        length = m.info.length
+                    }
+                else
+                    for ix = x + (x < 0 and 1 or -1), 0, (x < 0 and 1 or -1) do
+                        if grid[z][ix][y] then
+                            local pos = modules[grid[z][ix][y]].info.pts[1][1]
+                            local vec = modules[grid[z][ix][y]].info.pts[1][2]
+                            
+                            yState = {
+                                pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (xState.refList[x] - xState.refList[ix]),
+                                vec = vec,
+                                width = width,
+                                radius = m.info.straight and 10e8 or m.info.radius,
+                                length = m.info.length
+                            }
+                            break
+                        end
+                    end
+                end
+                
+                if not yState.radius then
+                    if yRef then
+                        for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
+                            if grid[z][x] and grid[z][x][i] then
+                                yState.radius = modules[grid[z][x][i]].info.radius
+                                break
+                            end
+                        end
+                    end
+                    if not yState.radius then
+                        local loop = {}
+                        if m.info.type == 1 then
+                            loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1)}
+                        elseif m.info.type == 2 then
+                            if (x < 0) then
+                                if m.info.right and modules[m.info.right].metadata.isPlatform then
+                                    loop = {x - 1, func.min(xNeg), -1}
+                                else
+                                    loop = {x + 1, func.max(xPos) or 0, 1}
+                                end
+                            else
+                                if m.info.left and modules[m.info.left].metadata.isPlatform then
+                                    loop = {x + 1, func.max(xPos), 1}
+                                else
+                                    loop = {x - 1, func.min(xNeg) or 0, -1}
+                                end
+                            end
+                        end
+                        for i = loop[1], loop[2], loop[3] do
+                            if grid[z][i] and grid[z][i][y] then
+                                yState.radius = modules[grid[z][i][y]].info.radius + (xState.refList[x] - xState.refList[i])
+                                break
+                            end
+                        end
+                    end
+                    if not yState.radius then
+                        yState.radius = 10e8
+                    end
+                end
+                m.info.radius = yState.radius
+                
+                local packer = arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
+                if y < 0 then arL, arR = arR, arL end
+                local refArc = {
+                    left = arL,
+                    right = arR,
+                    center = ar
+                }
+                
+                modules[slotId].info.arcs = refArc
+                
+                modules[slotId].info.pts = {
+                    {
+                        refArc.center:pt(refArc.center.inf),
+                        refArc.center:tangent(refArc.center.inf)
+                    },
+                    {
+                        refArc.center:pt(refArc.center.sup),
+                        refArc.center:tangent(refArc.center.sup)
+                    }
+                }
+                
+                modules[slotId].info.gravity = {
+                    refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                    refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                }
+                
+                yState.vec = y < 0 and -refArc.center:tangent(refArc.center.sup) or refArc.center:tangent(refArc.center.sup)
+                yState.pos = refArc.center:pt(refArc.center.sup)
+            end
+        end
+        
         local processX = function(x)
             if (not xState) then
                 xState = {
@@ -114,164 +278,25 @@ local function gridization(modules, classedModules)
                 xState.refList[x] = xState.pos
             end
             
-            local processY = function(y)
-                local slotId = grid[z][x][y]
-                local m = modules[slotId]
-                
-                do
-                    if grid[z][x][y - 1] then
-                        modules[grid[z][x][y - 1]].info.next = slotId
-                        m.info.prev = grid[z][x][y - 1]
-                    end
-                    
-                    if grid[z][x][y + 1] then
-                        modules[grid[z][x][y + 1]].info.prev = slotId
-                        m.info.next = grid[z][x][y + 1]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y] then
-                        modules[grid[z][x - 1][y]].info.right = slotId
-                        m.info.left = grid[z][x - 1][y]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y] then
-                        modules[grid[z][x + 1][y]].info.left = slotId
-                        m.info.right = grid[z][x + 1][y]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y - 1] then
-                        modules[grid[z][x - 1][y - 1]].info.rightNext = slotId
-                        m.info.leftPrev = grid[z][x - 1][y - 1]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y - 1] then
-                        modules[grid[z][x + 1][y - 1]].info.leftNext = slotId
-                        m.info.rightPrev = grid[z][x + 1][y - 1]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y + 1] then
-                        modules[grid[z][x - 1][y + 1]].info.rightPrev = slotId
-                        m.info.leftNext = grid[z][x - 1][y + 1]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y + 1] then
-                        modules[grid[z][x + 1][y + 1]].info.leftPrev = slotId
-                        m.info.rightNext = grid[z][x + 1][y + 1]
-                    end
-                end
-                
-                if (m.info.type == 1 or m.info.type == 2) then
-                    if not m.info.width then
-                        m.info.width = m.metadata.width or 5
-                    end
-                    
-                    local yState = {}
-                    
-                    local width = m.info.width
-                    local ref = y < 0 and m.info.next or (y > 0 and m.info.prev)
-                    if ref and modules[ref].info.type ~= 1 then
-                        ref = nil
-                    end
-                    if y == 0 or y == -1 then
-                        yState = {
-                            pos = coor.xyz(xState.pos, 0, 0),
-                            vec = coor.xyz(0, y < 0 and -1 or 1, 0),
-                            width = width,
-                            radius = m.info.straight and 10e8 or m.info.radius,
-                            length = m.info.length
-                        }
-                    elseif ref then
-                        yState = {
-                            pos = modules[ref].info.pts[2][1],
-                            vec = modules[ref].info.pts[2][2],
-                            width = width,
-                            radius = m.info.straight and 10e8 or (m.info.radius or modules[ref].info.radius),
-                            length = m.info.length
-                        }
-                    else
-                        for ix = x + (x < 0 and 1 or -1), 0, (x < 0 and 1 or -1) do
-                            if grid[z][ix][y] then
-                                local pos = modules[grid[z][ix][y]].info.pts[1][1]
-                                local vec = modules[grid[z][ix][y]].info.pts[1][2]
-                                
-                                yState = {
-                                    pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (xState.pos - xState.refList[ix]),
-                                    vec = vec,
-                                    width = width,
-                                    radius = m.info.straight and 10e8 or m.info.radius,
-                                    length = m.info.length
-                                }
-                                break
-                            end
-                        end
-                    end
-                    
-                    if not yState.radius then
-                        if ref then
-                            for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
-                                if grid[z][x] and grid[z][x][i] then
-                                    yState.radius = modules[grid[z][x][i]].info.radius
-                                    break
-                                end
-                            end
-                        end
-                        if not yState.radius then
-                            for i = x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1) do
-                                if grid[z][i] and grid[z][i][y] then
-                                    yState.radius = modules[grid[z][i][y]].info.radius + (xState.pos - xState.refList[i])
-                                    break
-                                end
-                            end
-                        end
-                        if not yState.radius then
-                            yState.radius = 10e8
-                        end
-                    end
-                    m.info.radius = yState.radius
-                    
-                    local packer = arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
-                    local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
-                    if y < 0 then arL, arR = arR, arL end
-                    local refArc = {
-                        left = arL,
-                        right = arR,
-                        center = ar
-                    }
-                    
-                    modules[slotId].info.arcs = refArc
-                    
-                    modules[slotId].info.pts = {
-                        {
-                            refArc.center:pt(refArc.center.inf),
-                            refArc.center:tangent(refArc.center.inf)
-                        },
-                        {
-                            refArc.center:pt(refArc.center.sup),
-                            refArc.center:tangent(refArc.center.sup)
-                        }
-                    }
-                    
-                    modules[slotId].info.gravity = {
-                        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-                        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-                    }
-                    
-                    yState.vec = y < 0 and -refArc.center:tangent(refArc.center.sup) or refArc.center:tangent(refArc.center.sup)
-                    yState.pos = refArc.center:pt(refArc.center.sup)
-                end
-            end
+            coroutine.yield()
             
-            for _, y in ipairs(yPos) do processY(y) end
+            for _, y in ipairs(yPos) do processY(x, y, xState) end
             yState = false
-            for _, y in ipairs(yNeg) do processY(y) end
+            for _, y in ipairs(yNeg) do processY(x, y, xState) end
         end
         
-        for _, x in ipairs(xPos) do processX(x) end
+        local xCoPos = func.map(xPos, function(x) return coroutine.create(processX) end)
+        local xCoNeg = func.map(xNeg, function(x) return coroutine.create(processX) end)
+        
+        for i, x in ipairs(xPos) do coroutine.resume(xCoPos[i], x) end
         if xState then
             xState.pos = 0
             xState.width = nil
         end
-        for _, x in ipairs(xNeg) do processX(x) end
+        for i, x in ipairs(xNeg) do coroutine.resume(xCoNeg[i], x) end
+        
+        for i, x in ipairs(xPos) do coroutine.resume(xCoPos[i], x) end
+        for i, x in ipairs(xNeg) do coroutine.resume(xCoNeg[i], x) end
     end
     return grid
 end
