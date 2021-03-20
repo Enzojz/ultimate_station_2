@@ -241,7 +241,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             end
         end
         
-        local grid = params.grid
         local pos = info.pos
         local metadata = params.modules[slotId].metadata
         local refArc = arcs.center
