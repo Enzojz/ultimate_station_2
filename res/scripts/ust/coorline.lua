@@ -15,13 +15,13 @@ function line.new(a, b, c)
             a = a / c,
             b = b / c,
             c = 1,
-            vecste = line.vec
+            vec = line.vec
         }
         or {
             a = a,
             b = b,
             c = 0,
-            vecste = line.vec
+            vec = line.vec
         }
     setmetatable(result,
         {

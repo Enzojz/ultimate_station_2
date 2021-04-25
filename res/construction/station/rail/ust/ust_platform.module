@@ -42,23 +42,23 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local trackLeft = info.left and params.modules[info.left].metadata.isTrack and params.modules[info.left] or false
     local trackRight = info.right and params.modules[info.right].metadata.isTrack and params.modules[info.right] or false
     
-    if (trackLeft and trackRight) then
-        local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
-        local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
+    -- if (trackLeft and trackRight) then
+    --     local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
+    --     local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
         
-        transfPos = quat.byVec(coor.xyz(1, 0, 0), leftPts[3] - rightPts[3]):mRot() * coor.trans(leftPts[3]:avg(rightPts[3]))
+    --     transfPos = quat.byVec(coor.xyz(1, 0, 0), leftPts[3] - rightPts[3]):mRot() * coor.trans(leftPts[3]:avg(rightPts[3]))
         
-        for i = 1, 4 do
-            local sizeSurface = {
-                lb = leftPts[i] + coor.xyz(0, 0, 1),
-                rb = rightPts[i] + coor.xyz(0, 0, 1),
-                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
-            }
-            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
-            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
-        end
-    else
+    --     for i = 1, 4 do
+    --         local sizeSurface = {
+    --             lb = leftPts[i] + coor.xyz(0, 0, 1),
+    --             rb = rightPts[i] + coor.xyz(0, 0, 1),
+    --             lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
+    --             rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
+    --         }
+    --         table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
+    --         table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+    --     end
+    -- else
         local leftPts, leftPtsRef, leftVecs = basePts(info.arcs.left, info.arcs.center)
         local rightPts, rightPtsRef, rightVecs = basePts(info.arcs.right, info.arcs.center)
         
@@ -72,7 +72,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
             table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
         end
-    end
+    -- end
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
@@ -138,6 +138,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
     if not ((pos.y < 0 and info.next) or (pos.y > 0 and info.prev)) then
         local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        
         local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
         
         params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
