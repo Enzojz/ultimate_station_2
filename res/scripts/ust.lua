@@ -83,7 +83,8 @@ ust.slotInfo = function(slotId, classedModules)
                 width = width,
                 data = data,
                 canModifyRadius = canModifyRadius,
-                canModifyDest = canModifyDest
+                canModifyDest = canModifyDest,
+                octa = {false, false, false, false, false, false, false, false}
             }
         else
             return {

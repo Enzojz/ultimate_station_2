@@ -1,0 +1,7 @@
+function data()
+    return {
+        updateFn = function(params, cParams)
+            return game.res.construction["station/rail/ust/ust.con"](params, cParams)
+        end
+    }
+end

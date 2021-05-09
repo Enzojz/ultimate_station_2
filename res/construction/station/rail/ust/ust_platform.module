@@ -13,20 +13,15 @@ local ma = math
 local pi = ma.pi
 
 local fitModels = {
-    surface = ust.fitModel(3.4, 5, -1.93, true, true),
-    extremity = ust.fitModel(3.4, 5, -1.93, true, true),
-    edge = ust.fitModel(0.8, 5, -1.93, true, true),
-    cornerLeft = ust.fitModel(0.8, 5, -1.93, true, true),
-    cornerRight = ust.fitModel(0.8, 5, -1.93, true, false),
+    surface = ust.fitModel(3.3, 5, -2, true, true),
+    edge = ust.fitModel(0.85, 5, -2, true, true),
 }
 
-local function basePts(arc, arcRef)
-    local radDelta = (arc.sup - arc.inf) / 4
-    local rads = func.map(func.seq(0, 4), function(i) return arc.inf + i * radDelta end)
+local function basePts(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
     local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    local ptsRef = func.map(rads, function(rad) return arcRef:pt(rad) end)
-    local vecs = func.map2(pts, ptsRef, function(pt, ptRef) return (pt - ptRef):normalized() end)
-    return pts, ptsRef, vecs
+    return pts
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
@@ -37,42 +32,179 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
     
-    local width = info.width or metadata.width or 5
-    
-    local trackLeft = info.left and params.modules[info.left].metadata.isTrack and params.modules[info.left] or false
-    local trackRight = info.right and params.modules[info.right].metadata.isTrack and params.modules[info.right] or false
-    
-    -- if (trackLeft and trackRight) then
-    --     local leftPts, leftPtsRef, leftVecs = basePts(trackLeft.info.arcs.right, trackLeft.info.arcs.center)
-    --     local rightPts, rightPtsRef, rightVecs = basePts(trackRight.info.arcs.left, trackRight.info.arcs.center)
-        
-    --     transfPos = quat.byVec(coor.xyz(1, 0, 0), leftPts[3] - rightPts[3]):mRot() * coor.trans(leftPts[3]:avg(rightPts[3]))
-        
-    --     for i = 1, 4 do
-    --         local sizeSurface = {
-    --             lb = leftPts[i] + coor.xyz(0, 0, 1),
-    --             rb = rightPts[i] + coor.xyz(0, 0, 1),
-    --             lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-    --             rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
-    --         }
-    --         table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
-    --         table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
-    --     end
-    -- else
-        local leftPts, leftPtsRef, leftVecs = basePts(info.arcs.left, info.arcs.center)
-        local rightPts, rightPtsRef, rightVecs = basePts(info.arcs.right, info.arcs.center)
-        
-        for i = 1, 4 do
-            local sizeSurface = {
-                lb = leftPts[i] + coor.xyz(0, 0, 1),
-                rb = rightPts[i] + coor.xyz(0, 0, 1),
-                lt = leftPts[i + 1] + coor.xyz(0, 0, 1),
-                rt = rightPts[i + 1] + coor.xyz(0, 0, 1),
-            }
-            table.insert(result.models, general.newModel("ust/platform/surface_tl.mdl", tag, fitModels.surface(sizeSurface, true)));
-            table.insert(result.models, general.newModel("ust/platform/surface_br.mdl", tag, fitModels.surface(sizeSurface, false)));
+    local isTrack = {}
+    local isPlatform = {}
+    local octaModules = {}
+    for i = 1, 8 do
+        if info.octa[i] then
+            octaModules[i] = info.octa[i] and params.modules[info.octa[i]]
+            isTrack[i] = octaModules[i].metadata and octaModules[i].metadata.isTrack or false
+            isPlatform[i] = octaModules[i].metadata and octaModules[i].metadata.isPlatform or false
+        else
+            octaModules[i] = false
+            isTrack[i] = false
+            isPlatform[i] = false
         end
-    -- end
+    end
+
+    local leftConnected = isPlatform[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
+    local rightConnected = isPlatform[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+    
+    -- local n = ma.floor(info.arcs.center:length() / 5 + 0.5)
+    -- if n == 0 then n = 1 end
+    local n = 4
+    
+    local leftPts = basePts(info.arcs.left, n)
+    local rightPts = basePts(info.arcs.right, n)
+    
+    local leftEdge = {}
+    local rightEdge = {}
+    local leftCentre = {}
+    local rightCentre = {}
+    
+    for i = 1, n + 1 do
+        local vec = (leftPts[i] - rightPts[i]):normalized()
+        leftEdge[i] = leftPts[i]
+        rightEdge[i] = rightPts[i]
+        leftCentre[i] = leftPts[i] - vec * 0.85
+        rightCentre[i] = rightPts[i] + vec * 0.85
+    end
+    
+    for i = 1, n do
+        local inf = pos.y < 0 and i or i + 1
+        local sup = pos.y < 0 and i + 1 or i
+        
+        local centre = {
+            lt = leftCentre[inf],
+            rt = rightCentre[inf],
+            lb = leftCentre[sup],
+            rb = rightCentre[sup],
+        }
+        
+        local left = {
+            lt = leftEdge[inf],
+            rt = leftCentre[inf],
+            lb = leftEdge[sup],
+            rb = leftCentre[sup],
+        }
+        
+        local right = {
+            lt = rightCentre[inf],
+            rt = rightEdge[inf],
+            lb = rightCentre[sup],
+            rb = rightEdge[sup],
+        }
+        
+        local isFirst = (pos.y >= 0 and i == 1) or (pos.y < 0 and i == 4)
+        local isLast = (pos.y >= 0 and i == 4) or (pos.y < 0 and i == 1)
+        
+        if isLast then
+            if isTrack[1] then
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_t_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_t_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.surface(centre, false)));
+            elseif not info.octa[1] then
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.surface(centre, false)));
+            else
+                table.insert(result.models, general.newModel("ust/platform/yi_centre_tl.mdl", tag, coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/yi_centre_br.mdl", tag, coor.transZ(2) * fitModels.surface(centre, false)));
+            end
+        elseif isFirst then
+            if isTrack[5] then
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_t_tl.mdl", tag, coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_t_br.mdl", tag, coor.transZ(2) * fitModels.surface(centre, false)));
+            elseif not info.octa[5] then
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_tl.mdl", tag, coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/ye_centre_br.mdl", tag, coor.transZ(2) * fitModels.surface(centre, false)));
+            else
+                table.insert(result.models, general.newModel("ust/platform/yi_centre_tl.mdl", tag, coor.transZ(2) * fitModels.surface(centre, true)));
+                table.insert(result.models, general.newModel("ust/platform/yi_centre_br.mdl", tag, coor.transZ(2) * fitModels.surface(centre, false)));
+            end
+        else
+            table.insert(result.models, general.newModel("ust/platform/yi_centre_tl.mdl", tag, coor.transZ(2) * fitModels.surface(centre, true)));
+            table.insert(result.models, general.newModel("ust/platform/yi_centre_br.mdl", tag, coor.transZ(2) * fitModels.surface(centre, false)));
+        end
+        
+        if leftConnected then
+            if isLast then
+                if isTrack[1] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_t_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_t_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, false)));
+                elseif not isPlatform[8] and isPlatform[1] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_x_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_x_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, false)));
+                else
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, false)));
+                end
+            elseif isFirst then
+                if isTrack[5] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_t_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_t_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+                elseif not isPlatform[6] and isPlatform[5] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_left_x_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_left_x_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+                else
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+                end
+            else
+                table.insert(result.models, general.newModel("ust/platform/xi_yi_left_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                table.insert(result.models, general.newModel("ust/platform/xi_yi_left_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+            end
+        else
+            if isLast and not isPlatform[1] then
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_right_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_right_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(left, false)));
+            elseif isFirst and not isPlatform[5] then
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_left_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_left_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+            else
+                table.insert(result.models, general.newModel("ust/platform/xe_yi_left_tl.mdl", tag, coor.transZ(2) * fitModels.edge(left, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_yi_left_br.mdl", tag, coor.transZ(2) * fitModels.edge(left, false)));
+            end
+        end
+        
+        if rightConnected then
+            if isLast then
+                if isTrack[1] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_t_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_t_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, false)));
+                elseif not isPlatform[2] and isPlatform[1] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_left_x_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_left_x_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, false)));
+                else
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_left_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, false)));
+                end
+            elseif isFirst then
+                if isTrack[5] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_t_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_t_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+                elseif not isPlatform[4] and isPlatform[5] then
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_x_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_yi_right_x_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+                else
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                    table.insert(result.models, general.newModel("ust/platform/xi_ye_right_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+                end
+            else
+                table.insert(result.models, general.newModel("ust/platform/xi_yi_right_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                table.insert(result.models, general.newModel("ust/platform/xi_yi_right_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+            end
+        else
+            if isLast and not isPlatform[1] then
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_left_br.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_left_tl.mdl", tag, coor.rotZ(pi) * coor.transZ(2) * fitModels.edge(right, false)));
+            elseif isFirst and not isPlatform[5] then
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_right_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_ye_right_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+            else
+                table.insert(result.models, general.newModel("ust/platform/xe_yi_right_tl.mdl", tag, coor.transZ(2) * fitModels.edge(right, true)));
+                table.insert(result.models, general.newModel("ust/platform/xe_yi_right_br.mdl", tag, coor.transZ(2) * fitModels.edge(right, false)));
+            end
+        end
+    end
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
@@ -93,7 +225,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {0, 0, 0, 0}
         })
     end
-
+    
     if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
     if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
     if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
@@ -102,8 +234,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
     if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
     if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
-
-    if not (info.left) then
+    
+    if not (info.octa.left) then
         local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
         params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
             id = makeData(1, 1),
@@ -119,7 +251,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         }
     end
     
-    if not (info.right) then
+    if not (info.octa.right) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
         
         params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
@@ -135,8 +267,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {1.5, 1.5, 1.5, 1.5}
         }
     end
-        
-    if not ((pos.y < 0 and info.next) or (pos.y > 0 and info.prev)) then
+    
+    if not ((pos.y < 0 and info.octa.next) or (pos.y > 0 and info.octa.prev)) then
         local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
         
         local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
@@ -155,7 +287,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         }
     end
     
-    if not ((pos.y < 0 and info.prev) or (pos.y > 0 and info.next)) then
+    if not ((pos.y < 0 and info.octa.prev) or (pos.y > 0 and info.octa.next)) then
         local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
         local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
         
@@ -172,7 +304,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {1.5, 1.5, 1.5, 1.5}
         }
     end
-    
+
 end
 function data()
     return {
