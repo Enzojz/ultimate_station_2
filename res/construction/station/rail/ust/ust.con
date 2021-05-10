@@ -428,43 +428,6 @@ local function gridization(modules, classedModules)
                             aligned = true
                         end
                         
-                        -- if (modules[m.info.octa[7]] and modules[m.info.octa[7]].metadata.isTrack) then
-                        --     aligned = true
-                        --     arL = modules[m.info.octa[7]].info.arcs.right
-                        --     if modules[m.info.octa[3]] and modules[m.info.octa[3]].metadata.isPlatform or not modules[m.info.octa[3]] then
-                        --         arR = arc.dR((modules[m.info.octa[7]].info.radius > 0 and 1 or -1) * m.metadata.width)(arL)
-                        --     end
-                        --     modules[slotId].info.limits = modules[m.info.octa[7]].info.limits
-                        -- end
-                        -- if (modules[m.info.octa[3]] and modules[m.info.octa[3]].metadata.isTrack) then
-                        --     aligned = true
-                        --     arR = modules[m.info.octa[3]].info.arcs.left
-                        --     if (modules[m.info.octa[7]] and modules[m.info.octa[7]].metadata.isPlatform or not modules[m.info.octa[7]]) then
-                        --         arL = arc.dR((modules[m.info.octa[3]].info.radius > 0 and -1 or 1) * m.metadata.width)(arR)
-                        --     end
-                        --     modules[slotId].info.limits = modules[m.info.octa[3]].info.limits
-                        -- end
-                        -- if x < 0 and m.info.octa[3] and modules[m.info.octa[3]].metadata.isPlatform then
-                        --     if modules[m.info.octa[3]].info.radius * modules[slotId].info.radius > 0 then
-                        --         aligned = true
-                        --         arR = modules[m.info.octa[3]].info.arcs.left
-                        --         modules[slotId].info.limits = modules[m.info.octa[3]].info.limits
-                        --         local limits = func.map2(modules[m.info.octa[3]].info.limits, modules[m.info.octa[3]].info.pts, calculateLimit(arR))
-                        --         arL = arL:withLimits({sup = limits[2], inf = limits[1]})
-                        --     end
-                        -- elseif x >= 0 and m.info.octa[7] and modules[m.info.octa[7]].metadata.isPlatform then
-                        --     if modules[m.info.octa[7]].info.radius * modules[slotId].info.radius > 0 then
-                        --         aligned = true
-                        --         arL = modules[m.info.octa[7]].info.arcs.right
-                        --         if modules[m.info.octa[7]].info.limits then
-                        --             modules[slotId].info.limits = modules[m.info.octa[7]].info.limits
-                        --             local limits = func.map2(modules[m.info.octa[7]].info.limits, modules[m.info.octa[7]].info.pts, calculateLimit(arL))
-                        --             arR = arR:withLimits({sup = limits[2], inf = limits[1]})
-                        --         else
-                        --             arR = arc.dR((modules[m.info.octa[7]].info.radius > 0 and 1 or -1) * m.metadata.width)(arL)
-                        --         end
-                        --     end
-                        -- end
                         if aligned then
                             local pts = {
                                 arL:pt(arL.inf):avg(arR:pt(arR.inf)),

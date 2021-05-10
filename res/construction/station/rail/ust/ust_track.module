@@ -167,6 +167,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             vecS = vecS:normalized()
             for i = -60, 60, 1 do
                 local rad = (arcs.center.inf - arcs.center.sup) + i * pi / 180
+                if info.pos.y < 0 then rad = -rad end
                 if (abs(rad) > 10e-3) then
                     local r = 20 / rad
                     if (abs(r) >= 50) then
