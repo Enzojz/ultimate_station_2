@@ -17,25 +17,57 @@
             tags = {"Train Station", "Station"},
         },
         postRunFn = function(settings, params)
-            local models = {}
-            for id, path in pairs(api.res.modelRep.getAll()) do
-                if path:match("ust/platform/[%w_-]+_tl.mdl") then
-                    local m = api.res.modelRep.get(id)
-                    local bbMax = m.boundingInfo.bbMax
-                    local bbMin = m.boundingInfo.bbMin
-                    models[path] = {x = bbMax.x, y = bbMax.y, w = bbMax.x - bbMin.x, h = bbMax.y - bbMin.y, d = 2, t = true, l = true}
-                elseif path:match("ust/platform/[%w_-]+_br.mdl") then
-                    local m = api.res.modelRep.get(id)
-                    local bbMax = m.boundingInfo.bbMax
-                    local bbMin = m.boundingInfo.bbMin
-                    models[path] = {x = bbMin.x, y = bbMin.y, w = bbMax.x - bbMin.x, h = bbMax.y - bbMin.y, d = 2, b = true, r = true}
+            local tracks = api.res.trackTypeRep.getAll()
+            local trackModuleList = {}
+            local trackIconList = {}
+            local trackNames = {}
+            for __, trackName in pairs(tracks) do
+                local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
+                local trackName = trackName:match("(.+).lua")
+                local baseFileName = ("construction/station/rail/ust/tracks/%s"):format(trackName)
+                for __, catenary in pairs({false, true}) do
+                    local mod = api.type.ModuleDesc.new()
+                    mod.fileName = ("%s%s.module"):format(baseFileName, catenary and "_catenary" or "")
+                    
+                    mod.availability.yearFrom = track.yearFrom
+                    mod.availability.yearTo = track.yearTo
+                    mod.cost.price = 0
+                    -- mod.buildMode = "SINGLE"
+                    mod.description.name = track.name .. (catenary and _("MENU_WITH_CAT") or "")
+                    mod.description.description = track.desc .. (catenary and _("MENU_WITH_CAT") or "")
+                    mod.description.icon = track.icon
+                    
+                    mod.type = "ust_track"
+                    mod.order.value = 0
+                    mod.metadata = {
+                        isTrack = true,
+                        width = track.trackDistance,
+                        height = track.railBase + track.railHeight,
+                        typeId = 1
+                    }
+                    
+                    mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}
+                    
+                    mod.updateScript.fileName = "construction/station/rail/ust/ust_track.updateFn"
+                    mod.updateScript.params = {
+                        trackType = trackName .. ".lua",
+                        catenary = catenary,
+                        trackWidth = track.trackDistance
+                    }
+                    
+                    mod.getModelsScript.fileName = "construction/station/rail/ust/ust_track.getModelsFn"
+                    mod.getModelsScript.params = {}
+                    
+                    api.res.moduleRep.add(mod.fileName, mod, true)
                 end
+                table.insert(trackModuleList, baseFileName)
+                table.insert(trackIconList, track.icon)
+                table.insert(trackNames, track.name)
             end
             
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"
             con.updateScript.params = {
-                models = models
             }
         end
     }

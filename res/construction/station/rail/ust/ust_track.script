@@ -15,15 +15,10 @@ local pi = ma.pi
 local abs = ma.abs
 local pow = ma.pow
 
-local fitModels = {
-    surface = ust.fitModel(3.4, 5, -1.93, true, true),
-    extremity = ust.fitModel(3.4, 5, -1.93, true, true),
-    edge = ust.fitModel(0.8, 5, -1.93, true, true),
-    cornerLeft = ust.fitModel(0.8, 5, -1.93, true, true),
-    cornerRight = ust.fitModel(0.8, 5, -1.93, true, false),
-}
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local trackType = closureParams.trackType
+    local catenary = closureParams.catenary
 
-local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
     
@@ -33,51 +28,51 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     if (info.pos.y > 0) then
         e = {
-            info.prev and params.modules[info.prev].metadata.isTrack and {
-                pts[1][1]:avg(params.modules[info.prev].info.pts[2][1]),
-                pts[1][2]:avg(params.modules[info.prev].info.pts[2][2])
+            info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
+                pts[1][1]:avg(params.modules[info.octa[5]].info.pts[2][1]),
+                pts[1][2]:avg(params.modules[info.octa[5]].info.pts[2][2])
             } or pts[1],
             
-            info.next and params.modules[info.next].metadata.isTrack and {
-                pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
-                pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+            info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
+                pts[2][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.octa[1]].info.pts[1][2])
             } or pts[2]
         }
     elseif (info.pos.y == 0) then
         e = {
-            info.prev and params.modules[info.prev].metadata.isTrack and {
-                pts[1][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                pts[1][2]:avg(-params.modules[info.prev].info.pts[1][2])
+            info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
+                pts[1][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
+                pts[1][2]:avg(-params.modules[info.octa[5]].info.pts[1][2])
             } or pts[1],
             
-            info.next and params.modules[info.next].metadata.isTrack and {
-                pts[2][1]:avg(params.modules[info.next].info.pts[1][1]),
-                pts[2][2]:avg(params.modules[info.next].info.pts[1][2])
+            info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
+                pts[2][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.octa[1]].info.pts[1][2])
             } or pts[2]
         }
     elseif (info.pos.y == -1) then
         e = {
-            info.next and params.modules[info.next].metadata.isTrack and {
-                pts[1][1]:avg(params.modules[info.next].info.pts[1][1]),
-                pts[1][2]:avg(-params.modules[info.next].info.pts[1][2])
+            info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
+                pts[1][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
+                pts[1][2]:avg(-params.modules[info.octa[1]].info.pts[1][2])
             } or pts[1],
             
-            info.prev and params.modules[info.prev].metadata.isTrack and {
-                pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+            info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
+                pts[2][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.octa[5]].info.pts[1][2])
             } or pts[2],
         
         }
     else
         e = {
-            info.next and params.modules[info.next].metadata.isTrack and {
-                pts[1][1]:avg(params.modules[info.next].info.pts[2][1]),
-                pts[1][2]:avg(params.modules[info.next].info.pts[2][2])
+            info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
+                pts[1][1]:avg(params.modules[info.octa[1]].info.pts[2][1]),
+                pts[1][2]:avg(params.modules[info.octa[1]].info.pts[2][2])
             } or pts[1],
             
-            info.prev and params.modules[info.prev].metadata.isTrack and {
-                pts[2][1]:avg(params.modules[info.prev].info.pts[1][1]),
-                pts[2][2]:avg(params.modules[info.prev].info.pts[1][2])
+            info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
+                pts[2][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
+                pts[2][2]:avg(params.modules[info.octa[5]].info.pts[1][2])
             } or pts[2],
         
         }
@@ -91,8 +86,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         type = "TRACK",
         alignTerrain = true,
         params = {
-            type = "standard.lua",
-            catenary = false,
+            type = trackType,
+            catenary = catenary,
         },
         edges = e,
         snapNodes = {},
@@ -248,6 +243,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
         if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
+        if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
         if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
         if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
         if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
@@ -255,75 +251,85 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
         if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
 
-        if not (info.left) then
-            local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
-            params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
-                id = makeData(1, 1),
-                transf = transf,
+        table.insert(
+            result.slots,
+            {
+                id = makeData(1, 9),
+                transf = transfPosC * coor.transZ(1),
                 type = "ust_track",
                 spacing = {1.5, 1.5, 1.5, 1.5}
             }
-            params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
-                id = makeData(2, 1),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-        
-        if not (info.right) then
+        )
+
+        if not (info.octa[3]) then
             local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
             
             params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
-                id = makeData(1, 2),
-                transf = transf,
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-            params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
-                id = makeData(2, 2),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-        
-        
-        if not ((pos.y < 0 and info.next) or (pos.y > 0 and info.prev)) then
-            local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
-            local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
-            
-            params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
                 id = makeData(1, 3),
                 transf = transf,
                 type = "ust_track",
                 spacing = {1.5, 1.5, 1.5, 1.5}
             }
-            params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
+            params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
                 id = makeData(2, 3),
                 transf = transf,
                 type = "ust_platform",
                 spacing = {1.5, 1.5, 1.5, 1.5}
             }
         end
-        
-        if not ((pos.y < 0 and info.prev) or (pos.y > 0 and info.next)) then
-            local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
-            local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
-            
-            params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
-                id = makeData(1, 4),
+
+        if not (info.octa[7]) then
+            local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+            params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
+                id = makeData(1, 7),
                 transf = transf,
                 type = "ust_track",
                 spacing = {1.5, 1.5, 1.5, 1.5}
             }
-            params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
-                id = makeData(2, 4),
+            params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
+                id = makeData(2, 7),
                 transf = transf,
                 type = "ust_platform",
                 spacing = {1.5, 1.5, 1.5, 1.5}
             }
         end
+        
+        if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+            local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+            local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+            
+            params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
+                id = makeData(1, 1),
+                transf = transf,
+                type = "ust_track",
+                spacing = {1.5, 1.5, 1.5, 1.5}
+            }
+            params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
+                id = makeData(2, 1),
+                transf = transf,
+                type = "ust_platform",
+                spacing = {1.5, 1.5, 1.5, 1.5}
+            }
+        end
+
+        if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+            local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+            local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+            
+            params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
+                id = makeData(1, 5),
+                transf = transf,
+                type = "ust_track",
+                spacing = {1.5, 1.5, 1.5, 1.5}
+            }
+            params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
+                id = makeData(2, 5),
+                transf = transf,
+                type = "ust_platform",
+                spacing = {1.5, 1.5, 1.5, 1.5}
+            }
+        end
+        
     end
 
 
@@ -331,33 +337,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
 end
 function data()
     return {
-        availability = {
-            yearFrom = 0,
-            yearTo = 0,
-        },
-        buildMode = "SINGLE",
-        cost = {
-            price = 0,
-        },
-        description = {
-            name = _("MENU_MODULE_PLATFORM"),
-            description = _("MENU_MODULE_PLATFORM_DESC"),
-        },
-        category = {
-            categories = {"tracks"},
-        },
-        type = "ust_track",
-        order = {
-            value = 260,
-        },
-        metadata = {
-            isTrack = true,
-            typeId = 1,
-            width = 5
-        },
-        
         updateFn = updateFn,
-        
         getModelsFn = function(params)
             return {}
         end
