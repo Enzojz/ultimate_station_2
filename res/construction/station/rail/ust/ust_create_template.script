@@ -1,0 +1,92 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local arc = require "ust/coorarc"
+local line = require "ust/coorline"
+local quat = require "ust/quaternion"
+local pipe = require "ust/pipe"
+local general = require "ust/general"
+local ust = require "ust"
+local dump = require "luadump"
+
+local rList = {15, 12, 10, 8, 7.5, 6, 5, 4, 3.5, 3, 2.5, 2, 1.75, 1.5, 1.25, 1, 0.9, 0.85, 0.8, 0.75, 0.7, 0.666, 0.633, 0.6, 0.566, 0.533, 0.5, 0.475, 0.45, 0.425, 0.4, 0.375, 0.35, 0.325, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.16, 0.14, 0.12, 0.1, 0.09, 0.08, 0.07, 0.06, 0.05}
+
+rList = pipe.new * rList * pipe.map(pipe.neg()) * pipe.rev() / ust.infi + rList
+local hPlatformList = {200, 280, 380, 550, 680, 760, 915, 960, 1100, 1219, 1250, 1380}
+local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 550, 850, 1050}
+local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+
+
+local function posGen(restTrack, lst, snd, ...)
+    if restTrack == 0 then
+        if lst and snd then
+            return {false, lst, snd, ...}
+        else
+            return {lst, snd, ...}
+        end
+    elseif lst == nil then
+        return {}
+    elseif snd == nil then
+        if lst then
+            return posGen(restTrack, false, true)
+        else
+            return posGen(restTrack - 1, true, false)
+        end
+    else
+        if lst and snd then
+            return posGen(restTrack, false, lst, snd, ...)
+        else
+            return posGen(restTrack - 1, true, lst, snd, ...)
+        end
+    end
+end
+
+
+local createTemplateFn = function(params)
+    local baseLength = trackLengths[params.lPlatform + 1]
+    local nbTracks = trackNumberList[params.trackNb + 1]
+    local radius = rList[params.radius]
+    
+    local nSeg = baseLength / 20
+    
+    local pos = params.platformLeft and posGen(nbTracks, false) or posGen(nbTracks)
+    dump()(params)
+    -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
+
+    dump()(pos)
+    local result = {
+        [101] = "station/rail/ust/ust_track.module",
+        [151] = "station/rail/ust/ust_data.module",
+        [152] = "station/rail/ust/ust_data.module",
+        [153] = "station/rail/ust/ust_data.module",
+        [100000154] = "station/rail/ust/ust_data.module",
+        [-155] = "station/rail/ust/ust_data.module",
+        [20000157] = "station/rail/ust/ust_data.module",
+    
+    -- [201] = "station/rail/ust/ust_platform.module",
+    -- [1000251] = "station/rail/ust/ust_data.module",
+    -- [252] = "station/rail/ust/ust_data.module",
+    -- [253] = "station/rail/ust/ust_data.module",
+    -- [20000257] = "station/rail/ust/ust_data.module",
+    -- [10000258] = "station/rail/ust/ust_data.module",
+    -- [502] = "station/rail/ust/ust_track.module",
+    -- [1000551] = "station/rail/ust/ust_data.module",
+    -- [-1000552] = "station/rail/ust/ust_data.module",
+    -- [553] = "station/rail/ust/ust_data.module",
+    -- [20000557] = "station/rail/ust/ust_data.module",
+    -- [10000558] = "station/rail/ust/ust_data.module",
+    -- [401] = "station/rail/ust/ust_track.module",
+    -- [2000451] = "station/rail/ust/ust_data.module",
+    -- [452] = "station/rail/ust/ust_data.module",
+    -- [453] = "station/rail/ust/ust_data.module",
+    -- [20000457] = "station/rail/ust/ust_data.module",
+    -- [301] = "station/rail/ust/ust_track.module",
+    -- [351] = "station/rail/ust/ust_data.module",
+    -- [-001000352] = "station/rail/ust/ust_data.module",
+    -- [353] = "station/rail/ust/ust_data.module",
+    -- [-100000354] = "station/rail/ust/ust_data.module",
+    -- [-001000355] = "station/rail/ust/ust_data.module",
+    -- [20000357] = "station/rail/ust/ust_data.module",
+    }
+    
+    return result
+end

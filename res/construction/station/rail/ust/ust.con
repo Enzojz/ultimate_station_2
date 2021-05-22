@@ -16,6 +16,13 @@ local pow = math.pow
 local floor = math.floor
 local pi = math.pi
 
+local rList = {15, 12, 10, 8, 7.5, 6, 5, 4, 3.5, 3, 2.5, 2, 1.75, 1.5, 1.25, 1, 0.9, 0.85, 0.8, 0.75, 0.7, 0.666, 0.633, 0.6, 0.566, 0.533, 0.5, 0.475, 0.45, 0.425, 0.4, 0.375, 0.35, 0.325, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.16, 0.14, 0.12, 0.1, 0.09, 0.08, 0.07, 0.06, 0.05}
+
+rList = pipe.new * rList * pipe.map(pipe.neg()) * pipe.rev() / ust.infi + rList
+local hPlatformList = {200, 280, 380, 550, 680, 760, 915, 960, 1100, 1219, 1250, 1380}
+local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 550, 850, 1050}
+local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+
 local arcPacker = function(pt, vec, length, radius)
     local nVec = vec:withZ(0):normalized()
     local tVec = coor.xyz(-nVec.y, nVec.x, 0)
@@ -45,7 +52,7 @@ local function classifyModules(params)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 10000
         m.typeId = type
-        if not result[id] then result[id] = {info = {}, slot = {}} end
+        if not result[id] then result[id] = {info = {}, slot = {}, metadata = {}} end
         if (type < 50) then
             result[id].type = type
             result[id].slotId = slotId
@@ -54,6 +61,7 @@ local function classifyModules(params)
             local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
             result[id].info[type] = data
             result[id].slot[type] = slotId
+            result[id].metadata[type] = m.metadata
         end
     end
     return result
@@ -445,20 +453,29 @@ local function gridization(modules, classedModules)
                                 line.pend(line.byPtPt(pts[3], pts[2]), midPts[2]),
                             }
                             
-                            local o = (lines[1] - lines[2]):withZ(0)
-                            
+                            local o = lines[1] - lines[2]
                             if not o then
-                                local r = 10e8
+                                local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+                                local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
                                 local midPt = pts[1]:avg(pts[3])
-                                local chord = line.pend(line.byPtPt(pts[1], pts[3]), midPt)
-                                o = pts[2] + (chord - pts[2]):normalized() * r
+                                o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ(0.5 * pi)) * normalLength
+                                r = 10e8
                             end
+                            
+                            o = o:withZ(0)
                             
                             local vecInf = pts[1] - o
                             local vecSup = pts[3] - o
                             
                             local r = vecInf:length()
-                            if r > 10e8 then r = 10e8 end
+                            if r > 10e8 then
+                                local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+                                local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+                                o = pts[1]:avg(pts[3]) + (o - pts[2]):normalized() * normalLength
+                                vecInf = pts[1] - o
+                                vecSup = pts[3] - o
+                                r = 10e8
+                            end
                             ar = arc.byOR(o, r)
                             
                             local inf = ar:rad(pts[1])
@@ -469,7 +486,6 @@ local function gridization(modules, classedModules)
                                 sup = sup,
                                 inf = inf
                             })
-                            
                             modules[slotId].info.radius = (length > 0 and 1 or -1) * (y < 0 and -1 or 1) * r
                             modules[slotId].info.length = math.abs(length)
                         end
@@ -672,42 +688,81 @@ local constructionTemplates =
         }
     }
 
-local createTemplateFn = function(_)
-    local result = {
-        [101] = "station/rail/ust/ust_track.module",
-        [151] = "station/rail/ust/ust_data.module",
-        [152] = "station/rail/ust/ust_data.module",
-        [153] = "station/rail/ust/ust_data.module",
-        [100000154] = "station/rail/ust/ust_data.module",
-        [-155] = "station/rail/ust/ust_data.module",
-        [20000157] = "station/rail/ust/ust_data.module",
+local function posGen(restTrack, lst, snd, ...)
+    if restTrack == 0 then
+        if lst and snd then
+            return {false, lst, snd, ...}
+        else
+            return {lst, snd, ...}
+        end
+    elseif lst == nil then
+        return {}
+    elseif snd == nil then
+        if lst then
+            return posGen(restTrack, false, true)
+        else
+            return posGen(restTrack - 1, true, false)
+        end
+    else
+        if lst and snd then
+            return posGen(restTrack, false, lst, snd, ...)
+        else
+            return posGen(restTrack - 1, true, lst, snd, ...)
+        end
+    end
+end
+
+local createTemplateFn = function(params)
+    local baseLength = trackLengths[params.lPlatform + 1]
+    local nbTracks = trackNumberList[params.trackNb + 1]
+    local radius = rList[params.radius]
     
-    -- [201] = "station/rail/ust/ust_platform.module",
-    -- [1000251] = "station/rail/ust/ust_data.module",
-    -- [252] = "station/rail/ust/ust_data.module",
-    -- [253] = "station/rail/ust/ust_data.module",
-    -- [20000257] = "station/rail/ust/ust_data.module",
-    -- [10000258] = "station/rail/ust/ust_data.module",
-    -- [502] = "station/rail/ust/ust_track.module",
-    -- [1000551] = "station/rail/ust/ust_data.module",
-    -- [-1000552] = "station/rail/ust/ust_data.module",
-    -- [553] = "station/rail/ust/ust_data.module",
-    -- [20000557] = "station/rail/ust/ust_data.module",
-    -- [10000558] = "station/rail/ust/ust_data.module",
-    -- [401] = "station/rail/ust/ust_track.module",
-    -- [2000451] = "station/rail/ust/ust_data.module",
-    -- [452] = "station/rail/ust/ust_data.module",
-    -- [453] = "station/rail/ust/ust_data.module",
-    -- [20000457] = "station/rail/ust/ust_data.module",
-    -- [301] = "station/rail/ust/ust_track.module",
-    -- [351] = "station/rail/ust/ust_data.module",
-    -- [-001000352] = "station/rail/ust/ust_data.module",
-    -- [353] = "station/rail/ust/ust_data.module",
-    -- [-100000354] = "station/rail/ust/ust_data.module",
-    -- [-001000355] = "station/rail/ust/ust_data.module",
-    -- [20000357] = "station/rail/ust/ust_data.module",
-    }
+    local nSeg = baseLength / 20
     
+    local posList = params.platformLeft and posGen(nbTracks, false) or posGen(nbTracks)
+    -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
+    local result = {}
+    local id = 1
+    
+    local yMax = nSeg % 2 == 0 and (nSeg / 2 - 1) or (nSeg - 1) / 2
+    local yMin = nSeg % 2 == 0 and (-nSeg / 2) or (1 - nSeg) / 2
+    
+    for i, pos in ipairs(posList) do
+        local x = #posList - i
+        if pos then
+            for y = yMin, yMax do
+                local info = {
+                    id = id,
+                    type = 1,
+                    pos = coor.xyz(x, y, 0),
+                    length = 20,
+                    width = 5,
+                }
+                local slotId, slotIds = ust.slotIds(info)
+                result[slotId] = "station/rail/ust/tracks/high_speed.module"
+                for _, slotId in pairs(slotIds) do
+                    result[slotId] = "station/rail/ust/ust_data.module"
+                end
+                id = id + 1
+            end
+        else
+            for y = yMin, yMax do
+                local info = {
+                    id = id,
+                    type = 2,
+                    pos = coor.xyz(x, y, 0),
+                    length = 20,
+                    width = 5,
+                }
+                local slotId, slotIds = ust.slotIds(info)
+                result[slotId] = "station/rail/ust/ust_platform.module"
+                for _, slotId in pairs(slotIds) do
+                    result[slotId] = "station/rail/ust/ust_data.module"
+                end
+                id = id + 1
+            end
+        end
+    end
     return result
 end
 
@@ -809,11 +864,9 @@ local preProcessFn = function(modules, change)
             modules[change.slotId] = nil
         elseif info.type == 80 and data == 1 then
             modules[ust.base(info.id, 80)] = nil
-            modules[change.slotId] = change.module
-        elseif info.type == 80 and data == 2 then
-            modules[ust.mixData(ust.base(info.id, 80), 1)] = nil
+        elseif info.type == 80 and data == 0 then
+            modules[ust.base(info.id, 80)] = change.module
         elseif info.type >= 81 and info.type <= 86 then
-            local grid = gridization(modules, classedModules)
             local id = info.id
             local m = modules[classedModules[id].slotId]
             
@@ -905,112 +958,102 @@ end
 local upgradeFn = function(_) end
 
 local updateFn = function(params, closureParams)
-        -- params.modelInfo = {}
-        -- for mdl, size in pairs(closureParams.models) do
-        --     params.modelInfo[mdl] = {
-        --         trans = coor.trans(coor.xyz(-size.x, -size.y, 0)),
-        --         size = coor.xyz(size.w, size.h, -size.d),
-        --         fitModels = ust.fitModel(size.w, size.h, size.d, size.t, size.l),
-        --         mdl = mdl
-        --     }
-        -- end
-        local result = {
-            entryConnectors = {},
-            colliders = {},
-            terrainAlignmentLists = {{type = "EQUAL", faces = {}}},
-            groundFaces = {},
-            terminalGroups = {},
-            stations = {},
-            dependentSlots = {},
-            edgeLists = {},
-            slotConfig = {},
-            occupied = {{}, {}, {}, {}},
-            cost = 0,
-            models = pipe.new * {},
-            slots = {},
-            labelText = {}
-        }
-        
-        
-        params.classedModules = classifyModules(params.modules)
-        
-        for id, info in pairs(params.classedModules) do
-            params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
-            params.modules[info.slotId].makeData = function(type, data)
-                return ust.mixData(ust.base(id, type), data)
-            end
-            for id, slotId in pairs(info.slot) do
-                params.modules[slotId].info = ust.slotInfo(slotId, params.classedModules)
-            end
+    local result = {
+        entryConnectors = {},
+        colliders = {},
+        terrainAlignmentLists = {{type = "EQUAL", faces = {}}},
+        groundFaces = {},
+        terminalGroups = {},
+        stations = {},
+        dependentSlots = {},
+        edgeLists = {},
+        slotConfig = {},
+        occupied = {{}, {}, {}, {}},
+        cost = 0,
+        models = pipe.new * {},
+        slots = {},
+        labelText = {}
+    }
+    
+    
+    params.classedModules = classifyModules(params.modules)
+    
+    for id, info in pairs(params.classedModules) do
+        params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
+        params.modules[info.slotId].makeData = function(type, data)
+            return ust.mixData(ust.base(id, type), data)
         end
-        
-        local grid = gridization(params.modules, params.classedModules)
-        params.grid = grid
-        params.slotGrid = {}
-        
-        params.anyRadiusModifiable = false
-        for _, module in pairs(params.modules) do
-            params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
+        for id, slotId in pairs(info.slot) do
+            params.modules[slotId].info = ust.slotInfo(slotId, params.classedModules)
         end
-        
-        for slotId, module in pairs(params.modules) do
-            if module.metadata.isTrack then
-                local baseTransf =
-                    quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), module.info.gravity[2]):mRot() *
-                    coor.trans(module.info.gravity[1])
-                
-                insert(result.slots, {
-                    id = slotId,
-                    transf = baseTransf,
-                    type = "ust_track",
-                    spacing = {2.5, 2.5, 2.5, 2.5}
-                })
-            elseif module.metadata.isPlatform then
-                local pos = module.info.pos
-                local left = grid[pos.z][pos.x - 1] and grid[pos.z][pos.x - 1][pos.y] and params.modules[grid[pos.z][pos.x - 1][pos.y]]
-                local right = grid[pos.z][pos.x + 1] and grid[pos.z][pos.x + 1][pos.y] and params.modules[grid[pos.z][pos.x + 1][pos.y]]
-                -- local baseTransf = nil
-                -- if left and right then
-                --     local pt = left.info.gravity[1]:avg(right.info.gravity[1])
-                --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
-                --     baseTransf =
-                --         quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), vec):mRot() *
-                --         coor.trans(pt)
-                -- elseif left then
-                --     local pt = left.info.gravity[1] +
-                --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
-                --     elseif right then
-                --     else
-                --         end
-                insert(result.slots, {
-                    id = slotId,
-                    transf = coor.I(),
-                    type = "ust_platform",
-                    spacing = {2.5, 2.5, 2.5, 2.5}
-                })
-            elseif module.metadata.isData then
-                insert(result.slots, {
-                    id = slotId,
-                    transf = coor.I(),
-                    type = "ust_data",
-                    spacing = {0, 0, 0, 0}
-                })
-            end
+    end
+    
+    local grid = gridization(params.modules, params.classedModules)
+    
+    params.grid = grid
+    params.slotGrid = {}
+    
+    params.anyRadiusModifiable = false
+    for _, module in pairs(params.modules) do
+        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
+    end
+    
+    for slotId, module in pairs(params.modules) do
+        if module.metadata.isTrack then
+            local baseTransf =
+                quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), module.info.gravity[2]):mRot() *
+                coor.trans(module.info.gravity[1])
+            
+            insert(result.slots, {
+                id = slotId,
+                transf = baseTransf,
+                type = "ust_track",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+        elseif module.metadata.isPlatform then
+            local pos = module.info.pos
+            local left = grid[pos.z][pos.x - 1] and grid[pos.z][pos.x - 1][pos.y] and params.modules[grid[pos.z][pos.x - 1][pos.y]]
+            local right = grid[pos.z][pos.x + 1] and grid[pos.z][pos.x + 1][pos.y] and params.modules[grid[pos.z][pos.x + 1][pos.y]]
+            -- local baseTransf = nil
+            -- if left and right then
+            --     local pt = left.info.gravity[1]:avg(right.info.gravity[1])
+            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
+            --     baseTransf =
+            --         quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), vec):mRot() *
+            --         coor.trans(pt)
+            -- elseif left then
+            --     local pt = left.info.gravity[1] +
+            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
+            --     elseif right then
+            --     else
+            --         end
+            insert(result.slots, {
+                id = slotId,
+                transf = coor.I(),
+                type = "ust_platform",
+                spacing = {2.5, 2.5, 2.5, 2.5}
+            })
+        elseif module.metadata.isData then
+            insert(result.slots, {
+                id = slotId,
+                transf = coor.I(),
+                type = "ust_data",
+                spacing = {0, 0, 0, 0}
+            })
         end
-        
-        
-        for z, gridx in pairs(grid) do
-            for x, gridy in pairs(gridx) do
-                local ys = func.keys(gridy)
-                local min = func.min(ys)
-                local max = func.max(ys)
-            end
+    end
+    
+    
+    for z, gridx in pairs(grid) do
+        for x, gridy in pairs(gridx) do
+            local ys = func.keys(gridy)
+            local min = func.min(ys)
+            local max = func.max(ys)
         end
-        
-        
-        
-        
-        result.terminateConstructionHook = function()
+    end
+    
+    result.terminateConstructionHook = function()
+            -- dump()(result.slots)
             for _, z in pairs(params.slotGrid) do
                 for _, x in pairs(z) do
                     for _, y in pairs(x) do
@@ -1020,12 +1063,11 @@ local updateFn = function(params, closureParams)
                     end
                 end
             end
-        end
-        return result
+    end
+    return result
 end
 
 function data()
-    
     return {
         type = "RAIL_STATION",
         description = {
@@ -1040,6 +1082,65 @@ function data()
         constructionTemplates = constructionTemplates,
         createTemplateFn = createTemplateFn,
         params = {
+            {
+                key = "trackNb",
+                name = _("MENU_TRACK_NR"),
+                values = func.map(trackNumberList, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 0
+            },
+            {
+                key = "trackType",
+                name = _("MENU_TRACK_TYPE"),
+                uiType = "COMBOBOX",
+                values = {_("Standard"), _("High-Speed")},
+                defaultIndex = 0
+            },
+            {
+                key = "catenary",
+                name = _("MENU_TRACK_CAT"),
+                values = {_("YES"), _("NO")},
+                defaultIndex = 0
+            },
+            {
+                key = "radius",
+                name = _("MENU_RADIUS"),
+                values = rList * pipe.map(function(r) return r > 15 and "∞" or tostring(math.floor(r * 1000)) end),
+                uiType = "SLIDER",
+                defaultIndex = (#rList - 1) / 2
+            },
+            {
+                key = "lPlatform",
+                name = _("MENU_PLATFORM_LENGTH"),
+                values = func.map(trackLengths, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 0
+            },
+            {
+                key = "hPlatform",
+                name = _("MENU_PLATFORM_HEIGHT"),
+                values = func.map(hPlatformList, tostring),
+                uiType = "SLIDER",
+                defaultIndex = 3
+            },
+            {
+                key = "platformWidth",
+                name = _("MENU_PLATFORM_WIDTH"),
+                values = {"5", "10", "15", "20"},
+                defaultIndex = 1
+            },
+            {
+                key = "platformLeft",
+                name = _("MENU_PLATFORM_LEFT"),
+                values = {_("YES"), _("NO")},
+                defaultIndex = 0
+            },
+            {
+                key = "platformRight",
+                name = _("MENU_PLATFORM_RIGHT"),
+                values = {_("YES"), _("NO"), _("AUTO")},
+                defaultIndex = 2
+            },
         },
         upgradeFn = upgradeFn,
         updateFn = updateFn,

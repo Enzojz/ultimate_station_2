@@ -16,6 +16,7 @@ local min = math.min
 
 local segmentLength = 20
 
+ust.infi = 1e8
 ust.typeList = {
     [1] = "ust_track",
     [2] = "ust_platform",
@@ -65,8 +66,8 @@ ust.slotInfo = function(slotId, classedModules)
             local straight = info[56] and true or nil
             local length = info[57] or 20
             local width = info[58]
-            local canModifyRadius = info[80] == 0 and true or false
-            local canModifyDest = info[80] == 1 and true or false
+            local canModifyRadius = info[80] and classedModules[id].metadata[80].type == 1 and true or false
+            local canModifyDest = info[80] and classedModules[id].metadata[80].type == 2 and true or false
             local data = classedModules[id].data
             
             if straight or radius == 0 then

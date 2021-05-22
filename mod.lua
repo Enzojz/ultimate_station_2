@@ -24,7 +24,7 @@
             for __, trackName in pairs(tracks) do
                 local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
                 local trackName = trackName:match("(.+).lua")
-                local baseFileName = ("construction/station/rail/ust/tracks/%s"):format(trackName)
+                local baseFileName = ("station/rail/ust/tracks/%s"):format(trackName)
                 for __, catenary in pairs({false, true}) do
                     local mod = api.type.ModuleDesc.new()
                     mod.fileName = ("%s%s.module"):format(baseFileName, catenary and "_catenary" or "")

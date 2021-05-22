@@ -30,7 +30,8 @@ function data()
             value = 260,
         },
         metadata = {
-            isData = true
+            isData = true,
+            type = 2
         },
         
         updateFn = function(result, transform, tag, slotId, addModelFn, params)
