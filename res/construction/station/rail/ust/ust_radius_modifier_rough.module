@@ -1,11 +1,70 @@
-local func = require "ust/func"
 local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local general = require "ust/general"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
 
 local unpack = table.unpack
+local insert = table.insert
 local ma = math
 local pi = ma.pi
+local abs = ma.abs
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local makeData = params.modules[sId].makeData
+
+    -- Entry for radius system
+    local arcs = info.arcs
+    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local transfPosC = rotZ * coor.trans(posC)
+    
+    table.insert(result.slots, {
+        id = makeData(80, 1),
+        transf = transfPosC * coor.transZ(1),
+        type = "ust_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    -- Radius modify system
+    local var = params.modules[params.classedModules[info.id].slot[80]].variant
+    local rad = arcs.center.inf
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local textR = info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
+    
+    local nameModelsF, width = livetext(2)(textR)
+    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(posC + coor.xyz(0, 0, 3)) end)) do
+        table.insert(result.models, m)
+    end
+    
+    local ptS, vecS = unpack(info.pts[1])
+    vecS = vecS:normalized()
+    for i = -60, 60, 1 do
+        local rad = (arcs.center.inf - arcs.center.sup) + i * pi / 180
+        if info.pos.y < 0 then rad = -rad end
+        if (abs(rad) > 10e-3) then
+            local r = 20 / rad
+            if (abs(r) >= 50) then
+                local o = ptS - (vecS * r .. coor.rotZ(pi * 0.5))
+                local dst = o + (vecS * r .. coor.rotZ(pi * 0.5 - rad))
+                insert(result.slots, {
+                    id = makeData(83 + var, i),
+                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ(arcs.center.inf - rad) * coor.trans(dst + coor.xyz(0, 0, 1)),
+                    type = "ust_modifier",
+                    shape = 2,
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
 
 function data()
     return {
@@ -13,7 +72,7 @@ function data()
             yearFrom = 0,
             yearTo = 0,
         },
-		visible = false,
+        visible = false,
         buildMode = "SINGLE",
         cost = {
             price = 0,
@@ -23,7 +82,7 @@ function data()
             description = _("MENU_RADIUS_MODIFIER_DESC"),
         },
         category = {
-            categories = { "modifiers" },
+            categories = {"modifiers"},
         },
         type = "ust_modifier",
         order = {
@@ -34,8 +93,7 @@ function data()
             type = 2
         },
         
-        updateFn = function(result, transform, tag, slotId, addModelFn, params)
-        end,
+        updateFn = updateFn,
         
         getModelsFn = function(params)
             return {}

@@ -18,7 +18,7 @@ local pow = ma.pow
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
     local trackType = closureParams.trackType
     local catenary = closureParams.catenary
-
+    
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
     
@@ -101,239 +101,123 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     table.insert(result.edgeLists, edges)
     
     
-    -- Entry for radius system
-    do
-        local arcs = info.arcs
-        local rad = (arcs.center.inf + arcs.center.sup) * 0.5
-        local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-        local vec = (posR - posL):normalized()
-        local posC = (posR + posL) * 0.5
-        local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-        local transfPosC = rotZ * coor.trans(posC)
-        
-        if not params.anyRadiusModifiable then
-            table.insert(result.slots, {
-                id = makeData(80, 0),
-                transf = transfPosC * coor.transZ(1),
-                type = "ust_modifier",
-                spacing = {0, 0, 0, 0}
-            })
-        elseif info.canModifyRadius then
-            table.insert(result.slots, {
-                id = makeData(80, 1),
-                transf = transfPosC * coor.transZ(1),
-                type = "ust_modifier",
-                spacing = {0, 0, 0, 0}
-            })
-        elseif info.canModifyDest then
-            table.insert(result.slots, {
-                id = makeData(80, 1),
-                transf = transfPosC * coor.transZ(1),
-                type = "ust_modifier",
-                spacing = {0, 0, 0, 0}
-            })
-        end
-        
-        if (info.id ~= 1) then
-            insert(result.slots, {
-                id = makeData(99, 0),
-                transf = transfPosC * coor.transZ(1),
-                type = "ust_remove",
-                spacing = {0, 0, 0, 0}
-            })
-        end
-        
-        -- Radius modify system
-        if info.canModifyDest then
-            local var = params.modules[params.classedModules[info.id].slot[80]].variant
-            local rad = arcs.center.inf
-            local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-            local vec = (posR - posL):normalized()
-            local posC = (posR + posL) * 0.5
-            local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-            local textR = info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
-            
-            local nameModelsF, width = livetext(2)(textR)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(posC + coor.xyz(0, 0, 3)) end)) do
-                table.insert(result.models, m)
-            end
-            
-            local ptS, vecS = unpack(info.pts[1])
-            vecS = vecS:normalized()
-            for i = -60, 60, 1 do
-                local rad = (arcs.center.inf - arcs.center.sup) + i * pi / 180
-                if info.pos.y < 0 then rad = -rad end
-                if (abs(rad) > 10e-3) then
-                    local r = 20 / rad
-                    if (abs(r) >= 50) then
-                        local o = ptS - (vecS * r .. coor.rotZ(pi * 0.5))
-                        local dst = o + (vecS * r .. coor.rotZ(pi * 0.5 - rad))
-                        insert(result.slots, {
-                            id = makeData(83 + var, i),
-                            transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ(arcs.center.inf - rad) * coor.trans(dst + coor.xyz(0, 0, 1)),
-                            type = "ust_modifier",
-                            shape = 2,
-                            spacing = {0, 0, 0, 0}
-                        })
-                    end
-                end
-            end
-        elseif info.canModifyRadius then
-            local var = params.modules[params.classedModules[info.id].slot[80]].variant
-            local step = (arcs.center.sup - arcs.center.inf) / 8
-            
-            for i = 0, 8 do
-                local rad = arcs.center.inf + step * i
-                local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-                local vec = (posR - posL):normalized()
-                local posC = (posR + posL) * 0.5
-                local posP = posL - vec
-                local posN = posR + vec
-                local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-                local textR = info.radius == 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
-                
-                local addText = function(label, pos, fAlign, h)
-                    local nameModelsF, width = livetext(h or 2)(label)
-                    for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                        table.insert(result.models, m)
-                    end
-                end
-                
-                local addSlot = function(id, data, pos, shape, rot)
-                    table.insert(result.slots, {
-                        id = makeData(id, data),
-                        transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(1),
-                        type = "ust_modifier",
-                        spacing = {0, 0, 0, 0},
-                        shape = shape or 0
-                    })
-                end
-                
-                if (i == 0) then
-                    addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
-                elseif (i == 1) then
-                    addSlot(85 + var, 0, posP)
-                    addText("∞ ⊘", posC, function(w) return coor.xyz(-w * 0.5, 0, -1) end)
-                    if (params.classedModules[info.id].slot[54] or params.classedModules[info.id].slot[55] or params.classedModules[info.id].slot[56]) then
-                        addSlot(85 + var, 1, posN)
-                    end
-                elseif i == 7 then
-                    addText("+", posP, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
-                    addText("-", posN, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
-                elseif i == 8 then
-                    addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
-                else
-                    local delta = pow(10, i - 2)
-                    if info.radius == 10e8 or (abs((info.radius or 0) + delta) >= 50 and (info.radius or 0) + delta < 999999) then
-                        local dir = (info.radius and info.radius < 999999 and (info.radius > 0 or (info.radius < 0 and info.radius + delta < 0))) and coor.xyz(-1, 0, 0) or coor.xyz(1, 0, 0)
-                        addSlot(81 + var, i - 1, posP, 1, quat.byVec(dir, vec):mRot())
-                    end
-                    if abs((info.radius or 0) - delta) >= 50 and (info.radius or 0) - delta > -999999 then
-                        local dir = (info.radius and info.radius < 999999 and (info.radius < 0 or (info.radius > 0 and info.radius - delta > 0))) and coor.xyz(1, 0, 0) or coor.xyz(-1, 0, 0)
-                        addSlot(81 + var, -i + 1, posN, 1, quat.byVec(dir, vec):mRot())
-                    end
-                    addText(string.format("∙ %d ∙", delta), posC, function(w) return coor.xyz(-w * 0.5, 0, -0.75) end, 1.5)
-                end
-            end
-        end
-        
-        local pos = info.pos
-        local metadata = params.modules[slotId].metadata
-        local refArc = arcs.center
-        
-        if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
-        if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
-        if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
-        if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
-        if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
-        if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
-        if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
-        if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
-        if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
-
-        table.insert(
-            result.slots,
-            {
-                id = makeData(1, 9),
-                transf = transfPosC * coor.transZ(1),
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        )
-
-        if not (info.octa[3]) then
-            local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
-            
-            params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
-                id = makeData(1, 3),
-                transf = transf,
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-            params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
-                id = makeData(2, 3),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-
-        if not (info.octa[7]) then
-            local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
-            params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
-                id = makeData(1, 7),
-                transf = transf,
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-            params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
-                id = makeData(2, 7),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-        
-        if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
-            local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
-            local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
-            
-            params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
-                id = makeData(1, 1),
-                transf = transf,
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-            params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
-                id = makeData(2, 1),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-
-        if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
-            local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
-            local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
-            
-            params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
-                id = makeData(1, 5),
-                transf = transf,
-                type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-            params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
-                id = makeData(2, 5),
-                transf = transf,
-                type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
-            }
-        end
-        
+    local arcs = info.arcs
+    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local transfPosC = rotZ * coor.trans(posC)
+    
+    if not params.anyRadiusModifiable then
+        table.insert(result.slots, {
+            id = makeData(80, 0),
+            transf = transfPosC * coor.transZ(1),
+            type = "ust_modifier",
+            spacing = {0, 0, 0, 0}
+        })
     end
-
-
-
+    
+    if (info.id ~= 1) then
+        insert(result.slots, {
+            id = makeData(99, 0),
+            transf = transfPosC * coor.transZ(1),
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+    
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    local refArc = arcs.center
+    
+    if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
+    if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
+    
+    table.insert(
+        result.slots,
+        {
+            id = makeData(1, 9),
+            transf = transfPosC * coor.transZ(1),
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    )
+    if not (info.octa[3]) then
+        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        
+        params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
+            id = makeData(1, 3),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
+            id = makeData(2, 3),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    if not (info.octa[7]) then
+        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
+            id = makeData(1, 7),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
+            id = makeData(2, 7),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
+            id = makeData(1, 1),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
+            id = makeData(2, 1),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
+    
+    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
+            id = makeData(1, 5),
+            transf = transf,
+            type = "ust_track",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
+            id = makeData(2, 5),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {1.5, 1.5, 1.5, 1.5}
+        }
+    end
 end
 function data()
     return {

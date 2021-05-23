@@ -1,19 +1,10 @@
-local func = require "ust/func"
-local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local general = require "ust/general"
-
-local unpack = table.unpack
-local ma = math
-local pi = ma.pi
-
 function data()
     return {
         availability = {
             yearFrom = 0,
             yearTo = 0,
         },
-		visible = false,
+        visible = false,
         buildMode = "SINGLE",
         cost = {
             price = 0,
@@ -32,13 +23,8 @@ function data()
         metadata = {
             isData = true
         },
-        
-        updateFn = function(result, transform, tag, slotId, addModelFn, params)
-        end,
-        
-        getModelsFn = function(params)
-            return {}
-        end
+        updateFn = function() end,
+        getModelsFn = function() return {} end
     }
 
 end

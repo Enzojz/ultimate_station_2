@@ -1,11 +1,91 @@
-local func = require "ust/func"
 local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local general = require "ust/general"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
 
-local unpack = table.unpack
 local ma = math
 local pi = ma.pi
+local abs = ma.abs
+local pow = ma.pow
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local makeData = params.modules[sId].makeData
+    
+    -- Entry for radius system
+    local arcs = info.arcs
+    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local transfPosC = rotZ * coor.trans(posC)
+    
+    table.insert(result.slots, {
+        id = makeData(80, 1),
+        transf = transfPosC * coor.transZ(1),
+        type = "ust_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    local var = params.modules[params.classedModules[info.id].slot[80]].variant
+    local step = (arcs.center.sup - arcs.center.inf) / 8
+    
+    for i = 0, 8 do
+        local rad = arcs.center.inf + step * i
+        local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+        local vec = (posR - posL):normalized()
+        local posC = (posR + posL) * 0.5
+        local posP = posL - vec
+        local posN = posR + vec
+        local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+        local textR = info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
+        
+        local addText = function(label, pos, fAlign, h)
+            local nameModelsF, width = livetext(h or 2)(label)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        local addSlot = function(id, data, pos, shape, rot)
+            table.insert(result.slots, {
+                id = makeData(id, data),
+                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(1),
+                type = "ust_modifier",
+                spacing = {0, 0, 0, 0},
+                shape = shape or 0
+            })
+        end
+        
+        if (i == 0) then
+            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+        elseif (i == 1) then
+            addSlot(85 + var, 0, posP)
+            addText("∞ ⊘", posC, function(w) return coor.xyz(-w * 0.5, 0, -1) end)
+            if (params.classedModules[info.id].slot[54] or params.classedModules[info.id].slot[55] or params.classedModules[info.id].slot[56]) then
+                addSlot(85 + var, 1, posN)
+            end
+        elseif i == 7 then
+            addText("+", posP, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            addText("-", posN, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+        elseif i == 8 then
+            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+        else
+            local delta = pow(10, i - 2)
+            if info.radius >= 10e8 or (abs((info.radius or 0) + delta) >= 50 and (info.radius or 0) + delta < 999999) then
+                local dir = (info.radius and info.radius < 999999 and (info.radius > 0 or (info.radius < 0 and info.radius + delta < 0))) and coor.xyz(-1, 0, 0) or coor.xyz(1, 0, 0)
+                addSlot(81 + var, i - 1, posP, 1, quat.byVec(dir, vec):mRot())
+            end
+            if abs((info.radius or 0) - delta) >= 50 and (info.radius or 0) - delta > -999999 then
+                local dir = (info.radius and info.radius < 999999 and (info.radius < 0 or (info.radius > 0 and info.radius - delta > 0))) and coor.xyz(1, 0, 0) or coor.xyz(-1, 0, 0)
+                addSlot(81 + var, -i + 1, posN, 1, quat.byVec(dir, vec):mRot())
+            end
+            addText(string.format("∙ %d ∙", delta), posC, function(w) return coor.xyz(-w * 0.5, 0, -0.75) end, 1.5)
+        end
+    end
+end
 
 function data()
     return {
@@ -34,8 +114,7 @@ function data()
             type = 1
         },
         
-        updateFn = function(result, transform, tag, slotId, addModelFn, params)
-        end,
+        updateFn = updateFn,
         
         getModelsFn = function(params)
             return {}

@@ -867,6 +867,7 @@ local preProcessFn = function(modules, change)
         elseif info.type == 80 and data == 0 then
             modules[ust.base(info.id, 80)] = change.module
         elseif info.type >= 81 and info.type <= 86 then
+            gridization(modules, classedModules)
             local id = info.id
             local m = modules[classedModules[id].slotId]
             
@@ -885,7 +886,6 @@ local preProcessFn = function(modules, change)
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
             if info.type >= 81 and info.type <= 84 then
-                
                 local radius = m.info.radius
                 
                 if info.type == 81 or info.type == 82 then
