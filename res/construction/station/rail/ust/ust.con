@@ -688,30 +688,6 @@ local constructionTemplates =
         }
     }
 
-local function posGen(restTrack, lst, snd, ...)
-    if restTrack == 0 then
-        if lst and snd then
-            return {false, lst, snd, ...}
-        else
-            return {lst, snd, ...}
-        end
-    elseif lst == nil then
-        return {}
-    elseif snd == nil then
-        if lst then
-            return posGen(restTrack, false, true)
-        else
-            return posGen(restTrack - 1, true, false)
-        end
-    else
-        if lst and snd then
-            return posGen(restTrack, false, lst, snd, ...)
-        else
-            return posGen(restTrack - 1, true, lst, snd, ...)
-        end
-    end
-end
-
 local createTemplateFn = function(params)
     local baseLength = trackLengths[params.lPlatform + 1]
     local nbTracks = trackNumberList[params.trackNb + 1]
@@ -719,7 +695,7 @@ local createTemplateFn = function(params)
     
     local nSeg = baseLength / 20
     
-    local posList = params.platformLeft and posGen(nbTracks, false) or posGen(nbTracks)
+    local posList = params.platformLeft and ust.posGen(nbTracks, false) or ust.posGen(nbTracks)
     -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
     local result = {}
     local id = 1
@@ -995,7 +971,7 @@ local updateFn = function(params, closureParams)
     
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
-        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius or module.info.canModifyDest
+        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
     end
     
     for slotId, module in pairs(params.modules) do
@@ -1011,22 +987,6 @@ local updateFn = function(params, closureParams)
                 spacing = {2.5, 2.5, 2.5, 2.5}
             })
         elseif module.metadata.isPlatform then
-            local pos = module.info.pos
-            local left = grid[pos.z][pos.x - 1] and grid[pos.z][pos.x - 1][pos.y] and params.modules[grid[pos.z][pos.x - 1][pos.y]]
-            local right = grid[pos.z][pos.x + 1] and grid[pos.z][pos.x + 1][pos.y] and params.modules[grid[pos.z][pos.x + 1][pos.y]]
-            -- local baseTransf = nil
-            -- if left and right then
-            --     local pt = left.info.gravity[1]:avg(right.info.gravity[1])
-            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
-            --     baseTransf =
-            --         quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), vec):mRot() *
-            --         coor.trans(pt)
-            -- elseif left then
-            --     local pt = left.info.gravity[1] +
-            --     local vec = (left.info.gravity[1] - right.info.gravity[1]):normalized()
-            --     elseif right then
-            --     else
-            --         end
             insert(result.slots, {
                 id = slotId,
                 transf = coor.I(),
@@ -1040,15 +1000,6 @@ local updateFn = function(params, closureParams)
                 type = "ust_data",
                 spacing = {0, 0, 0, 0}
             })
-        end
-    end
-    
-    
-    for z, gridx in pairs(grid) do
-        for x, gridy in pairs(gridx) do
-            local ys = func.keys(gridy)
-            local min = func.min(ys)
-            local max = func.max(ys)
         end
     end
     

@@ -66,8 +66,7 @@ ust.slotInfo = function(slotId, classedModules)
             local straight = info[56] and true or nil
             local length = info[57] or 20
             local width = info[58]
-            local canModifyRadius = info[80] and classedModules[id].metadata[80].type == 1 and true or false
-            local canModifyDest = info[80] and classedModules[id].metadata[80].type == 2 and true or false
+            local canModifyRadius = info[80] and true or false
             local data = classedModules[id].data
             
             if straight or radius == 0 then
@@ -84,7 +83,6 @@ ust.slotInfo = function(slotId, classedModules)
                 width = width,
                 data = data,
                 canModifyRadius = canModifyRadius,
-                canModifyDest = canModifyDest,
                 octa = {false, false, false, false, false, false, false, false}
             }
         else
@@ -508,6 +506,32 @@ ust.terrain = function(config, ref)
         return pipe.new / size.lt / size.lb / size.rb / size.rt * pipe.map(coor.vec2Tuple)
     end)
 end
+
+
+function ust.posGen(restTrack, lst, snd, ...)
+    if restTrack == 0 then
+        if lst and snd then
+            return {false, lst, snd, ...}
+        else
+            return {lst, snd, ...}
+        end
+    elseif lst == nil then
+        return {}
+    elseif snd == nil then
+        if lst then
+            return ust.posGen(restTrack, false, true)
+        else
+            return ust.posGen(restTrack - 1, true, false)
+        end
+    else
+        if lst and snd then
+            return ust.posGen(restTrack, false, lst, snd, ...)
+        else
+            return ust.posGen(restTrack - 1, true, lst, snd, ...)
+        end
+    end
+end
+
 
 local makeLayout = function(totalTracks, ignoreFst, ignoreLst)
     local function makeLayout(nbTracks, result)

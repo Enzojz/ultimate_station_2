@@ -78,7 +78,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         }
     end
     
-    table.insert(result.models, func.with(ust.unitLane(coor.xyz(0, 0, -2) + pts[2][1], coor.xyz(0, 0, -2) + pts[1][1]), {tag = tag}))
+    -- table.insert(result.models, func.with(ust.unitLane(coor.xyz(0, 0, -2) + pts[2][1], coor.xyz(0, 0, -2) + pts[1][1]), {tag = tag}))
     
     local e = pipe.new * e * pipe.map(function(e) return {e[1], e[2] * info.length} end) * pipe.map(pipe.map(coor.vec2Tuple))
     
