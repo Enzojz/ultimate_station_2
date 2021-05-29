@@ -84,69 +84,71 @@ local function gridization(modules, classedModules)
         for id, slotId in pairs(info.slot) do
             modules[slotId].info = ust.slotInfo(slotId, classedModules)
         end
+        
+        local pos = modules[info.slotId].info.pos
+        local x, y, z = pos.x, pos.y, pos.z
+        if not grid[z] then grid[z] = {} end
+        if not grid[z][x] then grid[z][x] = {} end
+        grid[z][x][y] = info.slotId
     end
     
     for slotId, module in pairs(modules) do
         if not module.metadata.isData then
             local info = module.info
-            if not grid[info.pos.z] then grid[info.pos.z] = {} end
-            if not grid[info.pos.z][info.pos.x] then grid[info.pos.z][info.pos.x] = {} end
-            grid[info.pos.z][info.pos.x][info.pos.y] = slotId
+            local x, y, z = info.pos.x, info.pos.y, info.pos.z
+            
+            if grid[z][x][y - 1] then
+                modules[grid[z][x][y - 1]].info.octa[1] = slotId
+                module.info.octa[5] = grid[z][x][y - 1]
+            end
+            
+            if grid[z][x][y + 1] then
+                modules[grid[z][x][y + 1]].info.octa[5] = slotId
+                module.info.octa[1] = grid[z][x][y + 1]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y] then
+                modules[grid[z][x - 1][y]].info.octa[3] = slotId
+                module.info.octa[7] = grid[z][x - 1][y]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y] then
+                modules[grid[z][x + 1][y]].info.octa[7] = slotId
+                module.info.octa[3] = grid[z][x + 1][y]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y - 1] then
+                modules[grid[z][x - 1][y - 1]].info.octa[2] = slotId
+                module.info.octa[6] = grid[z][x - 1][y - 1]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y - 1] then
+                modules[grid[z][x + 1][y - 1]].info.octa[8] = slotId
+                module.info.octa[4] = grid[z][x + 1][y - 1]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y + 1] then
+                modules[grid[z][x - 1][y + 1]].info.octa[4] = slotId
+                module.info.octa[8] = grid[z][x - 1][y + 1]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y + 1] then
+                modules[grid[z][x + 1][y + 1]].info.octa[6] = slotId
+                module.info.octa[2] = grid[z][x + 1][y + 1]
+            end
         end
     end
     
-    for z, zv in pairs(grid) do
-        local xPos = func.sort(func.filter(func.keys(zv), function(k) return k >= 0 end))
-        local xNeg = func.rev(func.sort(func.filter(func.keys(zv), function(k) return k < 0 end)))
+
+    for z, g in pairs(grid) do
+        local xPos = func.sort(func.filter(func.keys(g), function(k) return k >= 0 end))
+        local xNeg = func.rev(func.sort(func.filter(func.keys(g), function(k) return k < 0 end)))
         local xState = false
         
         local processY = function(x, y)
             return function()
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
-                
-                do
-                    if grid[z][x][y - 1] then
-                        modules[grid[z][x][y - 1]].info.octa[1] = slotId
-                        m.info.octa[5] = grid[z][x][y - 1]
-                    end
-                    
-                    if grid[z][x][y + 1] then
-                        modules[grid[z][x][y + 1]].info.octa[5] = slotId
-                        m.info.octa[1] = grid[z][x][y + 1]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y] then
-                        modules[grid[z][x - 1][y]].info.octa[3] = slotId
-                        m.info.octa[7] = grid[z][x - 1][y]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y] then
-                        modules[grid[z][x + 1][y]].info.octa[7] = slotId
-                        m.info.octa[3] = grid[z][x + 1][y]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y - 1] then
-                        modules[grid[z][x - 1][y - 1]].info.octa[2] = slotId
-                        m.info.octa[6] = grid[z][x - 1][y - 1]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y - 1] then
-                        modules[grid[z][x + 1][y - 1]].info.octa[8] = slotId
-                        m.info.octa[4] = grid[z][x + 1][y - 1]
-                    end
-                    
-                    if grid[z][x - 1] and grid[z][x - 1][y + 1] then
-                        modules[grid[z][x - 1][y + 1]].info.octa[4] = slotId
-                        m.info.octa[8] = grid[z][x - 1][y + 1]
-                    end
-                    
-                    if grid[z][x + 1] and grid[z][x + 1][y + 1] then
-                        modules[grid[z][x + 1][y + 1]].info.octa[6] = slotId
-                        m.info.octa[2] = grid[z][x + 1][y + 1]
-                    end
-                
-                end
                 
                 if m.metadata.isTrack or m.metadata.isPlatform then
                     if not m.info.width then
@@ -236,7 +238,65 @@ local function gridization(modules, classedModules)
                     modules[slotId].info.radius = yState.radius
                     modules[slotId].info.length = yState.length
                     
-                    if (m.metadata.isPlatform) then
+                    if m.metadata.isTrack then
+                        local packer = arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                        local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
+                        if y < 0 then arL, arR = arR, arL end
+                        
+                        if x < 0 and m.info.octa[3] and modules[m.info.octa[3]].metadata.isTrack then
+                            if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
+                                or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                                local sup = modules[m.info.octa[3]].info.arcs.center.sup
+                                arL.sup = sup
+                                arR.sup = sup
+                                ar.sup = sup
+                            elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
+                                or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                                local inf = modules[m.info.octa[3]].info.arcs.center.inf
+                                arL.inf = inf
+                                arR.inf = inf
+                                ar.inf = inf
+                            end
+                        elseif x >= 0 and m.info.octa[7] and modules[m.info.octa[7]].metadata.isTrack then
+                            if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
+                                or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                                local sup = modules[m.info.octa[7]].info.arcs.center.sup
+                                arL.sup = sup
+                                arR.sup = sup
+                                ar.sup = sup
+                            elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
+                                or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                                local inf = modules[m.info.octa[7]].info.arcs.center.inf
+                                arL.inf = inf
+                                arR.inf = inf
+                                ar.inf = inf
+                            end
+                        end
+                        
+                        local refArc = {
+                            left = arL,
+                            right = arR,
+                            center = ar
+                        }
+                        
+                        modules[slotId].info.arcs = refArc
+                        
+                        modules[slotId].info.pts = {
+                            {
+                                refArc.center:pt(refArc.center.inf),
+                                refArc.center:tangent(refArc.center.inf)
+                            },
+                            {
+                                refArc.center:pt(refArc.center.sup),
+                                refArc.center:tangent(refArc.center.sup)
+                            }
+                        }
+                        modules[slotId].info.gravity = {
+                            refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                            refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                        }
+                        modules[slotId].info.limits = func.map(modules[slotId].info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ(0.5 * pi), ptvec[1]) end)
+                    else
                         coroutine.yield()
                         
                         local function findLeftTrack(slotId)
@@ -511,64 +571,6 @@ local function gridization(modules, classedModules)
                             refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
                             refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
                         }
-                    else
-                        local packer = arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
-                        local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
-                        if y < 0 then arL, arR = arR, arL end
-                        
-                        if x < 0 and m.info.octa[3] and modules[m.info.octa[3]].metadata.isTrack then
-                            if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
-                                or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
-                                local sup = modules[m.info.octa[3]].info.arcs.center.sup
-                                arL.sup = sup
-                                arR.sup = sup
-                                ar.sup = sup
-                            elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
-                                or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
-                                local inf = modules[m.info.octa[3]].info.arcs.center.inf
-                                arL.inf = inf
-                                arR.inf = inf
-                                ar.inf = inf
-                            end
-                        elseif x >= 0 and m.info.octa[7] and modules[m.info.octa[7]].metadata.isTrack then
-                            if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
-                                or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
-                                local sup = modules[m.info.octa[7]].info.arcs.center.sup
-                                arL.sup = sup
-                                arR.sup = sup
-                                ar.sup = sup
-                            elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
-                                or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
-                                local inf = modules[m.info.octa[7]].info.arcs.center.inf
-                                arL.inf = inf
-                                arR.inf = inf
-                                ar.inf = inf
-                            end
-                        end
-                        
-                        local refArc = {
-                            left = arL,
-                            right = arR,
-                            center = ar
-                        }
-                        
-                        modules[slotId].info.arcs = refArc
-                        
-                        modules[slotId].info.pts = {
-                            {
-                                refArc.center:pt(refArc.center.inf),
-                                refArc.center:tangent(refArc.center.inf)
-                            },
-                            {
-                                refArc.center:pt(refArc.center.sup),
-                                refArc.center:tangent(refArc.center.sup)
-                            }
-                        }
-                        modules[slotId].info.gravity = {
-                            refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-                            refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-                        }
-                        modules[slotId].info.limits = func.map(modules[slotId].info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ(0.5 * pi), ptvec[1]) end)
                     end
                 
                 end
