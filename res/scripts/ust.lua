@@ -1,6 +1,7 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
 local arc = require "ust/coorarc"
+local line = require "ust/coorline"
 local general = require "ust/general"
 local pipe = require "ust/pipe"
 -- local dump = require "luadump"
@@ -14,8 +15,6 @@ local floor = math.floor
 local unpack = table.unpack
 local min = math.min
 
-local segmentLength = 20
-
 ust.infi = 1e8
 ust.typeList = {
     [1] = "ust_track",
@@ -27,8 +26,8 @@ ust.base = function(id, type)
 end
 
 ust.mixData = function(base, data)
-    -- local data = data > 0 and data or (1000 - data)
-    return (data < 0 and -base or base) + 1000000 * data
+        -- local data = data > 0 and data or (1000 - data)
+        return (data < 0 and -base or base) + 1000000 * data
 end
 
 ust.slotIds = function(info)
@@ -72,7 +71,7 @@ ust.slotInfo = function(slotId, classedModules)
             if straight or radius == 0 then
                 radius = nil
             end
-
+            
             return {
                 type = type,
                 id = id,
@@ -94,43 +93,9 @@ ust.slotInfo = function(slotId, classedModules)
         end
 end
 
-ust.normalizeRad = function(rad)
-    return (rad < pi * -0.5) and ust.normalizeRad(rad + pi * 2) or
-        ((rad > pi + pi * 0.5) and ust.normalizeRad(rad - pi * 2) or rad)
-end
-
-ust.arc2Edges = function(arc)
-    local extLength = 2
-    local extArc = arc:extendLimits(-extLength)
-    local length = arc.r * abs(arc.sup - arc.inf)
-    
-    local sup = arc:pt(arc.sup)
-    local inf = arc:pt(arc.inf)
-    
-    local supExt = arc:pt(extArc.sup)
-    local infExt = arc:pt(extArc.inf)
-    
-    local vecSupExt = arc:tangent(extArc.sup)
-    local vecInfExt = arc:tangent(extArc.inf)
-    
-    local vecSup = arc:tangent(arc.sup)
-    local vecInf = arc:tangent(arc.inf)
-    
-    return {
-        {inf, vecInf * extLength},
-        {infExt, vecInfExt * extLength},
-        
-        {infExt, vecInfExt * (length - extLength)},
-        {supExt, vecSupExt * (length - extLength)},
-        
-        {supExt, vecSupExt * extLength},
-        {sup, vecSup * extLength}
-    }
-end
-
 ust.arcPacker = function(pt, vec, length, radius)
     local nVec = vec:withZ(0):normalized()
-    local tVec = radius > 0 and coor.xyz(-nVec.y, nVec.x, 0) or coor.xyz(nVec.y, nVec.x, 0)
+    local tVec = coor.xyz(-nVec.y, nVec.x, 0)
     local o = pt + tVec * radius
     local ar = arc.byOR(o, abs(radius))
     local inf = ar:rad(pt)
@@ -141,28 +106,13 @@ ust.arcPacker = function(pt, vec, length, radius)
     })
     return function(...)
         local result = func.map({...}, function(dr)
-            return arc.byOR(o, abs(radius - dr), {
+            return arc.byOR(o, abs(radius + dr), {
                 sup = sup,
                 inf = inf
             })
         end)
-        return ar, table.unpack(result)
+        return ar, unpack(result)
     end
-end
-
-local retriveNSeg = function(length, l, ...)
-    return (function(x) return (x < 1 or (x % 1 > 0.5)) and ceil(x) or floor(x) end)(l:length() / length), l, ...
-end
-
-local retriveBiLatCoords = function(nSeg, l, ...)
-    local rst = pipe.new * {l, ...}
-    local lscale = l:length() / (nSeg * segmentLength)
-    return unpack(
-        func.map(rst,
-            function(s) return abs(lscale) < 1e-5 and pipe.new * {} or pipe.new * func.seqMap({0, nSeg},
-                function(n) return s:pt(s.inf + n * ((s.sup - s.inf) / nSeg)) end)
-            end)
-)
 end
 
 local function ungroup(fst, ...)
@@ -184,28 +134,6 @@ local function ungroup(fst, ...)
                 return result / c
             end
         end
-    end
-end
-
-ust.biLatCoords = function(length)
-    return function(...)
-        local arcs = pipe.new * {...}
-        local arcsInf = func.map({...}, pipe.select(1))
-        local arcsSup = func.map({...}, pipe.select(2))
-        local nSegInf = retriveNSeg(length, unpack(arcsInf))
-        local nSegSup = retriveNSeg(length, unpack(arcsSup))
-        if (nSegInf % 2 ~= nSegSup % 2) then
-            if (nSegInf > nSegSup) then
-                nSegSup = nSegSup + 1
-            else
-                nSegInf = nSegInf + 1
-            end
-        end
-        return unpack(ungroup
-            (retriveBiLatCoords(nSegInf, unpack(arcsInf)))
-            (retriveBiLatCoords(nSegSup, unpack(arcsSup)))
-            (pipe.new)
-    )
     end
 end
 
@@ -349,136 +277,29 @@ end
 
 ust.interlace = pipe.interlace({"s", "i"})
 
-ust.unitLane = function(f, t) return ((t - f):length2() > 1e-2 and (t - f):length2() < 562500) and general.newModel("ust/person_lane.mdl", general.mRot(t - f), coor.trans(f)) or nil end
+ust.unitLane = function(f, t, tag) return
+    ((t - f):length2() > 1e-2 and (t - f):length2() < 562500)
+        and general.newModel("ust/person_lane.mdl", tag, general.mRot(t - f), coor.trans(f))
+        or nil
+end
 
-ust.stepLane = function(f, t)
+ust.stepLane = function(f, t, tag)
     local vec = t - f
     local length = vec:length()
     if (length > 750 or length < 0.1) then return {} end
     local dZ = abs((f - t).z)
     if (length > dZ * 3 or length < 5) then
-        return {general.newModel("ust/person_lane.mdl", general.mRot(vec), coor.trans(f))}
+        return {general.newModel("ust/person_lane.mdl", tag, general.mRot(vec), coor.trans(f))}
     else
         local hVec = vec:withZ(0) / 3
         local fi = f + hVec
         local ti = t - hVec
         return {
-            general.newModel("ust/person_lane.mdl", general.mRot(fi - f), coor.trans(f)),
-            general.newModel("ust/person_lane.mdl", general.mRot(ti - fi), coor.trans(fi)),
-            general.newModel("ust/person_lane.mdl", general.mRot(t - ti), coor.trans(ti))
+            general.newModel("ust/person_lane.mdl", tag, general.mRot(fi - f), coor.trans(f)),
+            general.newModel("ust/person_lane.mdl", tag, general.mRot(ti - fi), coor.trans(fi)),
+            general.newModel("ust/person_lane.mdl", tag, general.mRot(t - ti), coor.trans(ti))
         }
     end
-end
-
-ust.buildSurface = function(tZ)
-    return function(fitModel, fnSize)
-        local fnSize = fnSize or function(_, lc, rc) return ust.assembleSize(lc, rc) end
-        return function(i, s, ...)
-            local sizeS = fnSize(i, ...)
-            return s
-                and pipe.new
-                / func.with(general.newModel(s .. "_tl.mdl", tZ and (tZ * fitModel(sizeS, true)) or fitModel(sizeS, true)), {pos = i})
-                / func.with(general.newModel(s .. "_br.mdl", tZ and (tZ * fitModel(sizeS, false)) or fitModel(sizeS, false)), {pos = i})
-                or pipe.new * {}
-        end
-    end
-end
-
-ust.linkConnectors = function(allConnectors)
-    return
-        #allConnectors < 2
-        and {}
-        or allConnectors
-        * pipe.interlace()
-        * pipe.map(function(conn)
-            local recordL = {}
-            local recordR = {}
-            if (#conn[1] == 0 and #conn[2] == 0) then return {} end
-            
-            for i, l in ipairs(conn[1]) do
-                for j, r in ipairs(conn[2]) do
-                    local vec = l - r
-                    local dist = vec:length2()
-                    recordL[i] = recordL[i] and recordL[i].dist < dist and recordL[i] or {dist = dist, vec = vec, i = i, j = j, l = l, r = r}
-                    recordR[j] = recordR[j] and recordR[j].dist < dist and recordR[j] or {dist = dist, vec = vec, i = i, j = j, l = l, r = r}
-                end
-            end
-            
-            return #recordL == 0 and #recordR == 0 and {} or (pipe.new + recordL + recordR)
-                * pipe.sort(function(l, r) return l.i < r.i or (l.i == r.i and l.j < r.j) end)
-                * pipe.fold(pipe.new * {}, function(result, e)
-                    if #result > 0 then
-                        local lastElement = result[#result]
-                        return (lastElement.i == e.i and lastElement.j == e.j) and result or (result / e)
-                    else
-                        return result / e
-                    end
-                end)
-                * pipe.map(function(e) return ust.unitLane(e.l, e.r) end)
-        end)
-        * pipe.flatten()
-end
-
-ust.models = function(set)
-    local c = "ust/ceil/"
-    local t = "ust/top/"
-    local p = "ust/platform/" .. set.platform .. "/"
-    local w = "ust/wall/" .. set.wall .. "/"
-    return {
-        platform = {
-            edgeLeft = p .. "platform_edge_left",
-            edgeRight = p .. "platform_edge_right",
-            central = p .. "platform_central",
-            left = p .. "platform_left",
-            right = p .. "platform_right",
-        },
-        upstep = {
-            a = p .. "platform_upstep_a",
-            b = p .. "platform_upstep_b",
-            aLeft = w .. "platform_upstep_a_left",
-            aRight = w .. "platform_upstep_a_right",
-            aInner = w .. "platform_upstep_a_inner",
-            bLeft = w .. "platform_upstep_b_left",
-            bRight = w .. "platform_upstep_b_right",
-            bInner = w .. "platform_upstep_b_inner",
-            back = w .. "platform_upstep_back"
-        },
-        downstep = {
-            right = w .. "platform_downstep_left",
-            left = w .. "platform_downstep_right",
-            central = p .. "platform_downstep",
-            back = w .. "platform_downstep_back"
-        },
-        ceil = {
-            edge = c .. "ceil_edge",
-            central = c .. "ceil_central",
-            left = c .. "ceil_left",
-            right = c .. "ceil_right",
-            aLeft = c .. "ceil_upstep_a_left",
-            aRight = c .. "ceil_upstep_a_right",
-            bLeft = c .. "ceil_upstep_b_left",
-            bRight = c .. "ceil_upstep_b_right",
-        },
-        top = {
-            track = {
-                left = t .. "top_track_left",
-                right = t .. "top_track_right",
-                central = t .. "top_track_central"
-            },
-            platform = {
-                left = t .. "top_platform_left",
-                right = t .. "top_platform_right",
-                central = t .. "top_platform_central"
-            },
-        },
-        wallTrack = w .. "wall_track",
-        wallPlatform = w .. "wall_platform",
-        wallExtremity = w .. "wall_extremity",
-        wallExtremityEdge = w .. "wall_extremity_edge",
-        wallExtremityPlatform = w .. "wall_extremity_platform",
-        wallExtremityTop = w .. "wall_extremity_top",
-        chair = p .. "platform_chair"
-    }
 end
 
 ust.defaultParams = function(params)
@@ -533,51 +354,659 @@ function ust.posGen(restTrack, lst, snd, ...)
 end
 
 
-local makeLayout = function(totalTracks, ignoreFst, ignoreLst)
-    local function makeLayout(nbTracks, result)
-        local p = false
-        local t = true
-        if (nbTracks == 0) then
-            local result = ignoreLst and result or (result[#result] and (result / p) or result)
-            return result
-        elseif (nbTracks == totalTracks and ignoreFst) then
-            return makeLayout(nbTracks - 1, result / t)
-        elseif (nbTracks == totalTracks and not ignoreFst) then
-            return makeLayout(nbTracks - 1, result / p / t)
-        elseif (nbTracks == 1 and ignoreLst) then
-            return makeLayout(nbTracks - 1, ((not result) or result[#result]) and (result / p / t) or (result / t))
-        elseif (nbTracks == 1 and not ignoreLst) then
-            return makeLayout(nbTracks - 1, result / t / p)
-        elseif (result[#result] == t) then
-            return makeLayout(nbTracks - 2, result / t / p / t)
-        else
-            return makeLayout(nbTracks - 1, result / t)
-        end
+local calculateLimit = function(arc)
+    return function(l, ptvec)
+        local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
+        return arc:rad(pt)
     end
-    return makeLayout(totalTracks, pipe.new)
 end
 
--- ust.createTemplateFn = function(params)
---     local radius = ustm.rList[params.radius + 1] * 1000
---     local length = min(ustm.trackLengths[params.lPlatform + 1], abs(radius * pi * 1.5))
---     local nbTracks = ustm.trackNumberList[params.trackNb + 1]
---     local layout = makeLayout(nbTracks, params.platformLeft == 0, params.platformRight == 0)
---     local midPos = ceil(#layout / 2)
---     local nSeg = length / 5
---     local stair = floor(nSeg / 4)
---     local result = {}
---     local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
---     local platformType = ustm.platformWidthList[(params.platformWidth) + 1]
---     for i, t in ipairs(layout) do
---         if t then
---             result[(i - midPos >= 0 and i or 1000 + i) - midPos] = trackType
---         else
---             local slot = (i - midPos >= 0 and i or 1000 + i) + 1000 - midPos
---             result[slot] = platformType
---             result[slot + 2000 + stair * 100000] = "station/rail/ust_platform_upstair.module"
---             result[slot + 2000 + (stair + 1) * 100000] = "station/rail/ust_platform_upstair.module"
---         end
---     end
---     return result
--- end
+ust.gridization = function(modules, classedModules)
+    local grid = {}
+    for id, info in pairs(classedModules) do
+        modules[info.slotId].info = ust.slotInfo(info.slotId, classedModules)
+        modules[info.slotId].makeData = function(type, data)
+            return ust.mixData(ust.base(id, type), data)
+        end
+        for id, slotId in pairs(info.slot) do
+            modules[slotId].info = ust.slotInfo(slotId, classedModules)
+        end
+        
+        local pos = modules[info.slotId].info.pos
+        local x, y, z = pos.x, pos.y, pos.z
+        if not grid[z] then grid[z] = {} end
+        if not grid[z][x] then grid[z][x] = {} end
+        grid[z][x][y] = info.slotId
+    end
+    
+    for slotId, module in pairs(modules) do
+        if not module.metadata.isData then
+            local info = module.info
+            local x, y, z = info.pos.x, info.pos.y, info.pos.z
+            
+            if grid[z][x][y - 1] then
+                modules[grid[z][x][y - 1]].info.octa[1] = slotId
+                module.info.octa[5] = grid[z][x][y - 1]
+            end
+            
+            if grid[z][x][y + 1] then
+                modules[grid[z][x][y + 1]].info.octa[5] = slotId
+                module.info.octa[1] = grid[z][x][y + 1]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y] then
+                modules[grid[z][x - 1][y]].info.octa[3] = slotId
+                module.info.octa[7] = grid[z][x - 1][y]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y] then
+                modules[grid[z][x + 1][y]].info.octa[7] = slotId
+                module.info.octa[3] = grid[z][x + 1][y]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y - 1] then
+                modules[grid[z][x - 1][y - 1]].info.octa[2] = slotId
+                module.info.octa[6] = grid[z][x - 1][y - 1]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y - 1] then
+                modules[grid[z][x + 1][y - 1]].info.octa[8] = slotId
+                module.info.octa[4] = grid[z][x + 1][y - 1]
+            end
+            
+            if grid[z][x - 1] and grid[z][x - 1][y + 1] then
+                modules[grid[z][x - 1][y + 1]].info.octa[4] = slotId
+                module.info.octa[8] = grid[z][x - 1][y + 1]
+            end
+            
+            if grid[z][x + 1] and grid[z][x + 1][y + 1] then
+                modules[grid[z][x + 1][y + 1]].info.octa[6] = slotId
+                module.info.octa[2] = grid[z][x + 1][y + 1]
+            end
+        end
+    end
+    
+    for z, g in pairs(grid) do
+        
+        local queue = {}
+        local parentMap = {}
+        
+        local enqueue = function(slotId, parent)
+            if slotId and not parentMap[slotId] then
+                table.insert(queue, slotId)
+                parentMap[slotId] = parent
+            end
+        end
+        
+        local function searchMap(index)
+            local current = queue[index]
+            if (current) then
+                local m = modules[current]
+                local info = m.info
+                local x, y = info.pos.x, info.pos.y
+                if y >= 0 then
+                    enqueue(info.octa[1], current)
+                    enqueue(info.octa[5], current)
+                else
+                    enqueue(info.octa[5], current)
+                    enqueue(info.octa[1], current)
+                end
+                if x >= 0 then
+                    enqueue(info.octa[3], current)
+                    enqueue(info.octa[7], current)
+                else
+                    enqueue(info.octa[7], current)
+                    enqueue(info.octa[3], current)
+                end
+                searchMap(index + 1)
+            end
+        end
+        
+        enqueue(g[0][0], true)
+        searchMap(1)
+        
+        local xPos = func.seq(0, func.max(func.keys(g)))
+        local xNeg = func.seq(func.min(func.keys(g)), -1)
+        
+        local infoX = {
+            pos = {[0] = 0},
+            width = {}
+        }
+        do
+            local xGroup = {}
+            
+            for _, x in ipairs(func.concat(xPos, func.rev(xNeg))) do
+                local width = nil
+                if grid[z][x] then
+                    local yList = func.concat(
+                        func.sort(func.filter(func.keys(grid[z][x]), function(k) return k >= 0 end)),
+                        func.rev(func.sort(func.filter(func.keys(grid[z][x]), function(k) return k < 0 end)))
+                    )
+                    for _, y in ipairs(func.rev(yList)) do
+                        local slotId = grid[z][x][y]
+                        local m = modules[slotId]
+                        local w = m.info.width or m.metadata.width
+                        if not width or width < w then
+                            width = w
+                        end
+                    end
+                    
+                    local sortedY = func.sort(yList)
+                    for i, y in ipairs(sortedY) do
+                        if xGroup[x] then
+                            if y - sortedY[i - 1] == 1 then
+                                table.insert(xGroup[x][#xGroup[x]], y)
+                            else
+                                table.insert(xGroup[x], {y})
+                            end
+                        else
+                            xGroup[x] = {{y}}
+                        end
+                    end
+                else
+                    width = 5
+                end
+                
+                if width then
+                    infoX.width[x] = width
+                    if x > 0 then
+                        infoX.pos[x] = infoX.pos[x - 1] + infoX.width[x - 1] * 0.5 + width * 0.5
+                    elseif x < 0 then
+                        infoX.pos[x] = infoX.pos[x + 1] - infoX.width[x + 1] * 0.5 - width * 0.5
+                    end
+                end
+            end
+        end
+        
+        local processY = function(x, y)
+            return function()
+                local slotId = grid[z][x][y]
+                local m = modules[slotId]
+                
+                if m.metadata.isTrack or m.metadata.isPlatform then
+                    if not m.info.width then
+                        m.info.width = m.metadata.width or 5
+                    end
+                    
+                    local width = m.info.width
+                    
+                    local yState = {
+                        width = width,
+                        radius = m.info.straight and 10e8 or m.info.radius,
+                        length = m.info.length
+                    }
+                    
+                    local anchor = parentMap[slotId]
+                    
+                    if (anchor == m.info.octa[3] or anchor == m.info.octa[7]) then
+                        local octa5 = m.info.octa[5] and modules[m.info.octa[5]]
+                        local octa1 = m.info.octa[1] and modules[m.info.octa[1]]
+                        if octa5 or octa1 then
+                            if octa5 and octa5.info and octa5.info.pts and octa1 and octa1.info and octa1.info.pts then
+                                anchor = m.info.octa[y >= 0 and 5 or 1]
+                            elseif octa5 and octa5.info and octa5.info.pts then
+                                anchor = m.info.octa[5]
+                            elseif octa1 and octa1.info and octa1.info.pts then
+                                anchor = m.info.octa[1]
+                            end
+                        end
+                    end
+
+                    if x == 0 and y == 0 then
+                        yState.pos = coor.xyz(infoX.pos[0], 0, 0)
+                        yState.vec = coor.xyz(0, 1, 0)
+                    else
+                        if anchor == m.info.octa[5] then
+                            yState.pos = modules[anchor].info.pts[4][1]
+                            yState.vec = modules[anchor].info.pts[4][2]
+                        elseif anchor == m.info.octa[1] then
+                            yState.pos = modules[anchor].info.pts[3][1]
+                            yState.vec = -modules[anchor].info.pts[3][2]
+                        elseif anchor == m.info.octa[3] then
+                            local pos = modules[anchor].info.pts[1][1]
+                            local vec = modules[anchor].info.pts[1][2]
+                            
+                            yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x + 1])
+                            yState.vec = vec
+                        elseif anchor == m.info.octa[7] then
+                            local pos = modules[anchor].info.pts[1][1]
+                            local vec = modules[anchor].info.pts[1][2]
+                            
+                            yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x - 1])
+                            yState.vec = vec
+                        end
+                    end
+                    
+                    if not yState.radius then
+                        if anchor == m.info.octa[5] or anchor == m.info.octa[1] then
+                            for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
+                                if grid[z][x] and grid[z][x][i] then
+                                    yState.radius = modules[grid[z][x][i]].info.radius
+                                    break
+                                end
+                            end
+                        end
+                        if not yState.radius then
+                            local loop = {}
+                            if m.metadata.isTrack then
+                                loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1)}
+                            elseif m.metadata.isPlatform then
+                                if (x < 0) then
+                                    if m.info.octa[3] and m.info.octa[7] and modules[m.info.octa[3]].metadata.isPlatform and modules[m.info.octa[7]].metadata.isTrack and modules[m.info.octa[7]].info.radius then
+                                        loop = {x - 1, func.min(xNeg), -1}
+                                    else
+                                        loop = {x + 1, func.max(xPos) or 0, 1}
+                                    end
+                                else
+                                    if m.info.octa[7] and m.info.octa[3] and modules[m.info.octa[7]].metadata.isPlatform and modules[m.info.octa[3]].metadata.isTrack and modules[m.info.octa[3]].info.radius then
+                                        loop = {x + 1, func.max(xPos), 1}
+                                    else
+                                        loop = {x - 1, func.min(xNeg) or 0, -1}
+                                    end
+                                end
+                            end
+                            for i = loop[1], loop[2], loop[3] do
+                                if grid[z][i] and grid[z][i][y] then
+                                    yState.radius = modules[grid[z][i][y]].info.radius + (infoX.pos[x] - infoX.pos[i])
+                                    yState.radiusRef = i
+                                    break
+                                end
+                            end
+                        end
+                        if not yState.radius then
+                            yState.radius = 10e8
+                        end
+                    end
+                    
+                    modules[slotId].info.radius = yState.radius
+                    modules[slotId].info.length = yState.length
+                    
+                    local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                    local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
+                    if y < 0 then arL, arR = arR, arL end
+                    
+                    if x < 0 and m.info.octa[3] and modules[m.info.octa[3]].metadata.isTrack then
+                        if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
+                            or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                            local sup = modules[m.info.octa[3]].info.arcs.center.sup
+                            arL.sup = sup
+                            arR.sup = sup
+                            ar.sup = sup
+                        elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
+                            or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                            local inf = modules[m.info.octa[3]].info.arcs.center.inf
+                            arL.inf = inf
+                            arR.inf = inf
+                            ar.inf = inf
+                        end
+                    elseif x >= 0 and m.info.octa[7] and modules[m.info.octa[7]].metadata.isTrack then
+                        if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
+                            or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                            local sup = modules[m.info.octa[7]].info.arcs.center.sup
+                            arL.sup = sup
+                            arR.sup = sup
+                            ar.sup = sup
+                        elseif (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
+                            or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                            local inf = modules[m.info.octa[7]].info.arcs.center.inf
+                            arL.inf = inf
+                            arR.inf = inf
+                            ar.inf = inf
+                        end
+                    end
+                    
+                    local refArc = {
+                        left = arL,
+                        right = arR,
+                        center = ar
+                    }
+                    
+                    modules[slotId].info.arcs = refArc
+                    
+                    modules[slotId].info.pts = {
+                        {
+                            refArc.center:pt(refArc.center.inf),
+                            refArc.center:tangent(refArc.center.inf)
+                        },
+                        {
+                            refArc.center:pt(refArc.center.sup),
+                            refArc.center:tangent(refArc.center.sup)
+                        }
+                    }
+                    
+                    if y >= 0 then
+                        modules[slotId].info.pts[3] = modules[slotId].info.pts[1]
+                        modules[slotId].info.pts[4] = modules[slotId].info.pts[2]
+                    else
+                        modules[slotId].info.pts[3] = {
+                            modules[slotId].info.pts[2][1],
+                            -modules[slotId].info.pts[2][2]
+                        }
+                        modules[slotId].info.pts[4] = {
+                            modules[slotId].info.pts[1][1],
+                            -modules[slotId].info.pts[1][2]
+                        }
+                    end
+                    
+                    modules[slotId].info.gravity = {
+                        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                    }
+                    modules[slotId].info.limits = func.map(modules[slotId].info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ(0.5 * pi), ptvec[1]) end)
+                    
+                    if m.metadata.isPlatform then
+                        coroutine.yield()
+                        
+                        local function findLeftTrack(slotId)
+                            if not slotId or not modules[slotId] then
+                                return nil
+                            elseif modules[slotId].metadata.isTrack then
+                                return modules[slotId].info.pos
+                            elseif modules[slotId].metadata.isPlatform then
+                                return findLeftTrack(modules[slotId].info.octa[7])
+                            else
+                                return nil
+                            end
+                        end
+                        
+                        local function findRightTrack(slotId)
+                            if not slotId or not modules[slotId] then
+                                return nil
+                            elseif modules[slotId].metadata.isTrack then
+                                return modules[slotId].info.pos
+                            elseif modules[slotId].metadata.isPlatform then
+                                return findRightTrack(modules[slotId].info.octa[3])
+                            else
+                                return nil
+                            end
+                        end
+                        
+                        local leftTrackPos = findLeftTrack(slotId)
+                        local rightTrackPos = findRightTrack(slotId)
+                        
+                        local ref = {
+                            left = (leftTrackPos and not rightTrackPos) or (leftTrackPos and rightTrackPos and leftTrackPos.x == x - 1 and rightTrackPos.x ~= x + 1),
+                            right = (rightTrackPos and not leftTrackPos) or (leftTrackPos and rightTrackPos and leftTrackPos.x ~= x - 1 and rightTrackPos.x == x + 1),
+                            leftRight = leftTrackPos and rightTrackPos and leftTrackPos.x == x - 1 and rightTrackPos.x == x + 1,
+                        }
+                        
+                        if y >= 0 then
+                            if (x >= 0) then
+                                if (ref.left and not ref.right and leftTrackPos ~= x - 1) then
+                                    if (m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform and modules[m.info.octa[5]].info.ref and modules[m.info.octa[5]].info.ref.right) then
+                                        ref = {prev = true}
+                                    end
+                                end
+                            else
+                                if (ref.right and not ref.left and rightTrackPos ~= x + 1) then
+                                    if (m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform and modules[m.info.octa[5]].info.ref and modules[m.info.octa[5]].info.ref.left) then
+                                        ref = {prev = true}
+                                    end
+                                end
+                            end
+                        else
+                            if (x >= 0) then
+                                if (ref.left and not ref.right and leftTrackPos ~= x - 1) then
+                                    if (m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and modules[m.info.octa[1]].info.ref.right) then
+                                        ref = {next = true}
+                                    end
+                                end
+                            else
+                                if (not ref.leftRight and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and modules[m.info.octa[1]].info.ref.leftRight) then
+                                    ref = {next = true}
+                                elseif (ref.right and not ref.left and rightTrackPos ~= x + 1) then
+                                    if (m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and modules[m.info.octa[1]].info.ref.left) then
+                                        ref = {next = true}
+                                    end
+                                end
+                            end
+                        end
+                        
+                        modules[slotId].info.ref = ref
+                        
+                        local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                        local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
+                        if y < 0 then arL, arR = arR, arL end
+                        
+                        local aligned = false;
+                        
+                        if ref.leftRight then
+                            local leftTrack = modules[grid[z][leftTrackPos.x][y]]
+                            local leftO = leftTrack.info.arcs.center.o
+                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[leftTrackPos.x])
+                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftTrack.info.arcs.center:limits())
+                            
+                            local rightTrack = modules[grid[z][rightTrackPos.x][y]]
+                            local rightO = rightTrack.info.arcs.center.o
+                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[rightTrackPos.x])
+                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightTrack.info.arcs.center:limits())
+                            
+                            local sup = leftTrack.info.pts[2][1]:avg(rightTrack.info.pts[2][1])
+                            
+                            local vecSupL = (leftTrack.info.radius > 0 and (leftTrack.info.pts[2][1] - arL.o) or (arL.o - leftTrack.info.pts[2][1])):normalized()
+                            local vecSupR = (rightTrack.info.radius > 0 and (rightTrack.info.pts[2][1] - arR.o) or (arR.o - rightTrack.info.pts[2][1])):normalized()
+                            local vecSup = (vecSupL + vecSupR):normalized()
+                            local limitSup = line.byVecPt(vecSup, sup)
+                            
+                            supL = calculateLimit(arL)(limitSup, leftTrack.info.pts[2])
+                            supR = calculateLimit(arR)(limitSup, rightTrack.info.pts[2])
+                            
+                            local infL = arL:rad(yState.pos)
+                            if (y == 0 or y == -1) then
+                                infL = leftTrack.info.arcs.center.inf
+                            elseif (y > 0 and m.info.octa[5]) then
+                                infL = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
+                            elseif (y < 0 and m.info.octa[1]) then
+                                infL = arL:rad(modules[m.info.octa[1]].info.pts[2][1])
+                            end
+                            
+                            local infR = arR:rad(yState.pos)
+                            if (y == 0 or y == -1) then
+                                infR = rightTrack.info.arcs.center.inf
+                            elseif (y > 0 and m.info.octa[5]) then
+                                infR = arR:rad(modules[m.info.octa[5]].info.pts[2][1])
+                            elseif (y < 0 and m.info.octa[1]) then
+                                infR = arR:rad(modules[m.info.octa[1]].info.pts[2][1])
+                            end
+                            
+                            arL = arL:withLimits({sup = supL, inf = infL})
+                            arR = arR:withLimits({sup = supR, inf = infR})
+                            aligned = true
+                        elseif ref.left then
+                            local leftTrack = modules[grid[z][leftTrackPos.x][y]]
+                            local leftO = leftTrack.info.arcs.center.o
+                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[leftTrackPos.x])
+                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftTrack.info.arcs.center:limits())
+                            arR = arc.byOR(leftO, leftRadius + m.info.width * 0.5, leftTrack.info.arcs.center:limits())
+                            
+                            local limitSup = leftTrack.info.limits[2]
+                            local supL = calculateLimit(arL)(limitSup, leftTrack.info.pts[2])
+                            local supR = calculateLimit(arR)(limitSup, leftTrack.info.pts[2])
+                            
+                            local inf = arL:rad(yState.pos)
+                            if (y == 0 or y == -1) then
+                                inf = leftTrack.info.arcs.center.inf
+                            elseif (y > 0 and m.info.octa[5]) then
+                                inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
+                            elseif (y < 0 and m.info.octa[1]) then
+                                inf = arL:rad(modules[m.info.octa[1]].info.pts[2][1])
+                            end
+                            
+                            arL = arL:withLimits({sup = supL, inf = inf})
+                            arR = arR:withLimits({sup = supR, inf = inf})
+                            aligned = true
+                        elseif ref.right then
+                            local rightTrack = modules[grid[z][rightTrackPos.x][y]]
+                            local rightO = rightTrack.info.arcs.center.o
+                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[rightTrackPos.x])
+                            arL = arc.byOR(rightO, rightRadius - m.info.width * 0.5, rightTrack.info.arcs.center:limits())
+                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightTrack.info.arcs.center:limits())
+                            
+                            local limitSup = rightTrack.info.limits[2]
+                            local supL = calculateLimit(arL)(limitSup, rightTrack.info.pts[2])
+                            local supR = calculateLimit(arR)(limitSup, rightTrack.info.pts[2])
+                            
+                            local inf = arL:rad(yState.pos)
+                            if (y == 0 or y == -1) then
+                                inf = rightTrack.info.arcs.center.inf
+                            elseif (y > 0 and m.info.octa[5]) then
+                                inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
+                            elseif (y < 0 and m.info.octa[1]) then
+                                inf = arL:rad(modules[m.info.octa[1]].info.pts[2][1])
+                            end
+                            
+                            arL = arL:withLimits({sup = supL, inf = inf})
+                            arR = arR:withLimits({sup = supR, inf = inf})
+                            aligned = true
+                        elseif ref.prev then
+                            local arcs = modules[m.info.octa[5]].info.arcs
+                            
+                            arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
+                            arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+                            
+                            arL = arL:withLimits({
+                                inf = arL.sup,
+                                sup = arL.sup + arL.sup - arL.inf
+                            })
+                            
+                            arR = arR:withLimits({
+                                inf = arR.sup,
+                                sup = arR.sup - arR.inf + arR.sup
+                            })
+                            
+                            aligned = true
+                        elseif ref.next then
+                            local arcs = modules[m.info.octa[1]].info.arcs
+                            
+                            arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
+                            arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+                            
+                            arL = arL:withLimits({
+                                inf = arL.sup,
+                                sup = arL.sup + arL.sup - arL.inf
+                            })
+                            
+                            arR = arR:withLimits({
+                                inf = arR.sup,
+                                sup = arR.sup - arR.inf + arR.sup
+                            })
+                            
+                            aligned = true
+                        end
+                        
+                        if aligned then
+                            local pts = {
+                                arL:pt(arL.inf):avg(arR:pt(arR.inf)),
+                                nil,
+                                arL:pt(arL.sup):avg(arR:pt(arR.sup))
+                            }
+                            pts[2] = arL:ptByPt(pts[1]:avg(pts[3])):avg(arR:ptByPt(pts[1]:avg(pts[3])))
+                            local midPts = {
+                                pts[1]:avg(pts[2]),
+                                pts[3]:avg(pts[2])
+                            }
+                            
+                            local lines = {
+                                line.pend(line.byPtPt(pts[1], pts[2]), midPts[1]),
+                                line.pend(line.byPtPt(pts[3], pts[2]), midPts[2]),
+                            }
+                            
+                            local o = lines[1] - lines[2]
+                            if not o then
+                                local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+                                local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+                                local midPt = pts[1]:avg(pts[3])
+                                o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ(0.5 * pi)) * normalLength
+                                r = 10e8
+                            end
+                            
+                            o = o:withZ(0)
+                            
+                            local vecInf = pts[1] - o
+                            local vecSup = pts[3] - o
+                            
+                            local r = vecInf:length()
+                            if r > 10e8 then
+                                local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+                                local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+                                o = pts[1]:avg(pts[3]) + (o - pts[2]):normalized() * normalLength
+                                vecInf = pts[1] - o
+                                vecSup = pts[3] - o
+                                r = 10e8
+                            end
+                            ar = arc.byOR(o, r)
+                            
+                            local inf = ar:rad(pts[1])
+                            
+                            local length = math.asin(vecInf:cross(vecSup).z / (r * r)) * r
+                            local sup = inf + length / r
+                            ar = ar:withLimits({
+                                sup = sup,
+                                inf = inf
+                            })
+                            modules[slotId].info.radius = (length > 0 and 1 or -1) * (y < 0 and -1 or 1) * r
+                            modules[slotId].info.length = math.abs(length)
+                        end
+                        
+                        local refArc = {
+                            left = arL,
+                            right = arR,
+                            center = ar
+                        }
+                        
+                        modules[slotId].info.arcs = refArc
+                        modules[slotId].info.pts = {
+                            {
+                                refArc.center:pt(refArc.center.inf),
+                                refArc.center:tangent(refArc.center.inf)
+                            },
+                            {
+                                refArc.center:pt(refArc.center.sup),
+                                refArc.center:tangent(refArc.center.sup)
+                            }
+                        }
+                        
+                        if y >= 0 then
+                            modules[slotId].info.pts[3] = modules[slotId].info.pts[1]
+                            modules[slotId].info.pts[4] = modules[slotId].info.pts[2]
+                        else
+                            modules[slotId].info.pts[3] = {
+                                modules[slotId].info.pts[2][1],
+                                -modules[slotId].info.pts[2][2]
+                            }
+                            modules[slotId].info.pts[4] = {
+                                modules[slotId].info.pts[1][1],
+                                -modules[slotId].info.pts[1][2]
+                            }
+                        end
+                        
+                        modules[slotId].info.gravity = {
+                            refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                            refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                        }
+                    else
+                        coroutine.yield()
+                    end
+                end
+            end
+        end
+        
+        local cr = {}
+        
+        for _, current in ipairs(queue) do
+            local pos = modules[current].info.pos
+            cr[current] = coroutine.create(processY(pos.x, pos.y))
+        end
+        
+        for _, current in ipairs(func.concat(queue, queue)) do
+            local result = coroutine.resume(cr[current])
+            if not result then
+                print(debug.traceback(cr[current]))
+            end
+        end
+    end
+    return grid
+end
+
+
 return ust
