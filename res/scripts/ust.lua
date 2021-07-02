@@ -75,6 +75,7 @@ ust.slotInfo = function(slotId, classedModules)
             return {
                 type = type,
                 id = id,
+                slotId = slotId,
                 pos = coor.xyz(x, y, z),
                 radius = radius,
                 straight = straight,
@@ -88,6 +89,7 @@ ust.slotInfo = function(slotId, classedModules)
             return {
                 type = type,
                 id = id,
+                slotId = slotId,
                 data = classedModules[id].info[type]
             }
         end
@@ -277,9 +279,9 @@ end
 
 ust.interlace = pipe.interlace({"s", "i"})
 
-ust.unitLane = function(f, t, tag) return
+ust.unitLane = function(f, t, tag, mdl) return
     ((t - f):length2() > 1e-2 and (t - f):length2() < 562500)
-        and general.newModel("ust/person_lane.mdl", tag, general.mRot(t - f), coor.trans(f))
+        and general.newModel(mdl or "ust/person_lane.mdl", tag, general.mRot(t - f), coor.trans(f))
         or nil
 end
 
