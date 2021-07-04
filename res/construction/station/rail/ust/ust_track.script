@@ -25,7 +25,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
     local e = pipe.new
         * {{2, 1}, {3, 2}, {4, 3}, {4, 5}, {5, 6}, {6, 7}}
-        * (info.pos.y < 0 and pipe.rev() or pipe.noop())
+        * (info.pos.y < 0 and pipe.noop() or pipe.rev())
         * pipe.map(function(idx)
             local inf = info.arcs.center.inf * (1 - pos[idx[1]]) + info.arcs.center.sup * pos[idx[1]]
             local sup = info.arcs.center.inf * (1 - pos[idx[2]]) + info.arcs.center.sup * pos[idx[2]]
@@ -41,57 +41,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 }
             }
         end)
-        * pipe.flatten()
-        * pipe.map(pipe.map(coor.vec2Tuple))
     
-    -- local e = {{}, {}}
-    -- if (info.pos.y > 0) then
-    --     pts[1][2] =
-    --     e = {
-    --         info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
-    --             pts[1][1]:avg(params.modules[info.octa[5]].info.pts[2][1]),
-    --             pts[1][2]:avg(params.modules[info.octa[5]].info.pts[2][2])
-    --         } or pts[1],
-    --         info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
-    --             pts[2][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
-    --             pts[2][2]:avg(params.modules[info.octa[1]].info.pts[1][2])
-    --         } or pts[2]
-    --     }
-    -- elseif (info.pos.y == 0) then
-    --     e = {
-    --         info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
-    --             pts[1][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
-    --             pts[1][2]:avg(-params.modules[info.octa[5]].info.pts[1][2])
-    --         } or pts[1],
-    --         info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
-    --             pts[2][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
-    --             pts[2][2]:avg(params.modules[info.octa[1]].info.pts[1][2])
-    --         } or pts[2]
-    --     }
-    -- elseif (info.pos.y == -1) then
-    --     e = {
-    --         info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
-    --             pts[1][1]:avg(params.modules[info.octa[1]].info.pts[1][1]),
-    --             pts[1][2]:avg(-params.modules[info.octa[1]].info.pts[1][2])
-    --         } or pts[1],
-    --         info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
-    --             pts[2][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
-    --             pts[2][2]:avg(params.modules[info.octa[5]].info.pts[1][2])
-    --         } or pts[2],
-    --     }
-    -- else
-    --     e = {
-    --         info.octa[1] and params.modules[info.octa[1]].metadata.isTrack and {
-    --             pts[1][1]:avg(params.modules[info.octa[1]].info.pts[2][1]),
-    --             pts[1][2]:avg(params.modules[info.octa[1]].info.pts[2][2])
-    --         } or pts[1],
-    --         info.octa[5] and params.modules[info.octa[5]].metadata.isTrack and {
-    --             pts[2][1]:avg(params.modules[info.octa[5]].info.pts[1][1]),
-    --             pts[2][2]:avg(params.modules[info.octa[5]].info.pts[1][2])
-    --         } or pts[2],
-    --     }
-    -- end
-    -- table.insert(result.models, func.with(ust.unitLane(coor.xyz(0, 0, -2) + pts[2][1], coor.xyz(0, 0, -2) + pts[1][1]), {tag = tag}))
+    if params.debug then
+        local nodeCount = #func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+        for n, nodes in ipairs(e) do
+            local text1 = tostring(nodeCount + n * 2 - 1)
+            local text2 = tostring(nodeCount + n * 2)
+            local addText = function(label, pos, fAlign, h)
+                local nameModelsF, width = livetext(h or 2)(label)
+                for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                    table.insert(result.models, m)
+                end
+            end
+            
+            addText(text1, nodes[1][1], function(w) return coor.xyz(-1.5 * w, 0, 0) end, 0.5)
+            addText(text2, nodes[2][1], function(w) return coor.xyz(0.5 * w, 0, 0) end, 0.5)
+        end
+    end
+
     local edges = {
         type = "TRACK",
         alignTerrain = true,
@@ -99,8 +66,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             type = trackType,
             catenary = catenary,
         },
-        edges = e,
-        snapNodes = {},
+        edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
+        snapNodes = func.filter({ (not info.octa[1]) and 1, (not info.octa[5]) and 11 }, pipe.noop()),
         freeNodes = {},
         tag2nodes = {
             [tag] = func.seq(0, 11)
@@ -112,12 +79,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     if info.trackGroup then
         local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
-        if info.trackGroup.left then
-            table.insert(params.edgeGroup[info.trackGroup.left], func.seq(#nodes - 12, #nodes - 1))
-        end
-        if info.trackGroup.right then
-            table.insert(params.edgeGroup[info.trackGroup.right], func.seq(#nodes - 12, #nodes - 1))
-        end
+        params.edgeGroup[slotId] = func.seq(#nodes - 12, #nodes - 1)
     end
     
     local arcs = info.arcs
@@ -237,6 +199,23 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             spacing = {1.5, 1.5, 1.5, 1.5}
         }
     end
+
+
+    if params.debug then
+        local text = tostring(info.id)
+        local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        
+        local addText = function(label, pos, fAlign, h)
+            local nameModelsF, width = livetext(h or 2)(label)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        addText(text, posC, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, posC, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+    end
+
 end
 function data()
     return {

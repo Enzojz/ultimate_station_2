@@ -49,10 +49,8 @@ local createTemplateFn = function(params)
     local nSeg = baseLength / 20
     
     local pos = params.platformLeft and posGen(nbTracks, false) or posGen(nbTracks)
-    dump()(params)
     -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
 
-    dump()(pos)
     local result = {
         [101] = "station/rail/ust/ust_track.module",
         [151] = "station/rail/ust/ust_data.module",

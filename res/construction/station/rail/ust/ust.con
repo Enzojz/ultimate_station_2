@@ -327,12 +327,12 @@ local function searchTerminalGroups(params, current, ...)
             end
             if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
                 table.insert(groupLeft[#groupLeft], m.info.slotId)
-            elseif (#groupLeft[#groupLeft] > 1) then
+            elseif (#groupLeft[#groupLeft] > 0) then
                 table.insert(groupLeft, {})
             end
             if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
                 table.insert(groupRight[#groupRight], m.info.slotId)
-            elseif (#groupRight[#groupRight] > 1) then
+            elseif (#groupRight[#groupRight] > 0) then
                 table.insert(groupRight, {})
             end
             m = params.modules[m.info.octa[5]]
@@ -378,6 +378,8 @@ local updateFn = function(params, closureParams)
         slots = {},
         labelText = {}
     }
+
+    -- params.debug = true
     
     
     params.classedModules = classifyModules(params.modules)
@@ -402,7 +404,7 @@ local updateFn = function(params, closureParams)
     params.trackPlatformGroup = {}
     searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
     
-    params.edgeGroup = func.map(params.trackGroup, function(_) return {} end)
+    params.edgeGroup = {}
     
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
@@ -439,21 +441,16 @@ local updateFn = function(params, closureParams)
     end
     
     result.terminateConstructionHook = function()
-        dump()({
-            t = params.trackGroup,
-            p = params.platformGroup
-        })
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then
-                local edge = params.edgeGroup[i]
-                
+                local edge = func.map(track, function(t) return params.edgeGroup[t] end)
                 if (platform.right) then
                     table.insert(
                         result.terminalGroups,
                         {
                             terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][8]
+                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
                         }
                 )
                 end
@@ -463,13 +460,13 @@ local updateFn = function(params, closureParams)
                         result.terminalGroups,
                         {
                             terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][6]
+                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
                         }
                 )
                 end
             end
         end
-        dump()(result.terminalGroups)
+        
         for _, z in pairs(params.slotGrid) do
             for _, x in pairs(z) do
                 for _, y in pairs(x) do
