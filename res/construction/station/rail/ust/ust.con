@@ -379,8 +379,7 @@ local updateFn = function(params, closureParams)
         labelText = {}
     }
 
-    params.debug = true
-    
+    -- params.debug = true
     
     params.classedModules = classifyModules(params.modules)
     
@@ -394,9 +393,12 @@ local updateFn = function(params, closureParams)
         end
     end
     
-    local grid = ust.gridization(params.modules, params.classedModules)
+    local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
     
     params.grid = grid
+    params.lowestHeight = lowestHeight
+    params.platformHeight = params.lowestHeight + hPlatformList[params.hPlatform + 1] * 0.001
+
     params.slotGrid = {}
     
     params.trackGroup = {}

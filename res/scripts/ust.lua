@@ -364,6 +364,7 @@ local calculateLimit = function(arc)
 end
 
 ust.gridization = function(modules, classedModules)
+    local lowestHeight = 2
     local grid = {}
     for id, info in pairs(classedModules) do
         modules[info.slotId].info = ust.slotInfo(info.slotId, classedModules)
@@ -528,6 +529,12 @@ ust.gridization = function(modules, classedModules)
                 if m.metadata.isTrack or m.metadata.isPlatform then
                     if not m.info.width then
                         m.info.width = m.metadata.width or 5
+                    end
+
+                    if m.metadata.isTrack then
+                        if m.metadata.height < lowestHeight then
+                            lowestHeight = m.metadata.height
+                        end
                     end
                     
                     local width = m.info.width
@@ -1007,7 +1014,7 @@ ust.gridization = function(modules, classedModules)
             end
         end
     end
-    return grid
+    return grid, lowestHeight
 end
 
 
