@@ -1,3 +1,5 @@
+local func = require "ust/func"
+local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local general = require "ust/general"
 
@@ -10,8 +12,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = info.id
     local parent = params.classedModules[id].slotId
     local module = params.modules[parent]
-
-    table.insert(result.models, general.newModel("ust/platform/underpass.mdl", tag, hTrans * (module.info.pos.y < 0 and coor.rotZ(math.pi) or coor.I()) * module.info.transf));
+    
+    table.insert(result.models, general.newModel("ust/platform/underpass.mdl", tag, hTrans * (module.info.pos.y < 0 and (coor.flipX() * coor.flipY()) or coor.I()) * module.info.transf));
+    
+    local pts = func.map({
+        coor.xyz(-2, 2.5, 0),
+        coor.xyz(-2, -3.5, 0),
+        coor.xyz(2, -3.5, 0),
+        coor.xyz(2, 2.5, 0),
+    }, function(pt) return pt .. module.info.transf end)
+    
+    
+    table.insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
 end
 function data()
     return {
