@@ -2,6 +2,7 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local arc = require "ust/coorarc"
 local line = require "ust/coorline"
+local quat = require "ust/quaternion"
 local general = require "ust/general"
 local pipe = require "ust/pipe"
 -- local dump = require "luadump"
@@ -48,6 +49,9 @@ ust.slotInfo = function(slotId, classedModules)
         -- Platform/track
         -- 1 ~ 2 : 01 : track 02 platform
         -- 3 ~ 6 : id
+        -- Component
+        -- 1 ~ 2 : 21 : underpass
+        -- 3 ~ 6 : id
         -- Information
         -- 1 ~ 2 : 51 x 52 y 53 z 54 radius 55 length 56 width
         -- 3 ~ 6 : id
@@ -56,7 +60,8 @@ ust.slotInfo = function(slotId, classedModules)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
         
-        if (type < 50) then
+        if (type < 20) then
+            local comp = {}
             local info = classedModules[id].info
             local x = info[51]
             local y = info[52]
@@ -72,6 +77,12 @@ ust.slotInfo = function(slotId, classedModules)
                 radius = nil
             end
             
+            for i = 21, 50 do
+                if classedModules[id].slot[i] then
+                    comp[i] = classedModules[id].slot[i]
+                end
+            end
+
             return {
                 type = type,
                 id = id,
@@ -83,7 +94,14 @@ ust.slotInfo = function(slotId, classedModules)
                 width = width,
                 data = data,
                 canModifyRadius = canModifyRadius,
-                octa = {false, false, false, false, false, false, false, false}
+                octa = {false, false, false, false, false, false, false, false},
+                comp = comp
+            }
+        elseif (type < 50) then
+            return {
+                type = type,
+                id = id,
+                slotId = slotId
             }
         else
             return {
@@ -383,7 +401,7 @@ ust.gridization = function(modules, classedModules)
     end
     
     for slotId, module in pairs(modules) do
-        if not module.metadata.isData then
+        if module.metadata.isTrack or module.metadata.isPlatform then
             local info = module.info
             local x, y, z = info.pos.x, info.pos.y, info.pos.z
             
@@ -697,10 +715,6 @@ ust.gridization = function(modules, classedModules)
                         }
                     end
                     
-                    modules[slotId].info.gravity = {
-                        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-                        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-                    }
                     modules[slotId].info.limits = func.map(modules[slotId].info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ(0.5 * pi), ptvec[1]) end)
                     
                     if m.metadata.isPlatform then
@@ -989,13 +1003,20 @@ ust.gridization = function(modules, classedModules)
                             }
                         end
                         
-                        modules[slotId].info.gravity = {
-                            refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-                            refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-                        }
                     else
                         coroutine.yield()
                     end
+                    
+                    local gravity = {
+                        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+                        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+                    }
+                    
+                    modules[slotId].info.transf = 
+                        quat.byVec(coor.xyz(0, y < 0 and -1 or 1, 0), gravity[2]):mRot() *
+                        coor.trans(gravity[1])
+                    
+                    modules[slotId].info.gravity = gravity
                 end
             end
         end

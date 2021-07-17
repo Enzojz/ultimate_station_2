@@ -1,46 +1,47 @@
 function data() return {
-   order = 0,
+   order = -1,
    params = {
+      order = -1,
       fade_out_range = {
          fadeOutEndDist = 20000,
          fadeOutStartDist = 10000
       },
       map_albedo_opacity = {
-         fileName = "models/station/rail/era_c/trainstation_1990_floor_001_albedo.dds",
+         fileName = "models/ust/transparent.tga",
          type = "TWOD",
          wrapS = "REPEAT",
          wrapT = "REPEAT"
       },
       map_metal_gloss_ao = {
-         fileName = "models/station/rail/era_c/trainstation_1990_floor_001_metal_gloss_ao.dds",
+         fileName = "default_metal_gloss_ao.dds",
          type = "TWOD",
          wrapS = "REPEAT",
          wrapT = "REPEAT"
       },
       map_normal = {
-         fileName = "models/station/rail/era_c/trainstation_1990_floor_001_normal.dds",
+         fileName = "default_normal_map.dds",
          type = "TWOD",
          wrapS = "REPEAT",
          wrapT = "REPEAT"
       },
       map_op_1 = {
-          fileName = "models/ust/op/xy.dds",
+			fileName = "unknown_texture.tga",
           magFilter = "LINEAR",
           minFilter = "LINEAR_MIPMAP_LINEAR"
       },
-      normal_scale = {
-          normalScale = 1,
-      },
       operation_1 =
       {
-          op = "MULTIPLICATION",
-          mode = "NORMAL",
-          scale = { 0.2, 0.2 },
-          opacity = -300.0
+			mode = "TEXCOORD",
+			op = "NO_OP",
+			opacity = 1,
+			scale = { 1, 1, },
+      },
+      normal_scale = {
+         normalScale = 1
       },
       polygon_offset = {
-         factor = 4,
-         units = 4,
+         factor = 0,
+         units = 0,
 			forceDepthWrite = true,
       },
       two_sided = {
@@ -48,5 +49,5 @@ function data() return {
          twoSided = false
       }
    },
-   type = "PHYS_TRANSPARENT_NRML_MAP_OP"
+   type = "PHYS_TRANSPARENT"
 } end

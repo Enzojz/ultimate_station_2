@@ -31,10 +31,13 @@ local function classifyModules(params)
         local id = (slotIdAbs - type) / 100 % 10000
         m.typeId = type
         if not result[id] then result[id] = {info = {}, slot = {}, metadata = {}} end
-        if (type < 50) then
+        if (type < 20) then
             result[id].type = type
             result[id].slotId = slotId
             result[id].data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
+        elseif (type < 50) then
+            result[id].slot[type] = slotId
+            result[id].metadata[type] = m.metadata
         else
             local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
             result[id].info[type] = data
@@ -415,22 +418,30 @@ local updateFn = function(params, closureParams)
     
     for slotId, module in pairs(params.modules) do
         if module.metadata.isTrack then
-            local baseTransf =
-                quat.byVec(coor.xyz(0, module.info.pos.y < 0 and -1 or 1, 0), module.info.gravity[2]):mRot() *
-                coor.trans(module.info.gravity[1])
-            
             insert(result.slots, {
                 id = slotId,
-                transf = baseTransf,
+                transf = module.info.transf,
                 type = "ust_track",
-                spacing = {2.5, 2.5, 2.5, 2.5}
+                spacing = {1.5, 1.5, 1.5, 1.5}
             })
         elseif module.metadata.isPlatform then
             insert(result.slots, {
                 id = slotId,
-                transf = coor.I(),
+                transf = module.info.transf,
                 type = "ust_platform",
-                spacing = {2.5, 2.5, 2.5, 2.5}
+                spacing = {1.5, 1.5, 1.5, 1.5}
+            })
+        elseif module.metadata.isComponent then
+            local info = params.modules[slotId].info
+            local id = info.id
+            local parent = params.classedModules[id].slotId
+            local module = params.modules[parent]
+
+            insert(result.slots, {
+                id = slotId,
+                transf = module.info.transf * coor.transZ(1),
+                type = "ust_component",
+                spacing = {0, 0, 0, 0}
             })
         elseif module.metadata.isData then
             insert(result.slots, {
@@ -441,8 +452,8 @@ local updateFn = function(params, closureParams)
             })
         end
     end
-    
     result.terminateConstructionHook = function()
+        
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then

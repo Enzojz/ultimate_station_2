@@ -85,12 +85,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     end
     
     local arcs = info.arcs
-    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
-    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-    local vec = (posR - posL):normalized()
-    local posC = (posR + posL) * 0.5
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local transfPosC = rotZ * coor.trans(posC)
+    local transfPosC = info.transf
     
     if not params.anyRadiusModifiable then
         table.insert(result.slots, {
@@ -209,13 +204,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * info.gravity[2] * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
                 table.insert(result.models, m)
             end
         end
         
-        addText(text, posC, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
-        addText(pos, posC, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
     end
 
 end

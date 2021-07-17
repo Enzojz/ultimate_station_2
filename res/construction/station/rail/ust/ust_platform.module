@@ -289,11 +289,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local metadata = params.modules[slotId].metadata
     local arcs = info.arcs
     local refArc = arcs.center
-    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
-    local vec = arcs.center:tangent(rad)
-    local posC = arcs.center:pt(rad)
-    local rotZ = quat.byVec(coor.xyz(0, pos.y < 0 and -1 or 1, 0), vec):mRot()
-    local transfPosC = rotZ * coor.trans(posC)
+    local transfPosC = info.transf
     
     if (info.id ~= 1) then
         insert(result.slots, {
@@ -304,6 +300,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         })
     end
     
+    for i = 21, 21 do
+        if not info.comp[i] then
+            insert(result.slots, {
+                id = makeData(i, 0),
+                transf = transfPosC * coor.transZ(1),
+                type = "ust_component",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+
     if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
     if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
     if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
@@ -314,6 +321,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
     if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
     
+    -- SLot to replace itself
     table.insert(
         result.slots,
         {
@@ -323,6 +331,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {1.5, 1.5, 1.5, 1.5}
         }
     )
+
     if not (info.octa[3]) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
         
@@ -400,13 +409,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * info.gravity[2] * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
                 table.insert(result.models, m)
             end
         end
         
-        addText(text, posC, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
-        addText(pos, posC, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
     end
 
 end

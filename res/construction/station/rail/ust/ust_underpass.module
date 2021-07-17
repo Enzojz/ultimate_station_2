@@ -1,0 +1,50 @@
+local coor = require "ust/coor"
+local general = require "ust/general"
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local module = params.modules[parent]
+
+    table.insert(result.models, general.newModel("ust/platform/underpass.mdl", tag, hTrans * (module.info.pos.y < 0 and coor.rotZ(math.pi) or coor.I()) * module.info.transf));
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_UNDERPASS"),
+            description = _("MENU_MODULE_PLATFORM_UNDERPASS_DESC"),
+        },
+        category = {
+            categories = {"component"},
+        },
+        type = "ust_component",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isComponent = true,
+            typeId = 21,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
