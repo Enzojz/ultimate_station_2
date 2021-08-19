@@ -1,34 +1,46 @@
+local laneutil = require "laneutil"
 function data() return {
-   boundingInfo = {
-      bbMax = { 1.900000, -0.000001, 1.649998 },
-      bbMin = { 0, -1.000002, -0.000001 }
-   },
-   collider = {
-      params = {
-
-      },
-      type = "MESH"
-   },
-   lods = {
-      {
-         node = {
-            materials = { "ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked_2.mtl", "ust/stairs/fence_red_masked.mtl" },
-            mesh = "ust/stairs/era_c/stairs_inter_tl.msh",
-            name = "stairs_inter_tl",
-            transf = {
-               1.000000, 0.000000, 0.000000, 0.000000, 
-               0.000000, 1.000000, 0.000000, 0.000000, 
-               0.000000, 0.000000, 1.000000, 0.000000, 
-               0.000000, 0.000000, 0.000000, 1.000000, 
-            }
-         },
-         static = false,
-         visibleFrom = 0,
-         visibleTo = 1000
-      }
-   },
-   metadata = {
-
-   },
-   version = 1
+    boundingInfo = {
+        bbMax = {1.900000, -0.000001, 1.649998},
+        bbMin = {0, -1.000002, -0.000001}
+    },
+    collider = {
+        params = {
+        
+        },
+        type = "MESH"
+    },
+    lods = {
+        {
+            node = {
+                materials = {"ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked_2.mtl", "ust/stairs/fence_red_masked.mtl"},
+                mesh = "ust/stairs/era_c/stairs_inter_tl.msh",
+                name = "stairs_inter_tl",
+                transf = {
+                    1.000000, 0.000000, 0.000000, 0.000000,
+                    0.000000, 1.000000, 0.000000, 0.000000,
+                    0.000000, 0.000000, 1.000000, 0.000000,
+                    0.000000, 0.000000, 0.000000, 1.000000,
+                }
+            },
+            static = false,
+            visibleFrom = 0,
+            visibleTo = 1000
+        }
+    },
+    metadata = {
+        transportNetworkProvider = {
+            laneLists = {
+                laneutil.createLanes({
+                    curves = {
+                        {
+                            {{1, -0.5, 8}, {1, 0, 8}}
+                        }
+                    }
+                }, {"PERSON"}, 20, 3, false)
+            },
+        }
+    
+    },
+    version = 1
 } end

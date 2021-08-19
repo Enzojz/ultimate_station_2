@@ -65,6 +65,56 @@
                 table.insert(trackNames, track.name)
             end
             
+            local overpassParams = {
+                {
+                    color = "red",
+                    orientation = -1,
+                    filename = "ust_overpass_positive"
+                },
+                {
+                    color = "red",
+                    orientation = 1,
+                    filename = "ust_overpass_negative"
+                },
+                {
+                    color = "red",
+                    orientation = 0,
+                    filename = "ust_overpass"
+                }
+            }
+            for i, params in ipairs(overpassParams) do
+                local mod = api.type.ModuleDesc.new()
+                mod.fileName = string.format("station/rail/ust/%s.module", params.filename)
+                
+                mod.availability.yearFrom = 0
+                mod.availability.yearTo = 0
+                mod.cost.price = 0
+                
+                mod.description.name = _("MENU_MODULE_PLATFORM_OVERPASS")
+                mod.description.description = _("MENU_MODULE_PLATFORM_OVERPASS_DESC")
+                mod.description.icon =  string.format("ui/construction/station/rail/ust/%s.tga", params.filename)
+                
+                mod.type = "ust_component"
+                mod.order.value = 0
+                mod.metadata = {
+                    isComponent = true,
+                    isOverpass = true,
+                    typeId = 21,
+                    width = 5
+                }
+                
+                mod.category.categories = {"component"}
+                
+                mod.updateScript.fileName = "construction/station/rail/ust/ust_overpass.updateFn"
+                mod.updateScript.params = params
+                
+                mod.getModelsScript.fileName = "construction/station/rail/ust/ust_overpass.getModelsFn"
+                mod.getModelsScript.params = {}
+                
+                api.res.moduleRep.add(mod.fileName, mod, true)
+            end
+
+            
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"
             con.updateScript.params = {
