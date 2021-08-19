@@ -1,0 +1,106 @@
+function data() return {
+   subMeshes = {
+      {
+         indices = {
+            normal = {
+               count = 120,
+               offset = 4648
+            },
+            position = {
+               count = 120,
+               offset = 4528
+            },
+            tangent = {
+               count = 120,
+               offset = 4768
+            },
+            uv0 = {
+               count = 120,
+               offset = 4888
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
+               count = 288,
+               offset = 5296
+            },
+            position = {
+               count = 288,
+               offset = 5008
+            },
+            tangent = {
+               count = 288,
+               offset = 5584
+            },
+            uv0 = {
+               count = 288,
+               offset = 5872
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
+               count = 48,
+               offset = 6208
+            },
+            position = {
+               count = 48,
+               offset = 6160
+            },
+            tangent = {
+               count = 48,
+               offset = 6256
+            },
+            uv0 = {
+               count = 48,
+               offset = 6304
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
+               count = 24,
+               offset = 6376
+            },
+            position = {
+               count = 24,
+               offset = 6352
+            },
+            tangent = {
+               count = 24,
+               offset = 6400
+            },
+            uv0 = {
+               count = 24,
+               offset = 6424
+            }
+         }
+      }
+   },
+   vertexAttr = {
+      normal = {
+         count = 1440,
+         numComp = 3,
+         offset = 528
+      },
+      position = {
+         count = 528,
+         numComp = 3,
+         offset = 0
+      },
+      tangent = {
+         count = 1920,
+         numComp = 4,
+         offset = 1968
+      },
+      uv0 = {
+         count = 640,
+         numComp = 2,
+         offset = 3888
+      }
+   }
+} end

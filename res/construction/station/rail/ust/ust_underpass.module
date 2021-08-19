@@ -2,28 +2,49 @@ local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local general = require "ust/general"
+local ust = require "ust"
+
+local topConnector = coor.xyz(0, 0.1, 0)
+local bottomConnector = {
+    coor.xyz(2, -6.5, -4),
+    coor.xyz(-2, -6.5, -4)
+}
+
+local function basePts(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    return pts
+end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
     
-    local info = params.modules[slotId].info
-    local id = info.id
-    local parent = params.classedModules[id].slotId
-    local module = params.modules[parent]
-    
-    table.insert(result.models, general.newModel("ust/platform/underpass.mdl", tag, hTrans * (module.info.pos.y < 0 and (coor.flipX() * coor.flipY()) or coor.I()) * module.info.transf));
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local n = 4
+    local centerPts = basePts(info.arcs.center, n)
+    local trans = hTrans * (info.pos.y < 0 and (coor.flipX() * coor.flipY()) or coor.I()) * info.transf
+    table.insert(result.models, general.newModel("ust/platform/underpass.mdl", tag, trans));
     
     local pts = func.map({
-        coor.xyz(-2, 2.5, 0),
-        coor.xyz(-2, -3.5, 0),
-        coor.xyz(2, -3.5, 0),
-        coor.xyz(2, 2.5, 0),
-    }, function(pt) return pt .. module.info.transf end)
+        coor.xyz(-2, 1, 0),
+        coor.xyz(-2, -5, 0),
+        coor.xyz(2, -5, 0),
+        coor.xyz(2, 1, 0),
+    }, function(pt) return pt .. trans end)
     
     
+    table.insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
     table.insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
+
+    if not result.connectors.underpass[info.pos.x] then result.connectors.underpass[info.pos.x] = {} end
+
+    result.connectors.underpass[info.pos.x][info.pos.y] = func.map(bottomConnector, function(pt) return pt .. trans end)
+
 end
 function data()
     return {

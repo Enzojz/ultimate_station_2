@@ -1,0 +1,34 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 1.500541, -0.500000, 8.250015 },
+      bbMin = { -0.949995, -2.250011, 6.600006 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked.mtl", "ust/stairs/fence_red_masked_2.mtl" },
+            mesh = "ust/stairs/era_c/stairs_right_0.msh",
+            name = "stairs_right_0",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

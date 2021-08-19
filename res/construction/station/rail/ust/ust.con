@@ -75,6 +75,7 @@ local createTemplateFn = function(params)
     local nSeg = baseLength / 20
     
     local posList = params.platformLeft and ust.posGen(nbTracks, false) or ust.posGen(nbTracks)
+    
     -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
     local result = {}
     local id = 1
@@ -379,7 +380,12 @@ local updateFn = function(params, closureParams)
         cost = 0,
         models = pipe.new * {},
         slots = {},
-        labelText = {}
+        labelText = {},
+        connectors = {
+            overpass = {},
+            underpass = {},
+            misc = {}
+        }
     }
 
     -- params.debug = true
@@ -422,24 +428,28 @@ local updateFn = function(params, closureParams)
                 id = slotId,
                 transf = module.info.transf,
                 type = "ust_track",
-                spacing = {1.5, 1.5, 1.5, 1.5}
+                spacing = {0, 0, 0, 0}
             })
         elseif module.metadata.isPlatform then
             insert(result.slots, {
                 id = slotId,
                 transf = module.info.transf,
                 type = "ust_platform",
-                spacing = {1.5, 1.5, 1.5, 1.5}
+                spacing = {0, 0, 0, 0}
             })
         elseif module.metadata.isComponent then
             local info = params.modules[slotId].info
             local id = info.id
             local parent = params.classedModules[id].slotId
             local module = params.modules[parent]
+            
+            local hRef = params.platformHeight
+            local hVec = coor.xyz(0, 0, hRef)
+            local hTrans = coor.trans(hVec)
 
             insert(result.slots, {
                 id = slotId,
-                transf = module.info.transf * coor.transZ(1),
+                transf = module.info.transf,
                 type = "ust_component",
                 spacing = {0, 0, 0, 0}
             })
@@ -452,8 +462,30 @@ local updateFn = function(params, closureParams)
             })
         end
     end
+
+    -- result.slotConfig = {
+    --     ust_component = {
+    --         maxModules = -1,
+    --         skipCollisionCheck = true,
+    --     },
+        
+    --     ust_remove = {
+    --         maxModules = -1,
+    --         skipCollisionCheck = true,
+    --     }
+    -- }
+
+
     result.terminateConstructionHook = function()
         
+        local existingLinkings = {}
+        
+        for x, cy in pairs(result.connectors.underpass) do
+            for y, c in pairs(cy) do
+                    
+            end
+        end
+
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then

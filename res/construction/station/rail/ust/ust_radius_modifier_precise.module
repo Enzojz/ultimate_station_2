@@ -24,7 +24,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     table.insert(result.slots, {
         id = makeData(80, 1),
-        transf = transfPosC * coor.transZ(1),
+        transf = transfPosC,
         type = "ust_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -52,7 +52,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local addSlot = function(id, data, pos, shape, rot)
             table.insert(result.slots, {
                 id = makeData(id, data),
-                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(1),
+                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos),
                 type = "ust_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = shape or 0

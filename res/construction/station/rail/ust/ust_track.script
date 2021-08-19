@@ -4,7 +4,7 @@ local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
+-- local dump = require "luadump"
 local livetext = require "ust/livetext"
 
 
@@ -90,7 +90,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     if not params.anyRadiusModifiable then
         table.insert(result.slots, {
             id = makeData(80, 0),
-            transf = transfPosC * coor.transZ(1),
+            transf = transfPosC,
             type = "ust_modifier",
             spacing = {0, 0, 0, 0}
         })
@@ -99,7 +99,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     if (info.id ~= 1) then
         insert(result.slots, {
             id = makeData(99, 0),
-            transf = transfPosC * coor.transZ(1),
+            transf = transfPosC,
             type = "ust_remove",
             spacing = {0, 0, 0, 0}
         })
@@ -123,11 +123,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         result.slots,
         {
             id = makeData(1, 9),
-            transf = transfPosC * coor.transZ(1),
+            transf = transfPosC,
             type = "ust_track",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
     )
+
     if not (info.octa[3]) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
         
@@ -135,13 +136,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             id = makeData(1, 3),
             transf = transf,
             type = "ust_track",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
         params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
             id = makeData(2, 3),
             transf = transf,
             type = "ust_platform",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
     end
     
@@ -151,13 +152,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             id = makeData(1, 7),
             transf = transf,
             type = "ust_track",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
         params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
             id = makeData(2, 7),
             transf = transf,
             type = "ust_platform",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
     end
     
@@ -169,13 +170,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             id = makeData(1, 1),
             transf = transf,
             type = "ust_track",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
         params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
             id = makeData(2, 1),
             transf = transf,
             type = "ust_platform",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
     end
     
@@ -187,13 +188,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             id = makeData(1, 5),
             transf = transf,
             type = "ust_track",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
         params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
             id = makeData(2, 5),
             transf = transf,
             type = "ust_platform",
-            spacing = {1.5, 1.5, 1.5, 1.5}
+            spacing = {0, 0, 0, 0}
         }
     end
 
@@ -204,7 +205,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * info.gravity[2] * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
                 table.insert(result.models, m)
             end
         end
