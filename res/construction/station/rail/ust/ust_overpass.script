@@ -4,7 +4,7 @@ local coor = require "ust/coor"
 local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
+-- local dump = require "luadump"
 
 local fitModels = {
     inter = ust.fitModel(2, 1, 7, true, true),
@@ -36,12 +36,14 @@ local rectBase = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
     
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local allOverpass = pipe.new * func.values(params.classedModules)
         * pipe.map(function(m) return m.slot[21] and params.modules[m.slot[21]].metadata.isOverpass and m.slot[21] or nil end)
@@ -114,11 +116,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local m = params.modules[info.octa[1]]
         local info = m.info
         
-        local sidePts = basePts(info.arcs.center, 16)
-        
-        local sidePt = sidePts[4]
-        local sideVec = interPts[5]:withZ(0) - sidePt
-        local sideTransf = hTrans * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), sideVec):mRot() * coor.trans(sidePt)
+        local connectPt = basePts(info.arcs.center, 4)[2] .. hTrans
+        local baseRef = basePts(info.arcs.center, 16)[4]
+        table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
+
+        local sideVec = interPts[5]:withZ(0) - baseRef
+        local sideTransf = hTrans * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
@@ -132,17 +135,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+
+        
     end
     
-    if  closureParams.orientation > -1 and info.octa[5] then
+    if closureParams.orientation > -1 and info.octa[5] then
         local m = params.modules[info.octa[5]]
         local info = m.info
         
-        local sidePts = basePts(info.arcs.center, 16)
+        local connectPt = basePts(info.arcs.center, 4)[2] .. hTrans
+        local baseRef = basePts(info.arcs.center, 16)[4]
+        table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
         
-        local sidePt = sidePts[4]
-        local sideVec = interPts[6]:withZ(0) - sidePt
-        local sideTransf = hTrans * quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), sideVec):mRot() * coor.trans(sidePt)
+        local sideVec = interPts[6]:withZ(0) - baseRef
+        local sideTransf = hTrans * quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
@@ -156,6 +162,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
         table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+        
     end
     
     if #allOverpass > 1 then
@@ -192,6 +199,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         end
     end
+    
+    -- SLot to remove
+    table.insert(
+        result.slots,
+        {
+            id = makeData(21, 1),
+            transf = coor.transZ(8) * centerTransf,
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    
+    -- SLot to replace itself
+    table.insert(
+        result.slots,
+        {
+            id = makeData(21, 2),
+            transf = coor.transZ(8) * centerTransf,
+            type = "ust_component",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    
+    
 end
 function data()
     return {

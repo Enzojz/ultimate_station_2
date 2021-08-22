@@ -6,7 +6,7 @@ local quat = require "ust/quaternion"
 local pipe = require "ust/pipe"
 local general = require "ust/general"
 local ust = require "ust"
-local dump = require "luadump"
+-- local dump = require "luadump"
 local livetext = require "ust/livetext"
 
 local unpack = table.unpack
@@ -123,6 +123,7 @@ local createTemplateFn = function(params)
 end
 
 local preProcessFn = function(modules, change)
+
     local classedModules = classifyModules(modules)
     
     local maxId = 0
@@ -211,6 +212,15 @@ local preProcessFn = function(modules, change)
                         modules[id] = nil
                     end
                 end
+            end
+        elseif info.type >= 20 and info.type < 50 then
+            if data == 1 then
+                modules[ust.base(info.id, info.type)] = nil
+            elseif data == 2 then
+                modules[ust.base(info.id, info.type)] = change.module
+                modules[change.slotId] = nil
+            else
+                modules[change.slotId] = change.module
             end
         elseif info.type == 99 and info.id ~= 1 then
             for _, slotId in pairs(classedModules[info.id].slot) do
@@ -385,7 +395,11 @@ local updateFn = function(params, closureParams)
             overpass = {},
             underpass = {},
             misc = {}
-        }
+        },
+        connections = {
+            underpass = {}
+        },
+        invokeLater = {}
     }
 
     -- params.debug = true
@@ -477,15 +491,6 @@ local updateFn = function(params, closureParams)
 
 
     result.terminateConstructionHook = function()
-        
-        local existingLinkings = {}
-        
-        for x, cy in pairs(result.connectors.underpass) do
-            for y, c in pairs(cy) do
-                    
-            end
-        end
-
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then
@@ -520,6 +525,10 @@ local updateFn = function(params, closureParams)
                     end
                 end
             end
+        end
+        
+        for _, fn in ipairs(result.invokeLater) do
+            fn()
         end
     end
     return result

@@ -5,7 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
-local dump = require "luadump"
+-- local dump = require "luadump"
 
 local unpack = table.unpack
 local insert = table.insert

@@ -1,12 +1,3 @@
-local func = require "ust/func"
-local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local general = require "ust/general"
-
-local unpack = table.unpack
-local ma = math
-local pi = ma.pi
-
 function data()
     return {
         availability = {
