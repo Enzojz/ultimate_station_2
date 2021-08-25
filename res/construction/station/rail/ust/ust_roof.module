@@ -40,7 +40,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftPts = basePts(info.arcs.left, n)
     local rightPts = basePts(info.arcs.right, n)
     local centerPts = basePts(info.arcs.center, n)
-
+    
     local isFirst = not (info.octa[1] and params.modules[info.octa[1]].info.comp[22])
     local isLast = not (info.octa[5] and params.modules[info.octa[5]].info.comp[22])
     
@@ -52,18 +52,25 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local vec = (leftPts[i] - rightPts[i]):normalized()
         edges[1][i] = leftPts[i]
         edges[6][i] = rightPts[i]
-
+        
         edges[2][i] = leftPts[i] - vec * 0.27
         edges[5][i] = rightPts[i] + vec * 0.27
         
         edges[7][i] = centerPts[i]
         edges[3][i] = centerPts[i] + vec * 0.25
         edges[4][i] = centerPts[i] - vec * 0.25
-
+        
         for k = 1, 7 do
             edges[k][i] = edges[k][i] + hVec
         end
     end
+    
+    local refVec = (leftPts[3] - rightPts[3]):normalized()
+    local refPt = centerPts[3]
+    
+    local trans = hTrans
+        * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
+        * coor.trans(refPt)
     
     for i = 1, n do
         for k = 1, 5 do
@@ -82,7 +89,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             if isFirst and ((info.pos.y < 0 and i == 1) or (info.pos.y >= 0 and i == n)) then
                 table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_br.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, true)));
                 table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_tl.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, false)));
-            elseif isLast and ((info.pos.y < 0 and i == n) or (info.pos.y >= 0 and i == 1))  then
+            elseif isLast and ((info.pos.y < 0 and i == n) or (info.pos.y >= 0 and i == 1)) then
                 table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
                 table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
             else
@@ -90,7 +97,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 table.insert(result.models, general.newModel(string.format("ust/platform/roof_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
             end
         end
-
+        
         if i % 2 == 1 then
             local vec = (edges[1][i + 1] - edges[6][i + 1]):normalized()
             local pos = edges[7][i + 1]
@@ -100,27 +107,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             table.insert(result.models, general.newModel("ust/platform/arm.mdl", tag, transf));
         end
     end
-
-    -- -- SLot to remove
-    -- table.insert(
-    --     result.slots,
-    --     {
-    --         id = makeData(22, 1),
-    --         transf = trans,
-    --         type = "ust_remove",
-    --         spacing = {0, 0, 0, 0}
-    --     }
-    -- )
-    -- -- SLot to replace itself
-    -- table.insert(
-    --     result.slots,
-    --     {
-    --         id = makeData(22, 2),
-    --         transf = trans,
-    --         type = "ust_component",
-    --         spacing = {0, 0, 0, 0}
-    --     }
--- )
+    
+    -- SLot to replace itself
+    table.insert(
+        result.slots,
+        {
+            id = makeData(22, 2),
+            transf = trans,
+            type = "ust_component",
+            spacing = {0, 0, 0, 0}
+        }
+)
 end
 function data()
     return {

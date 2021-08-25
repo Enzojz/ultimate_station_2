@@ -110,21 +110,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     table.insert(result.invokeLater, invokeLater)
     
-    -- SLot to remove
-    table.insert(
-        result.slots,
-        {
-            id = makeData(21, 1),
-            transf = trans,
-            type = "ust_remove",
-            spacing = {0, 0, 0, 0}
-        }
-    )
     -- SLot to replace itself
     table.insert(
         result.slots,
         {
-            id = makeData(21, 2),
+            id = makeData(21, 1),
             transf = trans,
             type = "ust_component",
             spacing = {0, 0, 0, 0}
