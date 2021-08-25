@@ -1,0 +1,32 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 0.269999, 0.000000, 4.257500 },
+      bbMin = { -0.000000, -5.000000, 3.957501 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "station/rail/era_c/era_c_trainstation_borders_1.mtl" },
+            mesh = "ust/platform/roof_1_tl.msh",
+            name = "roof_1_tl",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

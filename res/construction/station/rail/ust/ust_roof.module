@@ -1,0 +1,160 @@
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local general = require "ust/general"
+local ust = require "ust"
+local dump = require "luadump"
+
+local fitModels = {
+    edge = ust.fitModel(0.27, 5, 7, true, true),
+    block = ust.fitModel(1.98, 5, 7, true, true),
+    center = ust.fitModel(0.5, 5, 7, true, true),
+}
+
+local roofFitModels = {
+    fitModels.edge,
+    fitModels.block,
+    fitModels.center,
+    fitModels.block,
+    fitModels.edge
+}
+
+local function basePts(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    return pts
+end
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local n = 4
+    local leftPts = basePts(info.arcs.left, n)
+    local rightPts = basePts(info.arcs.right, n)
+    local centerPts = basePts(info.arcs.center, n)
+
+    local isFirst = not (info.octa[1] and params.modules[info.octa[1]].info.comp[22])
+    local isLast = not (info.octa[5] and params.modules[info.octa[5]].info.comp[22])
+    
+    local edges = {
+        {}, {}, {}, {}, {}, {}, {}
+    }
+    
+    for i = 1, n + 1 do
+        local vec = (leftPts[i] - rightPts[i]):normalized()
+        edges[1][i] = leftPts[i]
+        edges[6][i] = rightPts[i]
+
+        edges[2][i] = leftPts[i] - vec * 0.27
+        edges[5][i] = rightPts[i] + vec * 0.27
+        
+        edges[7][i] = centerPts[i]
+        edges[3][i] = centerPts[i] + vec * 0.25
+        edges[4][i] = centerPts[i] - vec * 0.25
+
+        for k = 1, 7 do
+            edges[k][i] = edges[k][i] + hVec
+        end
+    end
+    
+    for i = 1, n do
+        for k = 1, 5 do
+            local coords = info.pos.y < 0 and {
+                lt = edges[k][i],
+                lb = edges[k][i + 1],
+                rt = edges[k + 1][i],
+                rb = edges[k + 1][i + 1]
+            } or {
+                lt = edges[k][i + 1],
+                lb = edges[k][i],
+                rt = edges[k + 1][i + 1],
+                rb = edges[k + 1][i]
+            }
+            
+            if isFirst and ((info.pos.y < 0 and i == 1) or (info.pos.y >= 0 and i == n)) then
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_br.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, true)));
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_tl.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, false)));
+            elseif isLast and ((info.pos.y < 0 and i == n) or (info.pos.y >= 0 and i == 1))  then
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_end_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
+            else
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
+                table.insert(result.models, general.newModel(string.format("ust/platform/roof_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
+            end
+        end
+
+        if i % 2 == 1 then
+            local vec = (edges[1][i + 1] - edges[6][i + 1]):normalized()
+            local pos = edges[7][i + 1]
+            
+            local transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pos)
+            table.insert(result.models, general.newModel("ust/platform/pole.mdl", tag, transf));
+            table.insert(result.models, general.newModel("ust/platform/arm.mdl", tag, transf));
+        end
+    end
+
+    -- -- SLot to remove
+    -- table.insert(
+    --     result.slots,
+    --     {
+    --         id = makeData(22, 1),
+    --         transf = trans,
+    --         type = "ust_remove",
+    --         spacing = {0, 0, 0, 0}
+    --     }
+    -- )
+    -- -- SLot to replace itself
+    -- table.insert(
+    --     result.slots,
+    --     {
+    --         id = makeData(22, 2),
+    --         transf = trans,
+    --         type = "ust_component",
+    --         spacing = {0, 0, 0, 0}
+    --     }
+-- )
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_ROOF"),
+            description = _("MENU_MODULE_PLATFORM_UNDERPASS_ROOF"),
+        },
+        category = {
+            categories = {"component"},
+        },
+        type = "ust_component",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isRoof = true,
+            isComponent = true,
+            typeId = 22,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

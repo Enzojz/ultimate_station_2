@@ -303,7 +303,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         })
     end
     
-    for i = 21, 21 do
+    for i = 21, 22 do
         if not info.comp[i] then
             insert(result.slots, {
                 id = makeData(i, 0),

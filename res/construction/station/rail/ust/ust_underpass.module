@@ -93,7 +93,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if leftTarget then
             local _, from, to, slotIdTarget = table.unpack(leftTarget)
             if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
-                dump()({slotId, from, to})
                 table.insert(result.models, ust.unitLane(from, to, nil))
                 table.insert(result.connections.underpass[slotIdTarget], slotId)
                 table.insert(result.connections.underpass[slotId], slotIdTarget)
@@ -102,7 +101,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if rightTarget then
             local _, from, to, slotIdTarget = table.unpack(rightTarget)
             if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
-                dump()({slotId, from, to})
                 table.insert(result.models, ust.unitLane(from, to, nil))
                 table.insert(result.connections.underpass[slotIdTarget], slotId)
                 table.insert(result.connections.underpass[slotId], slotIdTarget)
@@ -155,6 +153,7 @@ function data()
             value = 260,
         },
         metadata = {
+            isUnderpass = true,
             isComponent = true,
             typeId = 21,
             width = 5

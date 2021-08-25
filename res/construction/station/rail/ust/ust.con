@@ -217,10 +217,11 @@ local preProcessFn = function(modules, change)
             if data == 1 then
                 modules[ust.base(info.id, info.type)] = nil
             elseif data == 2 then
-                modules[ust.base(info.id, info.type)] = change.module
                 modules[change.slotId] = nil
+                modules[ust.base(info.id, change.module.metadata.typeId)] = change.module
             else
-                modules[change.slotId] = change.module
+                modules[change.slotId] = nil
+                modules[ust.base(info.id, change.module.metadata.typeId)] = change.module
             end
         elseif info.type == 99 and info.id ~= 1 then
             for _, slotId in pairs(classedModules[info.id].slot) do

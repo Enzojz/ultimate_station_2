@@ -44,22 +44,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             }
         end)
     
-    if params.debug then
-        local nodeCount = #func.mapFlatten(result.edgeLists, function(e) return e.edges end)
-        for n, nodes in ipairs(e) do
-            local text1 = tostring(nodeCount + n * 2 - 1)
-            local text2 = tostring(nodeCount + n * 2)
-            local addText = function(label, pos, fAlign, h)
-                local nameModelsF, width = livetext(h or 2)(label)
-                for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                    table.insert(result.models, m)
-                end
-            end
+    -- if params.debug then
+    --     local nodeCount = #func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+    --     for n, nodes in ipairs(e) do
+    --         local text1 = tostring(nodeCount + n * 2 - 1)
+    --         local text2 = tostring(nodeCount + n * 2)
+    --         local addText = function(label, pos, fAlign, h)
+    --             local nameModelsF, width = livetext(h or 2)(label)
+    --             for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+    --                 table.insert(result.models, m)
+    --             end
+    --         end
             
-            addText(text1, nodes[1][1], function(w) return coor.xyz(-1.5 * w, 0, 0) end, 0.5)
-            addText(text2, nodes[2][1], function(w) return coor.xyz(0.5 * w, 0, 0) end, 0.5)
-        end
-    end
+    --         addText(text1, nodes[1][1], function(w) return coor.xyz(-1.5 * w, 0, 0) end, 0.5)
+    --         addText(text2, nodes[2][1], function(w) return coor.xyz(0.5 * w, 0, 0) end, 0.5)
+    --     end
+    -- end
 
     local edges = {
         type = "TRACK",
