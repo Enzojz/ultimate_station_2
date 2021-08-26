@@ -348,7 +348,11 @@ local updateFn = function(params, closureParams)
     local result = {
         entryConnectors = {},
         colliders = {},
-        terrainAlignmentLists = {{type = "EQUAL", faces = {}}},
+        terrainAlignmentLists = {
+            {type = "EQUAL", faces = {}},
+            {type = "LESS", faces = {}},
+            {type = "GREATER", faces = {}}
+        },
         groundFaces = {},
         terminalGroups = {},
         stations = {},
