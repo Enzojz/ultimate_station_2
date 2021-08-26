@@ -11,14 +11,6 @@ local fitModels = {
     overpass = ust.fitModel(1, 2.9, 7, true, true)
 }
 
-local function basePts(arc, n)
-    local radDelta = (arc.sup - arc.inf) / n
-    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
-    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    local vecs = func.map(rads, function(rad) return arc:tangent(rad) end)
-    return pts, vecs
-end
-
 local interCoords = {
     coor.xyz(-1, -1.45, 0),
     coor.xyz(1, -1.45, 0),
@@ -64,7 +56,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         * pipe.sort(function(l, r) return l.x < r.x end)
         * pipe.map(pipe.select("slotId"))
     
-    local centerPts, centerVecs = basePts(info.arcs.center, 4)
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
     
     local centerPt = centerPts[3]
     local centerVec = centerVecs[3]
@@ -116,8 +108,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local m = params.modules[info.octa[1]]
         local info = m.info
         
-        local connectPt = basePts(info.arcs.center, 4)[2] .. hTrans
-        local baseRef = basePts(info.arcs.center, 16)[4]
+        local connectPt = ust.basePts(info.arcs.center, 4)[2] .. hTrans
+        local baseRef = ust.basePts(info.arcs.center, 16)[4]
         table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
 
         local sideVec = interPts[5]:withZ(0) - baseRef
@@ -143,8 +135,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local m = params.modules[info.octa[5]]
         local info = m.info
         
-        local connectPt = basePts(info.arcs.center, 4)[2] .. hTrans
-        local baseRef = basePts(info.arcs.center, 16)[4]
+        local connectPt = ust.basePts(info.arcs.center, 4)[2] .. hTrans
+        local baseRef = ust.basePts(info.arcs.center, 16)[4]
         table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
         
         local sideVec = interPts[6]:withZ(0) - baseRef
@@ -180,7 +172,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local id = params.modules[prevSlotId].info.id
             local info = params.modules[params.classedModules[id].slotId].info
             
-            local centerPts, centerVecs = basePts(info.arcs.center, 4)
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             local centerPt = centerPts[3]
             local centerVec = centerVecs[3]
             

@@ -6,18 +6,10 @@ local general = require "ust/general"
 local ust = require "ust"
 local dump = require "luadump"
 
-local topConnector = coor.xyz(0, 0.1, 0)
 local bottomConnector = {
     coor.xyz(2, -6.5, -4),
     coor.xyz(-2, -6.5, -4)
 }
-
-local function basePts(arc, n)
-    local radDelta = (arc.sup - arc.inf) / n
-    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
-    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    return pts
-end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hRef = params.platformHeight
@@ -29,7 +21,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local n = 4
-    local centerPts = basePts(info.arcs.center, n)
+    local centerPts = ust.basePts(info.arcs.center, n)
     local refPos = centerPts[3]
     local refVec = centerPts[4] - centerPts[3]
     local trans = hTrans

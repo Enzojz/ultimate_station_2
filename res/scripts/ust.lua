@@ -101,7 +101,8 @@ ust.slotInfo = function(slotId, classedModules)
             return {
                 type = type,
                 id = id,
-                slotId = slotId
+                slotId = slotId,
+                data = classedModules[id].info[type]
             }
         else
             return {
@@ -1036,6 +1037,14 @@ ust.gridization = function(modules, classedModules)
         end
     end
     return grid, lowestHeight
+end
+
+ust.basePts = function(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    local vecs = func.map(rads, function(rad) return arc:tangent(rad) end)
+    return pts, vecs
 end
 
 

@@ -36,13 +36,6 @@ local fitMdl = {
     ["yi_centre"] = fitModels.surface,
 }
 
-local function basePts(arc, n)
-    local radDelta = (arc.sup - arc.inf) / n
-    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
-    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    return pts
-end
-
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
@@ -77,9 +70,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     -- if n == 0 then n = 1 end
     local n = 4
     
-    local leftPts = basePts(info.arcs.left, n)
-    local rightPts = basePts(info.arcs.right, n)
-    local centerPts = basePts(info.arcs.center, n)
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    local centerPts = ust.basePts(info.arcs.center, n)
 
     local leftEdge = {}
     local rightEdge = {}
@@ -350,6 +343,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             type = "ust_platform",
             spacing = {0, 0, 0, 0}
         }
+
+        insert(
+            result.slots, {
+                id = makeData(23, 3),
+                transf = transf,
+                type = "ust_building",
+                spacing = {0, 0, 0, 0}
+            }
+        )
     end
     
     if not (info.octa[7]) then

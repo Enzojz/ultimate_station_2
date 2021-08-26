@@ -20,13 +20,6 @@ local roofFitModels = {
     fitModels.edge
 }
 
-local function basePts(arc, n)
-    local radDelta = (arc.sup - arc.inf) / n
-    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
-    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    return pts
-end
-
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
@@ -37,9 +30,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local n = 4
-    local leftPts = basePts(info.arcs.left, n)
-    local rightPts = basePts(info.arcs.right, n)
-    local centerPts = basePts(info.arcs.center, n)
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    local centerPts = ust.basePts(info.arcs.center, n)
     
     local isFirst = not (info.octa[1] and params.modules[info.octa[1]].info.comp[22])
     local isLast = not (info.octa[5] and params.modules[info.octa[5]].info.comp[22])
