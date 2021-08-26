@@ -1,0 +1,159 @@
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local general = require "ust/general"
+local ust = require "ust"
+local dump = require "luadump"
+
+local topConnector = coor.xyz(0, 0.1, 0)
+local bottomConnector = {
+    coor.xyz(2, -6.5, -4),
+    coor.xyz(-2, -6.5, -4)
+}
+
+local function basePts(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    return pts
+end
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local n = 4
+    local centerPts = basePts(info.arcs.center, n)
+    local refPos = centerPts[3]
+    local refVec = centerPts[4] - centerPts[3]
+    local trans = hTrans
+        * coor.trans(coor.xyz(0, -0.1, 0))
+        * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
+        * coor.trans(refPos)
+    
+    table.insert(result.models, general.newModel("ust/platform/era_c/underpass.mdl", tag, trans));
+    
+    local pts = func.map({
+        coor.xyz(-2, 1, 0),
+        coor.xyz(-2, -5, 0),
+        coor.xyz(2, -5, 0),
+        coor.xyz(2, 1, 0),
+    }, function(pt) return pt .. trans end)
+    
+    
+    -- table.insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
+    table.insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
+    
+    result.connectors.underpass[slotId] = {pos = info.pos, connectors = func.map(bottomConnector, function(pt) return pt .. trans end)}
+    result.connections.underpass[slotId] = {}
+    
+    local invokeLater = function()
+        local leftConnector = result.connectors.underpass[slotId].connectors[info.pos.y < 0 and 1 or 2]
+        local rightConnector = result.connectors.underpass[slotId].connectors[info.pos.y < 0 and 2 or 1]
+        
+        local leftTarget = nil
+        local rightTarget = nil
+        
+        for slotIdTarget, c in pairs(result.connectors.underpass) do
+            if slotId ~= slotIdTarget then
+                local pos = c.pos
+                local xyc = c.connectors
+                if pos.x < info.pos.x then
+                    local target = xyc[pos.y < 0 and 2 or 1]
+                    local vec = leftConnector - target
+                    if leftTarget then
+                        local distance = table.unpack(leftTarget)
+                        if vec:length2() < distance then
+                            leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
+                        end
+                    else
+                        leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
+                    end
+                elseif pos.x > info.pos.x then
+                    local target = xyc[pos.y < 0 and 1 or 2]
+                    local vec = rightConnector - target
+                    if rightTarget then
+                        local distance = table.unpack(rightTarget)
+                        if vec:length2() < distance then
+                            rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
+                        end
+                    else
+                        rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
+                    end
+                end
+            end
+        end
+        
+        if leftTarget then
+            local _, from, to, slotIdTarget = table.unpack(leftTarget)
+            if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
+                table.insert(result.models, ust.unitLane(from, to, nil))
+                table.insert(result.connections.underpass[slotIdTarget], slotId)
+                table.insert(result.connections.underpass[slotId], slotIdTarget)
+            end
+        end
+        if rightTarget then
+            local _, from, to, slotIdTarget = table.unpack(rightTarget)
+            if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
+                table.insert(result.models, ust.unitLane(from, to, nil))
+                table.insert(result.connections.underpass[slotIdTarget], slotId)
+                table.insert(result.connections.underpass[slotId], slotIdTarget)
+            end
+        end
+    end
+    
+    table.insert(result.invokeLater, invokeLater)
+    
+    -- SLot to replace itself
+    table.insert(
+        result.slots,
+        {
+            id = makeData(21, 1),
+            transf = trans,
+            type = "ust_component",
+            spacing = {0, 0, 0, 0}
+        }
+)
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_UNDERPASS"),
+            description = _("MENU_MODULE_PLATFORM_UNDERPASS_DESC"),
+        },
+        category = {
+            categories = {"component"},
+        },
+        type = "ust_component",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isUnderpass = true,
+            isComponent = true,
+            typeId = 21,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

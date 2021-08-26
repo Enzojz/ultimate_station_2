@@ -97,7 +97,7 @@ local createTemplateFn = function(params)
                 local slotId, slotIds = ust.slotIds(info)
                 result[slotId] = "station/rail/ust/tracks/high_speed.module"
                 for _, slotId in pairs(slotIds) do
-                    result[slotId] = "station/rail/ust/ust_data.module"
+                    result[slotId] = "station/rail/ust/data.module"
                 end
                 id = id + 1
             end
@@ -111,9 +111,9 @@ local createTemplateFn = function(params)
                     width = 5,
                 }
                 local slotId, slotIds = ust.slotIds(info)
-                result[slotId] = "station/rail/ust/ust_platform.module"
+                result[slotId] = "station/rail/ust/era_c/platform.module"
                 for _, slotId in pairs(slotIds) do
-                    result[slotId] = "station/rail/ust/ust_data.module"
+                    result[slotId] = "station/rail/ust/data.module"
                 end
                 id = id + 1
             end
@@ -123,7 +123,7 @@ local createTemplateFn = function(params)
 end
 
 local preProcessFn = function(modules, change)
-
+    
     local classedModules = classifyModules(modules)
     
     local maxId = 0
@@ -162,7 +162,7 @@ local preProcessFn = function(modules, change)
                 for key, slotId in pairs(dataIds) do
                     modules[slotId] = {
                         metadata = {isData = true},
-                        name = "station/rail/ust/ust_data.module",
+                        name = "station/rail/ust/data.module",
                         updateScript = {
                             fileName = "",
                             params = {}
@@ -171,7 +171,7 @@ local preProcessFn = function(modules, change)
                     }
                 end
                 for id, m in pairs(modules) do
-                    if m.name == "station/rail/ust/ust_radius_modifier.module" then
+                    if m.name == "station/rail/ust/radius_modifier.module" then
                         modules[id] = nil
                     end
                 end
@@ -200,7 +200,7 @@ local preProcessFn = function(modules, change)
                 for key, slotId in pairs(dataIds) do
                     modules[slotId] = {
                         metadata = {isData = true},
-                        name = "station/rail/ust/ust_data.module",
+                        name = "station/rail/ust/data.module",
                         updateScript = {
                             fileName = "",
                             params = {}
@@ -209,7 +209,7 @@ local preProcessFn = function(modules, change)
                     }
                 end
                 for id, m in pairs(modules) do
-                    if m.name == "station/rail/ust/ust_radius_modifier.module" then
+                    if m.name == "station/rail/ust/radius_modifier.module" then
                         modules[id] = nil
                     end
                 end
@@ -273,7 +273,7 @@ local preProcessFn = function(modules, change)
                 local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
                 modules[addSlot] = {
                     metadata = {isData = true},
-                    name = "station/rail/ust/ust_data.module",
+                    name = "station/rail/ust/data.module",
                     updateScript = {
                         fileName = "",
                         params = {}
@@ -284,7 +284,7 @@ local preProcessFn = function(modules, change)
                 local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
                 modules[addSlot] = {
                     metadata = {isData = true},
-                    name = "station/rail/ust/ust_data.module",
+                    name = "station/rail/ust/data.module",
                     updateScript = {
                         fileName = "",
                         params = {}
@@ -296,7 +296,7 @@ local preProcessFn = function(modules, change)
                     local addSlot = ust.mixData(ust.base(id, 56), 0)
                     modules[addSlot] = {
                         metadata = {isData = true},
-                        name = "station/rail/ust/ust_data.module",
+                        name = "station/rail/ust/data.module",
                         updateScript = {
                             fileName = "",
                             params = {}
@@ -318,17 +318,7 @@ local preProcessFn = function(modules, change)
             modules[change.slotId] = nil
         end
     end
-    
-    -- for slotId, m in pairs(modules) do
-    --     if m.name == "station/rail/ust/ust_data.module" then
-    --         modules[slotId].name = "station/rail/ust/data.module"
-    --     elseif m.name == "station/rail/ust/ust_platform.module" then
-    --         modules[slotId].name = "station/rail/ust/era_c/platform.module"
-    --     elseif m.updateScript and m.updateScript.fileName == "construction/station/rail/ust/ust_track.updateFn" then
-    --         modules[slotId].updateScript.fileName = "construction/station/rail/ust/track.updateFn"
-    --     end
-    -- end
-    
+        
     return modules
 end
 
@@ -387,7 +377,7 @@ end
 local upgradeFn = function(_) end
 
 local updateFn = function(params, closureParams)
-    dump()(params)
+    
     local result = {
         entryConnectors = {},
         colliders = {},
@@ -414,7 +404,7 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
-    -- params.debug = true
+    params.debug = true
     
     params.classedModules = classifyModules(params.modules)
     
@@ -488,19 +478,6 @@ local updateFn = function(params, closureParams)
             })
         end
     end
-
-    -- result.slotConfig = {
-    --     ust_component = {
-    --         maxModules = -1,
-    --         skipCollisionCheck = true,
-    --     },
-        
-    --     ust_remove = {
-    --         maxModules = -1,
-    --         skipCollisionCheck = true,
-    --     }
-    -- }
-
 
     result.terminateConstructionHook = function()
         for i, track in ipairs(params.trackGroup) do

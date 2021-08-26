@@ -1,0 +1,100 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 1, 0, 0.750000 },
+      bbMin = { -1, -3.500000, 0 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = {
+               "station/rail/era_c/era_c_trainstation_wall_grey.mtl",
+               "station/rail/era_c/era_c_trainstation_floor_1.mtl",
+               "station/rail/era_c/era_c_trainstation_wall_white.mtl",
+               "station/rail/era_c/era_c_trainstation_borders_1.mtl",
+               "ust/transparent.mtl"
+            },
+            mesh = "ust/platform/era_c/underpass.msh",
+            name = "underpass",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+      transportNetworkProvider = {
+         laneLists = {
+            {
+               linkable = false,
+               nodes = {
+                  {
+                     { 0, 0.100000, 0 },
+                     { 0, -0.200000, 0 },
+                     2
+                  },
+                  {
+                     { 0, -0.100000, 0 },
+                     { 0, -0.200000, 0 },
+                     2
+                  },
+                  {
+                     { 0, -0.100000, 0 },
+                     { 0, -5, -4 },
+                     2
+                  },
+                  {
+                     { 0, -5.100000, -4 },
+                     { 0, -5, -4 },
+                     2
+                  },
+                  {
+                     { 0, -5.100000, -4 },
+                     { 1, -1.400000, 0 },
+                     2
+                  },
+                  {
+                     { 0, -6.500000, -4 },
+                     { 1, -1.400000, 0 },
+                     2
+                  },
+                  {
+                     { 0, -6.500000, -4 },
+                     { 2, 0, 0 },
+                     2
+                  },
+                  {
+                     { 2, -6.500000, -4 },
+                     { 2, 0, 0 },
+                     2
+                  },
+                  {
+                     { 0, -6.500000, -4 },
+                     { -2, 0, 0 },
+                     2
+                  },
+                  {
+                     { -2, -6.500000, -4 },
+                     { -2, 0, 0 },
+                     2
+                  }
+               },
+               speedLimit = 20,
+               transportModes = { "PERSON" }
+            }
+         }
+      }
+   },
+   version = 1
+} end

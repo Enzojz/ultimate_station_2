@@ -1,0 +1,459 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local ust = require "ust"
+local general = require "ust/general"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+-- local dump = require "luadump"
+
+local unpack = table.unpack
+local insert = table.insert
+
+local ma = math
+local pi = ma.pi
+
+local fitModels = {
+    surface = ust.fitModel(3.3, 5, -2, true, true),
+    edge = ust.fitModel(0.85, 5, -2, true, true),
+}
+
+local fitMdl = {
+    ["xe_ye_left"] = fitModels.edge,
+    ["xe_ye_right"] = fitModels.edge,
+    ["xe_yi_left"] = fitModels.edge,
+    ["xe_yi_right"] = fitModels.edge,
+    ["xi_ye_left"] = fitModels.edge,
+    ["xi_ye_left_t"] = fitModels.edge,
+    ["xi_ye_right"] = fitModels.edge,
+    ["xi_ye_right_t"] = fitModels.edge,
+    ["xi_yi_left"] = fitModels.edge,
+    ["xi_yi_left_x"] = fitModels.edge,
+    ["xi_yi_right"] = fitModels.edge,
+    ["xi_yi_right_x"] = fitModels.edge,
+    ["ye_centre"] = fitModels.surface,
+    ["ye_centre_t"] = fitModels.surface,
+    ["yi_centre"] = fitModels.surface,
+}
+
+local function basePts(arc, n)
+    local radDelta = (arc.sup - arc.inf) / n
+    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+    return pts
+end
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local info = params.modules[slotId].info
+    local makeData = params.modules[slotId].makeData
+    
+    local grid = params.grid
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    
+    local isTrack = {}
+    local isPlatform = {}
+    local octaModules = {}
+    for i = 1, 8 do
+        if info.octa[i] then
+            octaModules[i] = info.octa[i] and params.modules[info.octa[i]]
+            isTrack[i] = octaModules[i].metadata and octaModules[i].metadata.isTrack or false
+            isPlatform[i] = octaModules[i].metadata and octaModules[i].metadata.isPlatform or false
+        else
+            octaModules[i] = false
+            isTrack[i] = false
+            isPlatform[i] = false
+        end
+    end
+    
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local leftConnected = isPlatform[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
+    local rightConnected = isPlatform[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+    
+    -- local n = ma.floor(info.arcs.center:length() / 5 + 0.5)
+    -- if n == 0 then n = 1 end
+    local n = 4
+    
+    local leftPts = basePts(info.arcs.left, n)
+    local rightPts = basePts(info.arcs.right, n)
+    local centerPts = basePts(info.arcs.center, n)
+
+    local leftEdge = {}
+    local rightEdge = {}
+    local leftCentre = {}
+    local rightCentre = {}
+    local leftLaneBorder = {}
+    local rightLaneBorder = {}
+    local leftLane = {}
+    local rightLane = {}
+    
+    for i = 1, n + 1 do
+        local vec = (leftPts[i] - rightPts[i]):normalized()
+        leftEdge[i] = leftPts[i]
+        rightEdge[i] = rightPts[i]
+        leftCentre[i] = leftPts[i] - vec * 0.85
+        rightCentre[i] = rightPts[i] + vec * 0.85
+        
+        leftLaneBorder[i] = leftPts[i] + hVec
+        rightLaneBorder[i] = rightPts[i] + hVec
+        
+        local vec = (leftLaneBorder[i] - rightLaneBorder[i]):normalized()
+        
+        leftLane[i] = leftLaneBorder[i] - vec * 1.2
+        rightLane[i] = rightLaneBorder[i] + vec * 1.2
+        centerPts[i] = centerPts[i] + hVec
+    end
+    
+    if (pos.y >= 0 and not isPlatform[1]) or (pos.y < 0 and not isPlatform[5]) then
+        leftLaneBorder[n + 1] = leftLaneBorder[n + 1] + (leftLaneBorder[n] - leftLaneBorder[n + 1]):normalized()
+        rightLaneBorder[n + 1] = rightLaneBorder[n + 1] + (rightLaneBorder[n] - rightLaneBorder[n + 1]):normalized()
+        leftLane[n + 1] = leftLane[n + 1] + (leftLane[n] - leftLane[n + 1]):normalized()
+        rightLane[n + 1] = rightLane[n + 1] + (rightLane[n] - rightLane[n + 1]):normalized()
+    end
+    
+    if (pos.y >= 0 and not isPlatform[5]) or (pos.y < 0 and not isPlatform[1]) then
+        leftLaneBorder[1] = leftLaneBorder[1] + (leftLaneBorder[2] - leftLaneBorder[1]):normalized()
+        rightLaneBorder[1] = rightLaneBorder[1] + (rightLaneBorder[2] - rightLaneBorder[1]):normalized()
+        leftLane[1] = leftLane[1] + (leftLane[2] - leftLane[1]):normalized()
+        rightLane[1] = rightLane[1] + (rightLane[2] - rightLane[1]):normalized()
+    end
+    
+    for i = 1, n do
+        local inf = pos.y < 0 and i or i + 1
+        local sup = pos.y < 0 and i + 1 or i
+        
+        local isFirst = (pos.y >= 0 and i == 1) or (pos.y < 0 and i == 4)
+        local isLast = (pos.y >= 0 and i == 4) or (pos.y < 0 and i == 1)
+        
+        local centre = {
+            lt = leftCentre[inf],
+            rt = rightCentre[inf],
+            lb = leftCentre[sup],
+            rb = rightCentre[sup],
+        }
+        
+        local left = {
+            lt = leftEdge[inf],
+            rt = leftCentre[inf],
+            lb = leftEdge[sup],
+            rb = leftCentre[sup],
+        }
+        
+        local right = {
+            lt = rightCentre[inf],
+            rt = rightEdge[inf],
+            lb = rightCentre[sup],
+            rb = rightEdge[sup],
+        }
+        
+        
+        local addBlock = function(mdl, pos)
+            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
+            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
+        end
+        local addLastBlock = function(mdl, pos)
+            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
+            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+        end
+        
+        if isLast then
+            if isTrack[1] then
+                addLastBlock("ye_centre_t", centre)
+            elseif not info.octa[1] then
+                if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
+                    addLastBlock("ye_centre_t", centre)
+                else
+                    addLastBlock("ye_centre", centre)
+                end
+            else
+                addLastBlock("yi_centre", centre)
+            end
+        elseif isFirst then
+            if isTrack[5] then
+                addBlock("ye_centre_t", centre)
+            elseif not info.octa[5] then
+                if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
+                    addBlock("ye_centre_t", centre)
+                else
+                    addBlock("ye_centre", centre)
+                end
+            else
+                addBlock("yi_centre", centre)
+            end
+        else
+            addBlock("yi_centre", centre)
+        end
+        
+        if leftConnected then
+            if isLast then
+                if isTrack[1] or (isPlatform[8] and not isPlatform[1]) then
+                    addLastBlock("xi_ye_right_t", left)
+                elseif not isPlatform[1] then
+                    addLastBlock("xi_ye_right", left)
+                elseif not isPlatform[8] and isPlatform[1] then
+                    addLastBlock("xi_yi_right_x", left)
+                else
+                    addLastBlock("xi_yi_right", left)
+                end
+            elseif isFirst then
+                if isTrack[5] or (isPlatform[6] and not isPlatform[5]) then
+                    addBlock("xi_ye_left_t", left)
+                elseif not isPlatform[5] then
+                    addBlock("xi_ye_left", left)
+                elseif not isPlatform[6] and isPlatform[5] then
+                    addBlock("xi_yi_left_x", left)
+                else
+                    addBlock("xi_yi_left", left)
+                end
+            else
+                addBlock("xi_yi_left", left)
+            end
+        else
+            if isLast and not isPlatform[1] then
+                addLastBlock("xe_ye_right", left)
+            elseif isFirst and not isPlatform[5] then
+                addBlock("xe_ye_left", left)
+            else
+                addBlock("xe_yi_left", left)
+            end
+        end
+        
+        if rightConnected then
+            if isLast then
+                if isTrack[1] or (isPlatform[2] and not isPlatform[1]) then
+                    addLastBlock("xi_ye_left_t", right)
+                elseif not isPlatform[1] then
+                    addLastBlock("xi_ye_left", right)
+                elseif not isPlatform[2] and isPlatform[1] then
+                    addLastBlock("xi_yi_left_x", right)
+                else
+                    addLastBlock("xi_yi_left", right)
+                end
+            elseif isFirst then
+                if isTrack[5] or (isPlatform[4] and not isPlatform[5]) then
+                    addBlock("xi_ye_right_t", right)
+                elseif not isPlatform[5] then
+                    addBlock("xi_ye_right", right)
+                elseif not isPlatform[4] and isPlatform[5] then
+                    addBlock("xi_yi_right_x", right)
+                else
+                    addBlock("xi_yi_right", right)
+                end
+            else
+                addBlock("xi_yi_right", right)
+            end
+        else
+            if isLast and not isPlatform[1] then
+                addLastBlock("xe_ye_left", right)
+            elseif isFirst and not isPlatform[5] then
+                addBlock("xe_ye_right", right)
+            else
+                addBlock("xe_yi_right", right)
+            end
+        end
+        
+        
+        local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
+        local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+
+        if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+            local trackGroup = octaModules[7].info.trackGroup.right
+            table.insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
+            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = { models = {}, left = true } end
+            table.insert(params.platformGroup[trackGroup].models, #result.models - 1)
+        else
+            table.insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag))
+            if leftConnected then
+                table.insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
+            end
+        end
+        
+        if (rightTrack and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
+            local trackGroup = octaModules[3].info.trackGroup.left
+            table.insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag, "ust/terminal_lane.mdl"))
+
+            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = { models = {}, right = true} end
+            table.insert(params.platformGroup[trackGroup].models, #result.models - 1)
+        else
+            table.insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag))
+            if rightConnected then
+                table.insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
+            end
+        end
+        
+        table.insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
+        table.insert(result.models, ust.unitLane(rightLane[sup], centerPts[sup], tag))
+    end
+    
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    local arcs = info.arcs
+    local refArc = arcs.center
+    local transfPosC = info.transf
+    
+    if (info.id ~= 1) then
+        insert(result.slots, {
+            id = makeData(99, 0),
+            transf = transfPosC,
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+    
+    for i = 21, 22 do
+        if not info.comp[i] then
+            insert(result.slots, {
+                id = makeData(i, 0),
+                transf = transfPosC,
+                type = "ust_component",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+
+    if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
+    if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
+    
+    -- SLot to replace itself
+    table.insert(
+        result.slots,
+        {
+            id = makeData(2, 9),
+            transf = transfPosC,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+
+    if not (info.octa[3]) then
+        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        
+        params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
+            id = makeData(1, 3),
+            transf = transf,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
+            id = makeData(2, 3),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    end
+    
+    if not (info.octa[7]) then
+        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
+            id = makeData(1, 7),
+            transf = transf,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
+            id = makeData(2, 7),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    end
+    
+    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
+            id = makeData(1, 1),
+            transf = transf,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
+            id = makeData(2, 1),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    end
+    
+    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        
+        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+        
+        params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
+            id = makeData(1, 5),
+            transf = transf,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
+            id = makeData(2, 5),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    end
+
+    
+    if params.debug then
+        local text = tostring(info.id)
+        local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        
+        local addText = function(label, pos, fAlign, h)
+            local nameModelsF, width = livetext(h or 2)(label)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+    end
+
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM"),
+            description = _("MENU_MODULE_PLATFORM_DESC"),
+        },
+        category = {
+            categories = {"platform"},
+        },
+        type = "ust_platform",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isPlatform = true,
+            typeId = 2,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
