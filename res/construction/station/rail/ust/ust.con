@@ -161,7 +161,6 @@ local preProcessFn = function(modules, change)
                 }
                 local slotId, dataIds = ust.slotIds(newInfo)
                 modules[slotId] = change.module
-                dump()({slotId, modules[slotId]})
                 for key, slotId in pairs(dataIds) do
                     modules[slotId] = {
                         metadata = {isData = true},
@@ -376,12 +375,14 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
+    result.test = {pos = {
+        2, 4, 4, 14
+    }}
+
     params.debug = true
     
     params.classedModules = classifyModules(params.modules)
-    
-    dump()(params.classedModules)
-    
+
     for id, info in pairs(params.classedModules) do
         params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
         params.modules[info.slotId].makeData = function(type, data)
