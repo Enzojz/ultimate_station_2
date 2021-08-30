@@ -1,0 +1,34 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 1.2525000572205, 0.0071999998763204, 1.8600000143051, },
+		bbMin = { -1.2525000572205, -0.0071999998763204, 0.029999999329448, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 1.2525000572205, 0.0071999998763204, 0.91500002145767, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0.94499999284744, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						materials = { "ust/fences/green.mtl", },
+						mesh = "ust/fences/fences_2.msh",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 200,
+		},
+	},
+	metadata = { },
+	version = 1,
+}
+end
