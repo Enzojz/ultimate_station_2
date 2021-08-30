@@ -402,7 +402,7 @@ ust.gridization = function(modules, classedModules)
     end
     
     for slotId, module in pairs(modules) do
-        if module.metadata.isTrack or module.metadata.isPlatform then
+        if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
             local info = module.info
             local x, y, z = info.pos.x, info.pos.y, info.pos.z
             
@@ -545,7 +545,7 @@ ust.gridization = function(modules, classedModules)
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
                 
-                if m.metadata.isTrack or m.metadata.isPlatform then
+                if m.metadata.isTrack or m.metadata.isPlatform or m.metadata.isPlaceholder then
                     if not m.info.width then
                         m.info.width = m.metadata.width or 5
                     end
@@ -616,17 +616,17 @@ ust.gridization = function(modules, classedModules)
                         end
                         if not yState.radius then
                             local loop = {}
-                            if m.metadata.isTrack then
+                            if m.metadata.isTrack or m.metadata.isPlaceholder then
                                 loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(xPos) or func.min(xNeg) or 0), (x < 0 and 1 or -1)}
                             elseif m.metadata.isPlatform then
                                 if (x < 0) then
-                                    if m.info.octa[3] and m.info.octa[7] and modules[m.info.octa[3]].metadata.isPlatform and modules[m.info.octa[7]].metadata.isTrack and modules[m.info.octa[7]].info.radius then
+                                    if m.info.octa[3] and m.info.octa[7] and modules[m.info.octa[3]].metadata.isPlatform and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) and modules[m.info.octa[7]].info.radius then
                                         loop = {x - 1, func.min(xNeg), -1}
                                     else
                                         loop = {x + 1, func.max(xPos) or 0, 1}
                                     end
                                 else
-                                    if m.info.octa[7] and m.info.octa[3] and modules[m.info.octa[7]].metadata.isPlatform and modules[m.info.octa[3]].metadata.isTrack and modules[m.info.octa[3]].info.radius then
+                                    if m.info.octa[7] and m.info.octa[3] and modules[m.info.octa[7]].metadata.isPlatform and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) and modules[m.info.octa[3]].info.radius then
                                         loop = {x + 1, func.max(xPos), 1}
                                     else
                                         loop = {x - 1, func.min(xNeg) or 0, -1}
@@ -653,7 +653,7 @@ ust.gridization = function(modules, classedModules)
                     local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
                     if y < 0 then arL, arR = arR, arL end
                     
-                    if x < 0 and m.info.octa[3] and modules[m.info.octa[3]].metadata.isTrack then
+                    if x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) then
                         if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
                             or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
                             local sup = modules[m.info.octa[3]].info.arcs.center.sup
@@ -667,7 +667,7 @@ ust.gridization = function(modules, classedModules)
                             arR.inf = inf
                             ar.inf = inf
                         end
-                    elseif x >= 0 and m.info.octa[7] and modules[m.info.octa[7]].metadata.isTrack then
+                    elseif x >= 0 and m.info.octa[7] and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) then
                         if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
                             or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
                             local sup = modules[m.info.octa[7]].info.arcs.center.sup
@@ -724,7 +724,7 @@ ust.gridization = function(modules, classedModules)
                         local function findLeftTrack(slotId)
                             if not slotId or not modules[slotId] then
                                 return nil
-                            elseif modules[slotId].metadata.isTrack then
+                            elseif (modules[slotId].metadata.isTrack or modules[slotId].metadata.isPlaceholder) then
                                 return modules[slotId].info.pos
                             elseif modules[slotId].metadata.isPlatform then
                                 return findLeftTrack(modules[slotId].info.octa[7])
@@ -736,7 +736,7 @@ ust.gridization = function(modules, classedModules)
                         local function findRightTrack(slotId)
                             if not slotId or not modules[slotId] then
                                 return nil
-                            elseif modules[slotId].metadata.isTrack then
+                            elseif (modules[slotId].metadata.isTrack or modules[slotId].metadata.isPlaceholder) then
                                 return modules[slotId].info.pos
                             elseif modules[slotId].metadata.isPlatform then
                                 return findRightTrack(modules[slotId].info.octa[3])
@@ -1047,5 +1047,39 @@ ust.basePts = function(arc, n)
     return pts, vecs
 end
 
+ust.initSlotGrid = function(params, pos)
+    if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
+    if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
+    if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
+    if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
+end
+
+ust.newTopologySlots = function(params, makeData, pos)
+    return function(x, y, transf, octa) 
+        params.slotGrid[pos.z][x][y].track = {
+            id = makeData(1, octa),
+            transf = transf,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][x][y].platform = {
+            id = makeData(2, octa),
+            transf = transf,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+        params.slotGrid[pos.z][x][y].placeholder = {
+            id = makeData(3, octa),
+            transf = transf,
+            type = "ust_placeholder",
+            spacing = {0, 0, 0, 0}
+        }
+    end
+end
 
 return ust

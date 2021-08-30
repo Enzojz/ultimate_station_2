@@ -309,15 +309,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
-    if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
-    if not params.slotGrid[pos.z][pos.x][pos.y] then params.slotGrid[pos.z][pos.x][pos.y] = {} end
-    if not params.slotGrid[pos.z][pos.x - 1] then params.slotGrid[pos.z][pos.x - 1] = {} end
-    if not params.slotGrid[pos.z][pos.x + 1] then params.slotGrid[pos.z][pos.x + 1] = {} end
-    if not params.slotGrid[pos.z][pos.x - 1][pos.y] then params.slotGrid[pos.z][pos.x - 1][pos.y] = {} end
-    if not params.slotGrid[pos.z][pos.x + 1][pos.y] then params.slotGrid[pos.z][pos.x + 1][pos.y] = {} end
-    if not params.slotGrid[pos.z][pos.x][pos.y - 1] then params.slotGrid[pos.z][pos.x][pos.y - 1] = {} end
-    if not params.slotGrid[pos.z][pos.x][pos.y + 1] then params.slotGrid[pos.z][pos.x][pos.y + 1] = {} end
+    ust.initSlotGrid(params, pos)
+    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     -- SLot to replace itself
     table.insert(
@@ -329,21 +322,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {0, 0, 0, 0}
         }
     )
+
+
     if not (info.octa[3]) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
-        
-        params.slotGrid[pos.z][pos.x + 1][pos.y].track = {
-            id = makeData(1, 3),
-            transf = transf,
-            type = "ust_track",
-            spacing = {0, 0, 0, 0}
-        }
-        params.slotGrid[pos.z][pos.x + 1][pos.y].platform = {
-            id = makeData(2, 3),
-            transf = transf,
-            type = "ust_platform",
-            spacing = {0, 0, 0, 0}
-        }
+        newTopologySlots(pos.x + 1, pos.y, transf, 3)
         
         insert(
             result.slots, {
@@ -357,55 +340,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     if not (info.octa[7]) then
         local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
-        params.slotGrid[pos.z][pos.x - 1][pos.y].track = {
-            id = makeData(1, 7),
-            transf = transf,
-            type = "ust_track",
-            spacing = {0, 0, 0, 0}
-        }
-        params.slotGrid[pos.z][pos.x - 1][pos.y].platform = {
-            id = makeData(2, 7),
-            transf = transf,
-            type = "ust_platform",
-            spacing = {0, 0, 0, 0}
-        }
+        newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
     if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
         local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
         local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
-        
-        params.slotGrid[pos.z][pos.x][pos.y + 1].track = {
-            id = makeData(1, 1),
-            transf = transf,
-            type = "ust_track",
-            spacing = {0, 0, 0, 0}
-        }
-        params.slotGrid[pos.z][pos.x][pos.y + 1].platform = {
-            id = makeData(2, 1),
-            transf = transf,
-            type = "ust_platform",
-            spacing = {0, 0, 0, 0}
-        }
+        newTopologySlots(pos.x, pos.y + 1, transf, 1)
     end
     
     if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
         local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
         
         local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
-        
-        params.slotGrid[pos.z][pos.x][pos.y - 1].track = {
-            id = makeData(1, 5),
-            transf = transf,
-            type = "ust_track",
-            spacing = {0, 0, 0, 0}
-        }
-        params.slotGrid[pos.z][pos.x][pos.y - 1].platform = {
-            id = makeData(2, 5),
-            transf = transf,
-            type = "ust_platform",
-            spacing = {0, 0, 0, 0}
-        }
+        newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
     
     

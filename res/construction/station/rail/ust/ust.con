@@ -127,7 +127,7 @@ end
 local preProcessFn = function(modules, change)
     
     local classedModules = classifyModules(modules)
-    
+
     local maxId = 0
     for slotId, module in pairs(modules) do
         module.info = ust.slotInfo(slotId, classedModules)
@@ -161,6 +161,7 @@ local preProcessFn = function(modules, change)
                 }
                 local slotId, dataIds = ust.slotIds(newInfo)
                 modules[slotId] = change.module
+                dump()({slotId, modules[slotId]})
                 for key, slotId in pairs(dataIds) do
                     modules[slotId] = {
                         metadata = {isData = true},
@@ -379,6 +380,8 @@ local updateFn = function(params, closureParams)
     
     params.classedModules = classifyModules(params.modules)
     
+    dump()(params.classedModules)
+    
     for id, info in pairs(params.classedModules) do
         params.modules[info.slotId].info = ust.slotInfo(info.slotId, params.classedModules)
         params.modules[info.slotId].makeData = function(type, data)
@@ -422,6 +425,13 @@ local updateFn = function(params, closureParams)
                 id = slotId,
                 transf = module.info.transf,
                 type = "ust_platform",
+                spacing = {0, 0, 0, 0}
+            })
+        elseif module.metadata.isPlaceholder then
+            insert(result.slots, {
+                id = slotId,
+                transf = module.info.transf,
+                type = "ust_placeholder",
                 spacing = {0, 0, 0, 0}
             })
         elseif module.metadata.isComponent then
