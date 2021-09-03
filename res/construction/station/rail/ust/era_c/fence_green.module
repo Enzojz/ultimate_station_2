@@ -1,0 +1,94 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local ust = require "ust"
+local general = require "ust/general"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+
+local trainstationutil = require "modules/trainstationutil"
+local constructionutil = require "constructionutil"
+
+-- local dump = require "luadump"
+
+local unpack = table.unpack
+local insert = table.insert
+
+local ma = math
+local pi = ma.pi
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local id = params.modules[slotId].info.id
+    local data = params.modules[slotId].info.data
+    local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    -- if n == 0 then n = 1 end
+    local n = 10
+
+    local pts, vec = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
+
+    for i = 1, n do
+        local refPt = pts[i]:avg(pts[i + 1])
+        local refVec = pts[i] - pts[i + 1]
+        local lengthScale = refVec:length() / 2
+        local transf = hTrans
+            * coor.scaleX(lengthScale)
+            * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+            * coor.trans(refPt)
+
+        table.insert(result.models, general.newModel("ust/fences/green_3.mdl", tag, transf));
+    end
+    
+    for i = 1, n + 1 do
+        local refPt = pts[i]
+        local refVec = vec[i]
+        local transf = hTrans
+            * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+            * coor.trans(refPt)
+
+        table.insert(result.models, general.newModel("ust/fences/green_pole_3.mdl", tag, transf));
+    end
+
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_MAIN_BUILDING"),
+            description = _("MENU_MODULE_MAIN_BUILDING_DESC"),
+        },
+        category = {
+            categories = {"Building"},
+        },
+        type = "ust_component_polarised_inner",
+        order = {
+            value = 260,
+        },
+        metadata = {
+			typeName = "ust_component_polarised_inner",
+            isComponent = true,
+            isFence = true,
+            typeId = 24,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

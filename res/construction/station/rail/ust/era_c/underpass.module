@@ -135,6 +135,7 @@ function data()
             value = 260,
         },
         metadata = {
+			typeName = "ust_component",
             isUnderpass = true,
             isComponent = true,
             typeId = 21,

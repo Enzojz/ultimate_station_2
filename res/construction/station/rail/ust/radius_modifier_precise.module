@@ -110,6 +110,7 @@ function data()
             value = 260,
         },
         metadata = {
+			typeName = "ust_modifier",
             isData = true,
             type = 1
         },

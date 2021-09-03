@@ -47,13 +47,13 @@ end
 
 ust.slotInfo = function(slotId, classedModules)
         -- Platform/track
-        -- 1 ~ 2 : 01 : track 02 platform
+        -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
         -- 3 ~ 6 : id
         -- Component
-        -- 1 ~ 2 : 21 : underpass
+        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 23 entry 24 fences
         -- 3 ~ 6 : id
         -- Information
-        -- 1 ~ 2 : 51 x 52 y 53 z 54 radius 55 length 56 width
+        -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 radius 56 is_straight 57 length 58 width
         -- 3 ~ 6 : id
         -- > 6: data
         local slotIdAbs = math.abs(slotId)

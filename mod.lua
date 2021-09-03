@@ -40,6 +40,7 @@
                     mod.type = "ust_track"
                     mod.order.value = 0
                     mod.metadata = {
+                        typeName = "ust_track",
                         isTrack = true,
                         width = track.trackDistance,
                         height = track.railBase + track.railHeight,
@@ -97,6 +98,7 @@
                 mod.type = "ust_component"
                 mod.order.value = 0
                 mod.metadata = {
+                    typeName = "ust_component",
                     isComponent = true,
                     isOverpass = true,
                     typeId = 21,

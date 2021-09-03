@@ -163,14 +163,17 @@ function data()
         category = {
             categories = {"Building"},
         },
-        type = "ust_building",
+        type = "ust_component_polarised_outer",
         order = {
             value = 260,
         },
         metadata = {
+			typeName = "ust_component_polarised_outer",
+            isComponent = true,
             isBuilding = true,
             typeId = 23,
-            width = 5
+            width = 5,
+			spacing = {20, 20, 38, 0}
         },
         
         updateFn = updateFn,

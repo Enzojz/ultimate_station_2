@@ -227,6 +227,7 @@ function data()
             value = 260,
         },
         metadata = {
+			typeName = "ust_component",
             isComponent = true,
             isOverpass = true,
             typeId = 21,

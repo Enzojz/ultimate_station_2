@@ -98,6 +98,7 @@ function data()
             value = 260,
         },
         metadata = {
+			typeName = "ust_placeholder",
             isPlaceholder = true,
             typeId = 3,
             width = 5

@@ -29,7 +29,6 @@ local function classifyModules(params)
         local slotIdAbs = abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 10000
-        m.typeId = type
         if not result[id] then result[id] = {info = {}, slot = {}, metadata = {}} end
         if (type < 20) then
             result[id].type = type
@@ -412,44 +411,26 @@ local updateFn = function(params, closureParams)
     for _, module in pairs(params.modules) do
         params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
     end
-    
+
     for slotId, module in pairs(params.modules) do
-        if module.metadata.isTrack then
+        if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
             insert(result.slots, {
                 id = slotId,
                 transf = module.info.transf,
-                type = "ust_track",
-                spacing = {0, 0, 0, 0}
-            })
-        elseif module.metadata.isPlatform then
-            insert(result.slots, {
-                id = slotId,
-                transf = module.info.transf,
-                type = "ust_platform",
-                spacing = {0, 0, 0, 0}
-            })
-        elseif module.metadata.isPlaceholder then
-            insert(result.slots, {
-                id = slotId,
-                transf = module.info.transf,
-                type = "ust_placeholder",
+                type = module.metadata.typeName,
                 spacing = {0, 0, 0, 0}
             })
         elseif module.metadata.isComponent then
             local info = params.modules[slotId].info
             local id = info.id
             local parent = params.classedModules[id].slotId
-            local module = params.modules[parent]
-            
-            local hRef = params.platformHeight
-            local hVec = coor.xyz(0, 0, hRef)
-            local hTrans = coor.trans(hVec)
+            local m = params.modules[parent]
 
             insert(result.slots, {
                 id = slotId,
-                transf = module.info.transf,
-                type = "ust_component",
-                spacing = {0, 0, 0, 0}
+                transf = m.info.transf,
+                type = module.metadata.typeName,
+                spacing = module.metadata.spacing or {0, 0, 0, 0}
             })
         elseif module.metadata.isData then
             insert(result.slots, {

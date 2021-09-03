@@ -298,16 +298,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         })
     end
     
-    for i = 21, 22 do
-        if not info.comp[i] then
-            insert(result.slots, {
-                id = makeData(i, 0),
-                transf = transfPosC,
-                type = "ust_component",
-                spacing = {0, 0, 0, 0}
-            })
-        end
-    end
+    insert(result.slots, {
+        id = makeData(20, 0),
+        transf = transfPosC,
+        type = "ust_component",
+        spacing = {0, 0, 0, 0}
+    })
     
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
@@ -322,31 +318,66 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             spacing = {0, 0, 0, 0}
         }
     )
-
-
     if not (info.octa[3]) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
         
         insert(
             result.slots, {
-                id = makeData(23, 3),
+                id = makeData(49, 3),
                 transf = transf,
-                type = "ust_building",
+                type = "ust_component_polarised_outer",
                 spacing = {0, 0, 0, 0}
-            }
-    )
+            })
+        
+        insert(
+            result.slots, {
+                id = makeData(48, 3),
+                transf = transf,
+                type = "ust_component_polarised_inner",
+                spacing = {0, 0, 0, 0}
+            })
     end
     
     if not (info.octa[7]) then
         local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
+        
+        insert(
+            result.slots, {
+                id = makeData(49, 7),
+                transf = transf,
+                type = "ust_component_polarised_outer",
+                spacing = {0, 0, 0, 0}
+            })
+        insert(
+            result.slots, {
+                id = makeData(48, 7),
+                transf = transf,
+                type = "ust_component_polarised_inner",
+                spacing = {0, 0, 0, 0}
+            })
     end
     
     if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
         local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
         local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
+        
+        insert(
+            result.slots, {
+                id = makeData(49, 1),
+                transf = transf,
+                type = "ust_component_polarised_outer",
+                spacing = {0, 0, 0, 0}
+            })
+        insert(
+            result.slots, {
+                id = makeData(48, 1),
+                transf = transf,
+                type = "ust_component_polarised_inner",
+                spacing = {0, 0, 0, 0}
+            })
     end
     
     if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
@@ -354,6 +385,21 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
+        
+        insert(
+            result.slots, {
+                id = makeData(49, 5),
+                transf = transf,
+                type = "ust_component_polarised_outer",
+                spacing = {0, 0, 0, 0}
+            })
+        insert(
+            result.slots, {
+                id = makeData(48, 5),
+                transf = transf,
+                type = "ust_component_polarised_inner",
+                spacing = {0, 0, 0, 0}
+            })
     end
     
     
@@ -395,6 +441,7 @@ function data()
             value = 260,
         },
         metadata = {
+            typeName = "ust_platform",
             isPlatform = true,
             typeId = 2,
             width = 5
