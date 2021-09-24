@@ -27,7 +27,15 @@ local rectBase = {
     coor.xyz(-1, 11, 0),
 }
 
+local preUpdateFn = function(modules, change, classedModules, info, data)
+    modules[change.slotId] = nil
+    modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
+end
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    if params == 1 then
+        return preUpdateFn(result, transform, tag, slotId, addModelFn)
+    end
     
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
