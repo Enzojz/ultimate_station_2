@@ -319,7 +319,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         }
     )
     if not (info.octa[3]) then
-        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        local transf = ust.getTranfs(info, 3, metadata.width)
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
         
         insert(
@@ -340,7 +340,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     if not (info.octa[7]) then
-        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        local transf = ust.getTranfs(info, 7, metadata.width)
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
         
         insert(
@@ -360,8 +360,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
-        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+        local transf = ust.getTranfs(info, 1, metadata.width)
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
         
         insert(
@@ -381,9 +380,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
-        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
-        
-        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+        local transf = ust.getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
         
         insert(
