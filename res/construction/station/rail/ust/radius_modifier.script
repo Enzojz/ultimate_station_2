@@ -98,10 +98,17 @@ local preProcessAddRough =
         return -floor(20 / rad)
     end)
 
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info, data)
+    if change.slotId ~= slotId then
+        modules[slotId] = nil
+    end
+end
+
 function data()
     return {
         preProcessAddPrecise = preProcessAddPrecise,
-        preProcessAddRough = preProcessAddRough
+        preProcessAddRough = preProcessAddRough,
+        preProcessPostAdd = preProcessPostAdd
     }
 
 end

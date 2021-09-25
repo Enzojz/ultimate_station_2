@@ -15,7 +15,14 @@ local pi = ma.pi
 local abs = ma.abs
 local pow = ma.pow
 
-local preProcessAdd = function(modules, change, classedModules, info)
+local preProcessRemove = function(modules, change, classedModules, info, data)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
+local preProcessAdd = function(modules, change, classedModules, info, data)
     local maxId = 0
     for slotId, module in pairs(modules) do
         module.info = ust.slotInfo(slotId, classedModules)
@@ -204,6 +211,7 @@ end
 function data()
     return {
         preProcessAdd = preProcessAdd,
+        preProcessRemove = preProcessRemove,
         updateFn = updateFn,
         getModelsFn = function(params)
             return {}

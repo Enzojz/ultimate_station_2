@@ -1,0 +1,66 @@
+local ust = require "ust"
+local insert = table.insert
+
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isPlatform) then
+            local info = module.info
+            local makeData = module.makeData
+            local metadata = module.metadata
+            local pos = info.pos
+            
+            if not (info.octa[3]) then
+                local transf = ust.getTranfs(info, 3, metadata.width)
+                insert(
+                    result.slots, {
+                        id = makeData(48, 3),
+                        transf = transf,
+                        type = "ust_component_polarised_inner",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+            
+            if not (info.octa[7]) then
+                local transf = ust.getTranfs(info, 7, metadata.width)
+                insert(
+                    result.slots, {
+                        id = makeData(48, 7),
+                        transf = transf,
+                        type = "ust_component_polarised_inner",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+            
+            if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+                local transf = ust.getTranfs(info, 1, metadata.width)
+                insert(
+                    result.slots, {
+                        id = makeData(48, 1),
+                        transf = transf,
+                        type = "ust_component_polarised_inner",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+            
+            if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+                local transf = ust.getTranfs(info, 5, metadata.width)
+                insert(
+                    result.slots, {
+                        id = makeData(48, 5),
+                        transf = transf,
+                        type = "ust_component_polarised_inner",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+        end
+    end
+
+end
+
+function data()
+    return {
+        addSlot = addSlot
+    }
+end

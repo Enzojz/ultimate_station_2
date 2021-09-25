@@ -156,7 +156,9 @@ function data()
             typeName = "ust_placeholder",
             isPlaceholder = true,
             typeId = 3,
-            width = 5
+            width = 5,
+            scriptName = "construction/station/rail/ust/era_c/platform",
+            preProcessAdd = "preProcessAdd"
         },
         
         updateFn = updateFn,

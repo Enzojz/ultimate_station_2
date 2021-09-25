@@ -37,7 +37,7 @@ local fitMdl = {
 
 local fns = {
     preProcessAdd = function(modules, change, classedModules, info, data)
-        dump()({ x = info} )
+        dump()({x = info})
         local maxId = 0
         for slotId, module in pairs(modules) do
             module.info = ust.slotInfo(slotId, classedModules)
@@ -94,9 +94,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
     
-    local grid = params.grid
     local pos = info.pos
-    local metadata = params.modules[slotId].metadata
     
     local isTrack = {}
     local isPlatform = {}
@@ -340,8 +338,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
-    local arcs = info.arcs
-    local refArc = arcs.center
     local transfPosC = info.transf
     
     if (info.id ~= 1) then
@@ -376,82 +372,21 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if not (info.octa[3]) then
         local transf = ust.getTranfs(info, 3, metadata.width)
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
-        
-        insert(
-            result.slots, {
-                id = makeData(49, 3),
-                transf = transf,
-                type = "ust_component_polarised_outer",
-                spacing = {0, 0, 0, 0}
-            })
-        
-        insert(
-            result.slots, {
-                id = makeData(48, 3),
-                transf = transf,
-                type = "ust_component_polarised_inner",
-                spacing = {0, 0, 0, 0}
-            })
     end
     
     if not (info.octa[7]) then
         local transf = ust.getTranfs(info, 7, metadata.width)
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
-        
-        insert(
-            result.slots, {
-                id = makeData(49, 7),
-                transf = transf,
-                type = "ust_component_polarised_outer",
-                spacing = {0, 0, 0, 0}
-            })
-        insert(
-            result.slots, {
-                id = makeData(48, 7),
-                transf = transf,
-                type = "ust_component_polarised_inner",
-                spacing = {0, 0, 0, 0}
-            })
     end
     
     if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
         local transf = ust.getTranfs(info, 1, metadata.width)
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
-        
-        insert(
-            result.slots, {
-                id = makeData(49, 1),
-                transf = transf,
-                type = "ust_component_polarised_outer",
-                spacing = {0, 0, 0, 0}
-            })
-        insert(
-            result.slots, {
-                id = makeData(48, 1),
-                transf = transf,
-                type = "ust_component_polarised_inner",
-                spacing = {0, 0, 0, 0}
-            })
     end
     
     if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
         local transf = ust.getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
-        
-        insert(
-            result.slots, {
-                id = makeData(49, 5),
-                transf = transf,
-                type = "ust_component_polarised_outer",
-                spacing = {0, 0, 0, 0}
-            })
-        insert(
-            result.slots, {
-                id = makeData(48, 5),
-                transf = transf,
-                type = "ust_component_polarised_inner",
-                spacing = {0, 0, 0, 0}
-            })
     end
     
     
@@ -498,7 +433,8 @@ function data()
             typeId = 2,
             width = 5,
             scriptName = "construction/station/rail/ust/era_c/platform",
-            preProcessAdd = "preProcessAdd"
+            preProcessAdd = "preProcessAdd",
+            preProcessRemove = "preProcessRemove"
         },
         updateFn = updateFn,
         

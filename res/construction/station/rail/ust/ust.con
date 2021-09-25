@@ -127,8 +127,7 @@ local preProcessFn = function(modules, change)
     local info = ust.slotInfo(change.slotId, classedModules)
     local data = change.slotId > 0 and floor(change.slotId / 1000000) or -floor(-change.slotId / 1000000)
     if change.added then
-        local default = false
-        if change.module.metadata.scriptName and change.module.metadata.preProcessAdd then
+        if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info, data)
         else
             modules[change.slotId] = nil
@@ -136,25 +135,14 @@ local preProcessFn = function(modules, change)
         end
 
         for k, module in pairs(modules) do
-            
-        end
-
-        -- dump()(modules)
-
-        if info.type < 50 then
-            for id, m in pairs(modules) do
-                if m.name == "station/rail/ust/radius_modifier_precise.module" or m.name == "station/rail/ust/radius_modifier_rough.module" then
-                    modules[id] = nil
-                end
+            if (module.metadata and module.metadata.preProcessPostAdd) then
+                game.res.script[module.metadata.scriptName][module.metadata.preProcessPostAdd](modules, change, k, classedModules, info, data)
             end
         end
     else
-        if (info.type <= 2 and data == 0) then
-            for _, slotId in pairs(classedModules[info.id].slot) do
-                modules[slotId] = nil
-            end
-            modules[change.slotId] = nil
-        elseif (info.type >= 20 and info.type < 50)  then
+        if change.module.metadata.preProcessRemove then
+            game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessRemove](modules, change, classedModules, info, data)
+        else
             modules[change.slotId] = nil
         end
     end
@@ -248,10 +236,6 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
-    result.test = {pos = {
-        2, 4, 4, 14
-    }}
-
     -- params.debug = true
     
     params.classedModules = classifyModules(params.modules)
@@ -313,6 +297,12 @@ local updateFn = function(params, closureParams)
                 type = "ust_data",
                 spacing = {0, 0, 0, 0}
             })
+        end
+    end
+
+    for k, s in pairs(game.res.script) do
+        if s.addSlot and k:match("construction/station/rail/ust/") then
+            s.addSlot(params, result)
         end
     end
 

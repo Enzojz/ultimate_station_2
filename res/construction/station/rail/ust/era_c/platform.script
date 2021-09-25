@@ -1,6 +1,13 @@
 local coor = require "ust/coor"
 local ust = require "ust"
 
+local preProcessRemove = function(modules, change, classedModules, info, data)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
 local preProcessAdd = function(modules, change, classedModules, info, data)
     local maxId = 0
     for slotId, module in pairs(modules) do
@@ -46,7 +53,8 @@ end
 
 function data()
     return {
-        preProcessAdd = preProcessAdd
+        preProcessAdd = preProcessAdd,
+        preProcessRemove = preProcessRemove,
     }
 
 end
