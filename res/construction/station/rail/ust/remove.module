@@ -26,7 +26,7 @@ function data()
         },
         
         updateFn = function(modules, change, classedModules, info, _, fn_no)
-            if fn_no == 1 then
+            if fn_no.fn then
                 if info.id ~= 1 then
                     for _, slotId in pairs(classedModules[info.id].slot) do
                         modules[slotId] = nil

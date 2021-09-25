@@ -11,15 +11,14 @@ local bottomConnector = {
     coor.xyz(-2, -6.5, -4)
 }
 
-local preUpdateFn = function(modules, change, classedModules, info, data)
-    modules[change.slotId] = nil
-    modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
-end
+local fns = {
+}
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    if params == 1 then
-        return preUpdateFn(result, transform, tag, slotId, addModelFn)
+    if (params.fn) then
+        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
     end
+    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
@@ -143,7 +142,7 @@ function data()
             value = 260,
         },
         metadata = {
-			typeName = "ust_component",
+            typeName = "ust_component",
             isUnderpass = true,
             isComponent = true,
             typeId = 21,

@@ -10,22 +10,20 @@ local trainstationutil = require "modules/trainstationutil"
 local constructionutil = require "constructionutil"
 
 -- local dump = require "luadump"
-
 local unpack = table.unpack
 local insert = table.insert
 
 local ma = math
 local pi = ma.pi
 
-local preUpdateFn = function(modules, change, classedModules, info, data)
-    modules[change.slotId] = nil
-    modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
-end
+local fns = {
+}
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    if params == 1 then
-        return preUpdateFn(result, transform, tag, slotId, addModelFn)
+    if (params.fn) then
+        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
     end
+    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
@@ -37,9 +35,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     -- if n == 0 then n = 1 end
     local n = 10
-
+    
     local pts, vec = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
-
+    
     for i = 1, n do
         local refPt = pts[i]:avg(pts[i + 1])
         local refVec = pts[i] - pts[i + 1]
@@ -48,7 +46,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             * coor.scaleX(lengthScale)
             * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
             * coor.trans(refPt)
-
+        
         table.insert(result.models, general.newModel("ust/fences/green_3.mdl", tag, transf));
     end
     
@@ -58,7 +56,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local transf = hTrans
             * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
             * coor.trans(refPt)
-
+        
         table.insert(result.models, general.newModel("ust/fences/green_pole_3.mdl", tag, transf));
     end
 
@@ -85,7 +83,7 @@ function data()
             value = 260,
         },
         metadata = {
-			typeName = "ust_component_polarised_inner",
+            typeName = "ust_component_polarised_inner",
             isComponent = true,
             isFence = true,
             typeId = 24,

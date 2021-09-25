@@ -122,18 +122,36 @@ local createTemplateFn = function(params)
 end
 
 local preProcessFn = function(modules, change)
-    
     local classedModules = classifyModules(modules)
 
     local info = ust.slotInfo(change.slotId, classedModules)
     local data = change.slotId > 0 and floor(change.slotId / 1000000) or -floor(-change.slotId / 1000000)
-    
     if change.added then
-        if game.res.module[change.module.name] then
-            game.res.module[change.module.name](modules, change, classedModules, info, data, 1)
+        local default = false
+        if change.module.metadata.scriptName then
+            if game.res.script[change.module.metadata.scriptName].preProcessAdd then
+                game.res.script[change.module.metadata.scriptName].preProcessAdd(modules, change, classedModules, info, data)
+            else
+                default = true
+            end
+        elseif game.res.module[change.module.name] then
+            if game.res.module[change.module.name](modules, change, classedModules, info, data, {fn = "preProcessAdd"}) == false then
+                default = true
+            end
         else
             modules[change.slotId] = change.module
         end
+
+        if default then
+            modules[change.slotId] = nil
+            modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
+        end
+
+        for k, module in pairs(modules) do
+            
+        end
+
+        -- dump()(modules)
 
         if info.type < 50 then
             for id, m in pairs(modules) do

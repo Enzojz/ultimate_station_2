@@ -11,66 +11,44 @@ local abs = ma.abs
 local pow = math.pow
 local floor = math.floor
 
-local preUpdateFn = function(modules, change, classedModules, info, data)
-    if info.type == 80 and data == 1 then
-        modules[ust.base(info.id, 80)] = nil
-    elseif info.type == 80 and data == 0 then
-        modules[ust.base(info.id, 80)] = change.module
-    elseif info.type >= 81 and info.type <= 86 then
-        ust.gridization(modules, classedModules)
-        local id = info.id
-        local m = modules[classedModules[id].slotId]
-        
-        if classedModules[id].slot[54] then
-            modules[classedModules[id].slot[54]] = nil
-        end
-        
-        if classedModules[id].slot[55] then
-            modules[classedModules[id].slot[55]] = nil
-        end
-        
-        if classedModules[id].slot[56] then
-            modules[classedModules[id].slot[56]] = nil
-        end
-        
-        modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
-        
-        if info.type >= 81 and info.type <= 84 then
-            local radius = m.info.radius
+local fns = {
+    preProcessAdd = function(modules, change, classedModules, info, data)
+        if info.type == 80 and data == 1 then
+            modules[ust.base(info.id, 80)] = nil
+        elseif info.type == 80 and data == 0 then
+            modules[ust.base(info.id, 80)] = change.module
+        elseif info.type >= 81 and info.type <= 86 then
+            ust.gridization(modules, classedModules)
+            local id = info.id
+            local m = modules[classedModules[id].slotId]
             
-            local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
-            if m.info.radius == 10e8 or m.info.straight then
-                radius = delta
-            else
-                radius = radius + delta
+            if classedModules[id].slot[54] then
+                modules[classedModules[id].slot[54]] = nil
             end
             
-            if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
+            if classedModules[id].slot[55] then
+                modules[classedModules[id].slot[55]] = nil
+            end
             
-            local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
-            modules[addSlot] = {
-                metadata = {isData = true},
-                name = "station/rail/ust/data.module",
-                updateScript = {
-                    fileName = "",
-                    params = {}
-                },
-                variant = 0
-            }
+            if classedModules[id].slot[56] then
+                modules[classedModules[id].slot[56]] = nil
+            end
             
-            local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
-            modules[addSlot] = {
-                metadata = {isData = true},
-                name = "station/rail/ust/data.module",
-                updateScript = {
-                    fileName = "",
-                    params = {}
-                },
-                variant = 0
-            }
-        elseif info.type == 85 or info.type == 86 then
-            if data == 0 then
-                local addSlot = ust.mixData(ust.base(id, 56), 0)
+            modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
+            
+            if info.type >= 81 and info.type <= 84 then
+                local radius = m.info.radius
+                
+                local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
+                if m.info.radius == 10e8 or m.info.straight then
+                    radius = delta
+                else
+                    radius = radius + delta
+                end
+                
+                if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
+                
+                local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/data.module",
@@ -80,15 +58,40 @@ local preUpdateFn = function(modules, change, classedModules, info, data)
                     },
                     variant = 0
                 }
+                
+                local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
+                modules[addSlot] = {
+                    metadata = {isData = true},
+                    name = "station/rail/ust/data.module",
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            elseif info.type == 85 or info.type == 86 then
+                if data == 0 then
+                    local addSlot = ust.mixData(ust.base(id, 56), 0)
+                    modules[addSlot] = {
+                        metadata = {isData = true},
+                        name = "station/rail/ust/data.module",
+                        updateScript = {
+                            fileName = "",
+                            params = {}
+                        },
+                        variant = 0
+                    }
+                end
             end
         end
     end
-end
+}
 
-local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
-    if params == 1 then
-        return preUpdateFn(result, transform, tag, slotId, addModelFn)
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    if (params.fn) then
+        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
     end
+    
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
@@ -174,7 +177,7 @@ function data()
             yearFrom = 0,
             yearTo = 0,
         },
-		visible = false,
+        visible = false,
         buildMode = "SINGLE",
         cost = {
             price = 0,
@@ -184,14 +187,14 @@ function data()
             description = _("MENU_RADIUS_MODIFIER_DESC"),
         },
         category = {
-            categories = { "modifiers" },
+            categories = {"modifiers"},
         },
         type = "ust_modifier",
         order = {
             value = 260,
         },
         metadata = {
-			typeName = "ust_modifier",
+            typeName = "ust_modifier",
             isData = true,
             type = 1
         },

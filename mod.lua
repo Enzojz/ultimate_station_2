@@ -44,7 +44,8 @@
                         isTrack = true,
                         width = track.trackDistance,
                         height = track.railBase + track.railHeight,
-                        typeId = 1
+                        typeId = 1,
+                        scriptName = "construction/station/rail/ust/track"
                     }
                     
                     mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}
@@ -102,7 +103,8 @@
                     isComponent = true,
                     isOverpass = true,
                     typeId = 21,
-                    width = 5
+                    width = 5,
+                    scriptName = "construction/station/rail/ust/era_c/overpass"
                 }
                 
                 mod.category.categories = {"component"}
@@ -116,6 +118,12 @@
                 api.res.moduleRep.add(mod.fileName, mod, true)
             end
 
+            -- local moduleList = 
+            -- for k, v in pairs(api.res.moduleRep.getAll()) do
+            --     if v:match("construction/station/rail/ust/") then
+                
+            --     end
+            -- end
             
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"
