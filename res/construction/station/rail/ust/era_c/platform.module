@@ -5,7 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
--- local dump = require "luadump"
+local dump = require "luadump"
 local unpack = table.unpack
 local insert = table.insert
 
@@ -37,6 +37,7 @@ local fitMdl = {
 
 local fns = {
     preProcessAdd = function(modules, change, classedModules, info, data)
+        dump()({ x = info} )
         local maxId = 0
         for slotId, module in pairs(modules) do
             module.info = ust.slotInfo(slotId, classedModules)
@@ -82,7 +83,12 @@ local fns = {
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if (params.fn) then
-        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
+        if (fns and fns[params.fn]) then
+            fns[params.fn](result, transform, tag, slotId, addModelFn)
+            return true
+        else
+            return false
+        end
     end
     
     local info = params.modules[slotId].info
@@ -491,8 +497,9 @@ function data()
             isPlatform = true,
             typeId = 2,
             width = 5,
+            scriptName = "construction/station/rail/ust/era_c/platform",
+            preProcessAdd = "preProcessAdd"
         },
-        
         updateFn = updateFn,
         
         getModelsFn = function(params)

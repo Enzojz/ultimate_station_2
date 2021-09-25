@@ -45,7 +45,8 @@
                         width = track.trackDistance,
                         height = track.railBase + track.railHeight,
                         typeId = 1,
-                        scriptName = "construction/station/rail/ust/track"
+                        scriptName = "construction/station/rail/ust/track",
+                        preProcessAdd = "preProcessAdd"
                     }
                     
                     mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}
@@ -103,8 +104,7 @@
                     isComponent = true,
                     isOverpass = true,
                     typeId = 21,
-                    width = 5,
-                    scriptName = "construction/station/rail/ust/era_c/overpass"
+                    width = 5
                 }
                 
                 mod.category.categories = {"component"}

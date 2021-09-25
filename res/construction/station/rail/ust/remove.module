@@ -22,20 +22,12 @@ function data()
         },
         metadata = {
 			typeName = "ust_remove",
-            isData = true
+            isData = true,
+            scriptName = "construction/station/rail/ust/remove",
+            preProcessAdd = "preProcessAdd"
         },
         
-        updateFn = function(modules, change, classedModules, info, _, fn_no)
-            if fn_no.fn then
-                if info.id ~= 1 then
-                    for _, slotId in pairs(classedModules[info.id].slot) do
-                        modules[slotId] = nil
-                    end
-                    modules[classedModules[info.id].slotId] = nil
-                    modules[change.slotId] = nil
-                end
-            end
-        end,
+        updateFn = function() end,
         
         getModelsFn = function(params)
             return {}

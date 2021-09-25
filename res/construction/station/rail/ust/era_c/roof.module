@@ -20,14 +20,7 @@ local roofFitModels = {
     fitModels.edge
 }
 
-local fns = {
-}
-
-local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    if (params.fn) then
-        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
-    end
-    
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)

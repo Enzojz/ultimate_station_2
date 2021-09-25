@@ -117,14 +117,7 @@ local mdlList = pipe.new
     + {config.roof_head}
     + {config.main}
 
-local fns = {
-}
-
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    if (params.fn) then
-        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
-    end
-    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef - 0.8)
     local hTrans = coor.trans(hVec)

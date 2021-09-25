@@ -59,7 +59,12 @@ local fns = {
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if (params.fn) then
-        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
+        if (fns and fns[params.fn]) then
+            fns[params.fn](result, transform, tag, slotId, addModelFn)
+            return true
+        else
+            return false
+        end
     end
     
     

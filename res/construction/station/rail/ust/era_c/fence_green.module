@@ -16,14 +16,7 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
-local fns = {
-}
-
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    if (params.fn) then
-        return (fns and fns[params.fn]) and fns[params.fn](result, transform, tag, slotId, addModelFn) or false
-    end
-    
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
@@ -61,6 +54,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
 
 end
+
 function data()
     return {
         availability = {
