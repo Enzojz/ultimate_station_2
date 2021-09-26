@@ -1,12 +1,7 @@
 local coor = require "ust/coor"
 local ust = require "ust"
 
-local preProcessRemove = function(modules, change, classedModules, info, data)
-    for _, slotId in pairs(classedModules[info.id].slot) do
-        modules[slotId] = nil
-    end
-    modules[change.slotId] = nil
-end
+local insert = table.insert
 
 local preProcessAdd = function(modules, change, classedModules, info, data)
     local maxId = 0
@@ -51,10 +46,83 @@ local preProcessAdd = function(modules, change, classedModules, info, data)
     end
 end
 
+local slotSetup = function(params, result, slotId)
+    local module = params.modules[slotId]
+    local info = params.modules[slotId].info
+    local makeData = params.modules[slotId].makeData
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    local transfPosC = info.transf
+    
+    insert(result.slots, {
+        id = slotId,
+        transf = module.info.transf,
+        type = module.metadata.typeName,
+        spacing = {0, 0, 0, 0}
+    })
+    
+    if (info.id ~= 1) then
+        insert(result.slots, {
+            id = makeData(99, 0),
+            transf = transfPosC,
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+    
+    insert(result.slots, {
+        id = makeData(20, 0),
+        transf = transfPosC,
+        type = "ust_component",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    ust.initSlotGrid(params, pos)
+    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
+    
+    -- SLot to replace itself
+    insert(
+        result.slots,
+        {
+            id = makeData(2, 9),
+            transf = transfPosC,
+            type = "ust_platform",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    if not (info.octa[3]) then
+        local transf = ust.getTranfs(info, 3, metadata.width)
+        newTopologySlots(pos.x + 1, pos.y, transf, 3)
+    end
+    
+    if not (info.octa[7]) then
+        local transf = ust.getTranfs(info, 7, metadata.width)
+        newTopologySlots(pos.x - 1, pos.y, transf, 7)
+    end
+    
+    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+        local transf = ust.getTranfs(info, 1, metadata.width)
+        newTopologySlots(pos.x, pos.y + 1, transf, 1)
+    end
+    
+    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+        local transf = ust.getTranfs(info, 5, metadata.width)
+        newTopologySlots(pos.x, pos.y - 1, transf, 5)
+    end
+end
+
+local preProcessRemove = function(modules, change, classedModules, info, data)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
 function data()
     return {
         preProcessAdd = preProcessAdd,
         preProcessRemove = preProcessRemove,
+        slotSetup = slotSetup
     }
 
 end

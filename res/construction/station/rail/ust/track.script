@@ -15,12 +15,6 @@ local pi = ma.pi
 local abs = ma.abs
 local pow = ma.pow
 
-local preProcessRemove = function(modules, change, classedModules, info, data)
-    for _, slotId in pairs(classedModules[info.id].slot) do
-        modules[slotId] = nil
-    end
-    modules[change.slotId] = nil
-end
 
 local preProcessAdd = function(modules, change, classedModules, info, data)
     local maxId = 0
@@ -65,12 +59,91 @@ local preProcessAdd = function(modules, change, classedModules, info, data)
     end
 end
 
+local preProcessRemove = function(modules, change, classedModules, info, data)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
+local slotSetup = function(params, result, slotId)
+    local module = params.modules[slotId]
+    local info = params.modules[slotId].info
+    local makeData = params.modules[slotId].makeData
+
+    local arcs = info.arcs
+    local transfPosC = info.transf
+
+    local pos = info.pos
+    local metadata = params.modules[slotId].metadata
+    local refArc = arcs.center
+    
+    ust.initSlotGrid(params, pos)
+    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
+    
+    insert(result.slots, {
+        id = slotId,
+        transf = module.info.transf,
+        type = module.metadata.typeName,
+        spacing = {0, 0, 0, 0}
+    })
+    
+    table.insert(
+        result.slots,
+        {
+            id = makeData(1, 9),
+            transf = transfPosC,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    if not (info.octa[3]) then
+        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        newTopologySlots(pos.x + 1, pos.y, transf, 3)
+    end
+    
+    if not (info.octa[7]) then
+        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        newTopologySlots(pos.x - 1, pos.y, transf, 7)
+    end
+    
+    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+        newTopologySlots(pos.x, pos.y + 1, transf, 1)
+    end
+    
+    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+        newTopologySlots(pos.x, pos.y - 1, transf, 5)
+    end
+    
+    
+    if not params.anyRadiusModifiable then
+        table.insert(result.slots, {
+            id = makeData(80, 0),
+            transf = transfPosC,
+            type = "ust_modifier",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+    
+    if (info.id ~= 1) then
+        insert(result.slots, {
+            id = makeData(99, 0),
+            transf = transfPosC,
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+end
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)    
     local trackType = closureParams.trackType
     local catenary = closureParams.catenary
     
     local info = params.modules[slotId].info
-    local makeData = params.modules[slotId].makeData
     
     local zOffset = params.modules[slotId].metadata.height - params.lowestHeight
     
@@ -132,64 +205,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         params.edgeGroup[slotId] = func.seq(#nodes - 12, #nodes - 1)
     end
     
-    local arcs = info.arcs
-    local transfPosC = info.transf
     
-    if not params.anyRadiusModifiable then
-        table.insert(result.slots, {
-            id = makeData(80, 0),
-            transf = transfPosC,
-            type = "ust_modifier",
-            spacing = {0, 0, 0, 0}
-        })
-    end
-    
-    if (info.id ~= 1) then
-        insert(result.slots, {
-            id = makeData(99, 0),
-            transf = transfPosC,
-            type = "ust_remove",
-            spacing = {0, 0, 0, 0}
-        })
-    end
-    
-    local pos = info.pos
-    local metadata = params.modules[slotId].metadata
-    local refArc = arcs.center
-    
-    ust.initSlotGrid(params, pos)
-    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
-    
-    table.insert(
-        result.slots,
-        {
-            id = makeData(1, 9),
-            transf = transfPosC,
-            type = "ust_track",
-            spacing = {0, 0, 0, 0}
-        }
-    )
-    if not (info.octa[3]) then
-        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
-        newTopologySlots(pos.x + 1, pos.y, transf, 3)
-    end
-    
-    if not (info.octa[7]) then
-        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
-        newTopologySlots(pos.x - 1, pos.y, transf, 7)
-    end
-    
-    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
-        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
-        newTopologySlots(pos.x, pos.y + 1, transf, 1)
-    end
-    
-    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
-        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
-        newTopologySlots(pos.x, pos.y - 1, transf, 5)
-    end
     
     
     if params.debug then
@@ -212,6 +228,7 @@ function data()
     return {
         preProcessAdd = preProcessAdd,
         preProcessRemove = preProcessRemove,
+        slotSetup = slotSetup,
         updateFn = updateFn,
         getModelsFn = function(params)
             return {}

@@ -1,0 +1,14 @@
+local coor = require "ust/coor"
+function data()
+    return {
+        slotSetup = function(params, result, slotId)
+            table.insert(result.slots, {
+                id = slotId,
+                transf = coor.I(),
+                type = "ust_data",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    }
+
+end

@@ -4,7 +4,7 @@ local coor = require "ust/coor"
 local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
+-- local dump = require "luadump"
 
 local fitModels = {
     inter = ust.fitModel(2, 1, 7, true, true),

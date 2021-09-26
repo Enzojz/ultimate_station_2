@@ -47,7 +47,8 @@
                         typeId = 1,
                         scriptName = "construction/station/rail/ust/track",
                         preProcessAdd = "preProcessAdd",
-                        preProcessRemove = "preProcessRemove"
+                        preProcessRemove = "preProcessRemove",
+                        slotSetup = "slotSetup"
                     }
                     
                     mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}

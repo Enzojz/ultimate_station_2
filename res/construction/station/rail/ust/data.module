@@ -21,7 +21,9 @@ function data()
             value = 260,
         },
         metadata = {
-            isData = true
+            isData = true,
+            scriptName = "construction/station/rail/ust/data",
+            slotSetup = "slotSetup"
         },
         updateFn = function() end,
         getModelsFn = function() return {} end

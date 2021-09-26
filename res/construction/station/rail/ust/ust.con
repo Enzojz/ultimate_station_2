@@ -271,13 +271,8 @@ local updateFn = function(params, closureParams)
     end
 
     for slotId, module in pairs(params.modules) do
-        if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
-            insert(result.slots, {
-                id = slotId,
-                transf = module.info.transf,
-                type = module.metadata.typeName,
-                spacing = {0, 0, 0, 0}
-            })
+        if module.metadata.slotSetup then
+            game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
         elseif module.metadata.isComponent then
             local info = params.modules[slotId].info
             local id = info.id
@@ -290,16 +285,9 @@ local updateFn = function(params, closureParams)
                 type = module.metadata.typeName,
                 spacing = module.metadata.spacing or {0, 0, 0, 0}
             })
-        elseif module.metadata.isData then
-            insert(result.slots, {
-                id = slotId,
-                transf = coor.I(),
-                type = "ust_data",
-                spacing = {0, 0, 0, 0}
-            })
         end
     end
-
+    
     for k, s in pairs(game.res.script) do
         if s.addSlot and k:match("construction/station/rail/ust/") then
             s.addSlot(params, result)
