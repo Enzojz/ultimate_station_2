@@ -70,13 +70,7 @@ local slotSetup = function(params, result, slotId)
         })
     end
     
-    insert(result.slots, {
-        id = makeData(20, 0),
-        transf = transfPosC,
-        type = "ust_component",
-        spacing = {0, 0, 0, 0}
-    })
-    
+     
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     

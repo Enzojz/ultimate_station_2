@@ -257,7 +257,7 @@ local updateFn = function(params, closureParams)
     params.platformHeight = params.lowestHeight + hPlatformList[params.hPlatform + 1] * 0.001
 
     params.slotGrid = {}
-    
+
     params.trackGroup = {}
     params.platformGroup = {}
     params.trackPlatformGroup = {}
@@ -267,24 +267,12 @@ local updateFn = function(params, closureParams)
     
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
-        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
+        params.anyRadiusModifiable = params.anyRadiusModifiable or (module.info and module.info.canModifyRadius)
     end
 
     for slotId, module in pairs(params.modules) do
         if module.metadata.slotSetup then
             game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
-        elseif module.metadata.isComponent then
-            local info = params.modules[slotId].info
-            local id = info.id
-            local parent = params.classedModules[id].slotId
-            local m = params.modules[parent]
-
-            insert(result.slots, {
-                id = slotId,
-                transf = m.info.transf,
-                type = module.metadata.typeName,
-                spacing = module.metadata.spacing or {0, 0, 0, 0}
-            })
         end
     end
     
@@ -295,12 +283,13 @@ local updateFn = function(params, closureParams)
     end
 
     result.terminateConstructionHook = function()
+        dump()(result.slots)
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then
                 local edge = func.map(track, function(t) return params.edgeGroup[t] end)
                 if (platform.right) then
-                    table.insert(
+                    insert(
                         result.terminalGroups,
                         {
                             terminals = func.map(platform.models, function(p) return {p, 0} end),
@@ -310,7 +299,7 @@ local updateFn = function(params, closureParams)
                 end
                 
                 if (platform.left) then
-                    table.insert(
+                    insert(
                         result.terminalGroups,
                         {
                             terminals = func.map(platform.models, function(p) return {p, 0} end),

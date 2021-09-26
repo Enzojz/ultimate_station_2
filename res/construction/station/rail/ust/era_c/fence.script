@@ -1,6 +1,6 @@
 local ust = require "ust"
 local insert = table.insert
-
+-- local dump = require "luadump"
 
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
@@ -17,7 +17,7 @@ local addSlot = function(params, result)
                     result.slots, {
                         id = makeData(48, 3),
                         transf = transf,
-                        type = "ust_component_polarised_inner",
+                        type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end
@@ -28,7 +28,7 @@ local addSlot = function(params, result)
                     result.slots, {
                         id = makeData(48, 7),
                         transf = transf,
-                        type = "ust_component_polarised_inner",
+                        type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end
@@ -39,7 +39,7 @@ local addSlot = function(params, result)
                     result.slots, {
                         id = makeData(48, 1),
                         transf = transf,
-                        type = "ust_component_polarised_inner",
+                        type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end
@@ -50,7 +50,7 @@ local addSlot = function(params, result)
                     result.slots, {
                         id = makeData(48, 5),
                         transf = transf,
-                        type = "ust_component_polarised_inner",
+                        type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end

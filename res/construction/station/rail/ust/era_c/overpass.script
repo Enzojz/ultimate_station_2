@@ -4,7 +4,9 @@ local coor = require "ust/coor"
 local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
--- local dump = require "luadump"
+local dump = require "luadump"
+
+local insert = table.insert
 
 local fitModels = {
     inter = ust.fitModel(2, 1, 7, true, true),
@@ -26,6 +28,25 @@ local rectBase = {
     coor.xyz(1, 11, 0),
     coor.xyz(-1, 11, 0),
 }
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isPlatform) then
+            local info = module.info
+            local makeData = module.makeData
+            local transf = info.transf
+            
+            insert(result.slots, {
+                id = makeData(21, 0),
+                transf = transf,
+                type = "ust_passage",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+
+end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
     local hRef = params.platformHeight
@@ -197,16 +218,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         {
             id = makeData(21, 1),
             transf = coor.transZ(8) * centerTransf,
-            type = "ust_component",
+            type = "ust_passage",
             spacing = {0, 0, 0, 0}
         }
     )
-    
-    
 end
 
 function data()
     return {
+        addSlot = addSlot,
         updateFn = updateFn,
         getModelsFn = function(params)
             return {}

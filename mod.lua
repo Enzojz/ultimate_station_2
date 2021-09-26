@@ -99,10 +99,10 @@
                 mod.description.description = _("MENU_MODULE_PLATFORM_OVERPASS_DESC")
                 mod.description.icon =  string.format("ui/construction/station/rail/ust/era_c/%s.tga", params.filename)
                 
-                mod.type = "ust_component"
+                mod.type = "ust_passage"
                 mod.order.value = 0
                 mod.metadata = {
-                    typeName = "ust_component",
+                    typeName = "ust_passage",
                     isComponent = true,
                     isOverpass = true,
                     typeId = 21,

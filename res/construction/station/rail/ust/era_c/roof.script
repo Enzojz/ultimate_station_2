@@ -1,0 +1,29 @@
+local coor = require "ust/coor"
+
+local insert = table.insert
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isPlatform) then
+            local info = module.info
+            local makeData = module.makeData
+            local transf = info.transf
+            
+            insert(result.slots, {
+                id = makeData(22, 0),
+                transf = transf,
+                type = "ust_roof",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+
+end
+
+function data()
+    return {
+        addSlot = addSlot,
+    }
+
+end

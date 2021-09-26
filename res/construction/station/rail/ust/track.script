@@ -88,7 +88,7 @@ local slotSetup = function(params, result, slotId)
         spacing = {0, 0, 0, 0}
     })
     
-    table.insert(
+    insert(
         result.slots,
         {
             id = makeData(1, 9),

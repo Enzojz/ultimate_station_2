@@ -107,7 +107,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         {
             id = makeData(22, 2),
             transf = trans,
-            type = "ust_component",
+            type = "ust_roof",
             spacing = {0, 0, 0, 0}
         }
 )
@@ -129,12 +129,12 @@ function data()
         category = {
             categories = {"component"},
         },
-        type = "ust_component",
+        type = "ust_roof",
         order = {
             value = 260,
         },
         metadata = {
-            typeName = "ust_component",
+            typeName = "ust_roof",
             isRoof = true,
             isComponent = true,
             typeId = 22,

@@ -72,12 +72,12 @@ function data()
         category = {
             categories = {"Building"},
         },
-        type = "ust_component_polarised_inner",
+        type = "ust_component_fence",
         order = {
             value = 260,
         },
         metadata = {
-            typeName = "ust_component_polarised_inner",
+            typeName = "ust_component_fence",
             isComponent = true,
             isFence = true,
             typeId = 24,
