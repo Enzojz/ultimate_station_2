@@ -2,12 +2,10 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
 local ust = require "ust"
-
-local unpack = table.unpack
+local dump = require "luadump"
 local insert = table.insert
 local ma = math
 local pi = ma.pi
-local abs = ma.abs
 local pow = math.pow
 local floor = math.floor
 
@@ -99,16 +97,32 @@ local preProcessAddRough =
     end)
 
 local preProcessPostAdd = function(modules, change, slotId, classedModules, info, data)
-    if change.slotId ~= slotId then
+    if info.type < 50 then
         modules[slotId] = nil
     end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
 end
 
 function data()
     return {
         preProcessAddPrecise = preProcessAddPrecise,
         preProcessAddRough = preProcessAddRough,
-        preProcessPostAdd = preProcessPostAdd
+        preProcessPostAdd = preProcessPostAdd,
+        slotSetup = slotSetup
     }
 
 end

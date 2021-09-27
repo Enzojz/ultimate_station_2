@@ -119,7 +119,8 @@ function data()
             type = 1,
             scriptName = "construction/station/rail/ust/radius_modifier",
             preProcessAdd = "preProcessAddPrecise",
-            preProcessPostAdd = "preProcessPostAdd"
+            preProcessPostAdd = "preProcessPostAdd",
+            slotSetup = "slotSetup"
         },
         
         updateFn = updateFn,

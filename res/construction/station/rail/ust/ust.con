@@ -130,8 +130,13 @@ local preProcessFn = function(modules, change)
         if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info, data)
         else
-            modules[change.slotId] = nil
-            modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
+            if data == 1 then
+                modules[change.slotId] = nil
+                modules[ust.base(info.id, change.module.metadata.typeId)] = change.module
+            else
+                modules[change.slotId] = nil
+                modules[ust.mixData(ust.base(info.id, change.module.metadata.typeId), data)] = change.module
+            end
         end
 
         for k, module in pairs(modules) do
@@ -236,7 +241,7 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
-    -- params.debug = true
+    params.debug = true
     
     params.classedModules = classifyModules(params.modules)
 
@@ -267,7 +272,7 @@ local updateFn = function(params, closureParams)
     
     params.anyRadiusModifiable = false
     for _, module in pairs(params.modules) do
-        params.anyRadiusModifiable = params.anyRadiusModifiable or (module.info and module.info.canModifyRadius)
+        params.anyRadiusModifiable = params.anyRadiusModifiable or module.info.canModifyRadius
     end
 
     for slotId, module in pairs(params.modules) do
@@ -283,7 +288,6 @@ local updateFn = function(params, closureParams)
     end
 
     result.terminateConstructionHook = function()
-        dump()(result.slots)
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then

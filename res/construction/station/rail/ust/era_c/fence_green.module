@@ -24,7 +24,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local data = params.modules[slotId].info.data
     local info = params.modules[params.classedModules[id].slotId].info
-    local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     -- if n == 0 then n = 1 end
     local n = 10

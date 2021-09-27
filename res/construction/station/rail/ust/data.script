@@ -2,9 +2,14 @@ local coor = require "ust/coor"
 function data()
     return {
         slotSetup = function(params, result, slotId)
+            local info = params.modules[slotId].info
+            local id = info.id
+            local parent = params.classedModules[id].slotId
+            local m = params.modules[parent]
+        
             table.insert(result.slots, {
                 id = slotId,
-                transf = coor.I(),
+                transf = m.info.transf,
                 type = "ust_data",
                 spacing = {0, 0, 0, 0}
             })
