@@ -14,10 +14,10 @@ local addSlot = function(params, result)
                 local transf = ust.getTranfs(info, 3, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(49, 3),
+                        id = makeData(23, 3),
                         transf = transf,
-                        type = "ust_component_main_40",
-                        spacing = {0, 0, 0, 0}
+                        type = "ust_component_main_20",
+                        spacing = {1, 1, 12, 12}
                     })
             end
             
@@ -25,10 +25,10 @@ local addSlot = function(params, result)
                 local transf = ust.getTranfs(info, 7, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(49, 7),
+                        id = makeData(23, 7),
                         transf = transf,
-                        type = "ust_component_main_40",
-                        spacing = {0, 0, 0, 0}
+                        type = "ust_component_main_20",
+                        spacing = {1, 1, 12, 12}
                     })
             end
             
@@ -36,10 +36,10 @@ local addSlot = function(params, result)
                 local transf = ust.getTranfs(info, 1, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(49, 1),
+                        id = makeData(23, 1),
                         transf = transf,
-                        type = "ust_component_main_40",
-                        spacing = {0, 0, 0, 0}
+                        type = "ust_component_main_20",
+                        spacing = {12, 12, 1, 1}
                     })
             end
             
@@ -47,10 +47,10 @@ local addSlot = function(params, result)
                 local transf = ust.getTranfs(info, 5, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(49, 5),
+                        id = makeData(23, 5),
                         transf = transf,
-                        type = "ust_component_main_40",
-                        spacing = {0, 0, 0, 0}
+                        type = "ust_component_main_20",
+                        spacing = {12, 12, 1, 1}
                     })
             end
         end

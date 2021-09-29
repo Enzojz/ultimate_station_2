@@ -130,7 +130,7 @@ local preProcessFn = function(modules, change)
         if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info, data)
         else
-            if data == 1 then
+            if data == -1 then
                 modules[change.slotId] = nil
                 modules[ust.base(info.id, change.module.metadata.typeId)] = change.module
             else

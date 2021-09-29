@@ -1,7 +1,8 @@
 local ust = require "ust"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
 local insert = table.insert
 -- local dump = require "luadump"
-
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -11,33 +12,48 @@ local addSlot = function(params, result)
             local metadata = module.metadata
             local pos = info.pos
             
-            if not (info.octa[3]) then
-                local transf = ust.getTranfs(info, 3, metadata.width)
-                insert(
-                    result.slots, {
-                        id = makeData(48, 3),
-                        transf = transf,
-                        type = "ust_component_fence",
-                        spacing = {0, 0, 0, 0}
-                    })
-            end
+            local n = 2
             
-            if not (info.octa[7]) then
-                local transf = ust.getTranfs(info, 7, metadata.width)
-                insert(
-                    result.slots, {
-                        id = makeData(48, 7),
-                        transf = transf,
-                        type = "ust_component_fence",
-                        spacing = {0, 0, 0, 0}
-                    })
-            end
+            local ptsL, vecL = ust.basePts(info.arcs.left, n)
+            local ptsR, vecR = ust.basePts(info.arcs.right, n)
+            
+            local refPtL = ptsL[2]
+            local refVecL = vecL[2]
+            
+            local transfL =
+                quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVecL):mRot()
+                * coor.trans(refPtL)
+            
+            insert(
+                result.slots, {
+                    id = makeData(24, 7),
+                    transf = coor.scale(coor.xyz(5, 0.2, 1)) * transfL,
+                    type = "ust_component_fence",
+                    spacing = {0, 0, 0, 0}
+                })
+            
+            
+            local refPtR = ptsR[2]
+            local refVecR = vecR[2]
+            
+            local transfR =
+                quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVecR):mRot()
+                * coor.trans(refPtR)
+            
+            insert(
+                result.slots, {
+                    id = makeData(24, 3),
+                    transf = coor.scale(coor.xyz(5, 0.2, 1)) * transfR,
+                    type = "ust_component_fence",
+                    spacing = {0, 0, 0, 0}
+                })
+            
             
             if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
                 local transf = ust.getTranfs(info, 1, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(48, 1),
+                        id = makeData(24, 1),
                         transf = transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
@@ -48,7 +64,7 @@ local addSlot = function(params, result)
                 local transf = ust.getTranfs(info, 5, metadata.width)
                 insert(
                     result.slots, {
-                        id = makeData(48, 5),
+                        id = makeData(24, 5),
                         transf = transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}

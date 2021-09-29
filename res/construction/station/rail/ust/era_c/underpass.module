@@ -106,7 +106,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     table.insert(
         result.slots,
         {
-            id = makeData(21, 1),
+            id = makeData(21, -1),
             transf = trans,
             type = "ust_passage",
             spacing = {0, 0, 0, 0}

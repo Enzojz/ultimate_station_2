@@ -174,12 +174,12 @@ function data()
         category = {
             categories = {"Building"},
         },
-        type = "ust_component_main_40",
+        type = "ust_component_main_20",
         order = {
             value = 260,
         },
         metadata = {
-            typeName = "ust_component_main_40",
+            typeName = "ust_component_main_20",
             isComponent = true,
             isBuilding = true,
             typeId = 23,
