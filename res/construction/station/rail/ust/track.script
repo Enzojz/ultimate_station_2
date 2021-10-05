@@ -25,7 +25,7 @@ local preProcessAdd = function(modules, change, classedModules, info, data)
         end
     end
     
-    if (data == 9) then
+    if (data == -1) then
         local id = info.id
         local slotId = classedModules[id].slotId
         modules[slotId].name = change.module.name
@@ -78,9 +78,6 @@ local slotSetup = function(params, result, slotId)
     local metadata = params.modules[slotId].metadata
     local refArc = arcs.center
     
-    ust.initSlotGrid(params, pos)
-    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
-    
     insert(result.slots, {
         id = slotId,
         transf = module.info.transf,
@@ -88,15 +85,28 @@ local slotSetup = function(params, result, slotId)
         spacing = {0, 0, 0, 0}
     })
     
+    if (info.id ~= 1) then
+        insert(result.slots, {
+            id = makeData(2, -2),
+            transf = transfPosC,
+            type = "ust_remove",
+            spacing = {0, 0, 0, 0}
+        })
+    end
+
     insert(
         result.slots,
         {
-            id = makeData(1, 9),
+            id = makeData(1, -1),
             transf = transfPosC,
             type = "ust_track",
             spacing = {0, 0, 0, 0}
         }
     )
+    
+    ust.initSlotGrid(params, pos)
+    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
+    
     if not (info.octa[3]) then
         local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
@@ -129,14 +139,6 @@ local slotSetup = function(params, result, slotId)
         })
     end
     
-    if (info.id ~= 1) then
-        insert(result.slots, {
-            id = makeData(99, 0),
-            transf = transfPosC,
-            type = "ust_remove",
-            spacing = {0, 0, 0, 0}
-        })
-    end
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)    

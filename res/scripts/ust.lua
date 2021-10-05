@@ -17,10 +17,6 @@ local unpack = table.unpack
 local min = math.min
 
 ust.infi = 1e8
-ust.typeList = {
-    [1] = "ust_track",
-    [2] = "ust_platform",
-}
 
 ust.base = function(id, type)
     return id * 100 + type

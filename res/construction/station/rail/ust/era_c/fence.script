@@ -49,23 +49,36 @@ local addSlot = function(params, result)
                 })
             
             
-            if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
-                local transf = ust.getTranfs(info, 1, metadata.width)
+            if (pos.y < 0 and not info.octa[5]) or (pos.y >= 0 and not info.octa[1]) then
+                
+                local refPt = ptsR[3]:avg(ptsL[3])
+                local refVec = (ptsR[3] - ptsL[3]):normalized()
+
+                local transf =
+                    quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+
                 insert(
                     result.slots, {
                         id = makeData(24, 1),
-                        transf = transf,
+                        transf = coor.scale(coor.xyz(2, 0.2, 1)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end
             
-            if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
-                local transf = ust.getTranfs(info, 5, metadata.width)
+            if (pos.y < 0 and not info.octa[1]) or (pos.y >= 0 and not info.octa[5]) then
+                local refPt = ptsR[1]:avg(ptsL[1])
+                local refVec = (ptsR[1] - ptsL[1]):normalized()
+
+                local transf =
+                    quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+
                 insert(
                     result.slots, {
                         id = makeData(24, 5),
-                        transf = transf,
+                        transf = coor.scale(coor.xyz(2, 0.2, 1)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })

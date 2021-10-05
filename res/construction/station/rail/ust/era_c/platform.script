@@ -12,7 +12,7 @@ local preProcessAdd = function(modules, change, classedModules, info, data)
         end
     end
     
-    if (data == 9) then
+    if (data == -1) then
         local id = info.id
         local slotId = classedModules[id].slotId
         modules[slotId].name = change.module.name
@@ -63,27 +63,27 @@ local slotSetup = function(params, result, slotId)
     
     if (info.id ~= 1) then
         insert(result.slots, {
-            id = makeData(99, 0),
+            id = makeData(2, -2),
             transf = transfPosC,
             type = "ust_remove",
             spacing = {0, 0, 0, 0}
         })
     end
     
-     
-    ust.initSlotGrid(params, pos)
-    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
-    
     -- SLot to replace itself
     insert(
         result.slots,
         {
-            id = makeData(2, 9),
+            id = makeData(2, -1),
             transf = transfPosC,
             type = "ust_platform",
             spacing = {0, 0, 0, 0}
         }
     )
+     
+    ust.initSlotGrid(params, pos)
+    local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
+    
     if not (info.octa[3]) then
         local transf = ust.getTranfs(info, 3, metadata.width)
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
