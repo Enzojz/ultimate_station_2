@@ -26,7 +26,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
     local transfPosC = rotZ * coor.trans(posC)
     
-    table.insert(result.slots, {
+    insert(result.slots, {
         id = makeData(80, 1),
         transf = transfPosC,
         type = "ust_modifier",
@@ -49,12 +49,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
             for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                table.insert(result.models, m)
+                insert(result.models, m)
             end
         end
         
         local addSlot = function(id, data, pos, shape, rot)
-            table.insert(result.slots, {
+            insert(result.slots, {
                 id = makeData(id, data),
                 transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos),
                 type = "ust_modifier",

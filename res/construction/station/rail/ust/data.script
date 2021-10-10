@@ -4,11 +4,52 @@ local math = math
 local floor = math.floor
 local abs = math.abs
 
-local dump = require "luadump"
+local classifyPos = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    
+    if (type == 51)  then
+        modules[slotId].info.pos = modules[slotId].info.pos + coor.xyz(data, 0, 0)
+    elseif (type == 52) then
+        modules[slotId].info.pos = modules[slotId].info.pos + coor.xyz(0, data, 0)
+    elseif (type == 53) then
+        modules[slotId].info.pos = modules[slotId].info.pos + coor.xyz(0, 0, data)
+    end
+end
+
+local classifyRadius = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    
+    if (type == 54)  then
+        modules[slotId].info.radius = modules[slotId].info.radius + data
+    elseif (type == 55) then
+        modules[slotId].info.radius = modules[slotId].info.radius + data * 1000
+    elseif (type == 56) then
+        modules[slotId].info.radius = nil
+        modules[slotId].info.straight = true
+    end
+end
+
+local classifyGeometry = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    
+    if (type == 57)  then
+        modules[slotId].info.length = data
+    elseif (type == 58) then
+        modules[slotId].info.height = data
+    end
+end
+
+
 
 function data()
     return {
-        classify = ust.classifyData,
+        classifyPos = classifyPos,
+        classifyRadius = classifyRadius,
+        classifyGeometry = classifyGeometry,
+        classify = ust.classify,
         slotSetup = function(params, result, slotId)
             local info = params.modules[slotId].info
             local id = info.id

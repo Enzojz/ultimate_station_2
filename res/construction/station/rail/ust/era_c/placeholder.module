@@ -61,7 +61,6 @@ function data()
             preProcessAdd = "preProcessAdd",
             slotSetup = "slotSetup",
             preClassify = "preClassify",
-            postClassify = "postClassify"
         },
         
         updateFn = updateFn,

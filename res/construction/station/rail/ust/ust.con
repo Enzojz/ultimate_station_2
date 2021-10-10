@@ -89,8 +89,10 @@ local createTemplateFn = function(params)
                 }
                 local slotId, slotIds = ust.slotIds(info)
                 result[slotId] = "station/rail/ust/tracks/high_speed.module"
-                for _, slotId in pairs(slotIds) do
-                    result[slotId] = "station/rail/ust/data.module"
+                for m, slotIds in pairs(slotIds) do
+                    for _, slotId in ipairs(slotIds) do
+                        result[slotId] = string.format("station/rail/ust/%s.module", m)
+                    end
                 end
                 id = id + 1
             end
@@ -105,8 +107,10 @@ local createTemplateFn = function(params)
                 }
                 local slotId, slotIds = ust.slotIds(info)
                 result[slotId] = "station/rail/ust/era_c/platform.module"
-                for _, slotId in pairs(slotIds) do
-                    result[slotId] = "station/rail/ust/data.module"
+                for m, slotIds in pairs(slotIds) do
+                    for _, slotId in ipairs(slotIds) do
+                        result[slotId] = string.format("station/rail/ust/%s.module", m)
+                    end
                 end
                 id = id + 1
             end
@@ -244,7 +248,7 @@ local updateFn = function(params, closureParams)
     params.debug = true
     
     params.classedModules = classifyModules(params.modules)
-    dump()(params.modules)
+    
     local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
     
     params.grid = grid

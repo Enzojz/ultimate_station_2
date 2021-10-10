@@ -30,14 +30,21 @@ end
 ust.slotIds = function(info)
     local base = info.type + info.id * 100
     return base, {
-        posX = ust.mixData(ust.base(info.id, 51), info.pos.x),
-        posY = ust.mixData(ust.base(info.id, 52), info.pos.y),
-        posZ = ust.mixData(ust.base(info.id, 53), info.pos.z),
-        radiusLow = info.radius and ust.mixData(ust.base(info.id, 54), info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)) or nil,
-        radiusHigh = info.radius and ust.mixData(ust.base(info.id, 55), info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))) or nil,
-        straight = info.straight and ust.mixData(ust.base(info.id, 56), 0) or nil,
-        length = ust.mixData(ust.base(info.id, 57), info.length),
-        width = ust.mixData(ust.base(info.id, 58), info.width)
+        data_pos = {
+            ust.mixData(ust.base(info.id, 51), info.pos.x),
+            ust.mixData(ust.base(info.id, 52), info.pos.y),
+            ust.mixData(ust.base(info.id, 53), info.pos.z)
+        },
+        data_radius = info.radius and {
+            ust.mixData(ust.base(info.id, 54), info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)),
+            ust.mixData(ust.base(info.id, 55), info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))),
+        } or {
+            ust.mixData(ust.base(info.id, 56), 0)
+        },
+        data_geometry = {
+            ust.mixData(ust.base(info.id, 57), info.length),
+            ust.mixData(ust.base(info.id, 58), info.width)
+        }
     }
 end
 
@@ -1054,6 +1061,8 @@ ust.classifyComp = function(modules, classified, slotId)
     }
 
     modules[classified[id].slotId].info.comp[type] = true
+
+    return type, id, data
 end
 
 ust.classifyData = function(modules, classified, slotId)
@@ -1073,6 +1082,8 @@ ust.classifyData = function(modules, classified, slotId)
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end
+
+    return type, id, data
 end
 
 ust.preClassify = function(modules, classified, slotId)
@@ -1094,39 +1105,18 @@ ust.preClassify = function(modules, classified, slotId)
         slotId = slotId,
         data = data,
         octa = {false, false, false, false, false, false, false, false},
-        comp = {}
+        comp = {},
+        pos = coor.xyz(0, 0, 0),
+        width = 5,
+        length = 20,
+        canModifyRadius = false
     }
     
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end
-end
 
-
-ust.postClassify = function(modules, classified, slotId)
-    local id = modules[slotId].info.id
-    
-    local info = classified[id].info
-    local x = info[51]
-    local y = info[52]
-    local z = info[53] or 0
-    local radius = (info[54] or 0) + (info[55] or 0) * 1000
-    local straight = info[56] and true or nil
-    local length = info[57] or 20
-    local width = info[58]
-    local canModifyRadius = info[80] and true or false
-    -- local data = classedModules[id].data
-    if straight or radius == 0 then
-        radius = nil
-    end
-    
-    modules[slotId].info.pos = coor.xyz(x, y, z)
-    modules[slotId].info.radius = radius
-    modules[slotId].info.straight = straight
-    modules[slotId].info.length = length
-    modules[slotId].info.width = width
-    modules[slotId].info.canModifyRadius = canModifyRadius
-    
+    return type, id, data
 end
 
 return ust

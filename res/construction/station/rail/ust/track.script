@@ -40,16 +40,19 @@ local preProcessAdd = function(modules, change, classedModules, info)
         }
         local slotId, dataIds = ust.slotIds(newInfo)
         modules[slotId] = change.module
-        for key, slotId in pairs(dataIds) do
-            modules[slotId] = {
-                metadata = {isData = true},
-                name = "station/rail/ust/data.module",
-                updateScript = {
-                    fileName = "",
-                    params = {}
-                },
-                variant = 0
-            }
+        for m, slotIds in pairs(dataIds) do
+            for _, slotId in ipairs(slotIds) do
+                modules[slotId] = {
+                    metadata = {isData = true},
+                    name = string.format("station/rail/ust/%s.module", m),
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            
+            end
         end
     end
 end
@@ -228,7 +231,6 @@ function data()
         preProcessRemove = preProcessRemove,
         slotSetup = slotSetup,
         updateFn = updateFn,
-        postClassify = ust.postClassify,
         preClassify = ust.preClassify,
         getModelsFn = function(params)
             return {}

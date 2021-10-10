@@ -87,44 +87,44 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
     
     if slotId == allOverpass[#allOverpass] and #allOverpass > 1 then
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf));
         if closureParams.orientation > -1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         end
         if closureParams.orientation < 1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf));
         end
     elseif slotId == allOverpass[1] and #allOverpass > 1 then
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf));
         if closureParams.orientation > -1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         end
         if closureParams.orientation < 1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf));
         end
     else
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf));
         if closureParams.orientation > -1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         end
         if closureParams.orientation < 1 then
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
         else
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf));
         end
     end
     
-    table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, centerTransf));
+    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, centerTransf));
     
     if closureParams.orientation < 1 and info.octa[1] then
         local m = params.modules[info.octa[1]]
@@ -132,13 +132,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local connectPt = ust.basePts(info.arcs.center, 4)[info.pos.y < 0 and 4 or 2] .. hTrans
         local baseRef = ust.basePts(info.arcs.center, 16)[info.pos.y < 0 and 14 or 4]
-        table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
+        insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
 
         local sideVec = interPts[5]:withZ(0) - baseRef
         local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
         
         local interCoords = {
             lt = sidePts[3],
@@ -147,8 +147,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             rb = interPts[3]
         }
         
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
 
         
     end
@@ -159,13 +159,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local connectPt = ust.basePts(info.arcs.center, 4)[info.pos.y < 0 and 2 or 4] .. hTrans
         local baseRef = ust.basePts(info.arcs.center, 16)[info.pos.y < 0 and 4 or 14]
-        table.insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
+        insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
         
         local sideVec = interPts[6]:withZ(0) - baseRef
         local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
         
         local interCoords = {
             lt = interPts[1],
@@ -174,8 +174,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             rb = sidePts[3],
         }
         
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
-        table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
         
     end
     
@@ -208,14 +208,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 rb = interPts[1]
             }
             
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)));
-            table.insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)));
         
         end
     end
     
     -- SLot to replace itself
-    table.insert(
+    insert(
         result.slots,
         {
             id = makeData(21, -1),
@@ -224,20 +224,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             spacing = {0, 0, 0, 0}
         }
     )
-end
-
-local classify = function(modules, classified, slotId)
-    local slotIdAbs = abs(slotId)
-    local type = slotIdAbs % 100
-    local id = (slotIdAbs - type) / 100 % 10000
-    local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
-    
-    modules[slotId].info = {
-        data = data,
-        type = type,
-        slotId = slotId,
-        id = id
-    }
 end
 
 function data()

@@ -1,0 +1,33 @@
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = "HIDDEN_MODULE",
+            description = "NOTHING",
+        },
+        category = {
+            categories = {},
+        },
+        type = "ust_data",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            isData = true,
+            scriptName = "construction/station/rail/ust/data",
+            slotSetup = "slotSetup",
+            classify = "classifyPos",
+        },
+        updateFn = function() end,
+        getModelsFn = function() return {} end
+    }
+
+end
