@@ -23,7 +23,8 @@ function data()
         metadata = {
             isData = true,
             scriptName = "construction/station/rail/ust/data",
-            slotSetup = "slotSetup"
+            slotSetup = "slotSetup",
+            classify = "classify",
         },
         updateFn = function() end,
         getModelsFn = function() return {} end

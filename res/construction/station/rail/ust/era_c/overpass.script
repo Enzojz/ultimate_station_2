@@ -8,6 +8,10 @@ local dump = require "luadump"
 
 local insert = table.insert
 
+local math = math
+local floor = math.floor
+local abs = math.abs
+
 local fitModels = {
     inter = ust.fitModel(2, 1, 7, true, true),
     overpass = ust.fitModel(1, 2.9, 7, true, true)
@@ -224,8 +228,23 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     )
 end
 
+local classify = function(modules, classified, slotId)
+    local slotIdAbs = abs(slotId)
+    local type = slotIdAbs % 100
+    local id = (slotIdAbs - type) / 100 % 10000
+    local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
+    
+    modules[slotId].info = {
+        data = data,
+        type = type,
+        slotId = slotId,
+        id = id
+    }
+end
+
 function data()
     return {
+        classify = ust.classifyComp,
         addSlot = addSlot,
         updateFn = updateFn,
         getModelsFn = function(params)

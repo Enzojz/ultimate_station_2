@@ -41,7 +41,7 @@ ust.slotIds = function(info)
     }
 end
 
-ust.slotInfo = function(slotId, classedModules)
+ust.slotInfo = function(slotId)
         -- Platform/track
         -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
         -- 3 ~ 6 : id
@@ -55,59 +55,9 @@ ust.slotInfo = function(slotId, classedModules)
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
-        
-        if (type < 20) then
-            local comp = {}
-            local info = classedModules[id].info
-            local x = info[51]
-            local y = info[52]
-            local z = info[53] or 0
-            local radius = (info[54] or 0) + (info[55] or 0) * 1000
-            local straight = info[56] and true or nil
-            local length = info[57] or 20
-            local width = info[58]
-            local canModifyRadius = info[80] and true or false
-            local data = classedModules[id].data
-            
-            if straight or radius == 0 then
-                radius = nil
-            end
-            
-            for i = 21, 50 do
-                if classedModules[id].slot[i] then
-                    comp[i] = classedModules[id].slot[i]
-                end
-            end
+        local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
 
-            return {
-                type = type,
-                id = id,
-                slotId = slotId,
-                pos = coor.xyz(x, y, z),
-                radius = radius,
-                straight = straight,
-                length = length,
-                width = width,
-                data = data,
-                canModifyRadius = canModifyRadius,
-                octa = {false, false, false, false, false, false, false, false},
-                comp = comp
-            }
-        elseif (type < 50) then
-            return {
-                type = type,
-                id = id,
-                slotId = slotId,
-                data = classedModules[id].info[type]
-            }
-        else
-            return {
-                type = type,
-                id = id,
-                slotId = slotId,
-                data = classedModules[id].info[type]
-            }
-        end
+        return type, id, data
 end
 
 ust.arcPacker = function(pt, vec, length, radius)
@@ -382,14 +332,6 @@ ust.gridization = function(modules, classedModules)
     local lowestHeight = 2
     local grid = {}
     for id, info in pairs(classedModules) do
-        modules[info.slotId].info = ust.slotInfo(info.slotId, classedModules)
-        modules[info.slotId].makeData = function(type, data)
-            return ust.mixData(ust.base(id, type), data)
-        end
-        for id, slotId in pairs(info.slot) do
-            modules[slotId].info = ust.slotInfo(slotId, classedModules)
-        end
-        
         local pos = modules[info.slotId].info.pos
         local x, y, z = pos.x, pos.y, pos.z
         if not grid[z] then grid[z] = {} end
@@ -1098,6 +1040,97 @@ ust.getTranfs = function(info, pos, width)
         local pt = 0.5 * (refArc.sup + refArc.inf)
         return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
     end
+end
+
+
+ust.classifyComp = function(modules, classified, slotId)
+    local type, id, data = ust.slotInfo(slotId)
+    
+    modules[slotId].info = {
+        data = data,
+        type = type,
+        slotId = slotId,
+        id = id
+    }
+end
+
+ust.classifyData = function(modules, classified, slotId)
+    local type, id, data = ust.slotInfo(slotId)
+    
+    classified[id].slot[type] = slotId
+    classified[id].info[type] = data
+    classified[id].metadata[type] = modules[slotId].metadata
+
+    modules[slotId].info = {
+        data = data,
+        type = type,
+        slotId = slotId,
+        id = id
+    }
+
+    modules[slotId].makeData = function(type, data)
+        return ust.mixData(ust.base(id, type), data)
+    end
+end
+
+ust.preClassify = function(modules, classified, slotId)
+    local type, id, data = ust.slotInfo(slotId)
+    
+    classified[id] = {
+        type = type,
+        id = id,
+        slotId = slotId,
+        data = data,
+        info = {},
+        slot = {},
+        metadata = {}
+    }
+end
+
+
+ust.postClassify = function(modules, classified, slotId)
+    local type, id, data = ust.slotInfo(slotId)
+    
+    local comp = {}
+    local info = classified[id].info
+    local x = info[51]
+    local y = info[52]
+    local z = info[53] or 0
+    local radius = (info[54] or 0) + (info[55] or 0) * 1000
+    local straight = info[56] and true or nil
+    local length = info[57] or 20
+    local width = info[58]
+    local canModifyRadius = info[80] and true or false
+    -- local data = classedModules[id].data
+    if straight or radius == 0 then
+        radius = nil
+    end
+    
+    for i = 21, 50 do
+        if classified[id].slot[i] then
+            comp[i] = classified[id].slot[i]
+        end
+    end
+    
+    modules[slotId].info = {
+        type = type,
+        id = id,
+        slotId = slotId,
+        pos = coor.xyz(x, y, z),
+        radius = radius,
+        straight = straight,
+        length = length,
+        width = width,
+        data = data,
+        canModifyRadius = canModifyRadius,
+        octa = {false, false, false, false, false, false, false, false},
+        comp = comp
+    }
+
+    modules[slotId].makeData = function(type, data)
+        return ust.mixData(ust.base(id, type), data)
+    end
+
 end
 
 return ust

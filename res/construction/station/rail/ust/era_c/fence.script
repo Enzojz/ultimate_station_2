@@ -3,6 +3,11 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local insert = table.insert
 -- local dump = require "luadump"
+
+local math = math
+local floor = math.floor
+local abs = math.abs
+
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -85,11 +90,11 @@ local addSlot = function(params, result)
             end
         end
     end
-
 end
 
 function data()
     return {
+        classify = ust.classifyComp,
         addSlot = addSlot
     }
 end

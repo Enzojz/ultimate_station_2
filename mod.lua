@@ -48,7 +48,9 @@
                         scriptName = "construction/station/rail/ust/track",
                         preProcessAdd = "preProcessAdd",
                         preProcessRemove = "preProcessRemove",
-                        slotSetup = "slotSetup"
+                        slotSetup = "slotSetup",
+                        postClassify = "postClassify",
+                        preClassify = "preClassify",
                     }
                     
                     mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}
@@ -106,7 +108,9 @@
                     isComponent = true,
                     isOverpass = true,
                     typeId = 21,
-                    width = 5
+                    width = 5,
+                    scriptName = "construction/station/rail/ust/era_c/overpass",
+                    classify = "classify"
                 }
                 
                 mod.category.categories = {"component"}

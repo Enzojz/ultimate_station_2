@@ -1,0 +1,7 @@
+local ust = require "ust"
+
+function data()
+    return {
+        classify = ust.classifyComp,
+    }
+end

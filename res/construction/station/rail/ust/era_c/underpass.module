@@ -139,7 +139,9 @@ function data()
             isUnderpass = true,
             isComponent = true,
             typeId = 21,
-            width = 5
+            width = 5,
+            scriptName = "construction/station/rail/ust/era_c/underpass",
+            classify = "classify",
         },
         
         updateFn = updateFn,

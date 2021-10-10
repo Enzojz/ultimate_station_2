@@ -1,6 +1,11 @@
 local coor = require "ust/coor"
+local ust = require "ust"
 
 local insert = table.insert
+
+local math = math
+local floor = math.floor
+local abs = math.abs
 
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
@@ -23,6 +28,7 @@ end
 
 function data()
     return {
+        classify = ust.classifyComp,
         addSlot = addSlot,
     }
 

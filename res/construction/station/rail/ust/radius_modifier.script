@@ -6,15 +6,16 @@ local dump = require "luadump"
 local insert = table.insert
 local ma = math
 local pi = ma.pi
+local abs = math.abs
 local pow = math.pow
 local floor = math.floor
 
 
 local preProcessAdd = function(radiusFn)
-    return function(modules, change, classedModules, info, data)
-        if info.type == 80 and data == 1 then
+    return function(modules, change, classedModules, info)
+        if info.type == 80 and info.data == 1 then
             modules[ust.base(info.id, 80)] = nil
-        elseif info.type == 80 and data == 0 then
+        elseif info.type == 80 and info.data == 0 then
             modules[ust.base(info.id, 80)] = change.module
         elseif info.type >= 81 and info.type <= 86 then
             ust.gridization(modules, classedModules)
@@ -36,7 +37,7 @@ local preProcessAdd = function(radiusFn)
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
             if info.type >= 81 and info.type <= 84 then
-                local radius = radiusFn(data, m, m.info.radius)
+                local radius = radiusFn(info.data, m, m.info.radius)
                 if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
                 
                 local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
@@ -61,7 +62,7 @@ local preProcessAdd = function(radiusFn)
                     variant = 0
                 }
             elseif info.type == 85 or info.type == 86 then
-                if data == 0 then
+                if info.data == 0 then
                     local addSlot = ust.mixData(ust.base(id, 56), 0)
                     modules[addSlot] = {
                         metadata = {isData = true},
@@ -96,7 +97,7 @@ local preProcessAddRough =
         return -floor(20 / rad)
     end)
 
-local preProcessPostAdd = function(modules, change, slotId, classedModules, info, data)
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
     if info.type < 50 then
         modules[slotId] = nil
     end
@@ -119,6 +120,7 @@ end
 
 function data()
     return {
+        classify = ust.classifyData,
         preProcessAddPrecise = preProcessAddPrecise,
         preProcessAddRough = preProcessAddRough,
         preProcessPostAdd = preProcessPostAdd,

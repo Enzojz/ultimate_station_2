@@ -1,12 +1,20 @@
 local coor = require "ust/coor"
+local ust = require "ust" 
+local math = math
+local floor = math.floor
+local abs = math.abs
+
+local dump = require "luadump"
+
 function data()
     return {
+        classify = ust.classifyData,
         slotSetup = function(params, result, slotId)
             local info = params.modules[slotId].info
             local id = info.id
             local parent = params.classedModules[id].slotId
             local m = params.modules[parent]
-        
+            
             table.insert(result.slots, {
                 id = slotId,
                 transf = m.info.transf,

@@ -324,7 +324,9 @@ function data()
             scriptName = "construction/station/rail/ust/era_c/platform",
             preProcessAdd = "preProcessAdd",
             preProcessRemove = "preProcessRemove",
-            slotSetup = "slotSetup"
+            slotSetup = "slotSetup",
+            preClassify = "preClassify",
+            postClassify = "postClassify"
         },
         updateFn = updateFn,
         

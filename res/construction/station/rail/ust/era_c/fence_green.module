@@ -9,7 +9,6 @@ local livetext = require "ust/livetext"
 local trainstationutil = require "modules/trainstationutil"
 local constructionutil = require "constructionutil"
 
--- local dump = require "luadump"
 local unpack = table.unpack
 local insert = table.insert
 
@@ -104,6 +103,8 @@ function data()
             value = 260,
         },
         metadata = {
+            scriptName = "construction/station/rail/ust/era_c/fence",
+            classify = "classify",
             typeName = "ust_component_fence",
             isComponent = true,
             isFence = true,
