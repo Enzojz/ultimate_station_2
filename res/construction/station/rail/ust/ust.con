@@ -244,7 +244,7 @@ local updateFn = function(params, closureParams)
     params.debug = true
     
     params.classedModules = classifyModules(params.modules)
-
+    dump()(params.modules)
     local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
     
     params.grid = grid

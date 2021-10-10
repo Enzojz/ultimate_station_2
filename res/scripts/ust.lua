@@ -56,7 +56,7 @@ ust.slotInfo = function(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
         local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
-
+        
         return type, id, data
 end
 
@@ -487,7 +487,7 @@ ust.gridization = function(modules, classedModules)
                     if not m.info.width then
                         m.info.width = m.metadata.width or 5
                     end
-
+                    
                     if m.metadata.isTrack then
                         if m.metadata.height < lowestHeight then
                             lowestHeight = m.metadata.height
@@ -517,7 +517,7 @@ ust.gridization = function(modules, classedModules)
                             end
                         end
                     end
-
+                    
                     if x == 0 and y == 0 then
                         yState.pos = coor.xyz(infoX.pos[0], 0, 0)
                         yState.vec = coor.xyz(0, 1, 0)
@@ -941,7 +941,7 @@ ust.gridization = function(modules, classedModules)
                                 -modules[slotId].info.pts[1][2]
                             }
                         end
-                        
+                    
                     else
                         coroutine.yield()
                     end
@@ -951,7 +951,7 @@ ust.gridization = function(modules, classedModules)
                         refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
                     }
                     
-                    modules[slotId].info.transf = 
+                    modules[slotId].info.transf =
                         quat.byVec(coor.xyz(0, y < 0 and -1 or 1, 0), gravity[2]):mRot() *
                         coor.trans(gravity[1])
                     
@@ -998,7 +998,7 @@ ust.initSlotGrid = function(params, pos)
 end
 
 ust.newTopologySlots = function(params, makeData, pos)
-    return function(x, y, transf, octa) 
+    return function(x, y, transf, octa)
         params.slotGrid[pos.z][x][y].track = {
             id = makeData(1, octa),
             transf = transf,
@@ -1052,6 +1052,8 @@ ust.classifyComp = function(modules, classified, slotId)
         slotId = slotId,
         id = id
     }
+
+    modules[classified[id].slotId].info.comp[type] = true
 end
 
 ust.classifyData = function(modules, classified, slotId)
@@ -1060,14 +1062,14 @@ ust.classifyData = function(modules, classified, slotId)
     classified[id].slot[type] = slotId
     classified[id].info[type] = data
     classified[id].metadata[type] = modules[slotId].metadata
-
+    
     modules[slotId].info = {
         data = data,
         type = type,
         slotId = slotId,
         id = id
     }
-
+    
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end
@@ -1085,13 +1087,25 @@ ust.preClassify = function(modules, classified, slotId)
         slot = {},
         metadata = {}
     }
+    
+    modules[slotId].info = {
+        type = type,
+        id = id,
+        slotId = slotId,
+        data = data,
+        octa = {false, false, false, false, false, false, false, false},
+        comp = {}
+    }
+    
+    modules[slotId].makeData = function(type, data)
+        return ust.mixData(ust.base(id, type), data)
+    end
 end
 
 
 ust.postClassify = function(modules, classified, slotId)
-    local type, id, data = ust.slotInfo(slotId)
+    local id = modules[slotId].info.id
     
-    local comp = {}
     local info = classified[id].info
     local x = info[51]
     local y = info[52]
@@ -1106,31 +1120,13 @@ ust.postClassify = function(modules, classified, slotId)
         radius = nil
     end
     
-    for i = 21, 50 do
-        if classified[id].slot[i] then
-            comp[i] = classified[id].slot[i]
-        end
-    end
+    modules[slotId].info.pos = coor.xyz(x, y, z)
+    modules[slotId].info.radius = radius
+    modules[slotId].info.straight = straight
+    modules[slotId].info.length = length
+    modules[slotId].info.width = width
+    modules[slotId].info.canModifyRadius = canModifyRadius
     
-    modules[slotId].info = {
-        type = type,
-        id = id,
-        slotId = slotId,
-        pos = coor.xyz(x, y, z),
-        radius = radius,
-        straight = straight,
-        length = length,
-        width = width,
-        data = data,
-        canModifyRadius = canModifyRadius,
-        octa = {false, false, false, false, false, false, false, false},
-        comp = comp
-    }
-
-    modules[slotId].makeData = function(type, data)
-        return ust.mixData(ust.base(id, type), data)
-    end
-
 end
 
 return ust

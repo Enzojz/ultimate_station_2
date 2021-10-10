@@ -61,22 +61,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local info = params.modules[params.classedModules[id].slotId].info
     local makeData = params.modules[params.classedModules[id].slotId].makeData
     
-    local allOverpass = pipe.new * func.values(params.classedModules)
-        * pipe.map(function(m) return m.slot[21] and params.modules[m.slot[21]].metadata.isOverpass and m.slot[21] or nil end)
-        * pipe.values()
-        * pipe.map(function(slotId)
-            local id = params.modules[slotId].info.id
+    local allOverpass = pipe.new * func.values(params.modules)
+        * pipe.filter(function(m) return m.metadata.isOverpass end)
+        * pipe.map(function(m)
+            local id = m.info.id
             local pos = params.modules[params.classedModules[id].slotId].info.pos
             if pos.y == info.pos.y then
                 return {
-                    slotId = slotId,
+                    slotId = m.info.slotId,
                     x = pos.x
                 }
             else
                 return nil
             end
         end)
-        * pipe.values()
         * pipe.sort(function(l, r) return l.x < r.x end)
         * pipe.map(pipe.select("slotId"))
     
