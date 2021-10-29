@@ -22,9 +22,9 @@ local classifyRadius = function(modules, classified, slotId)
     local slotId = classified[id].slotId
     
     if (type == 54)  then
-        modules[slotId].info.radius = modules[slotId].info.radius + data
+        modules[slotId].info.radius = (modules[slotId].info.radius or 0) + data
     elseif (type == 55) then
-        modules[slotId].info.radius = modules[slotId].info.radius + data * 1000
+        modules[slotId].info.radius = (modules[slotId].info.radius or 0) + data * 1000
     elseif (type == 56) then
         modules[slotId].info.radius = nil
         modules[slotId].info.straight = true
