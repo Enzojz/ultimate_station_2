@@ -1,14 +1,15 @@
 local coor = require "ust/coor"
-local ust = require "ust" 
+local ust = require "ust"
 local math = math
 local floor = math.floor
 local abs = math.abs
+local dump = require "luadump"
 
 local classifyPos = function(modules, classified, slotId)
     local type, id, data = ust.classifyData(modules, classified, slotId)
     local slotId = classified[id].slotId
     
-    if (type == 51)  then
+    if (type == 51) then
         modules[slotId].info.pos = modules[slotId].info.pos + coor.xyz(data, 0, 0)
     elseif (type == 52) then
         modules[slotId].info.pos = modules[slotId].info.pos + coor.xyz(0, data, 0)
@@ -21,7 +22,7 @@ local classifyRadius = function(modules, classified, slotId)
     local type, id, data = ust.classifyData(modules, classified, slotId)
     local slotId = classified[id].slotId
     
-    if (type == 54)  then
+    if (type == 54) then
         modules[slotId].info.radius = (modules[slotId].info.radius or 0) + data
     elseif (type == 55) then
         modules[slotId].info.radius = (modules[slotId].info.radius or 0) + data * 1000
@@ -35,27 +36,43 @@ local classifyGeometry = function(modules, classified, slotId)
     local type, id, data = ust.classifyData(modules, classified, slotId)
     local slotId = classified[id].slotId
     
-    if (type == 57)  then
+    if (type == 57) then
         modules[slotId].info.length = data
     elseif (type == 58) then
         modules[slotId].info.height = data
     end
 end
 
-
+local classifyRef = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    
+    if (type == 60) then
+        if not modules[slotId].info.ref then modules[slotId].info.ref = {} end
+        if (data == 3) then
+            modules[slotId].info.ref.right = true
+        elseif (data == 7) then
+            modules[slotId].info.ref.left = true
+        elseif (data == 1) then
+            modules[slotId].info.ref.next = true
+        elseif (data == 5) then
+            modules[slotId].info.ref.prev = true
+        end
+    end
+end
 
 function data()
     return {
         classifyPos = classifyPos,
         classifyRadius = classifyRadius,
         classifyGeometry = classifyGeometry,
+        classifyRef = classifyRef,
         classify = ust.classify,
         slotSetup = function(params, result, slotId)
             local info = params.modules[slotId].info
             local id = info.id
             local parent = params.classedModules[id].slotId
             local m = params.modules[parent]
-            
             table.insert(result.slots, {
                 id = slotId,
                 transf = m.info.transf,

@@ -5,7 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
--- local dump = require "luadump"
+local dump = require "luadump"
 local unpack = table.unpack
 local insert = table.insert
 
@@ -61,6 +61,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftConnected = isPlatform[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
     local rightConnected = isPlatform[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
     
+    -- dump()({
+    --     slotId = slotId, 
+    --     isTrack = isTrack,
+    --     isPlatform = isPlatform,
+    --     leftConnected = leftConnected,
+    --     rightConnected = rightConnected,
+    --     r = isPlatform[3] and (octaModules[3].info.arcs.left.radius == info.arcs.right.radius),
+    --     o = isPlatform[3] and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2()
+    -- })
     -- local n = ma.floor(info.arcs.center:length() / 5 + 0.5)
     -- if n == 0 then n = 1 end
     local n = 4

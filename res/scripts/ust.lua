@@ -5,7 +5,7 @@ local line = require "ust/coorline"
 local quat = require "ust/quaternion"
 local general = require "ust/general"
 local pipe = require "ust/pipe"
--- local dump = require "luadump"
+local dump = require "luadump"
 local ust = require "ust_gridization"
 
 local math = math
@@ -29,6 +29,7 @@ end
 
 ust.slotIds = function(info)
     local base = info.type + info.id * 100
+    
     return base, {
         data_pos = {
             ust.mixData(ust.base(info.id, 51), info.pos.x),
@@ -44,6 +45,14 @@ ust.slotIds = function(info)
         data_geometry = {
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 58), info.width)
+        },
+        data_ref = info.ref and func.filter({
+            info.ref.left and ust.mixData(ust.base(info.id, 60), 7) or false,
+            info.ref.right and ust.mixData(ust.base(info.id, 60), 3) or false,
+            info.ref.next and ust.mixData(ust.base(info.id, 60), 1) or false,
+            info.ref.prev and ust.mixData(ust.base(info.id, 60), 5) or false
+        }, pipe.noop()) or {
+            ust.base(info.id, 60)
         }
     }
 end
@@ -56,7 +65,7 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 23 entry 24 fences
         -- 3 ~ 6 : id
         -- Information
-        -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 radius 56 is_straight 57 length 58 width
+        -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 radius 56 is_straight 57 length 58 width 60 ref
         -- 3 ~ 6 : id
         -- > 6: data
         local slotIdAbs = math.abs(slotId)
@@ -402,13 +411,13 @@ ust.classifyComp = function(modules, classified, slotId)
         slotId = slotId,
         id = id
     }
-
+    
     modules[classified[id].slotId].info.comp[type] = true
-
+    
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end
-
+    
     return type, id, data
 end
 
@@ -458,7 +467,7 @@ ust.preClassify = function(modules, classified, slotId)
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end
-
+    
     return type, id, data
 end
 

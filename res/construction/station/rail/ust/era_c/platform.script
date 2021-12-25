@@ -1,6 +1,7 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
 local ust = require "ust"
+local dump = require "luadump"
 
 local insert = table.insert
 local math = math
@@ -10,26 +11,95 @@ local floor = math.floor
 local preProcessAdd = function(modules, change, classedModules, info)
     local maxId = func.max(func.keys(classedModules))
     
+    local grid = {}
+    for id, info in pairs(classedModules) do
+        local pos = modules[info.slotId].info.pos
+        local x, y, z = pos.x, pos.y, pos.z
+        if not grid[z] then grid[z] = {} end
+        if not grid[z][x] then grid[z][x] = {} end
+        grid[z][x][y] = info.slotId
+    end
+    
+    
     if (info.data == -1) then
         local id = info.id
         local slotId = classedModules[id].slotId
         modules[slotId].name = change.module.name
     else
-        local pos = modules[classedModules[info.id].slotId].info.pos
-        local dpos = ({
-            [1] = coor.xyz(0, pos.y < 0 and -1 or 1, 0),
+        local refPos = modules[classedModules[info.id].slotId].info.pos
+        
+        local pos = ({
+            [1] = coor.xyz(0, refPos.y < 0 and -1 or 1, 0),
             [3] = coor.xyz(1, 0, 0),
-            [5] = coor.xyz(0, pos.y < 0 and 1 or -1, 0),
+            [5] = coor.xyz(0, refPos.y < 0 and 1 or -1, 0),
             [7] = coor.xyz(-1, 0, 0)
-        })[info.data]
+        })[info.data] + refPos
+        
+        
+        local x, y, z = pos.x, pos.y, pos.z
+        
+        local octa = {
+            [5] = grid[z][x] and grid[z][x][y - 1] or nil,
+            [1] = grid[z][x] and grid[z][x][y + 1] or nil,
+            [7] = grid[z][x - 1] and grid[z][x - 1][y] or nil,
+            [3] = grid[z][x + 1] and grid[z][x + 1][y] or nil,
+            [6] = grid[z][x - 1] and grid[z][x - 1][y - 1] or nil,
+            [4] = grid[z][x + 1] and grid[z][x + 1][y - 1] or nil,
+            [8] = grid[z][x - 1] and grid[z][x - 1][y + 1] or nil,
+            [2] = grid[z][x + 1] and grid[z][x + 1][y + 1] or nil,
+        }
+        
+        local function isTrack(pos)
+            return octa[pos] and modules[octa[pos]].metadata.isTrack
+        end
+        
+        local function isPlatform(pos)
+            return octa[pos] and modules[octa[pos]].metadata.isPlatform
+        end
+        
+        local function isEmpty(pos)
+            return not octa[pos] and not modules[octa[pos]]
+        end
+        
+        local ref = {}
+        if isTrack(3) and isTrack(7) then
+            ref = {left = true, right = true}
+        elseif isTrack(7) and not isPlatform(3) then
+            ref = {left = true}
+        elseif isTrack(3) and not isPlatform(7) then
+            ref = {right = true}
+        
+        elseif isPlatform(1) and isPlatform(5) then
+            ref = pos.y < 0 and {next = true} or {prev = true}
+        elseif isPlatform(1) then
+            ref = {next = true}
+        elseif isPlatform(5) then
+            ref = {prev = true}
+        
+        elseif isPlatform(7) then
+            ref = {left = true}
+        elseif isPlatform(3) then
+            ref = {right = true}
+        
+        elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) and not isEmpty(5) then
+            ref = pos.y < 0 and {next = true} or {prev = true}
+        elseif isEmpty(3) and isEmpty(7) and not isEmpty(5) then
+            ref = {prev = true}
+        elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) then
+            ref = {next = true}
+        end
+        
+        
         local newInfo = {
             id = maxId + 1,
             type = change.module.metadata.typeId,
-            pos = pos + dpos,
+            pos = pos,
             length = 20,
-            width = 5
+            width = 5,
+            ref = ref
         }
         local slotId, dataIds = ust.slotIds(newInfo)
+        
         modules[slotId] = change.module
         
         for m, slotIds in pairs(dataIds) do
