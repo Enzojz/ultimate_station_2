@@ -128,13 +128,39 @@ local classifyData = function(modules, classified, slotId)
     modules[slotId].info.canModifyRadius = true
 end
 
+local addSlot = function(params, result)
+    local anyRadiusModifiable = false
+    for _, module in pairs(params.modules) do
+        anyRadiusModifiable = anyRadiusModifiable or module.info.canModifyRadius
+    end
+
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isTrack) then
+            local info = module.info
+            local makeData = module.makeData
+            local transfPosC = info.transf
+            
+            if not anyRadiusModifiable then
+                table.insert(result.slots, {
+                    id = makeData(80, 0),
+                    transf = transfPosC,
+                    type = "ust_radius_modifier",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
+
 function data()
     return {
         classify = classifyData,
         preProcessAddPrecise = preProcessAddPrecise,
         preProcessAddRough = preProcessAddRough,
         preProcessPostAdd = preProcessPostAdd,
-        slotSetup = slotSetup
+        slotSetup = slotSetup,
+        addSlot = addSlot
     }
 
 end

@@ -126,17 +126,6 @@ local slotSetup = function(params, result, slotId)
         local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
-    
-    
-    if not params.anyRadiusModifiable then
-        table.insert(result.slots, {
-            id = makeData(80, 0),
-            transf = transfPosC,
-            type = "ust_radius_modifier",
-            spacing = {0, 0, 0, 0}
-        })
-    end
-    
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)    

@@ -178,14 +178,6 @@ local slotSetup = function(params, result, slotId)
         local transf = ust.getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
-    
-    table.insert(result.slots, {
-        id = makeData(90, 0),
-        transf = transfPosC,
-        type = "ust_ref_modifier",
-        spacing = {0, 0, 0, 0}
-    })
-
 end
 
 local preProcessRemove = function(modules, change, classedModules, info)

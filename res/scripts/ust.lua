@@ -465,7 +465,6 @@ ust.preClassify = function(modules, classified, slotId)
         pos = coor.xyz(0, 0, 0),
         width = 5,
         length = 20,
-        canModifyRadius = false
     }
     
     modules[slotId].makeData = function(type, data)

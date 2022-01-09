@@ -2,130 +2,180 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
 local ust = require "ust"
+local dump = require "luadump"
 
 local unpack = table.unpack
 local insert = table.insert
 local ma = math
 local pi = ma.pi
-local abs = ma.abs
-local pow = math.pow
-local floor = math.floor
+
+local mark = function(result, slotId, params)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local makeData = params.modules[sId].makeData
+    
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    local n = 2
+    local ptsL, vecL = ust.basePts(info.arcs.left, n)
+    local ptsR, vecR = ust.basePts(info.arcs.right, n)
+    local ptsC, vecC = ust.basePts(info.arcs.center, n)
+    
+    local addText = function(label, refPt)
+        local nameModelsF, width = livetext(2)(label)
+        for _, m in ipairs(nameModelsF(function() return coor.rotX(-0.5 * pi) * hTrans * coor.trans(refPt) end)) do
+            table.insert(result.models, m)
+        end
+    end
+    
+    if info.ref.left then
+        local refPt = ptsL[2]
+        local refVec = vecL[2]
+        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
+        addText("*", refPt)
+    end
+    
+    if info.ref.left then
+        local refPt = ptsL[2]
+        local refVec = vecL[2]
+        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
+        addText("*", refPt)
+    end
+    
+    if info.ref.right then
+        local refPt = ptsR[2]
+        local refVec = vecR[2]
+        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVec):mRot() * coor.trans(refPt)
+        addText("*", refPt)
+    end
+    
+    if info.ref.next then
+        local i = info.pos.y < 0 and 1 or 3
+        local refPt = ptsC[i]
+        local refVec = vecC[i]
+        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        addText("*", refPt)
+    end
+    
+    if info.ref.prev then
+        local i = info.pos.y < 0 and 3 or 1
+        local refPt = ptsC[i]
+        local refVec = vecC[i]
+        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        addText("*", refPt)
+    end
+end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     local makeData = params.modules[sId].makeData
-
+    
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef)
+    local hTrans = coor.trans(hVec)
+    
+    insert(result.slots, {
+        id = makeData(90, 1),
+        transf = info.transf,
+        type = "ust_ref_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
     local n = 2
     local ptsL, vecL = ust.basePts(info.arcs.left, n)
     local ptsR, vecR = ust.basePts(info.arcs.right, n)
+    local ptsC, vecC = ust.basePts(info.arcs.center, n)
     
-    if (info.octa[7]) then
-        local refPtL = ptsL[2]
-        local refVecL = vecL[2]
+    local addSlot = function(cond, data, transf)
+        if cond then
+            table.insert(result.slots, {
+                id = makeData(91, data),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf,
+                type = "ust_ref_modifier",
+                spacing = {0, 0, 0, 0},
+                shape = 2
+            })
+            
+            table.insert(result.slots, {
+                id = makeData(91, data),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf,
+                type = "ust_ref_modifier",
+                spacing = {0, 0, 0, 0},
+                shape = 2
+            })
+        else
+            table.insert(result.slots, {
+                id = makeData(91, data),
+                transf = transf,
+                type = "ust_ref_modifier",
+                spacing = {0, 0, 0, 0},
+                shape = 1
+            })
+        end
+    end
+    mark(result, slotId, params)
+    
+    for _, octa in ipairs(info.octa) do
+        if octa then
+            mark(result, octa, params)
+        end
+    end
 
-        local transfL =
-        quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVecL):mRot()
-        * coor.trans(refPtL)
-
-        table.insert(result.slots, {
-            id = makeData(91, info.ref.left and -1 or 1),
-            transf = transfL,
-            type = "ust_ref_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = info.ref.left and 2 or 1
-        })
+    do
+        local refPt = ptsL[2]
+        local refVec = vecL[2]
+        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
+        
+        if info.octa[7] and params.modules[info.octa[7]] and not params.modules[info.octa[7]].info.ref.right then
+            local sum = (info.ref.right and 2 or 0) + (info.ref.left and 0 or 1)
+            if (sum ~= 0) then
+                addSlot(info.ref.left, sum, transf)
+            end
+        end
     end
     
-    if (info.octa[3]) then
-        local refPtR = ptsR[2]
-        local refVecR = vecR[2]
+    do
+        local refPt = ptsR[2]
+        local refVec = vecR[2]
+        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVec):mRot() * coor.trans(refPt)
         
-        local transfR =
-            quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVecR):mRot()
-            * coor.trans(refPtR)
-        
-        table.insert(result.slots, {
-            id = makeData(91, info.ref.right and -2 or 2),
-            transf = transfR,
-            type = "ust_ref_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = info.ref.right and 2 or 1
-        })
+        if info.octa[3] and params.modules[info.octa[3]] and not params.modules[info.octa[3]].info.ref.left then
+            local sum = (info.ref.left and 1 or 0) + (info.ref.right and 0 or 2)
+            if sum ~= 0 then
+                addSlot(info.ref.right, sum, transf)
+            end
+        end
     end
-
-    if info.pos.y < 0 then
-        if info.octa[1] then
-            local refPt = ptsR[1]:avg(ptsL[1])
-            local refVec = (ptsR[1] - ptsL[1]):normalized()
     
-            local transf =
-                quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
-                * coor.trans(refPt)
-    
-            insert(
-                result.slots, {
-                    id = makeData(91, info.ref.next and -4 or 4),
-                    transf = transf,
-                    type = "ust_ref_modifier",
-                    spacing = {0, 0, 0, 0},
-                    shape = info.ref.next and 2 or 1
-                })
+    do
+        local i = info.pos.y < 0 and 1 or 3
+        local refPt = ptsC[i]
+        local refVec = vecC[i]
+        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        
+        if info.octa[1] and params.modules[info.octa[1]] and not params.modules[info.octa[1]].info.ref.prev then
+            if not info.ref.next then
+                addSlot(info.ref.next, 4, transf)
+            end
         end
         
-        if info.octa[5] then
-            local refPt = ptsR[3]:avg(ptsL[3])
-            local refVec = (ptsR[3] - ptsL[3]):normalized()
+    end
     
-            local transf =
-                quat.byVec(coor.xyz(0, -1, 0), refVec):mRot()
-                * coor.trans(refPt)
-    
-            insert(
-                result.slots, {
-                    id = makeData(91, info.ref.prev and -8 or 8),
-                    transf = transf,
-                    type = "ust_ref_modifier",
-                    spacing = {0, 0, 0, 0},
-                    shape = info.ref.prev and 2 or 1
-                })
-        end
-    else
-        if info.octa[1] then
-            local refPt = ptsR[3]:avg(ptsL[3])
-            local refVec = (ptsR[3] - ptsL[3]):normalized()
-    
-            local transf =
-                quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
-                * coor.trans(refPt)
-    
-            insert(
-                result.slots, {
-                    id = makeData(91, info.ref.next and -4 or 4),
-                    transf = transf,
-                    type = "ust_ref_modifier",
-                    spacing = {0, 0, 0, 0},
-                    shape = info.ref.next and 2 or 1
-                })
-        end
+    do
+        local i = info.pos.y < 0 and 3 or 1
+        local refPt = ptsC[i]
+        local refVec = vecC[i]
+        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
         
-        if info.octa[5] then
-            local refPt = ptsR[1]:avg(ptsL[1])
-            local refVec = (ptsR[1] - ptsL[1]):normalized()
-    
-            local transf =
-                quat.byVec(coor.xyz(0, -1, 0), refVec):mRot()
-                * coor.trans(refPt)
-    
-            insert(
-                result.slots, {
-                    id = makeData(91, info.ref.prev and -8 or 8),
-                    transf = transf,
-                    type = "ust_ref_modifier",
-                    spacing = {0, 0, 0, 0},
-                    shape = info.ref.prev and 2 or 1
-                })
+        if info.octa[5] and params.modules[info.octa[5]] and not params.modules[info.octa[5]].info.ref.next then
+            if not info.ref.prev then
+                addSlot(info.ref.prev, 8, transf)
+            end
         end
     end
 end

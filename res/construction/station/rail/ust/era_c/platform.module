@@ -61,17 +61,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left)
     local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right)
     
-    -- dump()({
-    --     slotId = slotId, 
-    --     isTrack = isTrack,
-    --     isPlatform = isPlatform,
-    --     leftConnected = leftConnected,
-    --     rightConnected = rightConnected,
-    --     r = isPlatform[3] and (octaModules[3].info.arcs.left.radius == info.arcs.right.radius),
-    --     o = isPlatform[3] and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2()
-    -- })
-    -- local n = ma.floor(info.arcs.center:length() / 5 + 0.5)
-    -- if n == 0 then n = 1 end
     local n = 4
     
     local leftPts = ust.basePts(info.arcs.left, n)

@@ -1,16 +1,4 @@
-local coor = require "ust/coor"
-local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
 local ust = require "ust"
-local dump = require "luadump"
-
-local insert = table.insert
-local ma = math
-local pi = ma.pi
-local abs = math.abs
-local pow = math.pow
-local floor = math.floor
-
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 90 and info.data == 1 then
@@ -23,18 +11,21 @@ local preProcessAdd = function(modules, change, classedModules, info)
         
         local oldSlot = classedModules[id].slot[60]
         local _, _, oldData = ust.slotInfo(oldSlot)
-        modules[oldSlot] = nil
-        
-        local addSlot = ust.mixData(ust.base(id, 60), oldData + info.data)
-        modules[addSlot] = {
-            metadata = {isData = true},
-            name = "station/rail/ust/data_ref.module",
-            updateScript = {
-                fileName = "",
-                params = {}
-            },
-            variant = 0
-        }
+
+        if (oldData + info.data ~= 0) then -- Prevent case no ref
+            modules[oldSlot] = nil
+            
+            local addSlot = ust.mixData(ust.base(id, 60), info.data)
+            modules[addSlot] = {
+                metadata = {isData = true},
+                name = "station/rail/ust/data_ref.module",
+                updateScript = {
+                    fileName = "",
+                    params = {}
+                },
+                variant = 0
+            }
+        end
     end
 end
 
@@ -44,11 +35,43 @@ local preProcessPostAdd = function(modules, change, slotId, classedModules, info
     end
 end
 
+local classifyData = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    modules[slotId].info.canModifyRef = true
+end
+
+local addSlot = function(params, result)
+    local anyRefModifiable = false
+    for _, module in pairs(params.modules) do
+        anyRefModifiable = anyRefModifiable or module.info.canModifyRef
+    end
+
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isPlatform) then
+            local info = module.info
+            local makeData = module.makeData
+            local transfPosC = info.transf
+            
+            if not anyRefModifiable or info.canModifyRef then
+                table.insert(result.slots, {
+                    id = makeData(90, 0),
+                    transf = transfPosC,
+                    type = "ust_ref_modifier",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
+
 function data()
     return {
-        classify = ust.classifyData,
+        classify = classifyData,
         preProcessAdd = preProcessAdd,
-        preProcessPostAdd = preProcessPostAdd
+        preProcessPostAdd = preProcessPostAdd,
+        addSlot = addSlot
     }
 
 end
