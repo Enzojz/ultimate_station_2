@@ -1,0 +1,54 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+local dump = require "luadump"
+
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+local abs = math.abs
+local pow = math.pow
+local floor = math.floor
+
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.type == 90 and info.data == 1 then
+        modules[ust.base(info.id, 90)] = nil
+    elseif info.type == 90 and info.data == 0 then
+        modules[ust.base(info.id, 90)] = change.module
+    elseif info.type == 91 then
+        ust.gridization(modules, classedModules)
+        local id = info.id
+        
+        local oldSlot = classedModules[id].slot[60]
+        local _, _, oldData = ust.slotInfo(oldSlot)
+        modules[oldSlot] = nil
+        
+        local addSlot = ust.mixData(ust.base(id, 60), oldData + info.data)
+        modules[addSlot] = {
+            metadata = {isData = true},
+            name = "station/rail/ust/data_ref.module",
+            updateScript = {
+                fileName = "",
+                params = {}
+            },
+            variant = 0
+        }
+    end
+end
+
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
+    if info.type < 50 then
+        modules[slotId] = nil
+    end
+end
+
+function data()
+    return {
+        classify = ust.classifyData,
+        preProcessAdd = preProcessAdd,
+        preProcessPostAdd = preProcessPostAdd
+    }
+
+end

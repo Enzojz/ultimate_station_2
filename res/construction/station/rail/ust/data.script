@@ -49,13 +49,16 @@ local classifyRef = function(modules, classified, slotId)
     
     if (type == 60) then
         if not modules[slotId].info.ref then modules[slotId].info.ref = {} end
-        if (data == 3) then
-            modules[slotId].info.ref.right = true
-        elseif (data == 7) then
+        if (bit32.band(data, 1) == 1) then
             modules[slotId].info.ref.left = true
-        elseif (data == 1) then
+        end
+        if (bit32.band(data, 2) == 2) then
+            modules[slotId].info.ref.right = true
+        end
+        if (bit32.band(data, 4) == 4) then
             modules[slotId].info.ref.next = true
-        elseif (data == 5) then
+        end
+        if (bit32.band(data, 8) == 8) then
             modules[slotId].info.ref.prev = true
         end
     end
@@ -67,7 +70,7 @@ function data()
         classifyRadius = classifyRadius,
         classifyGeometry = classifyGeometry,
         classifyRef = classifyRef,
-        classify = ust.classify,
+        classify = ust.classifyData,
         slotSetup = function(params, result, slotId)
             local info = params.modules[slotId].info
             local id = info.id

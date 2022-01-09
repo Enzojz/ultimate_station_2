@@ -28,7 +28,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     insert(result.slots, {
         id = makeData(80, 1),
         transf = transfPosC,
-        type = "ust_modifier",
+        type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
     
@@ -59,7 +59,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 insert(result.slots, {
                     id = makeData(83 + var, i),
                     transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ(arcs.center.inf - rad) * coor.trans(dst),
-                    type = "ust_modifier",
+                    type = "ust_radius_modifier",
                     shape = 2,
                     spacing = {0, 0, 0, 0}
                 })
@@ -86,12 +86,12 @@ function data()
         category = {
             categories = {"modifiers"},
         },
-        type = "ust_modifier",
+        type = "ust_radius_modifier",
         order = {
             value = 260,
         },
         metadata = {
-            typeName = "ust_modifier",
+            typeName = "ust_radius_modifier",
             isData = true,
             type = 2,
             scriptName = "construction/station/rail/ust/radius_modifier",

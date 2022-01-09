@@ -67,22 +67,24 @@ local createTemplateFn = function(params)
     
     local nSeg = baseLength / 20
     
-    local posList = params.platformLeft and ust.posGen(nbTracks, false) or ust.posGen(nbTracks)
+    local posList = func.rev(params.platformLeft and ust.posGen(nbTracks, false) or ust.posGen(nbTracks))
     
+    local xOffset = posList[1] and 0 or -1
     -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
+    
     local result = {}
     local id = 1
     
     local yMax = nSeg % 2 == 0 and (nSeg / 2 - 1) or (nSeg - 1) / 2
     local yMin = nSeg % 2 == 0 and (-nSeg / 2) or (1 - nSeg) / 2
-    for i, pos in ipairs(posList) do
-        local x = #posList - i
-        if pos then
+    for i, isTrack in ipairs(posList) do
+        local x = i - 1
+        if isTrack then
             for y = yMin, yMax do
                 local info = {
                     id = id,
                     type = 1,
-                    pos = coor.xyz(x, y, 0),
+                    pos = coor.xyz(x + xOffset, y, 0),
                     length = 20,
                     width = 5
                 }
@@ -100,9 +102,10 @@ local createTemplateFn = function(params)
                 local info = {
                     id = id,
                     type = 2,
-                    pos = coor.xyz(x, y, 0),
+                    pos = coor.xyz(x + xOffset, y, 0),
                     length = 20,
                     width = 5,
+                    ref = { left = posList[i - 1] == true, right = posList[i + 1] == true  }
                 }
                 local slotId, slotIds = ust.slotIds(info)
                 result[slotId] = "station/rail/ust/era_c/platform.module"
@@ -129,6 +132,7 @@ local preProcessFn = function(modules, change)
         data = data
     }
 
+    -- dump()({classedModules = classedModules})
     if change.added then
         if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info)

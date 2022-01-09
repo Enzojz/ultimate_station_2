@@ -58,8 +58,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
     
-    local leftConnected = isPlatform[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
-    local rightConnected = isPlatform[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+    local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left)
+    local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right)
     
     -- dump()({
     --     slotId = slotId, 
@@ -291,6 +291,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if params.debug then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        local refText = string.format("%s %s %s %s", info.ref.left and "L" or "", info.ref.right and "R" or "", info.ref.next and "N" or "", info.ref.prev and "P" or "")
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
@@ -298,9 +299,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 table.insert(result.models, m)
             end
         end
-        
+
         addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        
+        addText(refText, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -4) end, 0.75)
     end
 
 end

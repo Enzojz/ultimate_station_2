@@ -46,12 +46,14 @@ ust.slotIds = function(info)
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 58), info.width)
         },
-        data_ref = info.ref and func.filter({
-            info.ref.left and ust.mixData(ust.base(info.id, 60), 7) or false,
-            info.ref.right and ust.mixData(ust.base(info.id, 60), 3) or false,
-            info.ref.next and ust.mixData(ust.base(info.id, 60), 1) or false,
-            info.ref.prev and ust.mixData(ust.base(info.id, 60), 5) or false
-        }, pipe.noop()) or {
+        data_ref = {
+            info.ref and
+            ust.mixData(ust.base(info.id, 60),
+                (info.ref.left and 1 or 0) +
+                (info.ref.right and 2 or 0) +
+                (info.ref.next and 4 or 0) +
+                (info.ref.prev and 8 or 0)
+            ) or
             ust.base(info.id, 60)
         }
     }
@@ -68,6 +70,8 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 radius 56 is_straight 57 length 58 width 60 ref
         -- 3 ~ 6 : id
         -- > 6: data
+        -- Modifier
+        -- 1 ~ 2 : 80 81 radius
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000

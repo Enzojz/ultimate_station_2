@@ -1,0 +1,172 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+
+local unpack = table.unpack
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+local abs = ma.abs
+local pow = math.pow
+local floor = math.floor
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local makeData = params.modules[sId].makeData
+
+    local n = 2
+    local ptsL, vecL = ust.basePts(info.arcs.left, n)
+    local ptsR, vecR = ust.basePts(info.arcs.right, n)
+    
+    if (info.octa[7]) then
+        local refPtL = ptsL[2]
+        local refVecL = vecL[2]
+
+        local transfL =
+        quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVecL):mRot()
+        * coor.trans(refPtL)
+
+        table.insert(result.slots, {
+            id = makeData(91, info.ref.left and -1 or 1),
+            transf = transfL,
+            type = "ust_ref_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = info.ref.left and 2 or 1
+        })
+    end
+    
+    if (info.octa[3]) then
+        local refPtR = ptsR[2]
+        local refVecR = vecR[2]
+        
+        local transfR =
+            quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVecR):mRot()
+            * coor.trans(refPtR)
+        
+        table.insert(result.slots, {
+            id = makeData(91, info.ref.right and -2 or 2),
+            transf = transfR,
+            type = "ust_ref_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = info.ref.right and 2 or 1
+        })
+    end
+
+    if info.pos.y < 0 then
+        if info.octa[1] then
+            local refPt = ptsR[1]:avg(ptsL[1])
+            local refVec = (ptsR[1] - ptsL[1]):normalized()
+    
+            local transf =
+                quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
+                * coor.trans(refPt)
+    
+            insert(
+                result.slots, {
+                    id = makeData(91, info.ref.next and -4 or 4),
+                    transf = transf,
+                    type = "ust_ref_modifier",
+                    spacing = {0, 0, 0, 0},
+                    shape = info.ref.next and 2 or 1
+                })
+        end
+        
+        if info.octa[5] then
+            local refPt = ptsR[3]:avg(ptsL[3])
+            local refVec = (ptsR[3] - ptsL[3]):normalized()
+    
+            local transf =
+                quat.byVec(coor.xyz(0, -1, 0), refVec):mRot()
+                * coor.trans(refPt)
+    
+            insert(
+                result.slots, {
+                    id = makeData(91, info.ref.prev and -8 or 8),
+                    transf = transf,
+                    type = "ust_ref_modifier",
+                    spacing = {0, 0, 0, 0},
+                    shape = info.ref.prev and 2 or 1
+                })
+        end
+    else
+        if info.octa[1] then
+            local refPt = ptsR[3]:avg(ptsL[3])
+            local refVec = (ptsR[3] - ptsL[3]):normalized()
+    
+            local transf =
+                quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
+                * coor.trans(refPt)
+    
+            insert(
+                result.slots, {
+                    id = makeData(91, info.ref.next and -4 or 4),
+                    transf = transf,
+                    type = "ust_ref_modifier",
+                    spacing = {0, 0, 0, 0},
+                    shape = info.ref.next and 2 or 1
+                })
+        end
+        
+        if info.octa[5] then
+            local refPt = ptsR[1]:avg(ptsL[1])
+            local refVec = (ptsR[1] - ptsL[1]):normalized()
+    
+            local transf =
+                quat.byVec(coor.xyz(0, -1, 0), refVec):mRot()
+                * coor.trans(refPt)
+    
+            insert(
+                result.slots, {
+                    id = makeData(91, info.ref.prev and -8 or 8),
+                    transf = transf,
+                    type = "ust_ref_modifier",
+                    spacing = {0, 0, 0, 0},
+                    shape = info.ref.prev and 2 or 1
+                })
+        end
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_REF_MODIFIER"),
+            description = _("MENU_REF_MODIFIER_DESC"),
+        },
+        category = {
+            categories = {"modifiers"},
+        },
+        type = "ust_ref_modifier",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            typeName = "ust_ref_modifier",
+            isData = true,
+            type = 2,
+            scriptName = "construction/station/rail/ust/ref_modifier",
+            preProcessAdd = "preProcessAdd",
+            preProcessPostAdd = "preProcessPostAdd",
+            classify = "classify"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

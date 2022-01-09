@@ -132,7 +132,7 @@ local slotSetup = function(params, result, slotId)
         table.insert(result.slots, {
             id = makeData(80, 0),
             transf = transfPosC,
-            type = "ust_modifier",
+            type = "ust_radius_modifier",
             spacing = {0, 0, 0, 0}
         })
     end

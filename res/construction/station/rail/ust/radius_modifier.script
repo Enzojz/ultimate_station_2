@@ -22,6 +22,7 @@ local preProcessAdd = function(radiusFn)
             local id = info.id
             local m = modules[classedModules[id].slotId]
             
+            -- Clear previous radius
             if classedModules[id].slot[54] then
                 modules[classedModules[id].slot[54]] = nil
             end
@@ -37,6 +38,8 @@ local preProcessAdd = function(radiusFn)
             modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
             
             if info.type >= 81 and info.type <= 84 then
+                -- 81 82 radius value
+                -- 83 84 directional
                 local radius = radiusFn(info.data, m, m.info.radius)
                 if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
                 
@@ -62,6 +65,7 @@ local preProcessAdd = function(radiusFn)
                     variant = 0
                 }
             elseif info.type == 85 or info.type == 86 then
+                -- Make straight
                 if info.data == 0 then
                     local addSlot = ust.mixData(ust.base(id, 56), 0)
                     modules[addSlot] = {
@@ -112,7 +116,7 @@ local slotSetup = function(params, result, slotId)
     insert(result.slots, {
         id = slotId,
         transf = m.info.transf,
-        type = "ust_modifier",
+        type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
     

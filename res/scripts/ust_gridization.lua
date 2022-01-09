@@ -385,120 +385,10 @@ ust.gridization = function(modules, classedModules)
                         coroutine.yield()
                         -- Platform on second loop
                         
-                        local function findLeftTrack(slotId)
-                            if not slotId or not modules[slotId] then
-                                return nil
-                            elseif (modules[slotId].metadata.isTrack or modules[slotId].metadata.isPlaceholder) then
-                                return modules[slotId].info.pos
-                            elseif modules[slotId].metadata.isPlatform then
-                                return findLeftTrack(modules[slotId].info.octa[7])
-                            else
-                                return nil
-                            end
-                        end
-                        
-                        local function findRightTrack(slotId)
-                            if not slotId or not modules[slotId] then
-                                return nil
-                            elseif (modules[slotId].metadata.isTrack or modules[slotId].metadata.isPlaceholder) then
-                                return modules[slotId].info.pos
-                            elseif modules[slotId].metadata.isPlatform then
-                                return findRightTrack(modules[slotId].info.octa[3])
-                            else
-                                return nil
-                            end
-                        end
-                        
-                        local leftTrackPos = findLeftTrack(slotId)
-                        local rightTrackPos = findRightTrack(slotId)
                         
                         local ref = modules[slotId].info.ref or {}
-                        
-                        -- if #ref == 0 then
-                        --     local function isTrack(pos)
-                        --         return m.info.octa[pos] and modules[m.info.octa[pos]].metadata.isTrack
-                        --     end
-
-                        --     local function isPlatform(pos)
-                        --         return m.info.octa[pos] and modules[m.info.octa[pos]].metadata.isPlatform
-                        --     end
-
-                        --     local function isEmpty(pos)
-                        --         return not m.info.octa[pos] and not modules[m.info.octa[pos]]
-                        --     end
-
-                        --     if isTrack(3) and isTrack(7) then
-                        --         ref = { left = true, right = true }
-                        --     elseif isTrack(7) and not isPlatform(3) then
-                        --         ref = { left = true }
-                        --     elseif isTrack(3) and not isPlatform(7) then
-                        --         ref = { right = true }
-                            
-                        --     elseif isPlatform(1) and isPlatform(5) then
-                        --         ref = modules[slotId].info.pos.y < 0 and { next = true } or { prev = true }
-                        --     elseif isPlatform(1) then
-                        --         ref = { next = true }
-                        --     elseif isPlatform(5) then
-                        --         ref = { prev = true }
-
-                        --     elseif isPlatform(7) then
-                        --         ref = { left = true }
-                        --     elseif isPlatform(3) then
-                        --         ref = { right = true }
-                            
-                        --     elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) and not isEmpty(5) then
-                        --         ref = modules[slotId].info.pos.y < 0 and { next = true } or { prev = true }
-                        --     elseif isEmpty(3) and isEmpty(7) and not isEmpty(5) then
-                        --         ref = { prev = true }
-                        --     elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) then
-                        --         ref = { next = true }
-                        --     end
-                        -- end
-
-                        -- if y >= 0 then
-                        --     -- Forward side
-                        --     if (x >= 0) then
-                        --     -- Right side
-                        --         if (ref.left and not ref.right and leftTrackPos ~= x - 1) then
-                        --             -- Only tracks on left and not close
-                        --             if (m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform and modules[m.info.octa[5]].info.ref and modules[m.info.octa[5]].info.ref.right) then
-                        --                 -- Prev is a platform and it sticks to right
-                        --                 ref = {prev = true}
-                        --             end
-                        --         end
-                        --     else
-                        --         if (ref.right and not ref.left and rightTrackPos ~= x + 1) then
-                        --             -- Only tracks on right and not close
-                        --             if (m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform and modules[m.info.octa[5]].info.ref and modules[m.info.octa[5]].info.ref.left) then
-                        --                 -- Prev is a platform and it sticks to left
-                        --                 ref = {prev = true}
-                        --             end
-                        --         end
-                        --     end
-                        -- else
-                        --     if (x >= 0) then
-                        --         if (ref.left and not ref.right and leftTrackPos ~= x - 1) then
-                        --             if (m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and modules[m.info.octa[1]].info.ref.right) then
-                        --                 ref = {next = true}
-                        --             end
-                        --         end
-                        --     else
-                        --         if (not (ref.left and ref.right) and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and (modules[m.info.octa[1]].info.ref.left and modules[m.info.octa[1]].info.ref.right)) then
-                        --             ref = {next = true}
-                        --         elseif (ref.right and not ref.left and rightTrackPos ~= x + 1) then
-                        --             if (m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform and modules[m.info.octa[1]].info.ref and modules[m.info.octa[1]].info.ref.left) then
-                        --                 ref = {next = true}
-                        --             end
-                        --         end
-                        --     end
-                        -- end
-                        
                         modules[slotId].info.ref = ref
 
-                        dump()(
-                            {slotId = slotId, ref = ref}
-                        )
-                        
                         local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
                         local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
                         if y < 0 then arL, arR = arR, arL end
@@ -506,14 +396,14 @@ ust.gridization = function(modules, classedModules)
                         local aligned = false;
                         
                         if ref.left and ref.right then
-                            local leftTrack = modules[grid[z][leftTrackPos.x][y]]
+                            local leftTrack = modules[grid[z][x - 1][y]]
                             local leftO = leftTrack.info.arcs.center.o
-                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[leftTrackPos.x])
+                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
                             arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftTrack.info.arcs.center:limits())
                             
-                            local rightTrack = modules[grid[z][rightTrackPos.x][y]]
+                            local rightTrack = modules[grid[z][x + 1][y]]
                             local rightO = rightTrack.info.arcs.center.o
-                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[rightTrackPos.x])
+                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
                             arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightTrack.info.arcs.center:limits())
                             
                             local sup = leftTrack.info.pts[2][1]:avg(rightTrack.info.pts[2][1])

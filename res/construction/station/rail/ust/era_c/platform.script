@@ -1,5 +1,6 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
+local quat = require "ust/quaternion"
 local ust = require "ust"
 local dump = require "luadump"
 
@@ -69,18 +70,20 @@ local preProcessAdd = function(modules, change, classedModules, info)
         elseif isTrack(3) and not isPlatform(7) then
             ref = {right = true}
         
+        elseif isPlatform(7) and isPlatform(3) then
+            ref = {left = true, right = true}
+        elseif isPlatform(7) then
+            ref = {left = true}
+        elseif isPlatform(3) then
+            ref = {right = true}
+
         elseif isPlatform(1) and isPlatform(5) then
             ref = pos.y < 0 and {next = true} or {prev = true}
         elseif isPlatform(1) then
             ref = {next = true}
         elseif isPlatform(5) then
             ref = {prev = true}
-        
-        elseif isPlatform(7) then
-            ref = {left = true}
-        elseif isPlatform(3) then
-            ref = {right = true}
-        
+                
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) and not isEmpty(5) then
             ref = pos.y < 0 and {next = true} or {prev = true}
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(5) then
@@ -175,6 +178,14 @@ local slotSetup = function(params, result, slotId)
         local transf = ust.getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
+    
+    table.insert(result.slots, {
+        id = makeData(90, 0),
+        transf = transfPosC,
+        type = "ust_ref_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
 end
 
 local preProcessRemove = function(modules, change, classedModules, info)
