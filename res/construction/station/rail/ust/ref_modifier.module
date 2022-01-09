@@ -35,21 +35,14 @@ local mark = function(result, slotId, params)
         local refPt = ptsL[2]
         local refVec = vecL[2]
         local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
-        addText("*", refPt)
-    end
-    
-    if info.ref.left then
-        local refPt = ptsL[2]
-        local refVec = vecL[2]
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
-        addText("*", refPt)
+        addText("↞", refPt)
     end
     
     if info.ref.right then
         local refPt = ptsR[2]
         local refVec = vecR[2]
         local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVec):mRot() * coor.trans(refPt)
-        addText("*", refPt)
+        addText("↠", refPt)
     end
     
     if info.ref.next then
@@ -57,7 +50,7 @@ local mark = function(result, slotId, params)
         local refPt = ptsC[i]
         local refVec = vecC[i]
         local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
-        addText("*", refPt)
+        addText("↟", refPt)
     end
     
     if info.ref.prev then
@@ -65,7 +58,7 @@ local mark = function(result, slotId, params)
         local refPt = ptsC[i]
         local refVec = vecC[i]
         local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
-        addText("*", refPt)
+        addText("↡", refPt)
     end
 end
 
