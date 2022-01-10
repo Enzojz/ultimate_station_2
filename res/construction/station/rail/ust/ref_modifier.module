@@ -31,16 +31,15 @@ local mark = function(result, slotId, params)
         end
     end
 
-    for _, pt in ipairs(ptsL) do
-        addText("⋮", coor.trans(pt), coor.transX(-0.1))
+    for i = 1, 11 do
+        addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecL[i]):mRot() * coor.trans(ptsL[i]), coor.transX(-0.1))
+        addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.1))
     end
     
-    for _, pt in ipairs(ptsR) do
-        addText("⋮", coor.trans(pt), coor.transX(-0.1))
-    end
-    
-    for _, pt in ipairs({ptsL[1], ptsL[11], ptsR[1], ptsR[11], ptsC[1], ptsC[11]}) do
-        addText("⋯", coor.trans(pt), coor.transX(-0.5))
+    for _, i in ipairs({1, 11}) do
+        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecL[i]):mRot() * coor.trans(ptsL[i]), coor.transX(-0.5))
+        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.5))
+        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecC[i]):mRot() * coor.trans(ptsC[i]), coor.transX(-0.5))
     end
 
     if info.ref.left then

@@ -583,7 +583,7 @@ ust.gridization = function(modules, classedModules)
                             modules[slotId].info.length = math.abs(length)
                         end
                         
-                        local refArc = {
+                        refArc = {
                             left = arL,
                             right = arR,
                             center = ar
