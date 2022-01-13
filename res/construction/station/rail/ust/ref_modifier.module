@@ -9,70 +9,6 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
-local mark = function(result, slotId, params)
-    local id = params.modules[slotId].info.id
-    local sId = params.classedModules[id].slotId
-    local info = params.modules[sId].info
-    local makeData = params.modules[sId].makeData
-    
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef)
-    local hTrans = coor.trans(hVec)
-    
-    local n = 10
-    local ptsL, vecL = ust.basePts(info.arcs.left, n)
-    local ptsR, vecR = ust.basePts(info.arcs.right, n)
-    local ptsC, vecC = ust.basePts(info.arcs.center, n)
-    
-    local addText = function(label, transf, f)
-        local nameModelsF, width = livetext(2)(label)
-        for _, m in ipairs(nameModelsF(function() return (f or coor.I()) * coor.transZ(-0.85) * coor.rotX(-0.5 * pi) * hTrans * transf end)) do
-            table.insert(result.models, m)
-        end
-    end
-
-    for i = 1, 11 do
-        addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecL[i]):mRot() * coor.trans(ptsL[i]), coor.transX(-0.1))
-        addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.1))
-    end
-    
-    for _, i in ipairs({1, 11}) do
-        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecL[i]):mRot() * coor.trans(ptsL[i]), coor.transX(-0.5))
-        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.5))
-        addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecC[i]):mRot() * coor.trans(ptsC[i]), coor.transX(-0.5))
-    end
-
-    if info.ref.left then
-        local refPt = ptsL[6]
-        local refVec = vecL[6]
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
-        addText("⋘", transf, coor.transX(0.2))
-    end
-    
-    if info.ref.right then
-        local refPt = ptsR[6]
-        local refVec = vecR[6]
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVec):mRot() * coor.trans(refPt)
-        addText("⋘", transf, coor.transX(0.2))
-    end
-    
-    if info.ref.next then
-        local i = info.pos.y < 0 and 1 or 11
-        local refPt = ptsC[i]
-        local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
-        addText("⋘", transf, coor.transX(0.2))
-    end
-    
-    if info.ref.prev then
-        local i = info.pos.y < 0 and 11 or 1
-        local refPt = ptsC[i]
-        local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
-        addText("⋘", transf, coor.transX(0.2))
-    end
-end
-
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
@@ -118,11 +54,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
         end
     end
-    mark(result, slotId, params)
+    ust.marking(result, slotId, params)
     
     for _, octa in ipairs(info.octa) do
         if octa then
-            mark(result, octa, params)
+            ust.marking(result, octa, params)
         end
     end
 

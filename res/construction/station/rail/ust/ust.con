@@ -264,8 +264,8 @@ local updateFn = function(params, closureParams)
     params.trackGroup = {}
     params.platformGroup = {}
     params.trackPlatformGroup = {}
+    params.edgeIndex = {}
     searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
-    
     params.edgeGroup = {}
     
     for slotId, module in pairs(params.modules) do

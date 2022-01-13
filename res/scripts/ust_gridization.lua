@@ -10,7 +10,6 @@ local math = math
 local pi = math.pi
 
 -- It's a big function so I seperate it
-
 local calculateLimit = function(arc)
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
@@ -79,7 +78,6 @@ ust.gridization = function(modules, classedModules)
     for z, g in pairs(grid) do
         
         -- Build the gridization queue
-        
         local queue = {}
         local parentMap = {}
         
@@ -115,12 +113,10 @@ ust.gridization = function(modules, classedModules)
         end
         
         enqueue(g[0][0], true)
-        searchMap(1) -- Always starts from id: 1, search in Y axis first, then X axis
-
-        -- Build the gridization queue
-
-        -- Collect X postion and width information
+        searchMap(1)-- Always starts from id: 1, search in Y axis first, then X axis
         
+        -- Build the gridization queue
+        -- Collect X postion and width information
         local xPos = func.seq(0, func.max(func.keys(g)))
         local xNeg = func.seq(func.min(func.keys(g)), -1)
         
@@ -175,16 +171,13 @@ ust.gridization = function(modules, classedModules)
         end
         
         -- Collect X postion and width information
-
         -- Process in Y axis
-
         local processY = function(x, y)
             return function()
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
                 
                 -- First round, for both tracks and platforms
-
                 if m.metadata.isTrack or m.metadata.isPlatform or m.metadata.isPlaceholder then
                     if not m.info.width then
                         m.info.width = m.metadata.width or 5
@@ -204,9 +197,8 @@ ust.gridization = function(modules, classedModules)
                         length = m.info.length
                     }
                     
-                    local anchor = parentMap[slotId] -- Anchor is the reference point
+                    local anchor = parentMap[slotId]-- Anchor is the reference point
                     -- By default the anchor is the parant in search tree
-                    
                     if (anchor == m.info.octa[3] or anchor == m.info.octa[7]) then
                         -- If the anchor is from a another row, look if something in the same row exists nearby
                         local octa5 = m.info.octa[5] and modules[m.info.octa[5]]
@@ -300,7 +292,6 @@ ust.gridization = function(modules, classedModules)
                     modules[slotId].info.radius = yState.radius
                     modules[slotId].info.length = yState.length
                     -- Base radius and length
-
                     -- Initial arch
                     local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
                     local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
@@ -385,10 +376,9 @@ ust.gridization = function(modules, classedModules)
                         coroutine.yield()
                         -- Platform on second loop
                         
-                        
                         local ref = modules[slotId].info.ref or {}
                         modules[slotId].info.ref = ref
-
+                        
                         local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
                         local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
                         if y < 0 then arL, arR = arR, arL end
@@ -396,29 +386,34 @@ ust.gridization = function(modules, classedModules)
                         local aligned = false;
                         
                         if ref.left and ref.right then
-                            local leftTrack = modules[grid[z][x - 1][y]]
-                            local leftO = leftTrack.info.arcs.center.o
-                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
-                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftTrack.info.arcs.center:limits())
+                            local leftModule = modules[grid[z][x - 1][y]]
+                            local leftO = leftModule.info.arcs.center.o
+                            local leftRadius = leftModule.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
+                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftModule.info.arcs.center:limits())
                             
-                            local rightTrack = modules[grid[z][x + 1][y]]
-                            local rightO = rightTrack.info.arcs.center.o
-                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
-                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightTrack.info.arcs.center:limits())
+                            local rightModule = modules[grid[z][x + 1][y]]
+                            local rightO = rightModule.info.arcs.center.o
+                            local rightRadius = rightModule.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
+                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightModule.info.arcs.center:limits())
                             
-                            local sup = leftTrack.info.pts[2][1]:avg(rightTrack.info.pts[2][1])
-                            
-                            local vecSupL = (leftTrack.info.radius > 0 and (leftTrack.info.pts[2][1] - arL.o) or (arL.o - leftTrack.info.pts[2][1])):normalized()
-                            local vecSupR = (rightTrack.info.radius > 0 and (rightTrack.info.pts[2][1] - arR.o) or (arR.o - rightTrack.info.pts[2][1])):normalized()
-                            local vecSup = (vecSupL + vecSupR):normalized()
-                            local limitSup = line.byVecPt(vecSup, sup)
-                            
-                            supL = calculateLimit(arL)(limitSup, leftTrack.info.pts[2])
-                            supR = calculateLimit(arR)(limitSup, rightTrack.info.pts[2])
+                            local supL = leftModule.info.arcs.center.sup
+                            local supR = rightModule.info.arcs.center.sup
+
+                            if leftModule.metadata.isTrack and rightModule.metadata.isTrack then
+                                local sup = leftModule.info.pts[2][1]:avg(rightModule.info.pts[2][1])
+                                
+                                local vecSupL = (leftModule.info.radius > 0 and (leftModule.info.pts[2][1] - arL.o) or (arL.o - leftModule.info.pts[2][1])):normalized()
+                                local vecSupR = (rightModule.info.radius > 0 and (rightModule.info.pts[2][1] - arR.o) or (arR.o - rightModule.info.pts[2][1])):normalized()
+                                local vecSup = (vecSupL + vecSupR):normalized()
+                                local limitSup = line.byVecPt(vecSup, sup)
+
+                                supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
+                                supR = calculateLimit(arR)(limitSup, rightModule.info.pts[2])
+                            end
                             
                             local infL = arL:rad(yState.pos)
                             if (y == 0 or y == -1) then
-                                infL = leftTrack.info.arcs.center.inf
+                                infL = leftModule.info.arcs.center.inf
                             elseif (y > 0 and m.info.octa[5]) then
                                 infL = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
                             elseif (y < 0 and m.info.octa[1]) then
@@ -427,7 +422,7 @@ ust.gridization = function(modules, classedModules)
                             
                             local infR = arR:rad(yState.pos)
                             if (y == 0 or y == -1) then
-                                infR = rightTrack.info.arcs.center.inf
+                                infR = rightModule.info.arcs.center.inf
                             elseif (y > 0 and m.info.octa[5]) then
                                 infR = arR:rad(modules[m.info.octa[5]].info.pts[2][1])
                             elseif (y < 0 and m.info.octa[1]) then
@@ -438,19 +433,24 @@ ust.gridization = function(modules, classedModules)
                             arR = arR:withLimits({sup = supR, inf = infR})
                             aligned = true
                         elseif ref.left then
-                            local leftTrack = modules[grid[z][x - 1][y]]
-                            local leftO = leftTrack.info.arcs.center.o
-                            local leftRadius = leftTrack.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
-                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftTrack.info.arcs.center:limits())
-                            arR = arc.byOR(leftO, leftRadius + m.info.width * 0.5, leftTrack.info.arcs.center:limits())
+                            local leftModule = modules[grid[z][x - 1][y]]
+                            local leftO = leftModule.info.arcs.center.o
+                            local leftRadius = leftModule.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
+                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftModule.info.arcs.center:limits())
+                            arR = arc.byOR(leftO, leftRadius + m.info.width * 0.5, leftModule.info.arcs.center:limits())
                             
-                            local limitSup = leftTrack.info.limits[2]
-                            local supL = calculateLimit(arL)(limitSup, leftTrack.info.pts[2])
-                            local supR = calculateLimit(arR)(limitSup, leftTrack.info.pts[2])
+                            local supL = leftModule.info.arcs.center.sup
+                            local supR = leftModule.info.arcs.center.sup
+
+                            if (leftModule.metadata.isTrack) then
+                                local limitSup = leftModule.info.limits[2]
+                                supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
+                                supR = calculateLimit(arR)(limitSup, leftModule.info.pts[2])
+                            end
                             
                             local inf = arL:rad(yState.pos)
                             if (y == 0 or y == -1) then
-                                inf = leftTrack.info.arcs.center.inf
+                                inf = leftModule.info.arcs.center.inf
                             elseif (y > 0 and m.info.octa[5]) then
                                 inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
                             elseif (y < 0 and m.info.octa[1]) then
@@ -461,19 +461,24 @@ ust.gridization = function(modules, classedModules)
                             arR = arR:withLimits({sup = supR, inf = inf})
                             aligned = true
                         elseif ref.right then
-                            local rightTrack = modules[grid[z][x + 1][y]]
-                            local rightO = rightTrack.info.arcs.center.o
-                            local rightRadius = rightTrack.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
-                            arL = arc.byOR(rightO, rightRadius - m.info.width * 0.5, rightTrack.info.arcs.center:limits())
-                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightTrack.info.arcs.center:limits())
+                            local rightModule = modules[grid[z][x + 1][y]]
+                            local rightO = rightModule.info.arcs.center.o
+                            local rightRadius = rightModule.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
+                            arL = arc.byOR(rightO, rightRadius - m.info.width * 0.5, rightModule.info.arcs.center:limits())
+                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightModule.info.arcs.center:limits())
                             
-                            local limitSup = rightTrack.info.limits[2]
-                            local supL = calculateLimit(arL)(limitSup, rightTrack.info.pts[2])
-                            local supR = calculateLimit(arR)(limitSup, rightTrack.info.pts[2])
+                            local supL = rightModule.info.arcs.center.sup
+                            local supR = rightModule.info.arcs.center.sup
+
+                            if (rightModule.metadata.isTrack) then
+                                local limitSup = rightModule.info.limits[2]
+                                supL = calculateLimit(arL)(limitSup, rightModule.info.pts[2])
+                                supR = calculateLimit(arR)(limitSup, rightModule.info.pts[2])
+                            end
                             
                             local inf = arL:rad(yState.pos)
                             if (y == 0 or y == -1) then
-                                inf = rightTrack.info.arcs.center.inf
+                                inf = rightModule.info.arcs.center.inf
                             elseif (y > 0 and m.info.octa[5]) then
                                 inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
                             elseif (y < 0 and m.info.octa[1]) then
@@ -489,11 +494,11 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            if ((m.info.pos.y + 0.5)  * (modules[m.info.octa[5]].info.pos.y + 0.5) < 0) then
+                            if ((m.info.pos.y + 0.5) * (modules[m.info.octa[5]].info.pos.y + 0.5) < 0) then
                                 arL.sup, arL.inf = arL.inf, arL.sup
                                 arR.sup, arR.inf = arR.inf, arR.sup
                             end
-
+                            
                             arL = arL:withLimits({
                                 inf = arL.sup,
                                 sup = arL.sup + arL.sup - arL.inf
@@ -511,11 +516,11 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            if ((m.info.pos.y + 0.5)  * (modules[m.info.octa[1]].info.pos.y + 0.5) < 0) then
+                            if ((m.info.pos.y + 0.5) * (modules[m.info.octa[1]].info.pos.y + 0.5) < 0) then
                                 arL.sup, arL.inf = arL.inf, arL.sup
                                 arR.sup, arR.inf = arR.inf, arR.sup
                             end
-
+                            
                             arL = arL:withLimits({
                                 inf = arL.sup,
                                 sup = arL.sup + arL.sup - arL.inf
