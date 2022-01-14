@@ -248,12 +248,12 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
-    -- params.debug = true
+    params.debug = true
     
     params.classedModules = classifyModules(params.modules)
     local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
-    -- dump()(params.modules)
     -- dump()(params.classedModules)
+    -- dump()(params.modules)
     
     params.grid = grid
     params.lowestHeight = lowestHeight

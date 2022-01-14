@@ -40,9 +40,9 @@ ust.slotIds = function(info)
         data_radius = info.radius and {
             ust.mixData(ust.base(info.id, 54), info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)),
             ust.mixData(ust.base(info.id, 55), info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))),
-        } or {
+        } or info.straight and {
             ust.mixData(ust.base(info.id, 56), 0)
-        },
+        } or {},
         data_geometry = {
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 58), info.width)
