@@ -267,7 +267,7 @@ local updateFn = function(params, closureParams)
     params.edgeIndex = {}
     searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
     params.edgeGroup = {}
-    
+
     for slotId, module in pairs(params.modules) do
         if module.metadata.slotSetup then
             game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)

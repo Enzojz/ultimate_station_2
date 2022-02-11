@@ -92,7 +92,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
             ref = {next = true}
         end
         
-        
         local newInfo = {
             id = maxId + 1,
             type = change.module.metadata.typeId,
@@ -156,6 +155,7 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
+    
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     

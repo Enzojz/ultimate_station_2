@@ -1,4 +1,5 @@
 local func = require "ust/func"
+local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local arc = require "ust/coorarc"
 local line = require "ust/coorline"
@@ -75,45 +76,158 @@ ust.gridization = function(modules, classedModules)
         end
     end
     
+    
     for z, g in pairs(grid) do
         
+        
         -- Build the gridization queue
-        local queue = {}
         local parentMap = {}
         
-        local enqueue = function(slotId, parent)
-            if slotId and not parentMap[slotId] then
-                table.insert(queue, slotId)
-                parentMap[slotId] = parent
+        local mDist = {}
+        local groups = {}
+        for x, g in pairs(g) do
+            local ySeq = func.sort(func.keys(g))
+            local seqs = {}
+            for _, y in ipairs(ySeq) do
+                local slotId = g[y]
+                local m = modules[slotId]
+                if not mDist[slotId] then mDist[slotId] = {} end
+                if m.info.octa[3] then
+                    mDist[slotId][m.info.octa[3]] = 1
+                end
+                if m.info.octa[7] then
+                    mDist[slotId][m.info.octa[7]] = -1
+                end
+                
+                local data = {x = x, y = y, slotId = g[y]}
+                if #seqs == 0 then
+                    seqs[1] = {data}
+                else
+                    local lastSeq = seqs[#seqs]
+                    if (lastSeq[#lastSeq].y == y - 1) then
+                        table.insert(seqs[#seqs], data)
+                    else
+                        table.insert(seqs, {data})
+                    end
+                end
+            end
+            for _, seq in ipairs(seqs) do
+                table.insert(groups, {seq = seq, x = x, children = {}})
             end
         end
         
-        local function searchMap(index)
-            local current = queue[index]
-            if (current) then
-                local m = modules[current]
-                local info = m.info
-                local x, y = info.pos.x, info.pos.y
-                if y >= 0 then
-                    enqueue(info.octa[1], current)
-                    enqueue(info.octa[5], current)
-                else
-                    enqueue(info.octa[5], current)
-                    enqueue(info.octa[1], current)
+        local gDist = {}
+        
+        for i, groupL in ipairs(groups) do
+            if not gDist[i] then gDist[i] = {} end
+            for j, groupR in ipairs(groups) do
+                if not gDist[j] then gDist[j] = {} end
+                local distX = groupL.x - groupR.x
+                if i < j and (distX == 1 or distX == -1) then
+                    for _, seqL in ipairs(groupL.seq) do
+                        for _, seqR in ipairs(groupR.seq) do
+                            local slotIdL = seqL.slotId
+                            local slotIdR = seqR.slotId
+                            if mDist[slotIdL][slotIdR] then
+                                gDist[i][j] = mDist[slotIdL][slotIdR]
+                                gDist[j][i] = mDist[slotIdL][slotIdR]
+                                break
+                            end
+                        end
+                        if gDist[i][j] then break end
+                    end
                 end
-                if x >= 0 then
-                    enqueue(info.octa[3], current)
-                    enqueue(info.octa[7], current)
-                else
-                    enqueue(info.octa[7], current)
-                    enqueue(info.octa[3], current)
-                end
-                searchMap(index + 1)
             end
         end
         
-        enqueue(g[0][0], true)
-        searchMap(1)-- Always starts from id: 1, search in Y axis first, then X axis
+        local mGIndex = {}
+        for i, g in ipairs(groups) do
+            g.order = i
+            for _, seq in ipairs(g.seq) do
+                mGIndex[seq.slotId] = g.order
+            end
+        end
+        
+        local groupQueue = {}
+        for i, g in ipairs(groups) do
+            if (g.x == 0) then
+                for _, slot in ipairs(g.seq) do
+                    if slot.y == 0 then
+                        table.insert(groupQueue, i)
+                        groups[i].parent = true
+                        break
+                    end
+                end
+            end
+            if #groupQueue > 0 then break end
+        end
+        
+        while #groupQueue > 0 do
+            local g = table.remove(groupQueue, 1)
+            for n, _ in pairs(gDist[g]) do
+                if not groups[n].parent then
+                    table.insert(groupQueue, n)
+                    table.insert(groups[g].children, n)
+                    groups[n].parent = g
+                end
+            end
+        end
+        
+        
+        groupQueue = func.map(func.filter(groups, function(g) return g.parent == true end), pipe.select("order"))
+        parentMap = {}
+        childrenMap = {}
+        cqueue = {g[0][0]}
+        
+        while #groupQueue > 0 do
+            local g = groups[table.remove(groupQueue, 1)]
+            local ySeq = func.map(g.seq, pipe.select("y"))
+            local yMax = func.max(ySeq)
+            local yMin = func.min(ySeq)
+            
+            local seqs = {}
+            if (yMax > 0 and yMin >= 0) then
+                seqs = {g.seq}
+            elseif (yMax <= 0 and yMin < 0) then
+                seqs = {func.rev(g.seq)}
+            else
+                seqs = {
+                    func.filter(g.seq, function(s) return s.y >= 0 end),
+                    func.rev(func.filter(g.seq, function(s) return s.y <= 0 end))
+                }
+            end
+            
+            for _, seq in ipairs(seqs) do
+                for i, s in ipairs(seq) do
+                    if not childrenMap[s.slotId] then childrenMap[s.slotId] = {} end
+                    if seq[i + 1] and not parentMap[seq[i + 1]] then
+                        parentMap[seq[i + 1].slotId] = s.slotId
+                        table.insert(childrenMap[s.slotId], seq[i + 1].slotId)
+                    end
+                    for slotIdR, v in pairs(mDist[s.slotId] or {}) do
+                        local gR = mGIndex[slotIdR]
+                        if func.contains(g.children, gR) and not func.contains(groupQueue, gR) and not parentMap[slotIdR] then
+                            table.insert(groupQueue, gR)
+                            parentMap[slotIdR] = s.slotId
+                            table.insert(childrenMap[s.slotId], slotIdR)
+                        end
+                    end
+                end
+            end
+        end
+        
+        local queue = {}
+        while #cqueue > 0 do
+            local slotId = table.remove(cqueue, 1)
+            table.insert(queue, slotId)
+            if childrenMap[slotId] then
+                for _, slotId in ipairs(childrenMap[slotId]) do
+                    table.insert(cqueue, slotId)
+                end
+            end
+        end
+        
+        dump()(queue)
         
         -- Build the gridization queue
         -- Collect X postion and width information
@@ -197,20 +311,21 @@ ust.gridization = function(modules, classedModules)
                         length = m.info.length
                     }
                     
-                    local anchor = parentMap[slotId]-- Anchor is the reference point
+                    local ref = parentMap[slotId]-- Anchor is the reference point
+                    
                     -- By default the anchor is the parant in search tree
-                    if (anchor == m.info.octa[3] or anchor == m.info.octa[7]) then
+                    if (ref == m.info.octa[3] or ref == m.info.octa[7]) and not (m.info.ref.left or m.info.ref.right) then
                         -- If the anchor is from a another row, look if something in the same row exists nearby
                         local octa5 = m.info.octa[5] and modules[m.info.octa[5]]
                         local octa1 = m.info.octa[1] and modules[m.info.octa[1]]
                         if octa5 or octa1 then
                             if octa5 and octa5.info and octa5.info.pts and octa1 and octa1.info and octa1.info.pts then
                                 -- If exists in both sides
-                                anchor = m.info.octa[y >= 0 and 5 or 1]
+                                ref = m.info.octa[y >= 0 and 5 or 1]
                             elseif octa5 and octa5.info and octa5.info.pts then
-                                anchor = m.info.octa[5]
+                                ref = m.info.octa[5]
                             elseif octa1 and octa1.info and octa1.info.pts then
-                                anchor = m.info.octa[1]
+                                ref = m.info.octa[1]
                             end
                         end
                     end
@@ -220,21 +335,21 @@ ust.gridization = function(modules, classedModules)
                         yState.pos = coor.xyz(infoX.pos[0], 0, 0)
                         yState.vec = coor.xyz(0, 1, 0)
                     else
-                        if anchor == m.info.octa[5] then
-                            yState.pos = modules[anchor].info.pts[4][1]
-                            yState.vec = modules[anchor].info.pts[4][2]
-                        elseif anchor == m.info.octa[1] then
-                            yState.pos = modules[anchor].info.pts[3][1]
-                            yState.vec = -modules[anchor].info.pts[3][2]
-                        elseif anchor == m.info.octa[3] then
-                            local pos = modules[anchor].info.pts[1][1]
-                            local vec = modules[anchor].info.pts[1][2]
+                        if ref == m.info.octa[5] then
+                            yState.pos = modules[ref].info.pts[4][1]
+                            yState.vec = modules[ref].info.pts[4][2]
+                        elseif ref == m.info.octa[1] then
+                            yState.pos = modules[ref].info.pts[3][1]
+                            yState.vec = -modules[ref].info.pts[3][2]
+                        elseif ref == m.info.octa[3] then
+                            local pos = modules[ref].info.pts[1][1]
+                            local vec = modules[ref].info.pts[1][2]
                             
                             yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x + 1])
                             yState.vec = vec
-                        elseif anchor == m.info.octa[7] then
-                            local pos = modules[anchor].info.pts[1][1]
-                            local vec = modules[anchor].info.pts[1][2]
+                        elseif ref == m.info.octa[7] then
+                            local pos = modules[ref].info.pts[1][1]
+                            local vec = modules[ref].info.pts[1][2]
                             
                             yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x - 1])
                             yState.vec = vec
@@ -243,7 +358,7 @@ ust.gridization = function(modules, classedModules)
                     
                     if not yState.radius then
                         -- If no radius defined
-                        if anchor == m.info.octa[5] or anchor == m.info.octa[1] then
+                        if ref == m.info.octa[5] or ref == m.info.octa[1] then
                             -- If the element in the same row get radius defined, take it
                             for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
                                 if grid[z][x] and grid[z][x][i] then
@@ -251,7 +366,12 @@ ust.gridization = function(modules, classedModules)
                                     break
                                 end
                             end
+                        elseif ref == m.info.octa[3] then
+                            yState.radius = modules[m.info.octa[3]].info.radius - (modules[m.info.octa[3]].metadata.width + m.metadata.width) * 0.5
+                        elseif ref == m.info.octa[7] then
+                            yState.radius = modules[m.info.octa[7]].info.radius + (modules[m.info.octa[7]].metadata.width + m.metadata.width) * 0.5
                         end
+                        
                         if not yState.radius then
                             -- If the the radius is still unknown
                             local loop = {}
@@ -276,18 +396,18 @@ ust.gridization = function(modules, classedModules)
                                 end
                             end
                             for i = loop[1], loop[2], loop[3] do
-                                if grid[z][i] and grid[z][i][y] then
+                                if grid[z][i] and grid[z][i][y] and modules[grid[z][i][y]].info.radius then
                                     yState.radius = modules[grid[z][i][y]].info.radius + (infoX.pos[x] - infoX.pos[i])
-                                    yState.radiusRef = i
                                     break
                                 end
                             end
-                        end
-                        if not yState.radius then
-                            -- Make it straight
-                            yState.radius = 10e8
+                            if not yState.radius then
+                                -- Make it straight
+                                yState.radius = 10e8
+                            end
                         end
                     end
+                    
                     
                     modules[slotId].info.radius = yState.radius
                     modules[slotId].info.length = yState.length
@@ -298,7 +418,8 @@ ust.gridization = function(modules, classedModules)
                     if y < 0 then arL, arR = arR, arL end
                     
                     -- ALignement of starting point and ending point
-                    if x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) then
+                    if (x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) and not modules[m.info.octa[3]].info.ref.left) or
+                        (m.metadata.isTrack and ref == m.info.octa[3]) then
                         -- Left side, a track on the right
                         if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
                             or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
@@ -316,7 +437,8 @@ ust.gridization = function(modules, classedModules)
                             arR.inf = inf
                             ar.inf = inf
                         end
-                    elseif x >= 0 and m.info.octa[7] and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) then
+                    elseif (x >= 0 and m.info.octa[7] and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) and not modules[m.info.octa[7]].info.ref.right) or
+                        (m.metadata.isTrack and ref == m.info.octa[5]) then
                         -- Right side, a track on the left
                         if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
                             or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
@@ -375,7 +497,6 @@ ust.gridization = function(modules, classedModules)
                     if m.metadata.isPlatform then
                         coroutine.yield()
                         -- Platform on second loop
-                        
                         local ref = modules[slotId].info.ref or {}
                         modules[slotId].info.ref = ref
                         
@@ -398,7 +519,7 @@ ust.gridization = function(modules, classedModules)
                             
                             local supL = leftModule.info.arcs.center.sup
                             local supR = rightModule.info.arcs.center.sup
-
+                            
                             if leftModule.metadata.isTrack and rightModule.metadata.isTrack then
                                 local sup = leftModule.info.pts[2][1]:avg(rightModule.info.pts[2][1])
                                 
@@ -406,7 +527,7 @@ ust.gridization = function(modules, classedModules)
                                 local vecSupR = (rightModule.info.radius > 0 and (rightModule.info.pts[2][1] - arR.o) or (arR.o - rightModule.info.pts[2][1])):normalized()
                                 local vecSup = (vecSupL + vecSupR):normalized()
                                 local limitSup = line.byVecPt(vecSup, sup)
-
+                                
                                 supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
                                 supR = calculateLimit(arR)(limitSup, rightModule.info.pts[2])
                             end
@@ -441,7 +562,7 @@ ust.gridization = function(modules, classedModules)
                             
                             local supL = leftModule.info.arcs.center.sup
                             local supR = leftModule.info.arcs.center.sup
-
+                            
                             if (leftModule.metadata.isTrack) then
                                 local limitSup = leftModule.info.limits[2]
                                 supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
@@ -469,7 +590,7 @@ ust.gridization = function(modules, classedModules)
                             
                             local supL = rightModule.info.arcs.center.sup
                             local supR = rightModule.info.arcs.center.sup
-
+                            
                             if (rightModule.metadata.isTrack) then
                                 local limitSup = rightModule.info.limits[2]
                                 supL = calculateLimit(arL)(limitSup, rightModule.info.pts[2])
@@ -648,7 +769,7 @@ ust.gridization = function(modules, classedModules)
         for _, current in ipairs(func.concat(queue, queue)) do
             local result = coroutine.resume(cr[current])
             if not result then
-                print(debug.traceback(cr[current]))
+                error(debug.traceback(cr[current]))
             end
         end
     end

@@ -480,7 +480,6 @@ ust.marking = function(result, slotId, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
-    local makeData = params.modules[sId].makeData
     
     local hRef = params.platformHeight
     local hVec = coor.xyz(0, 0, hRef)
