@@ -10,6 +10,9 @@ local dump = require "luadump"
 local math = math
 local pi = math.pi
 
+local unpack = table.unpack
+local insert = table.insert
+
 -- It's a big function so I seperate it
 local calculateLimit = function(arc)
     return function(l, ptvec)
@@ -79,15 +82,18 @@ ust.gridization = function(modules, classedModules)
     
     for z, g in pairs(grid) do
         
-        
         -- Build the gridization queue
         local parentMap = {}
+        local childrenMap = {}
         
         local mDist = {}
+        local gDist = {}
+        local mGIndex = {}
         local groups = {}
+        
         for x, g in pairs(g) do
             local ySeq = func.sort(func.keys(g))
-            local seqs = {}
+            local slotSeqs = {}
             for _, y in ipairs(ySeq) do
                 local slotId = g[y]
                 local m = modules[slotId]
@@ -100,23 +106,25 @@ ust.gridization = function(modules, classedModules)
                 end
                 
                 local data = {x = x, y = y, slotId = g[y]}
-                if #seqs == 0 then
-                    seqs[1] = {data}
+                if #slotSeqs == 0 then
+                    slotSeqs[1] = {data}
                 else
-                    local lastSeq = seqs[#seqs]
+                    local lastSeq = slotSeqs[#slotSeqs]
                     if (lastSeq[#lastSeq].y == y - 1) then
-                        table.insert(seqs[#seqs], data)
+                        insert(slotSeqs[#slotSeqs], data)
                     else
-                        table.insert(seqs, {data})
+                        insert(slotSeqs, {data})
                     end
                 end
             end
-            for _, seq in ipairs(seqs) do
-                table.insert(groups, {seq = seq, x = x, children = {}})
+            for _, slots in ipairs(slotSeqs) do
+                local gId = #groups + 1
+                insert(groups, {slots = slots, x = x, order = gId, children = {}})
+                for _, seq in ipairs(slots) do
+                    mGIndex[seq.slotId] = gId
+                end
             end
         end
-        
-        local gDist = {}
         
         for i, groupL in ipairs(groups) do
             if not gDist[i] then gDist[i] = {} end
@@ -124,10 +132,10 @@ ust.gridization = function(modules, classedModules)
                 if not gDist[j] then gDist[j] = {} end
                 local distX = groupL.x - groupR.x
                 if i < j and (distX == 1 or distX == -1) then
-                    for _, seqL in ipairs(groupL.seq) do
-                        for _, seqR in ipairs(groupR.seq) do
-                            local slotIdL = seqL.slotId
-                            local slotIdR = seqR.slotId
+                    for _, slotL in ipairs(groupL.slots) do
+                        for _, slotR in ipairs(groupR.slots) do
+                            local slotIdL = slotL.slotId
+                            local slotIdR = slotR.slotId
                             if mDist[slotIdL][slotIdR] then
                                 gDist[i][j] = mDist[slotIdL][slotIdR]
                                 gDist[j][i] = mDist[slotIdL][slotIdR]
@@ -140,93 +148,74 @@ ust.gridization = function(modules, classedModules)
             end
         end
         
-        local mGIndex = {}
-        for i, g in ipairs(groups) do
-            g.order = i
-            for _, seq in ipairs(g.seq) do
-                mGIndex[seq.slotId] = g.order
-            end
-        end
-        
-        local groupQueue = {}
-        for i, g in ipairs(groups) do
-            if (g.x == 0) then
-                for _, slot in ipairs(g.seq) do
-                    if slot.y == 0 then
-                        table.insert(groupQueue, i)
-                        groups[i].parent = true
-                        break
+        local function groupTreeGen(g, ...)
+            if g then
+                local rest = {...}
+                for n, _ in pairs(gDist[g]) do
+                    if not groups[n].parent then
+                        insert(groups[g].children, n)
+                        insert(rest, n)
+                        groups[n].parent = g
                     end
                 end
+                groupTreeGen(unpack(rest))
             end
-            if #groupQueue > 0 then break end
         end
-        
-        while #groupQueue > 0 do
-            local g = table.remove(groupQueue, 1)
-            for n, _ in pairs(gDist[g]) do
-                if not groups[n].parent then
-                    table.insert(groupQueue, n)
-                    table.insert(groups[g].children, n)
-                    groups[n].parent = g
+        groups[mGIndex[g[0][0]]].parent = true
+        groupTreeGen(groups[mGIndex[g[0][0]]].order)
+
+        local function slotTreeGen(group, ...)
+            if group then
+                local g = groups[group]
+                local rest = {...}
+                local yPos = func.map(g.slots, pipe.select("y"))
+                local yMax = func.max(yPos)
+                local yMin = func.min(yPos)
+                
+                local slots = {}
+                if (yMax > 0 and yMin >= 0) then
+                    slots = {g.slots}
+                elseif (yMax <= 0 and yMin < 0) then
+                    slots = {func.rev(g.slots)}
+                else
+                    slots = {
+                        func.filter(g.slots, function(s) return s.y >= 0 end),
+                        func.rev(func.filter(g.slots, function(s) return s.y <= 0 end))
+                    }
                 end
-            end
-        end
-        
-        
-        groupQueue = func.map(func.filter(groups, function(g) return g.parent == true end), pipe.select("order"))
-        parentMap = {}
-        childrenMap = {}
-        cqueue = {g[0][0]}
-        
-        while #groupQueue > 0 do
-            local g = groups[table.remove(groupQueue, 1)]
-            local ySeq = func.map(g.seq, pipe.select("y"))
-            local yMax = func.max(ySeq)
-            local yMin = func.min(ySeq)
-            
-            local seqs = {}
-            if (yMax > 0 and yMin >= 0) then
-                seqs = {g.seq}
-            elseif (yMax <= 0 and yMin < 0) then
-                seqs = {func.rev(g.seq)}
-            else
-                seqs = {
-                    func.filter(g.seq, function(s) return s.y >= 0 end),
-                    func.rev(func.filter(g.seq, function(s) return s.y <= 0 end))
-                }
-            end
-            
-            for _, seq in ipairs(seqs) do
-                for i, s in ipairs(seq) do
-                    if not childrenMap[s.slotId] then childrenMap[s.slotId] = {} end
-                    if seq[i + 1] and not parentMap[seq[i + 1]] then
-                        parentMap[seq[i + 1].slotId] = s.slotId
-                        table.insert(childrenMap[s.slotId], seq[i + 1].slotId)
-                    end
-                    for slotIdR, v in pairs(mDist[s.slotId] or {}) do
-                        local gR = mGIndex[slotIdR]
-                        if func.contains(g.children, gR) and not func.contains(groupQueue, gR) and not parentMap[slotIdR] then
-                            table.insert(groupQueue, gR)
-                            parentMap[slotIdR] = s.slotId
-                            table.insert(childrenMap[s.slotId], slotIdR)
+                
+                for _, slot in ipairs(slots) do
+                    for i, s in ipairs(slot) do
+                        if not childrenMap[s.slotId] then childrenMap[s.slotId] = {} end
+                        if slot[i + 1] and not parentMap[slot[i + 1]] then
+                            parentMap[slot[i + 1].slotId] = s.slotId
+                            insert(childrenMap[s.slotId], slot[i + 1].slotId)
+                        end
+                        for slotIdR, v in pairs(mDist[s.slotId] or {}) do
+                            local gR = mGIndex[slotIdR]
+                            if func.contains(g.children, gR) and not func.contains(rest, gR) and not parentMap[slotIdR] then
+                                insert(rest, gR)
+                                parentMap[slotIdR] = s.slotId
+                                insert(childrenMap[s.slotId], slotIdR)
+                            end
                         end
                     end
                 end
+                slotTreeGen(unpack(rest))
             end
         end
+        slotTreeGen(groups[mGIndex[g[0][0]]].order)
         
-        local queue = {}
-        while #cqueue > 0 do
-            local slotId = table.remove(cqueue, 1)
-            table.insert(queue, slotId)
-            if childrenMap[slotId] then
-                for _, slotId in ipairs(childrenMap[slotId]) do
-                    table.insert(cqueue, slotId)
-                end
+        local function queueGen(slotId, ...)
+            if slotId then
+                local rest = func.concat({...}, childrenMap[slotId] or {})
+                return { slotId, unpack(queueGen(unpack(rest))) }
+            else
+                return {}
             end
         end
-        
+
+        local queue = queueGen(g[0][0])
         dump()(queue)
         
         -- Build the gridization queue
@@ -261,9 +250,9 @@ ust.gridization = function(modules, classedModules)
                     for i, y in ipairs(sortedY) do
                         if xGroup[x] then
                             if y - sortedY[i - 1] == 1 then
-                                table.insert(xGroup[x][#xGroup[x]], y)
+                                insert(xGroup[x][#xGroup[x]], y)
                             else
-                                table.insert(xGroup[x], {y})
+                                insert(xGroup[x], {y})
                             end
                         else
                             xGroup[x] = {{y}}
