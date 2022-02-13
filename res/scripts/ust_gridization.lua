@@ -163,49 +163,46 @@ ust.gridization = function(modules, classedModules)
         end
         groups[mGIndex[g[0][0]]].parent = true
         groupTreeGen(groups[mGIndex[g[0][0]]].order)
+        local groupRef = {}
 
         local function slotTreeGen(group, ...)
             if group then
                 local g = groups[group]
                 local rest = {...}
-                local yPos = func.map(g.slots, pipe.select("y"))
-                local yMax = func.max(yPos)
-                local yMin = func.min(yPos)
                 
-                local slots = {}
-                if (yMax > 0 and yMin >= 0) then
-                    slots = {g.slots}
-                elseif (yMax <= 0 and yMin < 0) then
-                    slots = {func.rev(g.slots)}
-                else
-                    slots = {
-                        func.filter(g.slots, function(s) return s.y >= 0 end),
-                        func.rev(func.filter(g.slots, function(s) return s.y <= 0 end))
-                    }
-                end
+                local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
+                local slots = {
+                    func.filter(g.slots, function(s) return s.y >= refY end),
+                    func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
+                }
                 
-                for _, slot in ipairs(slots) do
-                    for i, s in ipairs(slot) do
-                        if not childrenMap[s.slotId] then childrenMap[s.slotId] = {} end
-                        if slot[i + 1] and not parentMap[slot[i + 1]] then
-                            parentMap[slot[i + 1].slotId] = s.slotId
-                            insert(childrenMap[s.slotId], slot[i + 1].slotId)
-                        end
-                        for slotIdR, v in pairs(mDist[s.slotId] or {}) do
-                            local gR = mGIndex[slotIdR]
-                            if func.contains(g.children, gR) and not func.contains(rest, gR) and not parentMap[slotIdR] then
-                                insert(rest, gR)
-                                parentMap[slotIdR] = s.slotId
-                                insert(childrenMap[s.slotId], slotIdR)
-                            end
+                for _, slots in ipairs(slots) do
+                    for i, slot in ipairs(slots) do
+                        if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
+                        if slots[i + 1] and not parentMap[slots[i + 1]] then
+                            parentMap[slots[i + 1].slotId] = slot.slotId
+                            insert(childrenMap[slot.slotId], slots[i + 1].slotId)
                         end
                     end
+                    for i, slot in ipairs(slots) do
+                        for slotIdR, v in pairs(mDist[slot.slotId] or {}) do
+                            local groupR = mGIndex[slotIdR]
+                            if func.contains(g.children, groupR) and not func.contains(rest, groupR) and not parentMap[slotIdR] then
+                                groupRef[groupR] = slotIdR
+                                insert(rest, groupR)
+                                parentMap[slotIdR] = slot.slotId
+                                insert(childrenMap[slot.slotId], slotIdR)
+                            end
+                        end
+
+                    end
+
                 end
                 slotTreeGen(unpack(rest))
             end
         end
         slotTreeGen(groups[mGIndex[g[0][0]]].order)
-        
+
         local function queueGen(slotId, ...)
             if slotId then
                 local rest = func.concat({...}, childrenMap[slotId] or {})
@@ -216,7 +213,6 @@ ust.gridization = function(modules, classedModules)
         end
 
         local queue = queueGen(g[0][0])
-        dump()(queue)
         
         -- Build the gridization queue
         -- Collect X postion and width information
