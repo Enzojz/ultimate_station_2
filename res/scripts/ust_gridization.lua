@@ -178,6 +178,19 @@ ust.gridization = function(modules, classedModules)
                 
                 for _, slots in ipairs(slots) do
                     for i, slot in ipairs(slots) do
+                        modules[slot.slotId].info.isRev = slot.y < refY 
+                        if groupRef[group] and groupRef[group] == slot.slotId then
+                            local parent = parentMap[slot.slotId]
+                            if parent then
+                                modules[slot.slotId].info.isRev = modules[parent].info.isRev
+                            end
+                        end
+                        dump()({
+                            slotId = slot.slotId,
+                            parent = groupRef[group],
+                            y = slot.y,
+                            refY = refY
+                        })
                         if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
                         if slots[i + 1] and not parentMap[slots[i + 1]] then
                             parentMap[slots[i + 1].slotId] = slot.slotId
@@ -194,9 +207,7 @@ ust.gridization = function(modules, classedModules)
                                 insert(childrenMap[slot.slotId], slotIdR)
                             end
                         end
-
                     end
-
                 end
                 slotTreeGen(unpack(rest))
             end
@@ -297,24 +308,7 @@ ust.gridization = function(modules, classedModules)
                     }
                     
                     local ref = parentMap[slotId]-- Anchor is the reference point
-                    
-                    -- By default the anchor is the parant in search tree
-                    if (ref == m.info.octa[3] or ref == m.info.octa[7]) and not (m.info.ref.left or m.info.ref.right) then
-                        -- If the anchor is from a another row, look if something in the same row exists nearby
-                        local octa5 = m.info.octa[5] and modules[m.info.octa[5]]
-                        local octa1 = m.info.octa[1] and modules[m.info.octa[1]]
-                        if octa5 or octa1 then
-                            if octa5 and octa5.info and octa5.info.pts and octa1 and octa1.info and octa1.info.pts then
-                                -- If exists in both sides
-                                ref = m.info.octa[y >= 0 and 5 or 1]
-                            elseif octa5 and octa5.info and octa5.info.pts then
-                                ref = m.info.octa[5]
-                            elseif octa1 and octa1.info and octa1.info.pts then
-                                ref = m.info.octa[1]
-                            end
-                        end
-                    end
-                    
+                                        
                     if x == 0 and y == 0 then
                         -- The base ref can not be inferred
                         yState.pos = coor.xyz(infoX.pos[0], 0, 0)
@@ -344,13 +338,8 @@ ust.gridization = function(modules, classedModules)
                     if not yState.radius then
                         -- If no radius defined
                         if ref == m.info.octa[5] or ref == m.info.octa[1] then
-                            -- If the element in the same row get radius defined, take it
-                            for i = y + (y < 0 and 1 or -1), 0, (y < 0 and 1 or -1) do
-                                if grid[z][x] and grid[z][x][i] then
-                                    yState.radius = modules[grid[z][x][i]].info.radius
-                                    break
-                                end
-                            end
+                            local refM = modules[ref]
+                            yState.radius = (refM.info.isRev and m.info.isRev) == (refM.info.isRev or m.info.isRev) and refM.info.radius or -refM.info.radius
                         elseif ref == m.info.octa[3] then
                             yState.radius = modules[m.info.octa[3]].info.radius - (modules[m.info.octa[3]].metadata.width + m.metadata.width) * 0.5
                         elseif ref == m.info.octa[7] then
@@ -398,9 +387,9 @@ ust.gridization = function(modules, classedModules)
                     modules[slotId].info.length = yState.length
                     -- Base radius and length
                     -- Initial arch
-                    local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
+                    local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, yState.radius)
                     local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
-                    if y < 0 then arL, arR = arR, arL end
+                    if m.info.isRev then arL, arR = arR, arL end
                     
                     -- ALignement of starting point and ending point
                     if (x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) and not modules[m.info.octa[3]].info.ref.left) or
@@ -485,9 +474,6 @@ ust.gridization = function(modules, classedModules)
                         local ref = modules[slotId].info.ref or {}
                         modules[slotId].info.ref = ref
                         
-                        local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, y < 0 and -yState.radius or yState.radius)
-                        local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
-                        if y < 0 then arL, arR = arR, arL end
                         
                         local aligned = false;
                         
@@ -600,7 +586,7 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            if ((m.info.pos.y + 0.5) * (modules[m.info.octa[5]].info.pos.y + 0.5) < 0) then
+                            if (m.info.isRev and modules[m.info.octa[5]].info.isRev) ~= (m.info.isRev or modules[m.info.octa[5]].info.isRev) then
                                 arL.sup, arL.inf = arL.inf, arL.sup
                                 arR.sup, arR.inf = arR.inf, arR.sup
                             end
@@ -622,7 +608,7 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            if ((m.info.pos.y + 0.5) * (modules[m.info.octa[1]].info.pos.y + 0.5) < 0) then
+                            if (m.info.isRev and modules[m.info.octa[1]].info.isRev) ~= (m.info.isRev or modules[m.info.octa[1]].info.isRev) then
                                 arL.sup, arL.inf = arL.inf, arL.sup
                                 arR.sup, arR.inf = arR.inf, arR.sup
                             end
@@ -690,7 +676,7 @@ ust.gridization = function(modules, classedModules)
                                 sup = sup,
                                 inf = inf
                             })
-                            modules[slotId].info.radius = (length > 0 and 1 or -1) * (y < 0 and -1 or 1) * r
+                            modules[slotId].info.radius = (length > 0 and 1 or -1) * (m.info.isRev and -1 or 1) * r
                             modules[slotId].info.length = math.abs(length)
                         end
                         
