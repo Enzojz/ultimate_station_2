@@ -122,6 +122,7 @@ local createTemplateFn = function(params)
 end
 
 local preProcessFn = function(modules, change)
+    dump()(change)
     local classedModules = classifyModules(modules)
 
     local type, id, data = ust.slotInfo(change.slotId)

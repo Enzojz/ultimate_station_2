@@ -81,13 +81,17 @@ ust.slotInfo = function(slotId)
         return type, id, data
 end
 
-ust.arcPacker = function(pt, vec, length, radius)
+ust.arcPacker = function(pt, vec, length, radius, isRev)
     local nVec = vec:withZ(0):normalized()
     local tVec = coor.xyz(-nVec.y, nVec.x, 0)
+    local radius = isRev and -radius or radius
     local o = pt + tVec * radius
     local ar = arc.byOR(o, abs(radius))
     local inf = ar:rad(pt)
     local sup = inf + length / radius
+    if isRev then
+        inf, sup = sup, inf
+    end
     ar = ar:withLimits({
         sup = sup,
         inf = inf

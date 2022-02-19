@@ -30,9 +30,9 @@ local preProcessAdd = function(modules, change, classedModules, info)
         local refPos = modules[classedModules[info.id].slotId].info.pos
         
         local pos = ({
-            [1] = coor.xyz(0, refPos.y < 0 and -1 or 1, 0),
+            [1] = coor.xyz(0, 1, 0),
             [3] = coor.xyz(1, 0, 0),
-            [5] = coor.xyz(0, refPos.y < 0 and 1 or -1, 0),
+            [5] = coor.xyz(0, -1, 0),
             [7] = coor.xyz(-1, 0, 0)
         })[info.data] + refPos
         
@@ -78,14 +78,14 @@ local preProcessAdd = function(modules, change, classedModules, info)
             ref = {right = true}
 
         elseif isPlatform(1) and isPlatform(5) then
-            ref = pos.y < 0 and {next = true} or {prev = true}
+            ref = {prev = true}
         elseif isPlatform(1) then
             ref = {next = true}
         elseif isPlatform(5) then
             ref = {prev = true}
                 
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) and not isEmpty(5) then
-            ref = pos.y < 0 and {next = true} or {prev = true}
+            ref = {prev = true}
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(5) then
             ref = {prev = true}
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) then
@@ -169,12 +169,12 @@ local slotSetup = function(params, result, slotId)
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
-    if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
+    if not info.octa[1] then
         local transf = ust.getTranfs(info, 1, metadata.width)
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
     end
     
-    if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
+    if not info.octa[5] then
         local transf = ust.getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end

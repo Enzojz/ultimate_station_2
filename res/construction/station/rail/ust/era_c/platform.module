@@ -66,6 +66,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
     local centerPts = ust.basePts(info.arcs.center, n)
+
+    dump()({
+        slotId = slotId,
+        pts = {
+            l = leftPts,
+            r = rightPts,
+            c = centerPts
+        }
+    })
     
     local leftEdge = {}
     local rightEdge = {}
@@ -93,14 +102,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         centerPts[i] = centerPts[i] + hVec
     end
     
-    if (pos.y >= 0 and not isPlatform[1]) or (pos.y < 0 and not isPlatform[5]) then
+    if not isPlatform[1] then
         leftLaneBorder[n + 1] = leftLaneBorder[n + 1] + (leftLaneBorder[n] - leftLaneBorder[n + 1]):normalized()
         rightLaneBorder[n + 1] = rightLaneBorder[n + 1] + (rightLaneBorder[n] - rightLaneBorder[n + 1]):normalized()
         leftLane[n + 1] = leftLane[n + 1] + (leftLane[n] - leftLane[n + 1]):normalized()
         rightLane[n + 1] = rightLane[n + 1] + (rightLane[n] - rightLane[n + 1]):normalized()
     end
     
-    if (pos.y >= 0 and not isPlatform[5]) or (pos.y < 0 and not isPlatform[1]) then
+    if not isPlatform[5] then
         leftLaneBorder[1] = leftLaneBorder[1] + (leftLaneBorder[2] - leftLaneBorder[1]):normalized()
         rightLaneBorder[1] = rightLaneBorder[1] + (rightLaneBorder[2] - rightLaneBorder[1]):normalized()
         leftLane[1] = leftLane[1] + (leftLane[2] - leftLane[1]):normalized()
@@ -108,11 +117,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     for i = 1, n do
-        local inf = pos.y < 0 and i or i + 1
-        local sup = pos.y < 0 and i + 1 or i
+        local inf = i + 1
+        local sup = i
         
-        local isFirst = (pos.y >= 0 and i == 1) or (pos.y < 0 and i == 4)
-        local isLast = (pos.y >= 0 and i == 4) or (pos.y < 0 and i == 1)
+        local isFirst = i == 1
+        local isLast = i == 4
         
         local centre = {
             lt = leftCentre[inf],
@@ -284,7 +293,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
                 table.insert(result.models, m)
             end
         end
