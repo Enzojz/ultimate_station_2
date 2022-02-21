@@ -13,7 +13,8 @@ local pi = math.pi
 local unpack = table.unpack
 local insert = table.insert
 
--- It's a big function so I seperate it
+-- It's a long single-usage function so I seperate it
+
 local calculateLimit = function(arc)
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
@@ -21,17 +22,7 @@ local calculateLimit = function(arc)
     end
 end
 
-ust.gridization = function(modules, classedModules)
-    local lowestHeight = 2
-    local grid = {}
-    for id, info in pairs(classedModules) do
-        local pos = modules[info.slotId].info.pos
-        local x, y, z = pos.x, pos.y, pos.z
-        if not grid[z] then grid[z] = {} end
-        if not grid[z][x] then grid[z][x] = {} end
-        grid[z][x][y] = info.slotId
-    end
-    
+local function octa(modules, grid)
     for slotId, module in pairs(modules) do
         if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
             local info = module.info
@@ -78,140 +69,157 @@ ust.gridization = function(modules, classedModules)
             end
         end
     end
+end
+
+local function fnQueue(g, modules)
+    -- Build the gridization queue
+    local parentMap = {}
+    local childrenMap = {}
     
+    local mDist = {}
+    local gDist = {}
+    local mGIndex = {}
+    local groups = {}
+    
+    for x, g in pairs(g) do
+        local ySeq = func.sort(func.keys(g))
+        local slotSeqs = {}
+        for _, y in ipairs(ySeq) do
+            local slotId = g[y]
+            local m = modules[slotId]
+            if not mDist[slotId] then mDist[slotId] = {} end
+            if m.info.octa[3] then
+                mDist[slotId][m.info.octa[3]] = 1
+            end
+            if m.info.octa[7] then
+                mDist[slotId][m.info.octa[7]] = -1
+            end
+            
+            local data = {x = x, y = y, slotId = g[y]}
+            if #slotSeqs == 0 then
+                slotSeqs[1] = {data}
+            else
+                local lastSeq = slotSeqs[#slotSeqs]
+                if (lastSeq[#lastSeq].y == y - 1) then
+                    insert(slotSeqs[#slotSeqs], data)
+                else
+                    insert(slotSeqs, {data})
+                end
+            end
+        end
+        for _, slots in ipairs(slotSeqs) do
+            local gId = #groups + 1
+            insert(groups, {slots = slots, x = x, order = gId, children = {}})
+            for _, seq in ipairs(slots) do
+                mGIndex[seq.slotId] = gId
+            end
+        end
+    end
+    
+    for i, groupL in ipairs(groups) do
+        if not gDist[i] then gDist[i] = {} end
+        for j, groupR in ipairs(groups) do
+            if not gDist[j] then gDist[j] = {} end
+            local distX = groupL.x - groupR.x
+            if i < j and (distX == 1 or distX == -1) then
+                for _, slotL in ipairs(groupL.slots) do
+                    for _, slotR in ipairs(groupR.slots) do
+                        local slotIdL = slotL.slotId
+                        local slotIdR = slotR.slotId
+                        if mDist[slotIdL][slotIdR] then
+                            gDist[i][j] = mDist[slotIdL][slotIdR]
+                            gDist[j][i] = mDist[slotIdL][slotIdR]
+                            break
+                        end
+                    end
+                    if gDist[i][j] then break end
+                end
+            end
+        end
+    end
+    
+    local function groupTreeGen(g, ...)
+        if g then
+            local rest = {...}
+            for n, _ in pairs(gDist[g]) do
+                if not groups[n].parent then
+                    insert(groups[g].children, n)
+                    insert(rest, n)
+                    groups[n].parent = g
+                end
+            end
+            groupTreeGen(unpack(rest))
+        end
+    end
+    groups[mGIndex[g[0][0]]].parent = true
+    groupTreeGen(groups[mGIndex[g[0][0]]].order)
+    local groupRef = {}
+    
+    local function slotTreeGen(group, ...)
+        if group then
+            local g = groups[group]
+            local rest = {...}
+            
+            local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
+            local slots = {
+                func.filter(g.slots, function(s) return s.y >= refY end),
+                func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
+            }
+            
+            for _, slots in ipairs(slots) do
+                for i, slot in ipairs(slots) do
+                    modules[slot.slotId].info.refPos = slot.y - refY
+                    if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
+                    if slots[i + 1] and not parentMap[slots[i + 1]] then
+                        parentMap[slots[i + 1].slotId] = slot.slotId
+                        insert(childrenMap[slot.slotId], slots[i + 1].slotId)
+                    end
+                end
+                for i, slot in ipairs(slots) do
+                    for slotIdR, v in pairs(mDist[slot.slotId] or {}) do
+                        local groupR = mGIndex[slotIdR]
+                        if func.contains(g.children, groupR) and not func.contains(rest, groupR) and not parentMap[slotIdR] then
+                            groupRef[groupR] = slotIdR
+                            insert(rest, groupR)
+                            parentMap[slotIdR] = slot.slotId
+                            insert(childrenMap[slot.slotId], slotIdR)
+                        end
+                    end
+                end
+            end
+            slotTreeGen(unpack(rest))
+        end
+    end
+    slotTreeGen(groups[mGIndex[g[0][0]]].order)
+    
+    local function queueGen(slotId, ...)
+        if slotId then
+            local rest = func.concat({...}, childrenMap[slotId] or {})
+            return {slotId, unpack(queueGen(unpack(rest)))}
+        else
+            return {}
+        end
+    end
+
+    return queueGen(g[0][0]), parentMap
+end
+
+ust.gridization = function(modules, classedModules)
+    local lowestHeight = 2
+    local grid = {}
+    for id, info in pairs(classedModules) do
+        local pos = modules[info.slotId].info.pos
+        local x, y, z = pos.x, pos.y, pos.z
+        if not grid[z] then grid[z] = {} end
+        if not grid[z][x] then grid[z][x] = {} end
+        grid[z][x][y] = info.slotId
+    end
+    
+    octa(modules, grid)
     
     for z, g in pairs(grid) do
         
-        -- Build the gridization queue
-        local parentMap = {}
-        local childrenMap = {}
-        
-        local mDist = {}
-        local gDist = {}
-        local mGIndex = {}
-        local groups = {}
-        
-        for x, g in pairs(g) do
-            local ySeq = func.sort(func.keys(g))
-            local slotSeqs = {}
-            for _, y in ipairs(ySeq) do
-                local slotId = g[y]
-                local m = modules[slotId]
-                if not mDist[slotId] then mDist[slotId] = {} end
-                if m.info.octa[3] then
-                    mDist[slotId][m.info.octa[3]] = 1
-                end
-                if m.info.octa[7] then
-                    mDist[slotId][m.info.octa[7]] = -1
-                end
-                
-                local data = {x = x, y = y, slotId = g[y]}
-                if #slotSeqs == 0 then
-                    slotSeqs[1] = {data}
-                else
-                    local lastSeq = slotSeqs[#slotSeqs]
-                    if (lastSeq[#lastSeq].y == y - 1) then
-                        insert(slotSeqs[#slotSeqs], data)
-                    else
-                        insert(slotSeqs, {data})
-                    end
-                end
-            end
-            for _, slots in ipairs(slotSeqs) do
-                local gId = #groups + 1
-                insert(groups, {slots = slots, x = x, order = gId, children = {}})
-                for _, seq in ipairs(slots) do
-                    mGIndex[seq.slotId] = gId
-                end
-            end
-        end
-        
-        for i, groupL in ipairs(groups) do
-            if not gDist[i] then gDist[i] = {} end
-            for j, groupR in ipairs(groups) do
-                if not gDist[j] then gDist[j] = {} end
-                local distX = groupL.x - groupR.x
-                if i < j and (distX == 1 or distX == -1) then
-                    for _, slotL in ipairs(groupL.slots) do
-                        for _, slotR in ipairs(groupR.slots) do
-                            local slotIdL = slotL.slotId
-                            local slotIdR = slotR.slotId
-                            if mDist[slotIdL][slotIdR] then
-                                gDist[i][j] = mDist[slotIdL][slotIdR]
-                                gDist[j][i] = mDist[slotIdL][slotIdR]
-                                break
-                            end
-                        end
-                        if gDist[i][j] then break end
-                    end
-                end
-            end
-        end
-        
-        local function groupTreeGen(g, ...)
-            if g then
-                local rest = {...}
-                for n, _ in pairs(gDist[g]) do
-                    if not groups[n].parent then
-                        insert(groups[g].children, n)
-                        insert(rest, n)
-                        groups[n].parent = g
-                    end
-                end
-                groupTreeGen(unpack(rest))
-            end
-        end
-        groups[mGIndex[g[0][0]]].parent = true
-        groupTreeGen(groups[mGIndex[g[0][0]]].order)
-        local groupRef = {}
-        
-        local function slotTreeGen(group, ...)
-            if group then
-                local g = groups[group]
-                local rest = {...}
-                
-                local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
-                local slots = {
-                    func.filter(g.slots, function(s) return s.y >= refY end),
-                    func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
-                }
-                
-                for _, slots in ipairs(slots) do
-                    for i, slot in ipairs(slots) do
-                        modules[slot.slotId].info.refPos = slot.y - refY
-                        if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
-                        if slots[i + 1] and not parentMap[slots[i + 1]] then
-                            parentMap[slots[i + 1].slotId] = slot.slotId
-                            insert(childrenMap[slot.slotId], slots[i + 1].slotId)
-                        end
-                    end
-                    for i, slot in ipairs(slots) do
-                        for slotIdR, v in pairs(mDist[slot.slotId] or {}) do
-                            local groupR = mGIndex[slotIdR]
-                            if func.contains(g.children, groupR) and not func.contains(rest, groupR) and not parentMap[slotIdR] then
-                                groupRef[groupR] = slotIdR
-                                insert(rest, groupR)
-                                parentMap[slotIdR] = slot.slotId
-                                insert(childrenMap[slot.slotId], slotIdR)
-                            end
-                        end
-                    end
-                end
-                slotTreeGen(unpack(rest))
-            end
-        end
-        slotTreeGen(groups[mGIndex[g[0][0]]].order)
-        
-        local function queueGen(slotId, ...)
-            if slotId then
-                local rest = func.concat({...}, childrenMap[slotId] or {})
-                return {slotId, unpack(queueGen(unpack(rest)))}
-            else
-                return {}
-            end
-        end
-        
-        local queue = queueGen(g[0][0])
+        local queue, parentMap = fnQueue(g, modules)
         
         -- Build the gridization queue
         -- Collect X postion and width information
@@ -448,9 +456,7 @@ ust.gridization = function(modules, classedModules)
                         local ref = modules[slotId].info.ref or {}
                         modules[slotId].info.ref = ref
                         
-                        
                         local aligned = false;
-                        
                         if ref.left or ref.right then
                             local refModule = function(offset)
                                 local refModule = modules[grid[z][x + offset][y]]
@@ -460,55 +466,42 @@ ust.gridization = function(modules, classedModules)
                                     function() return arc.byOR(refO, refRadius - m.info.width * 0.5, refModule.info.arcs.center:limits()) end,
                                     function() return arc.byOR(refO, refRadius + m.info.width * 0.5, refModule.info.arcs.center:limits()) end
                             end
-                            local fn = function(arL, arR, refModule, refModule2)
-                                local sup = function(ar)
+                            local calculate = function(arL, arR, refModule, refModule2)
+                                local supFar = function(ar)
                                     return m.info.octa[1] and ar:rad(modules[m.info.octa[1]].info.pts[1][1]) or ar:rad(yState.pos)
                                 end
-                                local inf = function(ar)
+                                local infFar = function(ar)
                                     return m.info.refPos == 0
                                         and refModule.info.arcs.center.inf
                                         or (m.info.octa[5] and ar:rad(modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(yState.pos))
                                 end
-                                local limit = function(p)
-                                    local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
-                                    local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arL.o) or (arL.o - refModule.info.pts[p][1])):normalized()
-                                    local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arR.o) or (arR.o - refModule2.info.pts[p][1])):normalized()
-                                    return line.byVecPt((vecLimL + vecLimR):normalized(), limit)
+                                local limit = function(limL, limR, p, fFar)
+                                    if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+                                        local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
+                                        local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arL.o) or (arL.o - refModule.info.pts[p][1])):normalized()
+                                        local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arR.o) or (arR.o - refModule2.info.pts[p][1])):normalized()
+                                        local lim = line.byVecPt((vecLimL + vecLimR):normalized(), limit)
+                                        return
+                                            calculateLimit(arL)(lim, refModule.info.pts[p]),
+                                            calculateLimit(arR)(lim, refModule2.info.pts[p]),
+                                            fFar(arL), fFar(arL)
+                                    elseif refModule.metadata.isTrack then
+                                        local lim = refModule.info.limits[p]
+                                        return
+                                            calculateLimit(arL)(lim, refModule.info.pts[p]),
+                                            calculateLimit(arR)(lim, refModule.info.pts[p]),
+                                            fFar(arL), fFar(arL)
+                                    else
+                                        return limL, limR,
+                                            fFar(arL), fFar(arL)
+                                    end
                                 end
                                 if m.info.refPos < 0 then
-                                    local infL = refModule.info.arcs.center.inf
-                                    local infR = (refModule2 or refModule).info.arcs.center.inf
-                                    
-                                    if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
-                                        local lim = limit(1)
-                                        infL = calculateLimit(arL)(lim, refModule.info.pts[1])
-                                        infR = calculateLimit(arR)(lim, refModule2.info.pts[1])
-                                    elseif refModule.metadata.isTrack then
-                                        local lim = refModule.info.limits[1]
-                                        infL = calculateLimit(arL)(lim, refModule.info.pts[1])
-                                        infR = calculateLimit(arR)(lim, refModule.info.pts[1])
-                                    end
-                                    
-                                    local supL = sup(arL)
-                                    local supR = sup(arR)
+                                    local infL, infR, supL, supR = limit(refModule.info.arcs.center.inf, (refModule2 or refModule).info.arcs.center.inf, 1, supFar)
                                     arL = arL:withLimits({inf = infL, sup = supL})
                                     arR = arR:withLimits({inf = infR, sup = supR})
                                 else
-                                    local supL = refModule.info.arcs.center.sup
-                                    local supR = (refModule2 or refModule).info.arcs.center.sup
-                                    
-                                    if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
-                                        local lim = limit(2)
-                                        supL = calculateLimit(arL)(lim, refModule.info.pts[2])
-                                        supR = calculateLimit(arR)(lim, refModule2.info.pts[2])
-                                    elseif refModule.metadata.isTrack then
-                                        local lim = refModule.info.limits[2]
-                                        supL = calculateLimit(arL)(lim, refModule.info.pts[2])
-                                        supR = calculateLimit(arR)(lim, refModule.info.pts[2])
-                                    end
-                                    
-                                    local infL = inf(arL)
-                                    local infR = inf(arR)
+                                    local supL, supR, infL, infR = limit(refModule.info.arcs.center.sup, (refModule2 or refModule).info.arcs.center.sup, 2, infFar)
                                     arL = arL:withLimits({inf = infL, sup = supL})
                                     arR = arR:withLimits({inf = infR, sup = supR})
                                 end
@@ -518,18 +511,17 @@ ust.gridization = function(modules, classedModules)
                                 local rightModule, _, fArR = refModule(1)
                                 arL = fArL()
                                 arR = fArR()
-                                
-                                fn(arL, arR, leftModule, rightModule)
+                                calculate(arL, arR, leftModule, rightModule)
                             elseif ref.left then
                                 local leftModule, fArL, fArR = refModule(-1)
                                 arL = fArL()
                                 arR = fArR()
-                                fn(arL, arR, leftModule)
+                                calculate(arL, arR, leftModule)
                             elseif ref.right then
                                 local rightModule, fArL, fArR = refModule(1)
                                 arL = fArL()
                                 arR = fArR()
-                                fn(arL, arR, rightModule)
+                                calculate(arL, arR, rightModule)
                             end
                             aligned = true
                         elseif ref.prev then
@@ -538,10 +530,6 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            -- if (m.info.isRev and modules[m.info.octa[5]].info.isRev) ~= (m.info.isRev or modules[m.info.octa[5]].info.isRev) then
-                            --     arL.sup, arL.inf = arL.inf, arL.sup
-                            --     arR.sup, arR.inf = arR.inf, arR.sup
-                            -- end
                             arL = arL:withLimits({
                                 inf = arL.sup,
                                 sup = arL.sup + arL.sup - arL.inf
@@ -559,10 +547,6 @@ ust.gridization = function(modules, classedModules)
                             arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
-                            -- if (m.info.isRev and modules[m.info.octa[1]].info.isRev) ~= (m.info.isRev or modules[m.info.octa[1]].info.isRev) then
-                            --     arL.sup, arL.inf = arL.inf, arL.sup
-                            --     arR.sup, arR.inf = arR.inf, arR.sup
-                            -- end
                             arL = arL:withLimits({
                                 inf = arL.sup,
                                 sup = arL.sup + arL.sup - arL.inf
@@ -647,20 +631,6 @@ ust.gridization = function(modules, classedModules)
                                 refArc.center:tangent(refArc.center.sup)
                             }
                         }
-                    
-                    -- if y >= 0 then
-                    --     modules[slotId].info.pts[3] = modules[slotId].info.pts[1]
-                    --     modules[slotId].info.pts[4] = modules[slotId].info.pts[2]
-                    -- else
-                    --     modules[slotId].info.pts[3] = {
-                    --         modules[slotId].info.pts[2][1],
-                    --         -modules[slotId].info.pts[2][2]
-                    --     }
-                    --     modules[slotId].info.pts[4] = {
-                    --         modules[slotId].info.pts[1][1],
-                    --         -modules[slotId].info.pts[1][2]
-                    --     }
-                    -- end
                     else
                         coroutine.yield()
                     end
