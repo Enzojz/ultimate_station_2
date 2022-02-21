@@ -268,6 +268,7 @@ ust.gridization = function(modules, classedModules)
             end
         end
         
+        dump()(parentMap)
         -- Collect X postion and width information
         -- Process in Y axis
         local processY = function(x, y)
@@ -312,13 +313,13 @@ ust.gridization = function(modules, classedModules)
                             local pos = modules[ref].info.pts[1][1]
                             local vec = modules[ref].info.pts[1][2]
                             
-                            yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x + 1])
+                            yState.pos = pos + (vec:normalized() .. coor.rotZ(-0.5 * pi)) * (infoX.pos[x] - infoX.pos[x + 1])
                             yState.vec = vec
                         elseif ref == m.info.octa[7] then
                             local pos = modules[ref].info.pts[1][1]
                             local vec = modules[ref].info.pts[1][2]
                             
-                            yState.pos = pos + (vec:normalized() .. coor.rotZ((y < 0 and 0.5 or -0.5) * pi)) * (infoX.pos[x] - infoX.pos[x - 1])
+                            yState.pos = pos + (vec:normalized() .. coor.rotZ(-0.5 * pi)) * (infoX.pos[x] - infoX.pos[x - 1])
                             yState.vec = vec
                         end
                     end
@@ -450,176 +451,87 @@ ust.gridization = function(modules, classedModules)
                         
                         local aligned = false;
                         
-                        if ref.left and ref.right then
-                            local leftModule = modules[grid[z][x - 1][y]]
-                            local leftO = leftModule.info.arcs.center.o
-                            local leftRadius = leftModule.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
-                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftModule.info.arcs.center:limits())
-                            
-                            local rightModule = modules[grid[z][x + 1][y]]
-                            local rightO = rightModule.info.arcs.center.o
-                            local rightRadius = rightModule.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
-                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightModule.info.arcs.center:limits())
-                            
-                            if m.info.refPos < 0 then
-                                local infL = leftModule.info.arcs.center.inf
-                                local infR = rightModule.info.arcs.center.inf
-                                
-                                if leftModule.metadata.isTrack and rightModule.metadata.isTrack then
-                                    local inf = leftModule.info.pts[1][1]:avg(rightModule.info.pts[1][1])
-                                    
-                                    local vecInfL = (leftModule.info.radius > 0 and (leftModule.info.pts[1][1] - arL.o) or (arL.o - leftModule.info.pts[1][1])):normalized()
-                                    local vecInfR = (rightModule.info.radius > 0 and (rightModule.info.pts[1][1] - arR.o) or (arR.o - rightModule.info.pts[1][1])):normalized()
-                                    local vecInf = (vecInfL + vecInfR):normalized()
-                                    local limitInf = line.byVecPt(vecInf, inf)
-                                    
-                                    infL = calculateLimit(arL)(limitInf, leftModule.info.pts[1])
-                                    infR = calculateLimit(arR)(limitInf, rightModule.info.pts[1])
-                                end
-                                
-                                local supL = arL:rad(yState.pos)
-                                if (m.info.refPos < 0 and m.info.octa[1]) then
-                                    supL = arL:rad(modules[m.info.octa[1]].info.pts[1][1])
-                                end
-                                
-                                local supR = arR:rad(yState.pos)
-                                if (m.info.refPos < 0 and m.info.octa[1]) then
-                                    supR = arR:rad(modules[m.info.octa[1]].info.pts[1][1])
-                                end
-                                
-                                arL = arL:withLimits({inf = infL, sup = supL})
-                                arR = arR:withLimits({inf = infR, sup = supR})
-                            
-                            else
-                                local supL = leftModule.info.arcs.center.sup
-                                local supR = rightModule.info.arcs.center.sup
-                                
-                                if leftModule.metadata.isTrack and rightModule.metadata.isTrack then
-                                    local sup = leftModule.info.pts[2][1]:avg(rightModule.info.pts[2][1])
-                                    
-                                    local vecSupL = (leftModule.info.radius > 0 and (leftModule.info.pts[2][1] - arL.o) or (arL.o - leftModule.info.pts[2][1])):normalized()
-                                    local vecSupR = (rightModule.info.radius > 0 and (rightModule.info.pts[2][1] - arR.o) or (arR.o - rightModule.info.pts[2][1])):normalized()
-                                    local vecSup = (vecSupL + vecSupR):normalized()
-                                    local limitSup = line.byVecPt(vecSup, sup)
-                                    
-                                    supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
-                                    supR = calculateLimit(arR)(limitSup, rightModule.info.pts[2])
-                                end
-                                
-                                local infL = arL:rad(yState.pos)
-                                if m.info.refPos == 0 then
-                                    infL = leftModule.info.arcs.center.inf
-                                elseif (m.info.refPos > 0 and m.info.octa[5]) then
-                                    infL = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
-                                elseif (m.info.refPos < 0 and m.info.octa[1]) then
-                                    infL = arL:rad(modules[m.info.octa[1]].info.pts[2][1])
-                                end
-                                
-                                local infR = arR:rad(yState.pos)
-                                if (m.info.refPos == 0) then
-                                    infR = rightModule.info.arcs.center.inf
-                                elseif (m.info.refPos > 0 and m.info.octa[5]) then
-                                    infR = arR:rad(modules[m.info.octa[5]].info.pts[2][1])
-                                elseif (m.info.refPos < 0 and m.info.octa[1]) then
-                                    infR = arR:rad(modules[m.info.octa[1]].info.pts[2][1])
-                                end
-                                
-                                arL = arL:withLimits({sup = supL, inf = infL})
-                                arR = arR:withLimits({sup = supR, inf = infR})
-                                aligned = true
+                        if ref.left or ref.right then
+                            local refModule = function(offset)
+                                local refModule = modules[grid[z][x + offset][y]]
+                                local refO = refModule.info.arcs.center.o
+                                local refRadius = refModule.info.radius + (infoX.pos[x] - infoX.pos[x + offset])
+                                return refModule,
+                                    function() return arc.byOR(refO, refRadius - m.info.width * 0.5, refModule.info.arcs.center:limits()) end,
+                                    function() return arc.byOR(refO, refRadius + m.info.width * 0.5, refModule.info.arcs.center:limits()) end
                             end
-                        elseif ref.left then
-                            local leftModule = modules[grid[z][x - 1][y]]
-                            local leftO = leftModule.info.arcs.center.o
-                            local leftRadius = leftModule.info.radius + (infoX.pos[x] - infoX.pos[x - 1])
-                            arL = arc.byOR(leftO, leftRadius - m.info.width * 0.5, leftModule.info.arcs.center:limits())
-                            arR = arc.byOR(leftO, leftRadius + m.info.width * 0.5, leftModule.info.arcs.center:limits())
-                            
-                            if m.info.refPos < 0 then
-                                local infL = leftModule.info.arcs.center.inf
-                                local infR = leftModule.info.arcs.center.inf
-                                
-                                if (leftModule.metadata.isTrack) then
-                                    local limitSup = leftModule.info.limits[1]
-                                    infL = calculateLimit(arL)(limitSup, leftModule.info.pts[1])
-                                    infR = calculateLimit(arR)(limitSup, leftModule.info.pts[1])
+                            local fn = function(arL, arR, refModule, refModule2)
+                                local sup = function(ar)
+                                    return m.info.octa[1] and ar:rad(modules[m.info.octa[1]].info.pts[1][1]) or ar:rad(yState.pos)
                                 end
-                                
-                                local sup = arL:rad(yState.pos)
-                                if m.info.octa[1] then
-                                    sup = arL:rad(modules[m.info.octa[1]].info.pts[1][1])
+                                local inf = function(ar)
+                                    return m.info.refPos == 0
+                                        and refModule.info.arcs.center.inf
+                                        or (m.info.octa[5] and ar:rad(modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(yState.pos))
                                 end
-                                arL = arL:withLimits({inf = infL, sup = sup})
-                                arR = arR:withLimits({inf = infR, sup = sup})
-                            else
-                                local supL = leftModule.info.arcs.center.sup
-                                local supR = leftModule.info.arcs.center.sup
-                                
-                                if (leftModule.metadata.isTrack) then
-                                    local limitSup = leftModule.info.limits[2]
-                                    supL = calculateLimit(arL)(limitSup, leftModule.info.pts[2])
-                                    supR = calculateLimit(arR)(limitSup, leftModule.info.pts[2])
+                                local limit = function(p)
+                                    local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
+                                    local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arL.o) or (arL.o - refModule.info.pts[p][1])):normalized()
+                                    local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arR.o) or (arR.o - refModule2.info.pts[p][1])):normalized()
+                                    return line.byVecPt((vecLimL + vecLimR):normalized(), limit)
                                 end
-                                
-                                local inf = arL:rad(yState.pos)
-                                if (m.info.refPos == 0) then
-                                    inf = leftModule.info.arcs.center.inf
-                                elseif (m.info.refPos > 0 and m.info.octa[5]) then
-                                    inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
-                                elseif (m.info.refPos < 0 and m.info.octa[1]) then
-                                    inf = arL:rad(modules[m.info.octa[1]].info.pts[2][1])
+                                if m.info.refPos < 0 then
+                                    local infL = refModule.info.arcs.center.inf
+                                    local infR = (refModule2 or refModule).info.arcs.center.inf
+                                    
+                                    if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+                                        local lim = limit(1)
+                                        infL = calculateLimit(arL)(lim, refModule.info.pts[1])
+                                        infR = calculateLimit(arR)(lim, refModule2.info.pts[1])
+                                    elseif refModule.metadata.isTrack then
+                                        local lim = refModule.info.limits[1]
+                                        infL = calculateLimit(arL)(lim, refModule.info.pts[1])
+                                        infR = calculateLimit(arR)(lim, refModule.info.pts[1])
+                                    end
+                                    
+                                    local supL = sup(arL)
+                                    local supR = sup(arR)
+                                    arL = arL:withLimits({inf = infL, sup = supL})
+                                    arR = arR:withLimits({inf = infR, sup = supR})
+                                else
+                                    local supL = refModule.info.arcs.center.sup
+                                    local supR = (refModule2 or refModule).info.arcs.center.sup
+                                    
+                                    if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+                                        local lim = limit(2)
+                                        supL = calculateLimit(arL)(lim, refModule.info.pts[2])
+                                        supR = calculateLimit(arR)(lim, refModule2.info.pts[2])
+                                    elseif refModule.metadata.isTrack then
+                                        local lim = refModule.info.limits[2]
+                                        supL = calculateLimit(arL)(lim, refModule.info.pts[2])
+                                        supR = calculateLimit(arR)(lim, refModule.info.pts[2])
+                                    end
+                                    
+                                    local infL = inf(arL)
+                                    local infR = inf(arR)
+                                    arL = arL:withLimits({inf = infL, sup = supL})
+                                    arR = arR:withLimits({inf = infR, sup = supR})
                                 end
-                                arL = arL:withLimits({sup = supL, inf = inf})
-                                arR = arR:withLimits({sup = supR, inf = inf})
                             end
-                            
+                            if ref.left and ref.right then
+                                local leftModule, fArL = refModule(-1)
+                                local rightModule, _, fArR = refModule(1)
+                                arL = fArL()
+                                arR = fArR()
+                                
+                                fn(arL, arR, leftModule, rightModule)
+                            elseif ref.left then
+                                local leftModule, fArL, fArR = refModule(-1)
+                                arL = fArL()
+                                arR = fArR()
+                                fn(arL, arR, leftModule)
+                            elseif ref.right then
+                                local rightModule, fArL, fArR = refModule(1)
+                                arL = fArL()
+                                arR = fArR()
+                                fn(arL, arR, rightModule)
+                            end
                             aligned = true
-                        elseif ref.right then
-                            local rightModule = modules[grid[z][x + 1][y]]
-                            local rightO = rightModule.info.arcs.center.o
-                            local rightRadius = rightModule.info.radius + (infoX.pos[x] - infoX.pos[x + 1])
-                            
-                            arL = arc.byOR(rightO, rightRadius - m.info.width * 0.5, rightModule.info.arcs.center:limits())
-                            arR = arc.byOR(rightO, rightRadius + m.info.width * 0.5, rightModule.info.arcs.center:limits())
-                            
-                            if m.info.refPos < 0 then
-                                local infL = rightModule.info.arcs.center.inf
-                                local infR = rightModule.info.arcs.center.inf
-                                
-                                if (rightModule.metadata.isTrack) then
-                                    local limitInf = rightModule.info.limits[1]
-                                    infL = calculateLimit(arL)(limitInf, rightModule.info.pts[1])
-                                    infR = calculateLimit(arR)(limitInf, rightModule.info.pts[1])
-                                end
-                                
-                                local sup = arL:rad(yState.pos)
-                                if m.info.octa[1] then
-                                    sup = arL:rad(modules[m.info.octa[1]].info.pts[1][1])
-                                end
-                                
-                                arL = arL:withLimits({inf = infL, sup = sup})
-                                arR = arR:withLimits({inf = infR, sup = sup})
-                            else
-                                local supL = rightModule.info.arcs.center.sup
-                                local supR = rightModule.info.arcs.center.sup
-                                
-                                if (rightModule.metadata.isTrack) then
-                                    local limitSup = rightModule.info.limits[2]
-                                    supL = calculateLimit(arL)(limitSup, rightModule.info.pts[2])
-                                    supR = calculateLimit(arR)(limitSup, rightModule.info.pts[2])
-                                end
-                                
-                                local inf = arL:rad(yState.pos)
-                                if (m.info.refPos == 0) then
-                                    inf = rightModule.info.arcs.center.inf
-                                elseif m.info.octa[5] then
-                                    inf = arL:rad(modules[m.info.octa[5]].info.pts[2][1])
-                                end
-                                
-                                arL = arL:withLimits({sup = supL, inf = inf})
-                                arR = arR:withLimits({sup = supR, inf = inf})
-                                aligned = true
-                            end
                         elseif ref.prev then
                             local arcs = modules[m.info.octa[5]].info.arcs
                             
@@ -735,21 +647,20 @@ ust.gridization = function(modules, classedModules)
                                 refArc.center:tangent(refArc.center.sup)
                             }
                         }
-                        
-                        if y >= 0 then
-                            modules[slotId].info.pts[3] = modules[slotId].info.pts[1]
-                            modules[slotId].info.pts[4] = modules[slotId].info.pts[2]
-                        else
-                            modules[slotId].info.pts[3] = {
-                                modules[slotId].info.pts[2][1],
-                                -modules[slotId].info.pts[2][2]
-                            }
-                            modules[slotId].info.pts[4] = {
-                                modules[slotId].info.pts[1][1],
-                                -modules[slotId].info.pts[1][2]
-                            }
-                        end
                     
+                    -- if y >= 0 then
+                    --     modules[slotId].info.pts[3] = modules[slotId].info.pts[1]
+                    --     modules[slotId].info.pts[4] = modules[slotId].info.pts[2]
+                    -- else
+                    --     modules[slotId].info.pts[3] = {
+                    --         modules[slotId].info.pts[2][1],
+                    --         -modules[slotId].info.pts[2][2]
+                    --     }
+                    --     modules[slotId].info.pts[4] = {
+                    --         modules[slotId].info.pts[1][1],
+                    --         -modules[slotId].info.pts[1][2]
+                    --     }
+                    -- end
                     else
                         coroutine.yield()
                     end
