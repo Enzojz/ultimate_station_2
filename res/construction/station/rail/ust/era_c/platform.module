@@ -67,15 +67,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rightPts = ust.basePts(info.arcs.right, n)
     local centerPts = ust.basePts(info.arcs.center, n)
 
-    dump()({
-        slotId = slotId,
-        pts = {
-            l = leftPts,
-            r = rightPts,
-            c = centerPts
-        }
-    })
-    
     local leftEdge = {}
     local rightEdge = {}
     local leftCentre = {}

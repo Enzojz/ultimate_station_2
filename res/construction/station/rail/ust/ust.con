@@ -122,7 +122,6 @@ local createTemplateFn = function(params)
 end
 
 local preProcessFn = function(modules, change)
-    dump()(change)
     local classedModules = classifyModules(modules)
 
     local type, id, data = ust.slotInfo(change.slotId)
@@ -132,8 +131,7 @@ local preProcessFn = function(modules, change)
         id = id, 
         data = data
     }
-
-    -- dump()({classedModules = classedModules})
+    
     if change.added then
         if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info)

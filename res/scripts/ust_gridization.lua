@@ -276,7 +276,6 @@ ust.gridization = function(modules, classedModules)
             end
         end
         
-        dump()(parentMap)
         -- Collect X postion and width information
         -- Process in Y axis
         local processY = function(x, y)
