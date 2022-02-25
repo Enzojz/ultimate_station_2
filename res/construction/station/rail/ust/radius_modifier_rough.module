@@ -46,11 +46,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         insert(result.models, m)
     end
     
-    local ptS, vecS = unpack(info.pts[1])
+    local ptS, vecS = unpack(info.pts[info.refPos < 0 and 2 or 1])
     vecS = vecS:normalized()
+    if info.refPos < 0 then vecS = -vecS end
     for i = -60, 60, 1 do
         local rad = (arcs.center.inf - arcs.center.sup) + i * pi / 180
-        if info.pos.y < 0 then rad = -rad end
+        if info.refPos < 0 then rad = -rad end
         if (abs(rad) > 10e-3) then
             local r = 20 / rad
             if (abs(r) >= 50) then
@@ -58,7 +59,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 local dst = o + (vecS * r .. coor.rotZ(pi * 0.5 - rad))
                 insert(result.slots, {
                     id = makeData(83 + var, i),
-                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ(arcs.center.inf - rad) * coor.trans(dst),
+                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ((info.refPos < 0 and arcs.center.sup or arcs.center.inf) - rad) * coor.trans(dst),
                     type = "ust_radius_modifier",
                     shape = 2,
                     spacing = {0, 0, 0, 0}
