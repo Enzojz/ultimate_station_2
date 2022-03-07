@@ -38,7 +38,7 @@ local fitMdl = {
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local pos = info.pos
-    
+    -- dump()(info)
     local isTrack = {}
     local isPlatform = {}
     local octaModules = {}
@@ -75,7 +75,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rightLaneBorder = {}
     local leftLane = {}
     local rightLane = {}
-    
+    -- dump()(leftPts)
+    -- dump()(rightPts)
     for i = 1, n + 1 do
         local vec = (leftPts[i] - rightPts[i]):normalized()
         leftEdge[i] = leftPts[i]

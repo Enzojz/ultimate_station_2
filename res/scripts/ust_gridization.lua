@@ -390,16 +390,14 @@ ust.gridization = function(modules, classedModules)
                     if (x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) and not modules[m.info.octa[3]].info.ref.left) or
                         (m.metadata.isTrack and ref == m.info.octa[3]) then
                         -- Left side, a track on the right
-                        if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
-                            or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                        if m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform then
                             -- Next is a platform
                             local sup = modules[m.info.octa[3]].info.arcs.center.sup
                             arL.sup = sup
                             arR.sup = sup
                             ar.sup = sup
                         end
-                        if (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
-                            or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                        if m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform then
                             -- Prev is a platform
                             local inf = modules[m.info.octa[3]].info.arcs.center.inf
                             arL.inf = inf
@@ -409,16 +407,14 @@ ust.gridization = function(modules, classedModules)
                     elseif (x >= 0 and m.info.octa[7] and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) and not modules[m.info.octa[7]].info.ref.right) or
                         (m.metadata.isTrack and ref == m.info.octa[5]) then
                         -- Right side, a track on the left
-                        if (y >= 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform)
-                            or (y < 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform) then
+                        if m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform then
                             -- Next is a platform
                             local sup = modules[m.info.octa[7]].info.arcs.center.sup
                             arL.sup = sup
                             arR.sup = sup
                             ar.sup = sup
                         end
-                        if (y >= 0 and m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform)
-                            or (y < 0 and m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform) then
+                        if m.info.octa[5] and modules[m.info.octa[5]].metadata.isPlatform then
                             -- Prev is a platform
                             local inf = modules[m.info.octa[7]].info.arcs.center.inf
                             arL.inf = inf
@@ -469,7 +465,7 @@ ust.gridization = function(modules, classedModules)
                                 local supFar = function(ar)
                                     return m.info.octa[1] and ar:rad(modules[m.info.octa[1]].info.pts[1][1]) or ar:rad(yState.pos)
                                 end
-                                local infFar = function(ar)
+                                local infFar = function(ar, refModule)
                                     return m.info.refPos == 0
                                         and refModule.info.arcs.center.inf
                                         or (m.info.octa[5] and ar:rad(modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(yState.pos))
@@ -483,16 +479,16 @@ ust.gridization = function(modules, classedModules)
                                         return
                                             calculateLimit(arL)(lim, refModule.info.pts[p]),
                                             calculateLimit(arR)(lim, refModule2.info.pts[p]),
-                                            fFar(arL), fFar(arL)
+                                            fFar(arL, refModule), fFar(arR, refModule2)
                                     elseif refModule.metadata.isTrack then
                                         local lim = refModule.info.limits[p]
                                         return
                                             calculateLimit(arL)(lim, refModule.info.pts[p]),
                                             calculateLimit(arR)(lim, refModule.info.pts[p]),
-                                            fFar(arL), fFar(arL)
+                                            fFar(arL, refModule), fFar(arR, refModule)
                                     else
                                         return limL, limR,
-                                            fFar(arL), fFar(arL)
+                                            fFar(arL, refModule), fFar(arR, refModule)
                                     end
                                 end
                                 if m.info.refPos < 0 then
@@ -504,23 +500,24 @@ ust.gridization = function(modules, classedModules)
                                     arL = arL:withLimits({inf = infL, sup = supL})
                                     arR = arR:withLimits({inf = infR, sup = supR})
                                 end
+                                return arL, arR
                             end
                             if ref.left and ref.right then
                                 local leftModule, fArL = refModule(-1)
                                 local rightModule, _, fArR = refModule(1)
                                 arL = fArL()
                                 arR = fArR()
-                                calculate(arL, arR, leftModule, rightModule)
+                                arL, arR = calculate(arL, arR, leftModule, rightModule)
                             elseif ref.left then
                                 local leftModule, fArL, fArR = refModule(-1)
                                 arL = fArL()
                                 arR = fArR()
-                                calculate(arL, arR, leftModule)
+                                arL, arR = calculate(arL, arR, leftModule)
                             elseif ref.right then
                                 local rightModule, fArL, fArR = refModule(1)
                                 arL = fArL()
                                 arR = fArR()
-                                calculate(arL, arR, rightModule)
+                                arL, arR = calculate(arL, arR, rightModule)
                             end
                             aligned = true
                         elseif ref.prev then
@@ -547,13 +544,13 @@ ust.gridization = function(modules, classedModules)
                             arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
                             
                             arL = arL:withLimits({
-                                inf = arL.sup,
-                                sup = arL.sup + arL.sup - arL.inf
+                                sup = arL.inf,
+                                inf = arL.inf + arL.inf - arL.sup
                             })
                             
                             arR = arR:withLimits({
-                                inf = arR.sup,
-                                sup = arR.sup - arR.inf + arR.sup
+                                sup = arR.inf,
+                                inf = arR.inf + arR.inf - arR.sup
                             })
                             
                             aligned = true
@@ -609,7 +606,7 @@ ust.gridization = function(modules, classedModules)
                                 sup = sup,
                                 inf = inf
                             })
-                            modules[slotId].info.radius = (length > 0 and 1 or -1) * (m.info.refPos < 0 and -1 or 1) * r
+                            modules[slotId].info.radius = (length > 0 and 1 or -1) * r
                             modules[slotId].info.length = math.abs(length)
                         end
                         

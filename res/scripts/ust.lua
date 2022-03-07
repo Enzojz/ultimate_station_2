@@ -98,6 +98,7 @@ ust.arcPacker = function(pt, vec, length, radius, isRev)
     })
     return function(...)
         local result = func.map({...}, function(dr)
+            local dr = isRev and -dr or dr
             return arc.byOR(o, abs(radius + dr), {
                 sup = sup,
                 inf = inf
@@ -395,14 +396,14 @@ ust.getTranfs = function(info, pos, width)
         return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
     elseif pos == 3 then
         local pt = 0.5 * (refArc.sup + refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
         return coor.trans(coor.xyz(width, 0, 0)) * transf
     elseif pos == 5 then
         local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
         return quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
     elseif pos == 7 then
         local pt = 0.5 * (refArc.sup + refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
         return coor.trans(coor.xyz(-width, 0, 0)) * transf
     else
         local pt = 0.5 * (refArc.sup + refArc.inf)
