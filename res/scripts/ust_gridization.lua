@@ -14,7 +14,6 @@ local unpack = table.unpack
 local insert = table.insert
 
 -- It's a long single-usage function so I seperate it
-
 local calculateLimit = function(arc)
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
@@ -154,13 +153,16 @@ local function fnQueue(g, modules)
     groups[mGIndex[g[0][0]]].parent = true
     groupTreeGen(groups[mGIndex[g[0][0]]].order)
     local groupRef = {}
+    dump()(groups)
     
     local function slotTreeGen(group, ...)
         if group then
             local g = groups[group]
+            local parentG = g.parent ~= true and groups[g.parent] or nil
             local rest = {...}
             
             local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
+            local refX = groupRef[group] and modules[groupRef[group]].info.pos.x or 0
             local slots = {
                 func.filter(g.slots, function(s) return s.y >= refY end),
                 func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
@@ -168,7 +170,7 @@ local function fnQueue(g, modules)
             
             for _, slots in ipairs(slots) do
                 for i, slot in ipairs(slots) do
-                    modules[slot.slotId].info.refPos = slot.y - refY
+                    modules[slot.slotId].info.refPos = coor.xyz(parentG and g.x - parentG.x or 0, slot.y - refY, 0)
                     if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
                     if slots[i + 1] and not parentMap[slots[i + 1]] then
                         parentMap[slots[i + 1].slotId] = slot.slotId
@@ -200,7 +202,7 @@ local function fnQueue(g, modules)
             return {}
         end
     end
-
+    
     return queueGen(g[0][0]), parentMap
 end
 
@@ -387,8 +389,19 @@ ust.gridization = function(modules, classedModules)
                     
                     -- if m.info.isRev then arL, arR = arR, arL end
                     -- ALignement of starting point and ending point
-                    if (x < 0 and m.info.octa[3] and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder) and not modules[m.info.octa[3]].info.ref.left) or
-                        (m.metadata.isTrack and ref == m.info.octa[3]) then
+                    dump()({
+                        slotId = slotId,
+                        refPos = m.info.refPos,
+                        octa = m.info.octa
+                    })
+                    if (
+                        ((m.info.refPos.x == 0 and x < 0) or m.info.refPos.x < 0)
+                        and m.info.octa[3]
+                        and (modules[m.info.octa[3]].metadata.isTrack or modules[m.info.octa[3]].metadata.isPlaceholder)
+                        and not modules[m.info.octa[3]].info.ref.left
+                        )
+                        or (m.metadata.isTrack and ref == m.info.octa[3])
+                    then
                         -- Left side, a track on the right
                         if m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform then
                             -- Next is a platform
@@ -404,8 +417,14 @@ ust.gridization = function(modules, classedModules)
                             arR.inf = inf
                             ar.inf = inf
                         end
-                    elseif (x >= 0 and m.info.octa[7] and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder) and not modules[m.info.octa[7]].info.ref.right) or
-                        (m.metadata.isTrack and ref == m.info.octa[5]) then
+                    elseif (
+                        ((m.info.refPos.x == 0 and x >= 0) or m.info.refPos.x > 0)
+                        and m.info.octa[7]
+                        and (modules[m.info.octa[7]].metadata.isTrack or modules[m.info.octa[7]].metadata.isPlaceholder)
+                        and not modules[m.info.octa[7]].info.ref.right
+                        ) or
+                        (m.metadata.isTrack and ref == m.info.octa[5])
+                    then
                         -- Right side, a track on the left
                         if m.info.octa[1] and modules[m.info.octa[1]].metadata.isPlatform then
                             -- Next is a platform
@@ -466,7 +485,7 @@ ust.gridization = function(modules, classedModules)
                                     return m.info.octa[1] and ar:rad(modules[m.info.octa[1]].info.pts[1][1]) or ar:rad(yState.pos)
                                 end
                                 local infFar = function(ar, refModule)
-                                    return m.info.refPos == 0
+                                    return m.info.refPos.y == 0
                                         and refModule.info.arcs.center.inf
                                         or (m.info.octa[5] and ar:rad(modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(yState.pos))
                                 end
@@ -491,7 +510,7 @@ ust.gridization = function(modules, classedModules)
                                             fFar(arL, refModule), fFar(arR, refModule)
                                     end
                                 end
-                                if m.info.refPos < 0 then
+                                if m.info.refPos.y < 0 then
                                     local infL, infR, supL, supR = limit(refModule.info.arcs.center.inf, (refModule2 or refModule).info.arcs.center.inf, 1, supFar)
                                     arL = arL:withLimits({inf = infL, sup = supL})
                                     arR = arR:withLimits({inf = infR, sup = supR})
