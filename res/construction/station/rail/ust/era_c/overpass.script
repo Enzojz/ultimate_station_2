@@ -83,48 +83,48 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local centerPt = centerPts[3]
     local centerVec = centerVecs[3]
     
-    local centerTransf = hTrans * (quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+    local centerTransf = hTrans * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
     local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
     
     if slotId == allOverpass[#allOverpass] and #allOverpass > 1 then
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf))
         if closureParams.orientation > -1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if closureParams.orientation < 1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf))
         end
     elseif slotId == allOverpass[1] and #allOverpass > 1 then
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf))
         if closureParams.orientation > -1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if closureParams.orientation < 1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf))
         end
     else
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf))
         if closureParams.orientation > -1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if closureParams.orientation < 1 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf))
         end
     end
     
-    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, centerTransf));
+    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, centerTransf))
     
     if closureParams.orientation < 1 and info.octa[1] then
         local m = params.modules[info.octa[1]]
@@ -138,7 +138,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf))
         
         local interCoords = {
             lt = sidePts[3],
@@ -147,8 +147,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             rb = interPts[3]
         }
         
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt) .. coor.transZ(8), interCoords.lb:avg(interCoords.rb) .. coor.transZ(8), tag))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
 
         
     end
@@ -165,7 +166,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
         
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf));
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf))
         
         local interCoords = {
             lt = interPts[1],
@@ -174,8 +175,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             rb = sidePts[3],
         }
         
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)));
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)));
+        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt) .. coor.transZ(8), interCoords.lb:avg(interCoords.rb) .. coor.transZ(8), tag))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
         
     end
     
@@ -198,7 +200,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local centerPt = centerPts[3]
             local centerVec = centerVecs[3]
             
-            local centerTransf = hTrans * (quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+            local centerTransf = hTrans * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
             local prevRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
             
             local overpassCoords = {
@@ -208,8 +210,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 rb = interPts[1]
             }
             
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)));
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)));
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
         
         end
     end

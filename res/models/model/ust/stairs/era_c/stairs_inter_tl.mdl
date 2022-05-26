@@ -29,17 +29,17 @@ function data() return {
         }
     },
     metadata = {
-        transportNetworkProvider = {
-            laneLists = {
-                laneutil.createLanes({
-                    curves = {
-                        {
-                            {{1, -0.5, 8}, {1, 0, 8}}
-                        }
-                    }
-                }, {"PERSON"}, 20, 3, false)
-            },
-        }
+        -- transportNetworkProvider = {
+        --     laneLists = {
+        --         laneutil.createLanes({
+        --             curves = {
+        --                 {
+        --                     {{1, -0.5, 8}, {1, 0, 8}}
+        --                 }
+        --             }
+        --         }, {"PERSON"}, 20, 3, false)
+        --     },
+        -- }
     
     },
     version = 1

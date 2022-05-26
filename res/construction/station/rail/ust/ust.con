@@ -247,7 +247,7 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
 
-    params.debug = true
+    params.debug = false --Crash bug when live text is introduced
     
     params.classedModules = classifyModules(params.modules)
     local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
