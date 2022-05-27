@@ -1,28 +1,56 @@
 function data()
-  return {
-    order = 0,
-    params = {
-      emissive_scale = {
-        emissiveScale = { 1.3, 1.3, 1.3 },
-      },
-      fade_out_range = {
-        fadeOutEndDist = 250,
-        fadeOutStartDist = 100,
-      },
-      map_emissive = {
-        fileName = "models/ust/albedo/white.dds",
-        type = "TWOD",
-      },
-      polygon_offset = {
-        factor = 0,
-        units = 0,
-      },
-      two_sided = {
-        flipNormal = false,
-        twoSided = false,
-      },
-    },
-    type = "EMISSIVE",
-  }
-  end
-  
+    return {
+        params = {
+            fade_out_range = {
+                fadeOutEndDist = 2000,
+                fadeOutStartDist = 1000,
+            
+            },
+            map_albedo = {
+                compressionAllowed = true,
+                fileName = "models/ust/albedo/white.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            map_metal_gloss_ao = {
+                compressionAllowed = true,
+                fileName = "default_metal_gloss_ao.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            map_normal = {
+                compressionAllowed = true,
+                fileName = "default_normal_map.dds",
+                magFilter = "LINEAR",
+                minFilter = "LINEAR_MIPMAP_LINEAR",
+                mipmapAlphaScale = 0,
+                type = "TWOD",
+                wrapS = "REPEAT",
+                wrapT = "REPEAT",
+            
+            },
+            polygon_offset = {
+                factor = 0,
+                units = 0,
+            
+            },
+            two_sided = {
+                twoSided = false,
+            
+            },
+        
+        },
+        type = "PHYSICAL_NRML_MAP",
+    
+    }
+end
