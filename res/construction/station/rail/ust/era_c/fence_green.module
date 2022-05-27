@@ -36,7 +36,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local lengthScale = refVec:length() / 2
             local transf = hTrans
                 * coor.scaleX(lengthScale)
-                * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                 * coor.trans(refPt)
             
             table.insert(result.models, general.newModel("ust/fences/green_3.mdl", tag, transf));
@@ -46,13 +46,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local refPt = pts[i]
             local refVec = vec[i]
             local transf = hTrans
-                * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                 * coor.trans(refPt)
             
             table.insert(result.models, general.newModel("ust/fences/green_pole_3.mdl", tag, transf));
         end
     elseif data == 1 or data == 5 then
-        local rank = ((info.pos.y < 0 and data == 5) or (info.pos.y >= 0 and data == 1)) and 3 or 1 
+        local rank = data == 5 and 1 or 3
         local n = 2
         local ptsL = ust.basePts(info.arcs.left, n)
         local ptsR = ust.basePts(info.arcs.right, n)
@@ -63,7 +63,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i * 2 - 1) / 4 
             local transf = hTrans
                 * coor.scaleX(1.25)
-                * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), vec):mRot()
+                * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
             
             table.insert(result.models, general.newModel("ust/fences/green_3.mdl", tag, transf));
@@ -72,7 +72,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         for i = 1, 3 do
             local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i - 1) / 2
             local transf = hTrans
-                * quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), vec):mRot()
+                * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
             
             table.insert(result.models, general.newModel("ust/fences/green_pole_3.mdl", tag, transf));

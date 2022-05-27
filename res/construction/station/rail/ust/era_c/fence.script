@@ -14,7 +14,6 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local metadata = module.metadata
             local pos = info.pos
             
             local n = 2
@@ -26,7 +25,7 @@ local addSlot = function(params, result)
             local refVecL = vecL[2]
             
             local transfL =
-                quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVecL):mRot()
+                quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
                 * coor.trans(refPtL)
             
             insert(
@@ -42,7 +41,7 @@ local addSlot = function(params, result)
             local refVecR = vecR[2]
             
             local transfR =
-                quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVecR):mRot()
+                quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
                 * coor.trans(refPtR)
             
             insert(
@@ -54,13 +53,12 @@ local addSlot = function(params, result)
                 })
             
             
-            if (pos.y < 0 and not info.octa[5]) or (pos.y >= 0 and not info.octa[1]) then
-                
+            if not info.octa[1] then
                 local refPt = ptsR[3]:avg(ptsL[3])
                 local refVec = (ptsR[3] - ptsL[3]):normalized()
 
                 local transf =
-                    quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                    quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
 
                 insert(
@@ -72,12 +70,12 @@ local addSlot = function(params, result)
                     })
             end
             
-            if (pos.y < 0 and not info.octa[1]) or (pos.y >= 0 and not info.octa[5]) then
+            if not info.octa[5] then
                 local refPt = ptsR[1]:avg(ptsL[1])
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
 
                 local transf =
-                    quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot()
+                    quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
 
                 insert(
