@@ -134,26 +134,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local centerPts, centerVec = ust.basePts(info.arcs.center, n)
     local refVec = centerVec[1]
     
-    local orientation = {
-        [1] = coor.xyz(0, -1, 0);
-        [3] = coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0);
-        [5] = coor.xyz(0, -1, 0);
-        [7] = coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0)
-    }
-    local transf = hTrans
-        * quat.byVec(orientation[data], refVec):mRot()
-        * ust.getTranfs(info, data, metadata.width)
-    
-    
     -- if n == 0 then n = 1 end
     local n = 2
     
     
-    constructionutil.addModels(generatedData["clock"], result.models, transf, tag)
-    constructionutil.addModels(generatedData["assets"], result.models, transf, tag)
+    constructionutil.addModels(generatedData["clock"], result.models, transform, tag)
+    constructionutil.addModels(generatedData["assets"], result.models, transform, tag)
     
     for _, mdl in ipairs(mdlList) do
-        table.insert(result.models, general.newModel(mdl, tag, transf));
+        table.insert(result.models, general.newModel(mdl, tag, transform));
     end
 
 end

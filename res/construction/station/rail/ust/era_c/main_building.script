@@ -1,4 +1,6 @@
 local ust = require "ust"
+local quat = require "ust/quaternion"
+local coor = require "ust/coor"
 local insert = table.insert
 
 local math = math
@@ -13,31 +15,83 @@ local addSlot = function(params, result)
             local makeData = module.makeData
             local metadata = module.metadata
             local pos = info.pos
-
-            if not (info.octa[3]) then
-                local transf = ust.getTranfs(info, 3, metadata.width)
+            local refArc = info.arcs.center
+            
+            if not info.octa[3] then
+                local pt = 0.5 * (refArc.sup + refArc.inf)
+                local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
                 insert(
                     result.slots, {
                         id = makeData(23, 3),
                         transf = transf,
                         type = "ust_component_main_20",
-                        spacing = {1, 1, 12, 12}
+                        spacing = {12, 12, 1, 1}
                     })
+                
+                if not info.octa[2] and info.octa[1] then
+                    local pt = refArc.sup
+                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+                    insert(
+                        result.slots, {
+                            id = makeData(23, 2),
+                            transf = transf,
+                            type = "ust_component_main_20",
+                            spacing = {12, 12, 1, 1}
+                        })
+                end
+                
+                if not info.octa[4] and info.octa[5] then
+                    local pt = refArc.inf
+                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+                    insert(
+                        result.slots, {
+                            id = makeData(23, 4),
+                            transf = transf,
+                            type = "ust_component_main_20",
+                            spacing = {12, 12, 1, 1}
+                        })
+                end
             end
             
-            if not (info.octa[7]) then
-                local transf = ust.getTranfs(info, 7, metadata.width)
+            if not info.octa[7] then
+                local pt = 0.5 * (refArc.sup + refArc.inf)
+                local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
                 insert(
                     result.slots, {
                         id = makeData(23, 7),
                         transf = transf,
                         type = "ust_component_main_20",
-                        spacing = {1, 1, 12, 12}
+                        spacing = {12, 12, 1, 1}
                     })
+                
+                if not info.octa[6] and info.octa[5] then
+                    local pt = refArc.inf
+                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+                    insert(
+                        result.slots, {
+                            id = makeData(23, 6),
+                            transf = transf,
+                            type = "ust_component_main_20",
+                            spacing = {12, 12, 1, 1}
+                        })
+                end
+                
+                if not info.octa[8] and info.octa[1] then
+                    local pt = refArc.sup
+                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+                    insert(
+                        result.slots, {
+                            id = makeData(23, 8),
+                            transf = transf,
+                            type = "ust_component_main_20",
+                            spacing = {12, 12, 1, 1}
+                        })
+                end
             end
             
-            if not ((pos.y < 0 and info.octa[5]) or (pos.y > 0 and info.octa[1])) then
-                local transf = ust.getTranfs(info, 1, metadata.width)
+            if not info.octa[1] then
+                local pt = refArc.sup + metadata.width / (refArc.sup > refArc.inf and refArc.r or -refArc.r)
+                local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
                 insert(
                     result.slots, {
                         id = makeData(23, 1),
@@ -47,8 +101,9 @@ local addSlot = function(params, result)
                     })
             end
             
-            if not ((pos.y < 0 and info.octa[1]) or (pos.y > 0 and info.octa[5])) then
-                local transf = ust.getTranfs(info, 5, metadata.width)
+            if not info.octa[5] then
+                local pt = refArc.inf - metadata.width / (refArc.sup > refArc.inf and refArc.r or -refArc.r)
+                local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
                 insert(
                     result.slots, {
                         id = makeData(23, 5),
