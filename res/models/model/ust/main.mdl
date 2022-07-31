@@ -1,20 +1,3 @@
-local func = require "ust/func"
-local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local ust = require "ust"
-local general = require "ust/general"
-local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
-
-local trainstationutil = require "modules/trainstationutil"
-local constructionutil = require "constructionutil"
-
--- local dump = require "luadump"
-local unpack = table.unpack
-local insert = table.insert
-
-local ma = math
-local pi = ma.pi
 
 --Begin Generated
 local generatedData = {
@@ -107,77 +90,64 @@ local config = {
     translationY = 0,
 }
 
+local children = {}
+
+
 local mdlList = {
-    config.end_left,
-    config.end_left,
-    config.roof_side,
-    -- config.roof_head,
-    config.main
+    config.con_left,
+    config.con_right,
+    {config.end_left},
+    {config.end_left},
+    {config.roof_side},
+    {config.roof_head},
+    {config.main}
 }
 
-local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    
-    constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
-    constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
-    
+
+local function children()
+    local result = {}
+
     for _, mdl in ipairs(mdlList) do
-        table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));
+        table.insert(result,
+        {
+            id = mdl,
+            transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+            type = "MESH"
+        }
+        );
     end
     
-    local terrainAlignmentLists = pipe.new * {
-        coor.xyz(config.extend[1], config.extend[4], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[1], config.extend[3], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[2], config.extend[3], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[2], config.extend[4], 0.0) .. (hTrans * transform),
-    } * pipe.map(coor.vec2Tuple)
-
-    table.insert(result.terrainAlignmentLists, {
-        type = "EQUAL",
-        faces = { terrainAlignmentLists },
-        optional = true
-    })
-
 end
+
 function data()
     return {
-        availability = {
-            yearFrom = 0,
-            yearTo = 0,
+        boundingInfo = {
+            bbMax = { 1, 0.025000000372529, 1.8071000576019, },
+            bbMin = { -1, -0.025000000372529, 0.19249999523163, },
         },
-        buildMode = "SINGLE",
-        cost = {
-            price = 0,
+        collider = {
+           params = {  },
+           type = "MESH"
         },
-        description = {
-            name = _("MENU_MODULE_MAIN_BUILDING"),
-            description = _("MENU_MODULE_MAIN_BUILDING_DESC"),
+        lods = {
+            {
+                node = {
+                    children = {
+                        {
+                            materials = { "ust/fences/green.mtl", },
+                            mesh = "ust/fences/fences_1.msh",
+                            transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+                        },
+                    },
+                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+                },
+                static = false,
+                visibleFrom = 0,
+                visibleTo = 200,
+            },
         },
-        category = {
-            categories = {"Building"},
-        },
-        type = "ust_component_main_20",
-        order = {
-            value = 260,
-        },
-        metadata = {
-            scriptName = "construction/station/rail/ust/era_c/main_building",
-            classify = "classify",
-            typeName = "ust_component_main_20",
-            isComponent = true,
-            isBuilding = true,
-            typeId = 23,
-            width = 5,
-            spacing = {20, 20, 38, 0}
-        },
-        
-        updateFn = updateFn,
-        
-        getModelsFn = function(params)
-            return {}
-        end
+        metadata = { },
+        version = 1,
     }
-
-end
+    end
+    

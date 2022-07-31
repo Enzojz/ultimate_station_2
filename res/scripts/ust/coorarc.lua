@@ -34,7 +34,8 @@ function arc.new(o, r, limits)
         extraRad = arc.extraRad,
         extra = arc.extra,
         tangent = arc.tangent,
-        rev = arc.rev
+        rev = arc.rev,
+        xLine = arc.intersectionLine
     }
     setmetatable(result, {
         __sub = arc.intersectionArc,
@@ -137,8 +138,12 @@ function arc.tangent(arc, rad)
     return (coor.xyz(0, (arc.sup < arc.inf) and -1 or 1, 0) .. coor.rotZ(rad)):normalized()
 end
 
-
-function arc.intersectionLine(arc, line)
+function arc.intersectionLine(arc, line, betweenLimit)
+    local xpt = betweenLimit and function(x, y, z)
+        local pt = coor.xyz(x, y, z)
+        local rad = arc:rad(pt)
+        if (rad >= arc.inf and rad <= arc.sup) or (rad >= arc.sup and rad <= arc.inf) then return pt else return nil end
+    end or coor.xyz
     if (abs(line.a) > 1e-10) then
         
         -- a.x + b.y + c = 0
@@ -163,13 +168,13 @@ function arc.intersectionLine(arc, line)
         if (abs(delta) < 1e-10) then
             local y = -p / (2 * o)
             local x = -l - m * y
-            return {coor.xy(x, y)}
+            return {xpt(x, y, 0)}
         elseif (delta > 0) then
             local y0 = (-p + sqrt(delta)) / (2 * o)
             local y1 = (-p - sqrt(delta)) / (2 * o)
             local x0 = -l - m * y0
             local x1 = -l - m * y1
-            return {coor.xy(x0, y0), coor.xy(x1, y1)}
+            return {xpt(x0, y0, 0), xpt(x1, y1, 0)}
         else
             return {}
         end
@@ -179,13 +184,13 @@ function arc.intersectionLine(arc, line)
         local y = -line.c / line.b;
         local delta = arc.r * arc.r - (y - arc.o.y) * (y - arc.o.y);
         if (abs(delta) < 1e-10) then
-            return {coor.xy(arc.o.x, y)}
+            return {xpt(arc.o.x, y, 0)}
         elseif (delta > 0) then
             -- (x - a) = ± Sqrt(delta)
             -- x = ± Sqrt(delta) + a
             local x0 = sqrt(delta) + arc.o.x;
             local x1 = -sqrt(delta) + arc.o.x;
-            return {coor.xy(x0, y), coor.xy(x1, y)}
+            return {xpt(x0, y, 0), xpt(x1, y, 0)}
         else
             return {}
         end

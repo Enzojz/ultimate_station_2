@@ -153,7 +153,6 @@ local function fnQueue(g, modules)
     groups[mGIndex[g[0][0]]].parent = true
     groupTreeGen(groups[mGIndex[g[0][0]]].order)
     local groupRef = {}
-    dump()(groups)
     
     local function slotTreeGen(group, ...)
         if group then
@@ -389,11 +388,7 @@ ust.gridization = function(modules, classedModules)
                     
                     -- if m.info.isRev then arL, arR = arR, arL end
                     -- ALignement of starting point and ending point
-                    dump()({
-                        slotId = slotId,
-                        refPos = m.info.refPos,
-                        octa = m.info.octa
-                    })
+
                     if (
                         ((m.info.refPos.x == 0 and x < 0) or m.info.refPos.x < 0)
                         and m.info.octa[3]

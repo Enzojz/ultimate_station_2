@@ -1,7 +1,11 @@
 local ust = require "ust"
+local func = require "ust/func"
 local quat = require "ust/quaternion"
 local coor = require "ust/coor"
+local coorarc = require "ust/coorarc"
+local line = require "ust/coorline"
 local insert = table.insert
+local dump = require "luadump"
 
 local math = math
 local floor = math.floor
@@ -15,102 +19,128 @@ local addSlot = function(params, result)
             local makeData = module.makeData
             local metadata = module.metadata
             local pos = info.pos
-            local refArc = info.arcs.center
             
-            if not info.octa[3] then
-                local pt = 0.5 * (refArc.sup + refArc.inf)
-                local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                insert(
-                    result.slots, {
-                        id = makeData(23, 3),
-                        transf = transf,
-                        type = "ust_component_main_20",
-                        spacing = {12, 12, 1, 1}
-                    })
-                
-                if not info.octa[2] and info.octa[1] then
-                    local pt = refArc.sup
-                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                    insert(
-                        result.slots, {
-                            id = makeData(23, 2),
-                            transf = transf,
-                            type = "ust_component_main_20",
-                            spacing = {12, 12, 1, 1}
-                        })
-                end
-                
-                if not info.octa[4] and info.octa[5] then
-                    local pt = refArc.inf
-                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                    insert(
-                        result.slots, {
-                            id = makeData(23, 4),
-                            transf = transf,
-                            type = "ust_component_main_20",
-                            spacing = {12, 12, 1, 1}
-                        })
+            local grid = {}
+            for i = -2, 2 do
+                grid[i] = {}
+                for j = -2, 2 do
+                    local posG = coor.xyz(i, j, 0) + pos
+                    local m = params.grid[pos.z][posG.x] and params.grid[pos.z][posG.x][posG.y] and params.modules[params.grid[pos.z][posG.x][posG.y]]
+                    if (m and m.metadata.isPlatform) then
+                        grid[i][j] = m
+                    end
                 end
             end
             
-            if not info.octa[7] then
-                local pt = 0.5 * (refArc.sup + refArc.inf)
-                local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                insert(
-                    result.slots, {
-                        id = makeData(23, 7),
-                        transf = transf,
-                        type = "ust_component_main_20",
-                        spacing = {12, 12, 1, 1}
-                    })
-                
-                if not info.octa[6] and info.octa[5] then
-                    local pt = refArc.inf
-                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                    insert(
-                        result.slots, {
-                            id = makeData(23, 6),
-                            transf = transf,
-                            type = "ust_component_main_20",
-                            spacing = {12, 12, 1, 1}
-                        })
-                end
-                
-                if not info.octa[8] and info.octa[1] then
-                    local pt = refArc.sup
-                    local transf = coor.trans(coor.xyz(0, -metadata.width, 0)) * quat.byVec(coor.xyz(-1, 0, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                    insert(
-                        result.slots, {
-                            id = makeData(23, 8),
-                            transf = transf,
-                            type = "ust_component_main_20",
-                            spacing = {12, 12, 1, 1}
-                        })
+            do
+                local arc = info.arcs.left
+                local ptSup = arc:pt(arc.sup)
+                local ptInf = arc:pt(arc.inf)
+                local ptMid = arc:pt((arc.sup + arc.inf) * 0.5)
+                for _, ptId in ipairs({
+                    {ptSup, 8},
+                    {ptMid, 7},
+                    {ptInf, 6}
+                }) do
+                    local pt, octapos = table.unpack(ptId)
+                    local vec = (pt - info.arcs.center:ptByPt(pt)):normalized()
+                    local vecSup = (vec .. coor.rotZ(0.5 * math.pi)) * 20
+                    local vecInf = -vecSup
+                    local lnSup = line.byVecPt(vec, pt + vecSup)
+                    local lnInf = line.byVecPt(vec, pt + vecInf)
+                    local xSup, xInf
+                    for y = -2, 2 do
+                        local m = grid[0][y]
+                        if (m) then
+                            local arc = m.info.arcs.left
+                            
+                            if not xSup then
+                                local x = arc:xLine(lnSup, true)
+                                if #x == 1 then
+                                    xSup = table.unpack(x)
+                                end
+                            end
+                            if not xInf then
+                                local x = arc:xLine(lnInf, true)
+                                if #x == 1 then
+                                    xInf = table.unpack(x)
+                                end
+                            end
+                        else
+                            if (xSup and not xInf) or (xInf and not xSup) then
+                                break
+                            end
+                        end
+                        if xSup and xInf then 
+                            break
+                        end
+                    end
+                    if xSup and xInf then
+                        insert(
+                            result.slots, {
+                                id = makeData(23, octapos),
+                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xSup + xInf) * 0.5),
+                                type = "ust_component_main_20",
+                                spacing = {12, 12, 1, 1}
+                            })
+                    end
                 end
             end
+
             
-            if not info.octa[1] then
-                local pt = refArc.sup + metadata.width / (refArc.sup > refArc.inf and refArc.r or -refArc.r)
-                local transf = quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                insert(
-                    result.slots, {
-                        id = makeData(23, 1),
-                        transf = transf,
-                        type = "ust_component_main_20",
-                        spacing = {12, 12, 1, 1}
-                    })
-            end
-            
-            if not info.octa[5] then
-                local pt = refArc.inf - metadata.width / (refArc.sup > refArc.inf and refArc.r or -refArc.r)
-                local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-                insert(
-                    result.slots, {
-                        id = makeData(23, 5),
-                        transf = transf,
-                        type = "ust_component_main_20",
-                        spacing = {12, 12, 1, 1}
-                    })
+            do
+                local arc = info.arcs.right
+                local ptSup = arc:pt(arc.sup)
+                local ptInf = arc:pt(arc.inf)
+                local ptMid = arc:pt((arc.sup + arc.inf) * 0.5)
+                for _, ptId in ipairs({
+                    {ptSup, 2},
+                    {ptMid, 3},
+                    {ptInf, 4}
+                }) do
+                    local pt, octapos = table.unpack(ptId)
+                    local vec = (pt - info.arcs.center:ptByPt(pt)):normalized()
+                    local vecSup = (vec .. coor.rotZ(0.5 * math.pi)) * 20
+                    local vecInf = -vecSup
+                    local lnSup = line.byVecPt(vec, pt + vecSup)
+                    local lnInf = line.byVecPt(vec, pt + vecInf)
+                    local xSup, xInf
+                    for y = -2, 2 do
+                        local m = grid[0][y]
+                        if (m) then
+                            local arc = m.info.arcs.right
+                            
+                            if not xSup then
+                                local x = arc:xLine(lnSup, true)
+                                if #x == 1 then
+                                    xSup = table.unpack(x)
+                                end
+                            end
+                            if not xInf then
+                                local x = arc:xLine(lnInf, true)
+                                if #x == 1 then
+                                    xInf = table.unpack(x)
+                                end
+                            end
+                        else
+                            if (xSup and not xInf) or (xInf and not xSup) then
+                                break
+                            end
+                        end
+                        if xSup and xInf then 
+                            break
+                        end
+                    end
+                    if xSup and xInf then
+                        insert(
+                            result.slots, {
+                                id = makeData(23, octapos),
+                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xSup + xInf) * 0.5),
+                                type = "ust_component_main_20",
+                                spacing = {12, 12, 1, 1}
+                            })
+                    end
+                end
             end
         end
     end
