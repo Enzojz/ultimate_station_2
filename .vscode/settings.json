@@ -2,5 +2,6 @@
     "Lua.diagnostics.disable": [
         "lowercase-global",
         "redefined-local"
-    ]
+    ],
+    "Lua.completion.autoRequire": false
 }

@@ -263,6 +263,8 @@ local updateFn = function(params, closureParams)
     params.trackGroup = {}
     params.platformGroup = {}
     params.edgeIndex = {}
+    params.extra = {}
+
     searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
     params.edgeGroup = {}
 

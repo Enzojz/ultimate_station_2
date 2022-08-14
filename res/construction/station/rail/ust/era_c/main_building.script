@@ -32,112 +32,86 @@ local addSlot = function(params, result)
                 end
             end
             
-            do
-                local arc = info.arcs.left
-                local ptSup = arc:pt(arc.sup)
-                local ptInf = arc:pt(arc.inf)
-                local ptMid = arc:pt((arc.sup + arc.inf) * 0.5)
-                for _, ptId in ipairs({
-                    {ptSup, 8},
-                    {ptMid, 7},
-                    {ptInf, 6}
-                }) do
-                    local pt, octapos = table.unpack(ptId)
-                    local vec = (pt - info.arcs.center:ptByPt(pt)):normalized()
-                    local vecSup = (vec .. coor.rotZ(0.5 * math.pi)) * 20
-                    local vecInf = -vecSup
-                    local lnSup = line.byVecPt(vec, pt + vecSup)
-                    local lnInf = line.byVecPt(vec, pt + vecInf)
-                    local xSup, xInf
-                    for y = -2, 2 do
-                        local m = grid[0][y]
-                        if (m) then
-                            local arc = m.info.arcs.left
-                            
-                            if not xSup then
-                                local x = arc:xLine(lnSup, true)
-                                if #x == 1 then
-                                    xSup = table.unpack(x)
-                                end
-                            end
-                            if not xInf then
-                                local x = arc:xLine(lnInf, true)
-                                if #x == 1 then
-                                    xInf = table.unpack(x)
-                                end
-                            end
-                        else
-                            if (xSup and not xInf) or (xInf and not xSup) then
-                                break
-                            end
-                        end
-                        if xSup and xInf then 
-                            break
-                        end
-                    end
-                    if xSup and xInf then
-                        insert(
-                            result.slots, {
-                                id = makeData(23, octapos),
-                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xSup + xInf) * 0.5),
-                                type = "ust_component_main_20",
-                                spacing = {12, 12, 1, 1}
-                            })
-                    end
-                end
-            end
-
+            local lrData = {
+                {
+                    fnArc = function(arcs) return arcs.left end,
+                    pos = {sup = 8, mid = 7, inf = 6}
+                },
+                {
+                    fnArc = function(arcs) return arcs.right end,
+                    pos = {sup = 2, mid = 3, inf = 4}
+                }
+            }
             
-            do
-                local arc = info.arcs.right
-                local ptSup = arc:pt(arc.sup)
-                local ptInf = arc:pt(arc.inf)
-                local ptMid = arc:pt((arc.sup + arc.inf) * 0.5)
-                for _, ptId in ipairs({
-                    {ptSup, 2},
-                    {ptMid, 3},
-                    {ptInf, 4}
-                }) do
+            for _, d in ipairs(lrData) do
+                local arc = d.fnArc(info.arcs)
+                local pts = {
+                    {arc:pt(arc.sup), d.pos.sup},
+                    {arc:pt((arc.sup + arc.inf) * 0.5), d.pos.mid},
+                    {arc:pt(arc.inf), d.pos.inf},
+                }
+                for _, ptId in ipairs(pts) do
                     local pt, octapos = table.unpack(ptId)
                     local vec = (pt - info.arcs.center:ptByPt(pt)):normalized()
-                    local vecSup = (vec .. coor.rotZ(0.5 * math.pi)) * 20
+                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * 20
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
                     local lnInf = line.byVecPt(vec, pt + vecInf)
-                    local xSup, xInf
+                    local xInfo = {
+                        sup = nil,
+                        inf = nil
+                    }
                     for y = -2, 2 do
                         local m = grid[0][y]
                         if (m) then
-                            local arc = m.info.arcs.right
+                            local arc = d.fnArc(m.info.arcs)
                             
-                            if not xSup then
+                            if not xInfo.sup then
                                 local x = arc:xLine(lnSup, true)
                                 if #x == 1 then
-                                    xSup = table.unpack(x)
+                                    local pt = table.unpack(x)
+                                    xInfo.sup = {
+                                        y = y,
+                                        rad = arc:rad(pt),
+                                        pt = pt,
+                                        arc = arc
+                                    }
                                 end
                             end
-                            if not xInf then
+                            if not xInfo.inf then
                                 local x = arc:xLine(lnInf, true)
                                 if #x == 1 then
-                                    xInf = table.unpack(x)
+                                    local pt = table.unpack(x)
+                                    xInfo.inf = {
+                                        y = y,
+                                        rad = arc:rad(pt),
+                                        pt = pt,
+                                        arc = arc
+                                    }
                                 end
                             end
                         else
-                            if (xSup and not xInf) or (xInf and not xSup) then
+                            if (xInfo.sup and not xInfo.inf) or (xInfo.inf and not xInfo.sup) then
                                 break
                             end
                         end
-                        if xSup and xInf then 
-                            break
-                        end
+                        if xInfo.sup and xInfo.inf then break end
                     end
-                    if xSup and xInf then
+                    if xInfo.sup and xInfo.inf then
+                        params.extra[makeData(23, octapos)] = {
+                            seq = func.seq(xInfo.inf.y, xInfo.sup.y),
+                            arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
+                            vecNormal = vec,
+                            xInfo = xInfo,
+                            lnSup = lnSup,
+                            lnInf = lnInf
+                        }
                         insert(
                             result.slots, {
                                 id = makeData(23, octapos),
-                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xSup + xInf) * 0.5),
+                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
                                 type = "ust_component_main_20",
-                                spacing = {12, 12, 1, 1}
+                                spacing = {20, 20, 1, 1}
                             })
                     end
                 end
