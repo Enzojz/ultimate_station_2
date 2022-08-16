@@ -1,5 +1,6 @@
 local ust = require "ust"
 local func = require "ust/func"
+local pipe = require "ust/pipe"
 local quat = require "ust/quaternion"
 local coor = require "ust/coor"
 local coorarc = require "ust/coorarc"
@@ -26,12 +27,12 @@ local addSlot = function(params, result)
                 for j = -2, 2 do
                     local posG = coor.xyz(i, j, 0) + pos
                     local m = params.grid[pos.z][posG.x] and params.grid[pos.z][posG.x][posG.y] and params.modules[params.grid[pos.z][posG.x][posG.y]]
-                    if (m and m.metadata.isPlatform) then
+                    if m then
                         grid[i][j] = m
                     end
                 end
             end
-            
+
             local lrData = {
                 {
                     fnArc = function(arcs) return arcs.left end,
@@ -52,7 +53,7 @@ local addSlot = function(params, result)
                 }
                 for _, ptId in ipairs(pts) do
                     local pt, octapos = table.unpack(ptId)
-                    local vec = (pt - info.arcs.center:ptByPt(pt)):normalized()
+                    local vec = (info.arcs.left:ptByPt(pt) - info.arcs.right:ptByPt(pt)):normalized()
                     local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * 20
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
@@ -63,11 +64,11 @@ local addSlot = function(params, result)
                     }
                     for y = -2, 2 do
                         local m = grid[0][y]
-                        if (m) then
+                        if (m and m.metadata.isPlatform) then
                             local arc = d.fnArc(m.info.arcs)
                             
                             if not xInfo.sup then
-                                local x = arc:xLine(lnSup, true)
+                                local x = func.filter(arc:xLine(lnSup, true), pipe.noop())
                                 if #x == 1 then
                                     local pt = table.unpack(x)
                                     xInfo.sup = {
@@ -79,7 +80,7 @@ local addSlot = function(params, result)
                                 end
                             end
                             if not xInfo.inf then
-                                local x = arc:xLine(lnInf, true)
+                                local x = func.filter(arc:xLine(lnInf, true), pipe.noop())
                                 if #x == 1 then
                                     local pt = table.unpack(x)
                                     xInfo.inf = {
@@ -100,8 +101,9 @@ local addSlot = function(params, result)
                     if xInfo.sup and xInfo.inf then
                         params.extra[makeData(23, octapos)] = {
                             seq = func.seq(xInfo.inf.y, xInfo.sup.y),
+                            slotIds = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return grid[0][y].info.slotId end),
                             arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
-                            vecNormal = vec,
+                            vecNormal = octapos > 5 and vec or -vec,
                             xInfo = xInfo,
                             lnSup = lnSup,
                             lnInf = lnInf
@@ -109,7 +111,7 @@ local addSlot = function(params, result)
                         insert(
                             result.slots, {
                                 id = makeData(23, octapos),
-                                transf = quat.byVec(coor.xyz(0, 1, 0), -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
+                                transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
                                 type = "ust_component_main_20",
                                 spacing = {20, 20, 1, 1}
                             })

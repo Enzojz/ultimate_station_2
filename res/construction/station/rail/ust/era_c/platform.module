@@ -93,6 +93,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         rightLane[i] = rightLaneBorder[i] + vec * 1.2
         centerPts[i] = centerPts[i] + hVec
     end
+
+    params.extra[slotId] = {
+        leftLane = leftLane,
+        rightLane = rightLane
+    }
     
     if not isPlatform[1] then
         leftLaneBorder[n + 1] = leftLaneBorder[n + 1] + (leftLaneBorder[n] - leftLaneBorder[n + 1]):normalized()

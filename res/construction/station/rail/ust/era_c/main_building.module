@@ -118,11 +118,11 @@ local mdlList = {
 }
 
 local connectors = {
-    coor.xyz(0, -2.5, -0.8),
-    coor.xyz(10, -2.5, -0.8),
-    coor.xyz(20, -2.5, -0.8),
-    coor.xyz(-10, -2.5, -0.8),
-    coor.xyz(-20, -2.5, -0.8)
+    coor.xyz(0, -2.5, 0),
+    coor.xyz(10, -2.5, 0),
+    coor.xyz(20, -2.5, 0),
+    coor.xyz(-10, -2.5, 0),
+    coor.xyz(-20, -2.5, 0)
 }
 
 local fitModels = {
@@ -201,15 +201,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             break
         end
     end
-
-    dump()(platformPts)
-
+    
     platformPts = func.flatten(platformPts)
-
+    
     local vecTangent = (ptSup - ptInf) * (1 / (#platformPts - 1))
     local buildingPts = func.map(func.seq(1, #platformPts), function(n) return ptInf + vecTangent * (n - 1) end)
     
-    local pts = func.zip(func.interlace(buildingPts), func.interlace(platformPts))
+    local pts = (data < 5) and func.zip(func.interlace(platformPts), func.interlace(buildingPts)) or func.zip(func.interlace(buildingPts), func.interlace(platformPts))
     for _, ptg in ipairs(pts) do
         local buildingPts, platformPts = unpack(ptg)
         local size = {
@@ -220,7 +218,23 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         }
         addBlock("yi_centre", size);
     end
-
+    
+    insert(result.invokeLater, function()
+        local lanePts = pipe.new * params.extra[slotId].slotIds
+            * pipe.map(function(slotId) return data > 5 and params.extra[slotId].leftLane or params.extra[slotId].rightLane end)
+            * pipe.flatten()
+            * pipe.filter(function(pt) return ((pt - ptSup):dot(vecTangent)) * ((pt - ptInf):dot(vecTangent)) < 0 end)
+        
+        for _, pt in ipairs(connectors) do
+            local pt = pt .. (hTransP * transform)
+            local closesetPt = lanePts
+                * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
+                * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
+            local lpt = closesetPt.pt
+            table.insert(result.models, ust.unitLane(lpt, pt, tag))
+        end
+    end)
+    
     constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
     constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
     
