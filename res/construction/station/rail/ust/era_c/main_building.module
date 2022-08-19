@@ -158,12 +158,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local data = params.modules[slotId].info.data
     local info = params.modules[params.classedModules[id].slotId].info
     
+    -- Main building to platform faces
     local extra = params.extra[slotId]
     
     local arcs = extra.arcs
-    local ptInf = extra.xInfo.inf.pt + extra.vecNormal * 2.5
-    local ptSup = extra.xInfo.sup.pt + extra.vecNormal * 2.5
-    
+    local ptInf = extra.xInfo.inf.pt + extra.vecNormal * 5
+    local ptSup = extra.xInfo.sup.pt + extra.vecNormal * 5
     
     local addBlock = function(mdl, pos)
         table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
@@ -219,6 +219,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         addBlock("yi_centre", size);
     end
     
+    -- Main building to platform Connection
     insert(result.invokeLater, function()
         local lanePts = pipe.new * params.extra[slotId].slotIds
             * pipe.map(function(slotId) return data > 5 and params.extra[slotId].leftLane or params.extra[slotId].rightLane end)
@@ -235,6 +236,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end)
     
+    -- Models
     constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
     constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
     
@@ -242,16 +244,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));
     end
     
-    local terrainAlignmentLists = pipe.new * {
-        coor.xyz(config.extend[1], config.extend[4], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[1], config.extend[3], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[2], config.extend[3], 0.0) .. (hTrans * transform),
-        coor.xyz(config.extend[2], config.extend[4], 0.0) .. (hTrans * transform),
-    } * pipe.map(coor.vec2Tuple)
+    -- Terrains
+    local terrainAlignmentLists = pipe.new /
+        {
+            coor.xyz(config.extend[1], config.extend[4], 0.0) .. (hTrans * transform),
+            coor.xyz(config.extend[1], config.extend[3], 0.0) .. (hTrans * transform),
+            coor.xyz(config.extend[2], config.extend[3], 0.0) .. (hTrans * transform),
+            coor.xyz(config.extend[2], config.extend[4], 0.0) .. (hTrans * transform),
+        }
+        / (pipe.new * platformPts + func.rev(buildingPts))
+        * pipe.map(pipe.map(coor.vec2Tuple))
     
     table.insert(result.terrainAlignmentLists, {
         type = "EQUAL",
-        faces = {terrainAlignmentLists},
+        faces = terrainAlignmentLists,
         optional = true
     })
 
