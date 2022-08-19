@@ -1,10 +1,12 @@
 function data() return {
    boundingInfo = {
-      bbMax = { 0.000000, 5.000000, 4.257500 },
-      bbMin = { -0.270002, 0.000000, 3.957501 }
+      bbMax = { 0, 5, 4.257500 },
+      bbMin = { -0.270002, 0, 3.957501 }
    },
    collider = {
-      params = {  },
+      params = {
+
+      },
       type = "MESH"
    },
    lods = {

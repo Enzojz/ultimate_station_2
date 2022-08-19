@@ -67,22 +67,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     for i = 1, n do
         for k = 1, 5 do
-            local coords = info.pos.y < 0 and {
-                lt = edges[k][i],
-                lb = edges[k][i + 1],
-                rt = edges[k + 1][i],
-                rb = edges[k + 1][i + 1]
-            } or {
+            local coords = {
                 lt = edges[k][i + 1],
                 lb = edges[k][i],
                 rt = edges[k + 1][i + 1],
                 rb = edges[k + 1][i]
             }
             
-            if isFirst and ((info.pos.y < 0 and i == 1) or (info.pos.y >= 0 and i == n)) then
+            if isFirst and i == n then
                 table.insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, true)));
                 table.insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, false)));
-            elseif isLast and ((info.pos.y < 0 and i == n) or (info.pos.y >= 0 and i == 1)) then
+            elseif isLast and i == 1 then
                 table.insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
                 table.insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
             else
