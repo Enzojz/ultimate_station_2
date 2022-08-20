@@ -13,7 +13,6 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local metadata = module.metadata
             local pos = info.pos
             
             local grid = {}
@@ -94,7 +93,7 @@ local addSlot = function(params, result)
                         if xInfo.sup and xInfo.inf then break end
                     end
                     if xInfo.sup and xInfo.inf then
-                        params.extra[makeData(23, octapos)] = {
+                        params.extra[makeData(32, octapos)] = {
                             seq = func.seq(xInfo.inf.y, xInfo.sup.y),
                             slotIds = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return grid[0][y].info.slotId end),
                             arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
@@ -105,7 +104,7 @@ local addSlot = function(params, result)
                         }
                         insert(
                             result.slots, {
-                                id = makeData(23, octapos),
+                                id = makeData(32, octapos),
                                 transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
                                 type = "ust_component_main_20",
                                 spacing = {10, 10, 1, 1}

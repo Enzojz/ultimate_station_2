@@ -138,21 +138,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hTrans = coor.trans(hVec)
     local hTransP = coor.trans(coor.xyz(0, 0, hRef))
     
-    local id = params.modules[slotId].info.id
     local data = params.modules[slotId].info.data
-    local info = params.modules[params.classedModules[id].slotId].info
     
     -- Main building to platform faces
     local extra = params.extra[slotId]
     
     local arcs = extra.arcs
-    local ptInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 5
-    local ptSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 5
+    local ptBuildingInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 5
+    local ptBuildingSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 5
     
-    local vecEdge = (ptSupEdge - ptInfEdge):normalized() * 0.85
+    local vecEdge = (ptBuildingSupEdge - ptBuildingInfEdge):normalized() * 0.85
     
-    local ptInf = ptInfEdge + vecEdge
-    local ptSup = ptSupEdge - vecEdge
+    local ptBuildingInf = ptBuildingInfEdge + vecEdge
+    local ptBuildingSup = ptBuildingSupEdge - vecEdge
+
+    local ptPlatformInf = extra.xInfo.inf.pt + vecEdge
+    local ptPlatformSup = extra.xInfo.sup.pt - vecEdge
     
     local addBlock = function(mdl, pos)
         table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
@@ -165,20 +166,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if (i > 1 and i < #arcs) then
             table.insert(platformPts, func.map({0, 0.25, 0.5, 0.75}, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         elseif (i == 1 and i < #arcs) then
-            local xInfo = extra.xInfo.inf
-            local pct = (xInfo.rad - arc.inf) / lRad
+            local rad = arc:rad(ptPlatformInf)
+            local pct = (rad - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75}, function(radPct) return radPct > pct end)
             table.insert(rads, 1, pct)
             table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         elseif (i == #arcs and i > 1) then
-            local xInfo = extra.xInfo.sup
-            local pct = (xInfo.rad - arc.inf) / lRad
+            local rad = arc:rad(ptPlatformSup)
+            local pct = (rad - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pct end)
             table.insert(rads, pct)
             table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         else
-            local pctInf = (extra.xInfo.inf.rad - arc.inf) / lRad
-            local pctSup = (extra.xInfo.sup.rad - arc.inf) / lRad
+            local pctInf = (arc:rad(ptPlatformInf) - arc.inf) / lRad
+            local pctSup = (arc:rad(ptPlatformSup) - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pctSup and radPct > pctInf end)
             table.insert(rads, 1, pctInf)
             table.insert(rads, pctSup)
@@ -189,8 +190,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     platformPts = func.flatten(platformPts)
     
-    local vecTangent = (ptSup - ptInf) * (1 / (#platformPts - 1))
-    local buildingPts = func.map(func.seq(1, #platformPts), function(n) return ptInf + vecTangent * (n - 1) end)
+    local vecTangent = (ptBuildingSup - ptBuildingInf) * (1 / (#platformPts - 1))
+    local buildingPts = func.map(func.seq(1, #platformPts), function(n) return ptBuildingInf + vecTangent * (n - 1) end)
     
     local pts = (data < 5)
         and func.zip(func.interlace(platformPts), func.interlace(buildingPts))
@@ -207,16 +208,16 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     addBlock("xe_yi_left", {
-        lt = ptInfEdge,
+        lt = ptBuildingInfEdge,
         lb = platformPts[1] - (platformPts[2] - platformPts[1]):normalized() * ((platformPts[2] - platformPts[1]):normalized():dot(vecEdge)),
         rb = platformPts[1],
-        rt = ptInf
+        rt = ptBuildingInf
     })
     
-    addBlock("xe_yi_right", {
+    addBlock("xe_yi_left", {
         lt = platformPts[#platformPts] + (platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized() * ((platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized():dot(vecEdge)),
-        lb = ptSupEdge,
-        rb = ptSup,
+        lb = ptBuildingSupEdge,
+        rb = ptBuildingSup,
         rt = platformPts[#platformPts]
     })
     
@@ -225,7 +226,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local lanePts = pipe.new * params.extra[slotId].slotIds
             * pipe.map(function(slotId) return data > 5 and params.extra[slotId].leftLane or params.extra[slotId].rightLane end)
             * pipe.flatten()
-            * pipe.filter(function(pt) return ((pt - ptSup):dot(vecTangent)) * ((pt - ptInf):dot(vecTangent)) < 0 end)
+            * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
         
         for _, pt in ipairs(connectors) do
             local pt = pt .. (hTransP * transform)
@@ -238,8 +239,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end)
     
     -- Models
-    -- constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
-    -- constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
+    constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
+    constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
     
     for _, mdl in ipairs(mdlList) do
         table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));
@@ -290,7 +291,7 @@ function data()
             typeName = "ust_component_main_40",
             isComponent = true,
             isBuilding = true,
-            typeId = 23,
+            typeId = 33,
             width = 5,
             spacing = {20, 20, 38, 0}
         },
