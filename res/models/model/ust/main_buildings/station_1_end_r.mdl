@@ -1,0 +1,77 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 5.2000002861023, 0.19999998807907, 5.0575008392334, },
+		bbMin = { 0, -11.25, -9.9999994063182e-08, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 2.6000001430511, 5.7249999046326, 2.5287504196167, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_borders_1.mtl", "station/rail/era_c/era_c_trainstation_floor_1.mtl", "station/rail/era_c/era_c_trainstation_borders_2.mtl", "station/rail/era_c/era_c_trainstation_borders_3.mtl", },
+								mesh = "station/rail/era_c/station_1_end_r/station_1_end_r_lod0.msh",
+								name = "station_1_end_r",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -45, 0, 0, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_c/era_c_trainstation_borders_3.mtl", },
+							-- 	mesh = "station/rail/era_c/station_1_end_r/station_1_end_r_perron_lod0.msh",
+							-- 	name = "station_1_end_r_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -40.235176086426, 0, 0, 1, },
+							-- },
+						},
+						name = "station_1_end_r_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 45, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 400,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_borders_1.mtl", "station/rail/era_c/era_c_trainstation_borders_3.mtl", "station/rail/era_c/era_c_trainstation_floor_1.mtl", },
+								mesh = "station/rail/era_c/station_1_end_r/station_1_end_r_lod1.msh",
+								name = "station_1_end_r",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -45, 0, -4.7683712978142e-08, 1, },
+							},
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_borders_3.mtl", },
+								mesh = "station/rail/era_c/station_1_end_r/station_1_end_r_perron_lod1.msh",
+								name = "station_1_end_r_perron",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -40.235176086426, 0, 0, 1, },
+							},
+						},
+						name = "station_1_end_r_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 45, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 400,
+			visibleTo = 3500,
+		},
+	},
+	metadata = { },
+	version = 1,
+}
+end

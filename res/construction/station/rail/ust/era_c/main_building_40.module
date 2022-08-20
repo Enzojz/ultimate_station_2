@@ -3,11 +3,7 @@ local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
-local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
-local line = require "ust/coorline"
 
-local trainstationutil = require "modules/trainstationutil"
 local constructionutil = require "constructionutil"
 
 local dump = require "luadump"
@@ -18,15 +14,7 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
---Begin Generated
 local generatedData = {
-    ["main"] = {
-        models = {
-            ["station/rail/era_c/station_3_main.mdl"] = {
-                {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000},
-            },
-        },
-    },
     ["clock"] = {
         models = {
             ["station/rail/asset/era_c_big_clock.mdl"] = {
@@ -98,15 +86,11 @@ local generatedData = {
 
 local config = {
     extend = {21, -21, 0, -38, 4, 0},
-    main = "ust/main_buildings/station_3_main.mdl",
-    con_left = {"station/rail/era_c/station_3_main_con_l_1.mdl", "station/rail/era_c/station_3_main_con_l_2.mdl", "station/rail/era_c/station_3_main_con_l_3.mdl", },
-    con_right = {"station/rail/era_c/station_3_main_con_r_1.mdl", "station/rail/era_c/station_3_main_con_r_2.mdl", "station/rail/era_c/station_3_main_con_r_3.mdl", },
-    end_left = "ust/main_buildings/station_3_main_end_l.mdl",
-    end_right = "ust/main_buildings/station_3_main_end_r.mdl",
+    main = "ust/main_buildings/station_3.mdl",
+    end_left = "ust/main_buildings/station_3_end_l.mdl",
+    end_right = "ust/main_buildings/station_3_end_r.mdl",
     roof_side = "station/rail/era_c/station_3_roof_perron_side.mdl",
     roof_head = "station/rail/era_c/station_3_roof_perron_head.mdl",
-    slotIdOffset = 1,
-    translationY = 0,
 }
 
 local mdlList = {
@@ -208,7 +192,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local vecTangent = (ptSup - ptInf) * (1 / (#platformPts - 1))
     local buildingPts = func.map(func.seq(1, #platformPts), function(n) return ptInf + vecTangent * (n - 1) end)
     
-    local pts = (data < 5) and func.zip(func.interlace(platformPts), func.interlace(buildingPts)) or func.zip(func.interlace(buildingPts), func.interlace(platformPts))
+    local pts = (data < 5)
+        and func.zip(func.interlace(platformPts), func.interlace(buildingPts))
+        or func.zip(func.interlace(buildingPts), func.interlace(platformPts))
+    
     for _, ptg in ipairs(pts) do
         local buildingPts, platformPts = unpack(ptg)
         addBlock("yi_centre", {
@@ -251,8 +238,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end)
     
     -- Models
-    constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
-    constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
+    -- constructionutil.addModels(generatedData["clock"], result.models, hTrans * transform, tag)
+    -- constructionutil.addModels(generatedData["assets"], result.models, hTrans * transform, tag)
     
     for _, mdl in ipairs(mdlList) do
         table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));

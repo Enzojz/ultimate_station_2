@@ -1,0 +1,247 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 5, 0, 6.2895374298096, },
+		bbMin = { -5, -12.484599113464, 0.79999995231628, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 5, 6.2422995567322, 2.7447686195374, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_glass_milk.mtl", "station/rail/era_c/era_c_trainstation_borders_1.mtl", },
+								mesh = "station/rail/era_c/station_1/station_1_roof_lod0.msh",
+								name = "station_1_roof",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1.2999999523163, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_c/era_c_trainstation_floor_1.mtl", },
+							-- 	mesh = "station/rail/era_c/station_1/station_1_perron_lod0.msh",
+							-- 	name = "station_1_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							-- },
+						},
+						name = "station_1_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 100,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_glass_milk.mtl", "station/rail/era_c/era_c_trainstation_borders_1.mtl", },
+								mesh = "station/rail/era_c/station_1/station_1_roof_lod1.msh",
+								name = "station_1_roof",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1.2999999523163, 1, },
+							},
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_floor_1.mtl", },
+								mesh = "station/rail/era_c/station_1/station_1_perron_lod1.msh",
+								name = "station_1_perron",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+						},
+						name = "station_1_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 100,
+			visibleTo = 400,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_borders_1.mtl", "station/rail/era_c/era_c_trainstation_glass_milk.mtl", },
+								mesh = "station/rail/era_c/station_1/station_1_roof_lod2.msh",
+								name = "station_1_roof",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, -1.2999999523163, 1, },
+							},
+							{
+								materials = { "station/rail/era_c/era_c_trainstation_floor_1.mtl", },
+								mesh = "station/rail/era_c/station_1/station_1_perron_lod2.msh",
+								name = "station_1_perron",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+						},
+						name = "station_1_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 400,
+			visibleTo = 3500 ,
+		},
+	},
+	metadata = {
+		transportNetworkProvider = {
+			laneLists = {
+				{
+					linkable = false,
+					nodes = {
+						-- {
+						-- 	{ -2.5, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 2.5, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						{
+							{ -5, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 5, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 5, 0, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ -5, 0, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, 0, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -6, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -6, 0.80000001192093, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -10, 0, },
+							{ 0, -2.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -10, 0, },
+							{ 0, -17.5, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -13.5, 0, },
+							{ 0, -17.5, 0, },
+							2.4000000953674,
+						},
+					},
+					speedLimit = 20,
+					transportModes = { "PERSON", },
+				},
+				{
+					linkable = true,
+					nodes = {
+						{
+							{ -5, -13.5, 0, },
+							{ 10, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -13.5, 0, },
+							{ 10, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -13.5, 0, },
+							{ 10, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 5, -13.5, 0, },
+							{ 10, 0, 0, },
+							2.4000000953674,
+						},
+					},
+					speedLimit = 20,
+					transportModes = { "PERSON", },
+				},
+			},
+			runways = { },
+			terminals = { },
+		},
+	},
+	version = 1,
+}
+end

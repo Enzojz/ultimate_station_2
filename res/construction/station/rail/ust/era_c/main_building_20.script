@@ -49,7 +49,7 @@ local addSlot = function(params, result)
                 for _, ptId in ipairs(pts) do
                     local pt, octapos = table.unpack(ptId)
                     local vec = (info.arcs.left:ptByPt(pt) - info.arcs.right:ptByPt(pt)):normalized()
-                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * 20
+                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * 10
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
                     local lnInf = line.byVecPt(vec, pt + vecInf)
@@ -107,8 +107,8 @@ local addSlot = function(params, result)
                             result.slots, {
                                 id = makeData(23, octapos),
                                 transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
-                                type = "ust_component_main_40",
-                                spacing = {20, 20, 1, 1}
+                                type = "ust_component_main_20",
+                                spacing = {10, 10, 1, 1}
                             })
                     end
                 end
