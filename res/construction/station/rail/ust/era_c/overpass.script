@@ -130,8 +130,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local m = params.modules[info.octa[1]]
         local info = m.info
         
-        local connectPt = ust.basePts(info.arcs.center, 4)[info.pos.y < 0 and 4 or 2] .. hTrans
-        local baseRef = ust.basePts(info.arcs.center, 16)[info.pos.y < 0 and 14 or 4]
+        local connectPt = ust.basePts(info.arcs.center, 4)[2] .. hTrans
+        local baseRef = ust.basePts(info.arcs.center, 16)[4]
         insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
 
         local sideVec = interPts[5]:withZ(0) - baseRef
@@ -158,8 +158,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local m = params.modules[info.octa[5]]
         local info = m.info
         
-        local connectPt = ust.basePts(info.arcs.center, 4)[info.pos.y < 0 and 2 or 4] .. hTrans
-        local baseRef = ust.basePts(info.arcs.center, 16)[info.pos.y < 0 and 4 or 14]
+        local connectPt = ust.basePts(info.arcs.center, 4)[4] .. hTrans
+        local baseRef = ust.basePts(info.arcs.center, 16)[14]
         insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
         
         local sideVec = interPts[6]:withZ(0) - baseRef

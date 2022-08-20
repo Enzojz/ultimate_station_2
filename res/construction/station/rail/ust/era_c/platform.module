@@ -17,6 +17,10 @@ local fitModels = {
     edge = ust.fitModel(0.85, 5, -2, true, true),
 }
 
+-- e : extremity
+-- i : intermediate
+-- t : terminal side
+-- x : cross section
 local fitMdl = {
     ["xe_ye_left"] = fitModels.edge,
     ["xe_ye_right"] = fitModels.edge,

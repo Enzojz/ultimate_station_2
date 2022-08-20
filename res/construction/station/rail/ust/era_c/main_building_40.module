@@ -101,8 +101,8 @@ local config = {
     main = "ust/main_buildings/station_3_main.mdl",
     con_left = {"station/rail/era_c/station_3_main_con_l_1.mdl", "station/rail/era_c/station_3_main_con_l_2.mdl", "station/rail/era_c/station_3_main_con_l_3.mdl", },
     con_right = {"station/rail/era_c/station_3_main_con_r_1.mdl", "station/rail/era_c/station_3_main_con_r_2.mdl", "station/rail/era_c/station_3_main_con_r_3.mdl", },
-    end_left = "station/rail/era_c/station_3_main_end_l.mdl",
-    end_right = "station/rail/era_c/station_3_main_end_r.mdl",
+    end_left = "ust/main_buildings/station_3_main_end_l.mdl",
+    end_right = "ust/main_buildings/station_3_main_end_r.mdl",
     roof_side = "station/rail/era_c/station_3_roof_perron_side.mdl",
     roof_head = "station/rail/era_c/station_3_roof_perron_head.mdl",
     slotIdOffset = 1,
@@ -162,16 +162,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local extra = params.extra[slotId]
     
     local arcs = extra.arcs
-    local ptInf = extra.xInfo.inf.pt + extra.vecNormal * 5
-    local ptSup = extra.xInfo.sup.pt + extra.vecNormal * 5
+    local ptInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 5
+    local ptSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 5
+    
+    local vecEdge = (ptSupEdge - ptInfEdge):normalized() * 0.85
+    
+    local ptInf = ptInfEdge + vecEdge
+    local ptSup = ptSupEdge - vecEdge
     
     local addBlock = function(mdl, pos)
         table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
         table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
-    end
-    local addLastBlock = function(mdl, pos)
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTransP * fitMdl[mdl](pos, true)));
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTransP * fitMdl[mdl](pos, false)));
     end
     
     local platformPts = {}
@@ -210,14 +211,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local pts = (data < 5) and func.zip(func.interlace(platformPts), func.interlace(buildingPts)) or func.zip(func.interlace(buildingPts), func.interlace(platformPts))
     for _, ptg in ipairs(pts) do
         local buildingPts, platformPts = unpack(ptg)
-        local size = {
+        addBlock("yi_centre", {
             lt = buildingPts[2],
             lb = buildingPts[1],
             rt = platformPts[2],
             rb = platformPts[1]
-        }
-        addBlock("yi_centre", size);
+        });
     end
+    
+    addBlock("xe_yi_left", {
+        lt = ptInfEdge,
+        lb = platformPts[1] - (platformPts[2] - platformPts[1]):normalized() * ((platformPts[2] - platformPts[1]):normalized():dot(vecEdge)),
+        rb = platformPts[1],
+        rt = ptInf
+    })
+    
+    addBlock("xe_yi_right", {
+        lt = platformPts[#platformPts] + (platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized() * ((platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized():dot(vecEdge)),
+        lb = ptSupEdge,
+        rb = ptSup,
+        rt = platformPts[#platformPts]
+    })
     
     -- Main building to platform Connection
     insert(result.invokeLater, function()
@@ -279,14 +293,14 @@ function data()
         category = {
             categories = {"Building"},
         },
-        type = "ust_component_main_20",
+        type = "ust_component_main_40",
         order = {
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/main_building",
+            scriptName = "construction/station/rail/ust/era_c/main_building_40",
             classify = "classify",
-            typeName = "ust_component_main_20",
+            typeName = "ust_component_main_40",
             isComponent = true,
             isBuilding = true,
             typeId = 23,

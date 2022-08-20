@@ -112,7 +112,7 @@ local addSlot = function(params, result)
                             result.slots, {
                                 id = makeData(23, octapos),
                                 transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
-                                type = "ust_component_main_20",
+                                type = "ust_component_main_40",
                                 spacing = {20, 20, 1, 1}
                             })
                     end
