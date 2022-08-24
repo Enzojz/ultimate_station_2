@@ -1,0 +1,49 @@
+local config = {
+    color = "red",
+    orientation = -1,
+}
+
+local function updateFn(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/era_c/overpass"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+end
+
+local function getModelsFn(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/era_c/overpass"].getModelsFn(config)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_OVERPASS"),
+            description = _("MENU_MODULE_PLATFORM_OVERPASS_DESC"),
+        },
+        category = {
+            categories = {"component"},
+        },
+        type = "ust_passage",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            typeName = "ust_passage",
+            isComponent = true,
+            isOverpass = true,
+            typeId = 21,
+            width = 5,
+            scriptName = "construction/station/rail/ust/era_c/overpass",
+            classify = "classify"
+        },
+        
+        updateFn = updateFn,
+        getModelsFn = getModelsFn
+    }
+
+end
