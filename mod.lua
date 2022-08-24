@@ -1,4 +1,5 @@
-﻿function data()
+﻿local dump = require "luadump"
+function data()
     return {
         info = {
             severityAdd = "NONE",
@@ -70,6 +71,7 @@
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
             end
+
             
             local overpassParams = {
                 {
@@ -88,6 +90,7 @@
                     filename = "overpass_twoway"
                 }
             }
+
             for i, params in ipairs(overpassParams) do
                 local mod = api.type.ModuleDesc.new()
                 mod.fileName = string.format("station/rail/ust/era_c/%s.module", params.filename)
@@ -122,6 +125,8 @@
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)
             end
+
+            
 
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"

@@ -1,11 +1,4 @@
-local func = require "ust/func"
 local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local ust = require "ust"
-local general = require "ust/general"
-
-local unpack = table.unpack
-local insert = table.insert
 
 local generatedData = {
     ["clock"] = {
@@ -73,8 +66,7 @@ local generatedData = {
     },
 }
 
-local config = {
-    extend = {21, -21, 0, -38, 4, 0},
+local mdls = {
     main = "ust/main_buildings/station_3.mdl",
     end_left = "ust/main_buildings/station_3_end_l.mdl",
     end_right = "ust/main_buildings/station_3_end_r.mdl",
@@ -82,284 +74,28 @@ local config = {
     roof_head = "station/rail/era_c/station_3_roof_perron_head.mdl",
 }
 
-local mdlList = {
-    config.end_left,
-    config.end_right,
-    config.roof_side,
-    -- config.roof_head,
-    config.main
+local config = {
+    width = 40,
+    extend = {21, -21, 0, -38, 4, 0},
+    generatedData = generatedData,
+    mdlList = {
+        mdls.end_left,
+        mdls.end_right,
+        mdls.roof_side,
+        mdls.main
+    },
+    connectors = {
+        coor.xyz(0, -2.5, 0),
+        coor.xyz(10, -2.5, 0),
+        coor.xyz(20, -2.5, 0),
+        coor.xyz(-10, -2.5, 0),
+        coor.xyz(-20, -2.5, 0)
+    }
 }
 
-local connectors = {
-    coor.xyz(0, 0, 0),
-    coor.xyz(10, 0, 0),
-    coor.xyz(20, 0, 0),
-    coor.xyz(-10, 0, 0),
-    coor.xyz(-20, 0, 0)
-}
-
-local fitModels = {
-    surface = ust.fitModel(3.3, 5, -2, true, true),
-    edge = ust.fitModel(0.85, 5, -2, true, true),
-}
-
-local fitMdl = {
-    ["xe_ye_left"] = fitModels.edge,
-    ["xe_ye_right"] = fitModels.edge,
-    ["xe_yi_left"] = fitModels.edge,
-    ["xe_yi_right"] = fitModels.edge,
-    ["xi_ye_left"] = fitModels.edge,
-    ["xi_ye_left_t"] = fitModels.edge,
-    ["xi_ye_right"] = fitModels.edge,
-    ["xi_ye_right_t"] = fitModels.edge,
-    ["xi_yi_left"] = fitModels.edge,
-    ["xi_yi_left_x"] = fitModels.edge,
-    ["xi_yi_right"] = fitModels.edge,
-    ["xi_yi_right_x"] = fitModels.edge,
-    ["ye_centre"] = fitModels.surface,
-    ["ye_centre_t"] = fitModels.surface,
-    ["yi_centre"] = fitModels.surface,
-}
-
-local function addModels(mdlList, transf, tag, result)
-    for mdl, transfs in pairs(mdlList) do
-        for _, t in ipairs(transfs) do
-            table.insert(result, general.newModel(mdl, tag, coor.mul(t, transf)));
-        end
-    end
-end
-
-local updateFnSide = function(result, transform, tag, slotId, addModelFn, params)
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    local hTransP = coor.trans(coor.xyz(0, 0, hRef))
-    
-    local data = params.modules[slotId].info.data
-    
-    -- Main building to platform faces
-    local extra = params.extra[slotId]
-    
-    local arcs = extra.arcs
-    local ptBuildingInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 5
-    local ptBuildingSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 5
-    
-    local vecEdge = (ptBuildingSupEdge - ptBuildingInfEdge):normalized() * 0.85
-    
-    local ptBuildingInf = ptBuildingInfEdge + vecEdge
-    local ptBuildingSup = ptBuildingSupEdge - vecEdge
-    
-    local ptPlatformInf = extra.xInfo.inf.pt + vecEdge
-    local ptPlatformSup = extra.xInfo.sup.pt - vecEdge
-    
-    local addBlock = function(mdl, pos)
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
-    end
-    
-    local platformPts = {}
-    for i, arc in ipairs(arcs) do
-        local lRad = arc.sup - arc.inf
-        if (i > 1 and i < #arcs) then
-            table.insert(platformPts, func.map({0, 0.25, 0.5, 0.75}, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        elseif (i == 1 and i < #arcs) then
-            local rad = arc:rad(ptPlatformInf)
-            local pct = (rad - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75}, function(radPct) return radPct > pct end)
-            table.insert(rads, 1, pct)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        elseif (i == #arcs and i > 1) then
-            local rad = arc:rad(ptPlatformSup)
-            local pct = (rad - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pct end)
-            table.insert(rads, pct)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        else
-            local pctInf = (arc:rad(ptPlatformInf) - arc.inf) / lRad
-            local pctSup = (arc:rad(ptPlatformSup) - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pctSup and radPct > pctInf end)
-            table.insert(rads, 1, pctInf)
-            table.insert(rads, pctSup)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-            break
-        end
-    end
-    
-    platformPts = func.flatten(platformPts)
-    
-    local vecTangent = (ptBuildingSup - ptBuildingInf) * (1 / (#platformPts - 1))
-    local buildingPts = func.map(func.seq(1, #platformPts), function(n) return ptBuildingInf + vecTangent * (n - 1) end)
-    
-    local pts = (data < 5)
-        and func.zip(func.interlace(platformPts), func.interlace(buildingPts))
-        or func.zip(func.interlace(buildingPts), func.interlace(platformPts))
-    
-    for _, ptg in ipairs(pts) do
-        local buildingPts, platformPts = unpack(ptg)
-        addBlock("yi_centre", {
-            lt = buildingPts[2],
-            lb = buildingPts[1],
-            rt = platformPts[2],
-            rb = platformPts[1]
-        });
-    end
-    
-    addBlock("xe_yi_left", {
-        lt = ptBuildingInfEdge,
-        lb = platformPts[1] - (platformPts[2] - platformPts[1]):normalized() * ((platformPts[2] - platformPts[1]):normalized():dot(vecEdge)),
-        rb = platformPts[1],
-        rt = ptBuildingInf
-    })
-    
-    addBlock("xe_yi_left", {
-        lt = platformPts[#platformPts] + (platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized() * ((platformPts[#platformPts] - platformPts[#platformPts - 1]):normalized():dot(vecEdge)),
-        lb = ptBuildingSupEdge,
-        rb = ptBuildingSup,
-        rt = platformPts[#platformPts]
-    })
-    
-    -- Main building to platform Connection
-    insert(result.invokeLater, function()
-        local lanePts = pipe.new * params.extra[slotId].slotIds
-            * pipe.map(function(slotId) return data > 5 and params.extra[slotId].leftLane or params.extra[slotId].rightLane end)
-            * pipe.flatten()
-            * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
-        
-        for _, pt in ipairs(connectors) do
-            local pt = pt .. (hTransP * transform)
-            local closesetPt = lanePts
-                * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
-                * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
-            local lpt = closesetPt.pt
-            table.insert(result.models, ust.unitLane(lpt, pt, tag))
-        end
-    end)
-    
-    -- Models
-    addModels(generatedData["clock"], hTrans * transform, tag, result.models)
-    addModels(generatedData["assets"], hTrans * transform, tag, result.models)
-    
-    for _, mdl in ipairs(mdlList) do
-        table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));
-    end
-    
-    -- Terrains
-    local terrainAlignmentLists = pipe.new /
-        {
-            coor.xyz(config.extend[1], config.extend[4], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[1], config.extend[3], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[2], config.extend[3], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[2], config.extend[4], 0.0) .. (hTrans * transform),
-        }
-        / (pipe.new * platformPts + func.rev(buildingPts))
-        * pipe.map(pipe.map(coor.vec2Tuple))
-    
-    table.insert(result.terrainAlignmentLists, {
-        type = "EQUAL",
-        faces = terrainAlignmentLists,
-        optional = true
-    })
-end
-
-local updateFnHead = function(result, transform, tag, slotId, addModelFn, params)
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    local hTransP = coor.trans(coor.xyz(0, 0, hRef))
-    
-    
-    -- Models
-    addModels(generatedData["clock"], hTrans * transform, tag, result.models)
-    addModels(generatedData["assets"], hTrans * transform, tag, result.models)
-    
-    for _, mdl in ipairs(mdlList) do
-        table.insert(result.models, general.newModel(mdl, tag, hTrans * transform));
-    end
-    
-    local addBlock = function(mdl, pos)
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
-        table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
-    end
-    
-    for _, x in ipairs(func.interlace({-19.15, -15, -10, -5, 0, 5, 10, 15, 19.15})) do
-        local r, l = unpack(x)
-        addBlock("ye_centre", {
-            lt = coor.xyz(l, -5, 0) .. transform,
-            lb = coor.xyz(l, 0, 0) .. transform,
-            rt = coor.xyz(r, -5, 0) .. transform,
-            rb = coor.xyz(r, 0, 0) .. transform
-        });
-    end
-    
-    addBlock("xe_ye_left", {
-        lt = coor.xyz(20, -5, 0) .. transform,
-        lb = coor.xyz(20, 0, 0) .. transform,
-        rt = coor.xyz(19.15, -5, 0) .. transform,
-        rb = coor.xyz(19.15, 0, 0) .. transform
-    });
-    
-    addBlock("xe_ye_right", {
-        lt = coor.xyz(-19.15, -5, 0) .. transform,
-        lb = coor.xyz(-19.15, 0, 0) .. transform,
-        rt = coor.xyz(-20, -5, 0) .. transform,
-        rb = coor.xyz(-20, 0, 0) .. transform
-    });
-    
-    -- Terrains
-    local terrainAlignmentLists = pipe.new /
-        {
-            coor.xyz(config.extend[1], config.extend[4], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[1], config.extend[3], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[2], config.extend[3], 0.0) .. (hTrans * transform),
-            coor.xyz(config.extend[2], config.extend[4], 0.0) .. (hTrans * transform),
-        }
-        * pipe.map(pipe.map(coor.vec2Tuple))
-    
-    table.insert(result.terrainAlignmentLists, {
-        type = "EQUAL",
-        faces = terrainAlignmentLists,
-        optional = true
-    })
-
-    
-    -- local id = params.modules[slotId].info.id
-    -- local info = params.modules[params.classedModules[id].slotId].info
-    -- local pos = info.pos
-
-    -- local ptBuildingSup = coor.xyz(-20, -5, 0) .. transform
-    -- local ptBuildingInf = coor.xyz(20, -5, 0) .. transform
-    -- local vecTangent = (ptBuildingSup - ptBuildingInf)
-    -- local pts = {}
-    -- for x, ys in pairs(params.grid[info.pos.z]) do
-    --     for y, slotId in pairs(ys) do
-    --         if y == pos.y then
-    --             local module = params.modules[slotId]
-    --             if module and module.metadata.isPlatform then
-    --                 table.insert(pts, module.info.arcs.center:pt(module.info.arcs.center.sup) .. hTrans)
-    --             end
-    --         end
-    --     end
-    -- end
-
-    
-    -- -- Main building to platform Connection
-    -- insert(result.invokeLater, function()
-    --     local lanePts = pipe.new * pts
-    --         * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
-        
-    --     for _, pt in ipairs(connectors) do
-    --         local pt = pt .. (hTransP * transform)
-    --         local closesetPt = lanePts
-    --             * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
-    --             * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
-    --         local lpt = closesetPt.pt
-    --         table.insert(result.models, ust.unitLane(lpt, pt, tag))
-    --     end
-    -- end)
-end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    (params.modules[slotId].info.data < 10 and updateFnSide or updateFnHead)(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/era_c/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
 end
 
 function data()
