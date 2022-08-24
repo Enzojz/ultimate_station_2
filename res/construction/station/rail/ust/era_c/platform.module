@@ -281,7 +281,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
         
         table.insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
-        table.insert(result.models, ust.unitLane(rightLane[sup], centerPts[sup], tag))
+        table.insert(result.models, ust.unitLane(rightLane[inf], centerPts[inf], tag))
     end
     
     local face = pipe.new + leftEdge + func.rev(rightEdge)

@@ -7,7 +7,7 @@ local line = require "ust/coorline"
 local insert = table.insert
 local dump = require "luadump"
 
-local addSlot = function(params, result)
+local addSlotFn = function(params, result, width, spacing, moduleId)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
         if (module.metadata and module.metadata.isPlatform) then
@@ -26,6 +26,47 @@ local addSlot = function(params, result)
                     end
                 end
             end
+
+            --- Head
+
+            do 
+                local n = width / 5 - 1
+                if n > 9 then n = 9 end
+                if not grid[0][1] then
+                    local arc = info.arcs.center
+                    local pt = arc:pt(arc.sup)
+                    local vec = arc:tangent(arc.sup)
+                    local offsetVec = vec .. coor.rotZ(math.pi * 0.5)
+
+                    for i = -n, n do
+                        insert(
+                            result.slots, {
+                                id = makeData(moduleId, 20 + i),
+                                transf = quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
+                                type = "ust_component_main_" .. width,
+                                spacing = spacing
+                            })
+                    end
+                end
+                
+                if not grid[0][5] then
+                    local arc = info.arcs.center
+                    local pt = arc:pt(arc.inf)
+                    local vec = arc:tangent(arc.inf)
+                    local offsetVec = vec .. coor.rotZ(math.pi * 0.5)
+                    for i = -n, n do
+                        insert(
+                            result.slots, {
+                                id = makeData(moduleId, 40 + i),
+                                transf = quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
+                                type = "ust_component_main_" .. width,
+                                spacing = spacing
+                            })
+                    end
+                end
+            end
+
+            --- Side
 
             local lrData = {
                 {
@@ -48,7 +89,7 @@ local addSlot = function(params, result)
                 for _, ptId in ipairs(pts) do
                     local pt, octapos = table.unpack(ptId)
                     local vec = (info.arcs.left:ptByPt(pt) - info.arcs.right:ptByPt(pt)):normalized()
-                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * 20
+                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * (width / 2)
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
                     local lnInf = line.byVecPt(vec, pt + vecInf)
@@ -93,7 +134,7 @@ local addSlot = function(params, result)
                         if xInfo.sup and xInfo.inf then break end
                     end
                     if xInfo.sup and xInfo.inf then
-                        params.extra[makeData(33, octapos)] = {
+                        params.extra[makeData(moduleId, octapos)] = {
                             seq = func.seq(xInfo.inf.y, xInfo.sup.y),
                             slotIds = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return grid[0][y].info.slotId end),
                             arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
@@ -104,17 +145,22 @@ local addSlot = function(params, result)
                         }
                         insert(
                             result.slots, {
-                                id = makeData(33, octapos),
+                                id = makeData(moduleId, octapos),
                                 transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
-                                type = "ust_component_main_40",
-                                spacing = {20, 20, 1, 1}
+                                type = "ust_component_main_" .. width,
+                                spacing = spacing
                             })
                     end
                 end
             end
         end
     end
+end
 
+local function addSlot(params, result)
+    addSlotFn(params, result, 10, {5, 5, 17, 1}, 31)
+    addSlotFn(params, result, 20, {10, 10, 23, 1}, 32)
+    addSlotFn(params, result, 40, {20, 20, 38, 0}, 33)
 end
 
 function data()
