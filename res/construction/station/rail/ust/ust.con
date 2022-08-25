@@ -52,7 +52,7 @@ local constructionTemplates =
             },
             description = {
                 name = _("MENU_NAME"),
-                description = _("MENU_NAME")
+                description = _("MENU_DESC")
             },
             data = {
                 params = {}

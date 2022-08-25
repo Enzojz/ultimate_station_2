@@ -103,8 +103,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_RADIUS_MODIFIER"),
-            description = _("MENU_RADIUS_MODIFIER_DESC"),
+            name = _("MENU_RADIUS_PRECISE_MODIFIER"),
+            description = _("MENU_RADIUS_PRECISE_MODIFIER_DESC"),
         },
         category = {
             categories = {"modifiers"},

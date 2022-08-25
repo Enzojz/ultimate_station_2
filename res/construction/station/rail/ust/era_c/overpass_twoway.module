@@ -22,8 +22,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_PLATFORM_OVERPASS"),
-            description = _("MENU_MODULE_PLATFORM_OVERPASS_DESC"),
+            name = _("MENU_MODULE_PLATFORM_OVERPASS_TWOWAY"),
+            description = _("MENU_MODULE_PLATFORM_OVERPASS_TWOWAY_DESC"),
         },
         category = {
             categories = {"component"},

@@ -10,8 +10,8 @@ function data()
             price = 0,
         },
         description = {
-            name = "HIDDEN_MODULE",
-            description = "NOTHING",
+            name = _("MODULE_REMOVE_HELPER"),
+            description = _("MODULE_REMOVE_HELPER_DESC"),
         },
         category = {
             categories = { "remover" },

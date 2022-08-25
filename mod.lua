@@ -4,8 +4,8 @@ function data()
         info = {
             severityAdd = "NONE",
             severityRemove = "CRITICAL",
-            name = _("name"),
-            description = _("desc"),
+            name = _("MOD_NAME"),
+            description = _("MOD_DESC"),
             authors = {
                 {
                     name = "Enzojz",
@@ -70,6 +70,13 @@ function data()
                 table.insert(trackModuleList, baseFileName)
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
+            end
+
+            for index, name in ipairs(api.res.moduleRep.getAll()) do
+                if name:match("station/rail/ust/data") then
+                    print(name)
+                    api.res.moduleRep.setVisible(index, false)
+                end
             end
 
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))

@@ -35,8 +35,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_PLATFORM"),
-            description = _("MENU_MODULE_PLATFORM_DESC"),
+            name = _("MENU_MODULE_PLATFORM_PLACEHOLDER"),
+            description = _("MENU_MODULE_PLATFORM_PLACEHOLDER_DESC"),
         },
         category = {
             categories = {"platform"},
