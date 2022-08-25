@@ -279,7 +279,7 @@ local updateFn = function(params, closureParams)
             s.addSlot(params, result)
         end
     end
-
+    
     result.terminateConstructionHook = function()
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]

@@ -9,6 +9,8 @@ local general = require "ust/general"
 local insert = table.insert
 local unpack = table.unpack
 
+local dump = require "luadump"
+
 local addSlotFn = function(params, result, width, spacing, moduleId)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -348,7 +350,16 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
         insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
     end
     
-    for _, x in ipairs(func.interlace({-19.15, -15, -10, -5, 0, 5, 10, 15, 19.15})) do
+    local blocks = pipe.new
+        * func.seq(-config.width / 10, config.width / 10)
+        * pipe.map(function(x) return x * 5 end)
+
+    blocks[1] = -config.width * 0.5 + 0.85
+    blocks[#blocks] = config.width * 0.5 - 0.85
+
+    dump()(blocks)
+
+    for _, x in ipairs(blocks * pipe.interlace()) do
         local r, l = unpack(x)
         addBlock("ye_centre", {
             lt = coor.xyz(l, -5, 0) .. transform,
@@ -359,17 +370,17 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     end
     
     addBlock("xe_ye_left", {
-        lt = coor.xyz(config.width, -5, 0) .. transform,
-        lb = coor.xyz(config.width, 0, 0) .. transform,
-        rt = coor.xyz(config.width - 0.85, -5, 0) .. transform,
-        rb = coor.xyz(config.width - 0.85, 0, 0) .. transform
+        lt = coor.xyz(config.width * 0.5, -5, 0) .. transform,
+        lb = coor.xyz(config.width * 0.5, 0, 0) .. transform,
+        rt = coor.xyz(config.width * 0.5 - 0.85, -5, 0) .. transform,
+        rb = coor.xyz(config.width * 0.5 - 0.85, 0, 0) .. transform
     });
     
     addBlock("xe_ye_right", {
-        lt = coor.xyz(-(config.width - 0.85), -5, 0) .. transform,
-        lb = coor.xyz(-(config.width - 0.85), 0, 0) .. transform,
-        rt = coor.xyz(-config.width, -5, 0) .. transform,
-        rb = coor.xyz(-config.width, 0, 0) .. transform
+        lt = coor.xyz(-(config.width * 0.5 - 0.85), -5, 0) .. transform,
+        lb = coor.xyz(-(config.width * 0.5 - 0.85), 0, 0) .. transform,
+        rt = coor.xyz(-config.width * 0.5, -5, 0) .. transform,
+        rb = coor.xyz(-config.width * 0.5, 0, 0) .. transform
     });
     
     -- Terrains
