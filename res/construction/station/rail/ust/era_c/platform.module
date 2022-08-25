@@ -5,8 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
-local dump = require "luadump"
-local unpack = table.unpack
+
 local insert = table.insert
 
 local ma = math
@@ -147,12 +146,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         
         local addBlock = function(mdl, pos)
-            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
-            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
         end
         local addLastBlock = function(mdl, pos)
-            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
-            table.insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
         end
         
         if isLast then
@@ -257,35 +256,35 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
             local trackGroup = octaModules[7].info.trackGroup.right
-            table.insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
+            insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
             if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
-            table.insert(params.platformGroup[trackGroup].models, #result.models - 1)
+            insert(params.platformGroup[trackGroup].models, #result.models - 1)
         else
-            table.insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag))
+            insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag))
             if leftConnected then
-                table.insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
+                insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
             end
         end
         
         if (rightTrack and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
             local trackGroup = octaModules[3].info.trackGroup.left
-            table.insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag, "ust/terminal_lane.mdl"))
+            insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag, "ust/terminal_lane.mdl"))
             
             if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, right = true} end
-            table.insert(params.platformGroup[trackGroup].models, #result.models - 1)
+            insert(params.platformGroup[trackGroup].models, #result.models - 1)
         else
-            table.insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag))
+            insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag))
             if rightConnected then
-                table.insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
+                insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
             end
         end
         
-        table.insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
-        table.insert(result.models, ust.unitLane(rightLane[inf], centerPts[inf], tag))
+        insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
+        insert(result.models, ust.unitLane(rightLane[inf], centerPts[inf], tag))
     end
     
     local face = pipe.new + leftEdge + func.rev(rightEdge)
-    table.insert(result.terrainAlignmentLists[1].faces, face * pipe.map(coor.vec2Tuple))
+    insert(result.terrainAlignmentLists[1].faces, face * pipe.map(coor.vec2Tuple))
     
     if params.debug then
         local text = tostring(info.id)
@@ -295,7 +294,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
             for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                table.insert(result.models, m)
+                insert(result.models, m)
             end
         end
 

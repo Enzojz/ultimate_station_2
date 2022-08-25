@@ -1,8 +1,6 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
-local quat = require "ust/quaternion"
 local ust = require "ust"
-local dump = require "luadump"
 
 local insert = table.insert
 local math = math

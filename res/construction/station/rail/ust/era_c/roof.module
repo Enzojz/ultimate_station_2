@@ -1,10 +1,7 @@
-local func = require "ust/func"
-local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local general = require "ust/general"
 local ust = require "ust"
--- local dump = require "luadump"
 
 local fitModels = {
     edge = ust.fitModel(0.27, 5, 7, true, true),
