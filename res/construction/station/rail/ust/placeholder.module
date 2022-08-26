@@ -39,11 +39,11 @@ function data()
             description = _("MENU_MODULE_PLATFORM_PLACEHOLDER_DESC"),
         },
         category = {
-            categories = {"ust_cat_helper"},
+            categories = {"ust_cat_platform"},
         },
         type = "ust_placeholder",
         order = {
-            value = 260,
+            value = 1,
         },
         metadata = {
             typeName = "ust_placeholder",

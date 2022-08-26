@@ -14,7 +14,7 @@ function data()
             description = _("MODULE_REMOVE_HELPER_DESC"),
         },
         category = {
-            categories = {"ust_cat_helper"},
+            categories = {"ust_cat_modifier"}
         },
         type = "ust_remove",
         order = {
