@@ -53,7 +53,7 @@ function data()
                         preClassify = "preClassify",
                     }
                     
-                    mod.category.categories = catenary and {_("TRACK_CAT")} or {_("TRACK")}
+                    mod.category.categories = catenary and { "ust_cat_track_cat" } or { "ust_cat_track" }
                     
                     mod.updateScript.fileName = "construction/station/rail/ust/track.updateFn"
                     mod.updateScript.params = {
@@ -72,7 +72,7 @@ function data()
                 table.insert(trackNames, track.name)
             end
 
-            for index, name in ipairs(api.res.moduleRep.getAll()) do
+            for index, name in pairs(api.res.moduleRep.getAll()) do
                 if name:match("station/rail/ust/data") then
                     print(name)
                     api.res.moduleRep.setVisible(index, false)

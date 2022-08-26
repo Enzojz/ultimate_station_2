@@ -119,7 +119,7 @@ function data()
             description = _("MENU_MODULE_PLATFORM_ROOF_DESC"),
         },
         category = {
-            categories = {"component"},
+            categories = {"ust_cat_comp"},
         },
         type = "ust_roof",
         order = {

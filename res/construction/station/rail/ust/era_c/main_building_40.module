@@ -113,7 +113,7 @@ function data()
             description = _("MENU_MODULE_MAIN_BUILDING_40_DESC"),
         },
         category = {
-            categories = {"Building"},
+            categories = {"ust_cat_building"},
         },
         type = "ust_component_main_40",
         order = {

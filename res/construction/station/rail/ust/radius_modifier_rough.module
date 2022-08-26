@@ -85,7 +85,7 @@ function data()
             description = _("MENU_RADIUS_ROUGH_MODIFIER_DESC"),
         },
         category = {
-            categories = {"modifiers"},
+            categories = {"ust_cat_modifier"},
         },
         type = "ust_radius_modifier",
         order = {

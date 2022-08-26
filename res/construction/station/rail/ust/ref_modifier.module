@@ -149,7 +149,7 @@ function data()
             description = _("MENU_REF_MODIFIER_DESC"),
         },
         category = {
-            categories = {"modifiers"},
+            categories = {"ust_cat_modifier"},
         },
         type = "ust_ref_modifier",
         order = {
