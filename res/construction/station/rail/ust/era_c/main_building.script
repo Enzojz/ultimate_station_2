@@ -61,7 +61,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 40 + i),
-                                transf = quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
+                                transf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
