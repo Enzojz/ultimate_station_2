@@ -101,6 +101,18 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
+    if (info.id ~= 1) then -- id 1 must be a track
+        insert(
+            result.slots,
+            {
+                id = makeData(2, -1),
+                transf = transfPosC,
+                type = "ust_platform",
+                spacing = {0, 0, 0, 0}
+            }
+        )
+    end
+    
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
@@ -128,98 +140,98 @@ local slotSetup = function(params, result, slotId)
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
-    -- dump()(params.modules[slotId].info)
-    local trackType = closureParams.trackType
-    local catenary = closureParams.catenary
-    
-    local info = params.modules[slotId].info
-    
-    local zOffset = params.modules[slotId].metadata.height - params.lowestHeight
-    
-    local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
-    local e = pipe.new
-        * {{2, 1}, {3, 2}, {4, 3}, {4, 5}, {5, 6}, {6, 7}}
-        * pipe.rev()
-        * pipe.map(function(idx)
-            local inf = info.arcs.center.inf * (1 - pos[idx[1]]) + info.arcs.center.sup * pos[idx[1]]
-            local sup = info.arcs.center.inf * (1 - pos[idx[2]]) + info.arcs.center.sup * pos[idx[2]]
-            local length = (pos[idx[2]] - pos[idx[1]]) * info.length
-            return {
-                {
-                    info.arcs.center:pt(inf) + coor.xyz(0, 0, zOffset),
-                    info.arcs.center:tangent(inf) * length
-                },
-                {
-                    info.arcs.center:pt(sup) + coor.xyz(0, 0, zOffset),
-                    info.arcs.center:tangent(sup) * length
-                }
-            }
-        end)
-    
-    -- if params.debug then
-    --     local nodeCount = #func.mapFlatten(result.edgeLists, function(e) return e.edges end)
-    --     for n, nodes in ipairs(e) do
-    --         local text1 = tostring(nodeCount + n * 2 - 1)
-    --         local text2 = tostring(nodeCount + n * 2)
-    --         local addText = function(label, pos, fAlign, h)
-    --             local nameModelsF, width = livetext(h or 2)(label)
-    --             for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-    --                 table.insert(result.models, m)
-    --             end
-    --         end
-    --         addText(text1, nodes[1][1], function(w) return coor.xyz(-1.5 * w, 0, 0) end, 0.5)
-    --         addText(text2, nodes[2][1], function(w) return coor.xyz(0.5 * w, 0, 0) end, 0.5)
-    --     end
-    -- end
-    local edges = {
-        type = "TRACK",
-        alignTerrain = true,
-        params = {
-            type = trackType,
-            catenary = catenary,
-        },
-        edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
-        snapNodes = func.filter({(not info.octa[1]) and 1, (not info.octa[5]) and 11}, pipe.noop()),
-        freeNodes = {},
-        tag2nodes = {
-            [tag] = func.seq(0, 11)
-        },
-        slot = slotId
-    }
-    
-    insert(result.edgeLists, edges)
-    params.edgeIndex[slotId] = #result.edgeLists
-    if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
-        insert(result.invokeLater, function()
-            local indexL = params.edgeIndex[slotId]
-            local indexR = params.edgeIndex[info.octa[1]]
-            local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
-            local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[12][1])
-            local pt = ptL:avg(ptR):toTuple()
-            result.edgeLists[indexL].edges[2][1] = pt
-            result.edgeLists[indexR].edges[12][1] = pt
-        end)
-    end
-    
-    if info.trackGroup then
-        local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
-        params.edgeGroup[slotId] = func.seq(#nodes - 12, #nodes - 1)
-    end
-    
-    if params.debug then
-        local text = tostring(info.id)
-        local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        -- dump()(params.modules[slotId].info)
+        local trackType = closureParams.trackType
+        local catenary = closureParams.catenary
         
-        local addText = function(label, pos, fAlign, h)
-            local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                insert(result.models, m)
-            end
+        local info = params.modules[slotId].info
+        
+        local zOffset = params.modules[slotId].metadata.height - params.lowestHeight
+        
+        local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
+        local e = pipe.new
+            * {{2, 1}, {3, 2}, {4, 3}, {4, 5}, {5, 6}, {6, 7}}
+            * pipe.rev()
+            * pipe.map(function(idx)
+                local inf = info.arcs.center.inf * (1 - pos[idx[1]]) + info.arcs.center.sup * pos[idx[1]]
+                local sup = info.arcs.center.inf * (1 - pos[idx[2]]) + info.arcs.center.sup * pos[idx[2]]
+                local length = (pos[idx[2]] - pos[idx[1]]) * info.length
+                return {
+                    {
+                        info.arcs.center:pt(inf) + coor.xyz(0, 0, zOffset),
+                        info.arcs.center:tangent(inf) * length
+                    },
+                    {
+                        info.arcs.center:pt(sup) + coor.xyz(0, 0, zOffset),
+                        info.arcs.center:tangent(sup) * length
+                    }
+                }
+            end)
+        
+        -- if params.debug then
+        --     local nodeCount = #func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+        --     for n, nodes in ipairs(e) do
+        --         local text1 = tostring(nodeCount + n * 2 - 1)
+        --         local text2 = tostring(nodeCount + n * 2)
+        --         local addText = function(label, pos, fAlign, h)
+        --             local nameModelsF, width = livetext(h or 2)(label)
+        --             for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+        --                 table.insert(result.models, m)
+        --             end
+        --         end
+        --         addText(text1, nodes[1][1], function(w) return coor.xyz(-1.5 * w, 0, 0) end, 0.5)
+        --         addText(text2, nodes[2][1], function(w) return coor.xyz(0.5 * w, 0, 0) end, 0.5)
+        --     end
+        -- end
+        local edges = {
+            type = "TRACK",
+            alignTerrain = true,
+            params = {
+                type = trackType,
+                catenary = catenary,
+            },
+            edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
+            snapNodes = func.filter({(not info.octa[1]) and 1, (not info.octa[5]) and 11}, pipe.noop()),
+            freeNodes = {},
+            tag2nodes = {
+                [tag] = func.seq(0, 11)
+            },
+            slot = slotId
+        }
+        
+        insert(result.edgeLists, edges)
+        params.edgeIndex[slotId] = #result.edgeLists
+        if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
+            insert(result.invokeLater, function()
+                local indexL = params.edgeIndex[slotId]
+                local indexR = params.edgeIndex[info.octa[1]]
+                local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
+                local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[12][1])
+                local pt = ptL:avg(ptR):toTuple()
+                result.edgeLists[indexL].edges[2][1] = pt
+                result.edgeLists[indexR].edges[12][1] = pt
+            end)
         end
         
-        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
-        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
-    end
+        if info.trackGroup then
+            local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+            params.edgeGroup[slotId] = func.seq(#nodes - 12, #nodes - 1)
+        end
+        
+        if params.debug then
+            local text = tostring(info.id)
+            local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+            
+            local addText = function(label, pos, fAlign, h)
+                local nameModelsF, width = livetext(h or 2)(label)
+                for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                    insert(result.models, m)
+                end
+            end
+            
+            addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+            addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        end
 
 end
 

@@ -14,6 +14,7 @@ local unpack = table.unpack
 local insert = table.insert
 
 -- It's a long single-usage function so I seperate it
+
 local calculateLimit = function(arc)
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
@@ -71,12 +72,13 @@ local function octa(modules, grid)
 end
 
 local function fnQueue(g, modules)
+    -- g: all modules in a same z layer
     -- Build the gridization queue
     local parentMap = {}
     local childrenMap = {}
     
-    local mDist = {}
-    local gDist = {}
+    local mDist = {} -- Module distance
+    local gDist = {} -- Group distance
     local mGIndex = {}
     local groups = {}
     
@@ -87,34 +89,37 @@ local function fnQueue(g, modules)
             local slotId = g[y]
             local m = modules[slotId]
             if not mDist[slotId] then mDist[slotId] = {} end
-            if m.info.octa[3] then
+            if m.info.octa[3] then -- Module on the right
                 mDist[slotId][m.info.octa[3]] = 1
             end
-            if m.info.octa[7] then
+            if m.info.octa[7] then -- Module on the left
                 mDist[slotId][m.info.octa[7]] = -1
             end
             
             local data = {x = x, y = y, slotId = g[y]}
+
+            -- To build a continous module group from ymin to ymax
             if #slotSeqs == 0 then
                 slotSeqs[1] = {data}
             else
                 local lastSeq = slotSeqs[#slotSeqs]
                 if (lastSeq[#lastSeq].y == y - 1) then
-                    insert(slotSeqs[#slotSeqs], data)
+                    insert(slotSeqs[#slotSeqs], data) -- If continous
                 else
-                    insert(slotSeqs, {data})
+                    insert(slotSeqs, {data}) -- Otherwise create a new seq
                 end
             end
         end
         for _, slots in ipairs(slotSeqs) do
-            local gId = #groups + 1
+            local gId = #groups + 1 -- Define group id
             insert(groups, {slots = slots, x = x, order = gId, children = {}})
             for _, seq in ipairs(slots) do
-                mGIndex[seq.slotId] = gId
+                mGIndex[seq.slotId] = gId -- Module to group LUT
             end
         end
     end
     
+    -- Calculate group distance
     for i, groupL in ipairs(groups) do
         if not gDist[i] then gDist[i] = {} end
         for j, groupR in ipairs(groups) do
@@ -137,6 +142,7 @@ local function fnQueue(g, modules)
         end
     end
     
+    -- Generate the group parent - children tree
     local function groupTreeGen(g, ...)
         if g then
             local rest = {...}
@@ -150,6 +156,7 @@ local function fnQueue(g, modules)
             groupTreeGen(unpack(rest))
         end
     end
+
     groups[mGIndex[g[0][0]]].parent = true
     groupTreeGen(groups[mGIndex[g[0][0]]].order)
     local groupRef = {}

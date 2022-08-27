@@ -147,13 +147,23 @@ local slotSetup = function(params, result, slotId)
     insert(
         result.slots,
         {
+            id = makeData(1, -1),
+            transf = transfPosC,
+            type = "ust_track",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    
+    insert(
+        result.slots,
+        {
             id = makeData(2, -1),
             transf = transfPosC,
             type = "ust_platform",
             spacing = {0, 0, 0, 0}
         }
     )
-    
+
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     

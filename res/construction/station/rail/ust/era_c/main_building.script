@@ -357,8 +357,6 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     blocks[1] = -config.width * 0.5 + 0.85
     blocks[#blocks] = config.width * 0.5 - 0.85
 
-    dump()(blocks)
-
     for _, x in ipairs(blocks * pipe.interlace()) do
         local r, l = unpack(x)
         addBlock("ye_centre", {
