@@ -5,6 +5,13 @@ local math = math
 local sin = math.sin
 local cos = math.cos
 
+---@class line
+---@field a number
+---@field b number
+---@field c number
+---@field vec fun(line: line) : coor2
+---@operator sub(line) : coor2
+
 -- line in form of
 -- a.x + b.y + 1 = 0, if c != 0
 -- if not
@@ -31,6 +38,9 @@ function line.new(a, b, c)
     return result
 end
 
+---@param vec coor2
+---@param pt coor2
+---@return line
 function line.byVecPt(vec, pt)
     local a = vec.y
     local b = -vec.x
@@ -38,22 +48,36 @@ function line.byVecPt(vec, pt)
     return line.new(a, b, c)
 end
 
+---@param pt1 coor2
+---@param pt2 coor2
+---@return line
 function line.byPtPt(pt1, pt2)
     return line.byVecPt(pt2 - pt1, pt2)
 end
 
+---@param rad number
+---@param pt coor2
+---@return line
 function line.byRadPt(rad, pt)
     return line.byVecPt({y = sin(rad), x = cos(rad)}, pt)
 end
 
+---@param l line
+---@return coor2
 function line.vec(l)
     return coor.xy(-l.b, l.a):normalized()
 end
 
+---@param l line
+---@param pt coor2
+---@return line
 function line.pend(l, pt)
     return line.byVecPt(coor.xy(l.a, l.b), pt)
 end
 
+---@param l1 line
+---@param l2 line
+---@return coor2 | nil
 function line.intersection(l1, l2)
     local a11 = l1.a
     local a12 = l1.b

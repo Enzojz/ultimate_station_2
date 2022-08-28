@@ -29,13 +29,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@class coor2
 ---@field x number
 ---@field y number
----@field length coor2 -> number
----@field length2 coor2 -> number
----@field normalized coor2 -> coor2
----@field withZ coor2 -> number -> coor3
----@field avg coor2 -> coor2
----@field dot coor2 -> coor2 -> number
----@field cross coor2 -> coor2 -> number
+---@field length fun(self: coor2): number
+---@field length2 fun(self: coor) : number
+---@field normalized fun(self: coor2) : coor2
+---@field withZ fun(self: coor2, z: number) : coor3
+---@field avg fun(self: coor2, others...: coor2) : coor2
+---@field dot fun(lhs: coor2, rhs: coor2) : number
+---@field cross fun(lhs: coor2, rhs: coor2) : number
 ---@operator add(coor2): coor2
 ---@operator sub(coor2): coor2
 ---@operator mul(number): coor2
@@ -47,14 +47,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@field x number
 ---@field y number
 ---@field z number
----@field length coor3 -> number
----@field length2 coor3 -> number
----@field normalized coor3 -> coor3
----@field withZ coor3 -> number -> coor3
----@field avg coor3 -> coor3
----@field dot coor3 -> coor3 -> number
----@field cross coor3 -> coor3 -> coor3
----@field toTuple coor3 -> table
+---@field length fun(self: coor3): number
+---@field length2 fun(self: coor3): number
+---@field normalized fun(self: coor3): coor3
+---@field withZ fun(self: coor3, z: number): coor3
+---@field avg fun(self: coor3, others...: coor3): coor3
+---@field dot fun(lhs: coor3, rhs: coor3) : number
+---@field cross fun(lhs: coor3, rhs: coor3) : coor3
+---@field toTuple fun(self: coor3): table
 ---@operator add(coor3): coor3
 ---@operator sub(coor3): coor3
 ---@operator mul(number): coor3
@@ -62,6 +62,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@operator mod(coor3): number
 ---@operator unm(coor3): coor3
 ---@operator concat(matrix): coor3
+
+---@alias coor coor2|coor3
+---@operator sub(coor): coor
+---@operator add(coor): coor
+---@operator mul(number): coor
 
 ---@class matrix
 ---@operator mul(matrix): matrix
@@ -75,7 +80,6 @@ local math = math
 local sin = math.sin
 local cos = math.cos
 local sqrt = math.sqrt
-local rad = math.rad
 local unpack = table.unpack
 local insert = table.insert
 

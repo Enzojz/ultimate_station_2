@@ -25,18 +25,48 @@ WHETHER IN AN ACTION OF CONTRACT, steT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
+
+---@class quaternion
+---@field w number
+---@field x number
+---@field y number
+---@field z number
+---@field length fun(self: quaternion): number
+---@field length2 fun(self: quaternion): number
+---@field normalized fun(self: quaternion): quaternion
+---@field mRot fun(self: quaternion): matrix
+---@field inv fun(self: quaternion) : quaternion
+---@field conj fun(self: quaternion) : quaternion
+---@field cross fun(lhs: quaternion, rhs: quaternion) : quaternion
+---@operator add(quaternion) : quaternion
+---@operator sub(quaternion) : quaternion
+---@operator mul(number) : quaternion
+---@operator div(number) : quaternion
+---@operator unm : quaternion
+
 local coor = require "ust/coor"
 local quaternion = {}
 
 local math = math
-local sin = math.sin
-local cos = math.cos
 local sqrt = math.sqrt
-local rad = math.rad
 
+---comment
+---@param self quaternion
+---@return number
 local qLength = function(self) return sqrt(self:length2()) end
+---comment
+---@param self quaternion
+---@return number
 local qLength2 = function(self) return self.x * self.x + self.y * self.y + self.z * self.z + self.w * self.w end
+
+---comment
+---@param self quaternion
+---@return quaternion
 local qNormalized = function(self) return self:length2() == 0 and self or (self / self:length()) end
+
+---comment
+---@param q quaternion
+---@return matrix
 local qMRot = function(q)
     return coor.I() * {
         1 - 2 * q.y * q.y - 2 * q.z * q.z,     2 * q.x * q.y + 2 * q.w * q.z,     2 * q.x * q.z - 2 * q.w * q.y,     0,
@@ -46,14 +76,24 @@ local qMRot = function(q)
     }
 end
 
+---comment
+---@param qu quaternion
+---@return quaternion
 local qConj = function(qu)
     return quaternion.wxyz(qu.w, -qu.x, -qu.y, -qu.z)
 end
 
+---comment
+---@param q quaternion
+---@return quaternion
 local qInv = function(q)
     return q:conj() / q:length2()
 end
 
+---comment
+---@param p quaternion
+---@param q quaternion
+---@return quaternion
 local qCross = function(p, q)
     return quaternion.wxyz(
         p.w * q.w - p.x * q.x - p.y * q.y - p.z * q.z,
@@ -100,10 +140,16 @@ function quaternion.wxyz(w, x, y, z)
     return result
 end
 
+---@param pt coor3
+---@param w number
+---@return quaternion
 function quaternion.xyzw(pt, w)
     return quaternion.wxyz(w, pt.x, pt.y, pt.z)
 end
 
+---@param vec1 coor3
+---@param vec2 coor3
+---@return quaternion
 function quaternion.byVec(vec1, vec2)
     local cr = vec1:cross(vec2)
     return quaternion.xyzw(cr, sqrt(vec1:length2() * vec2:length2()) + vec1:dot(vec2)):normalized()

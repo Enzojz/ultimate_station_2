@@ -28,6 +28,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 local pipe = {}
 local unpack = table.unpack
 
+---@generic T : any
+---@generic S : any
+---@param init `T`
+---@param fun fun(init: `T`, e: `S`) : T
+---@return fun(ls: `S`[]) : `T`
 function pipe.fold(init, fun)
     return function(ls)
         for i = 1, #ls do init = fun(init, ls[i]) end
@@ -35,12 +40,19 @@ function pipe.fold(init, fun)
     end
 end
 
+---@generic T : any
+---@param fun fun(e:`T`)
+---@return fun(ls: `T`[])
 function pipe.forEach(fun)
     return function(ls)
         for i = 1, #ls do fun(ls[i]) end
     end
 end
 
+---@generic T : any
+---@generic S : any
+---@param fun fun(e: `T`, i?: integer) : S
+---@return fun(ls: `T`[]): `S`[]
 function pipe.map(fun)
     return function(ls)
         local result = {}
@@ -49,6 +61,9 @@ function pipe.map(fun)
     end
 end
 
+---@generic K : any
+---@generic V : any
+---@return fun(ls: table<`K`, `V`>): `K`[]
 function pipe.keys()
     return function(ls)
         local result = {}
@@ -57,7 +72,9 @@ function pipe.keys()
     end
 end
 
-
+---@generic K : any
+---@generic V : any
+---@return fun(ls: table<`K`, `V`>): `V`[]
 function pipe.values()
     return function(ls)
         local result = {}
@@ -66,6 +83,11 @@ function pipe.values()
     end
 end
 
+---@generic K : any
+---@generic V : any
+---@generic T : any
+---@param fun fun(e: `V`, i?: `K`): `T`
+---@return fun(ls: table<`K`, `V`>): table<`K`, `T`>
 function pipe.mapValues(fun)
     return function(ls)
         local result = {}
@@ -74,6 +96,11 @@ function pipe.mapValues(fun)
     end
 end
 
+---@generic T : any
+---@generic K : any
+---@generic V : any
+---@param fun fun(e: `T`): `K`, `V`
+---@return fun(ls: `T`[]): table<`K`, `T`>
 function pipe.mapPair(fun)
     return function(ls)
         local result = {}
@@ -85,6 +112,9 @@ function pipe.mapPair(fun)
     end
 end
 
+---@generic T : any
+---@param pre fun(e: `T`): boolean
+---@return fun(ls: `T`[]): `T`[]
 function pipe.filter(pre)
     return function(ls)
         local result = {}
@@ -97,6 +127,9 @@ function pipe.filter(pre)
     end
 end
 
+---@generic T : any
+---@param t2 `T`[]
+---@return fun(t1: `T`[]): `T`[]
 function pipe.concat(t2)
     return function(t1)
         local result = {}
@@ -106,6 +139,8 @@ function pipe.concat(t2)
     end
 end
 
+---@generic T : any
+---@return fun(ls: `T`[][]): `T`[]
 function pipe.flatten()
     return function(ls)
         local result = {}
@@ -114,12 +149,22 @@ function pipe.flatten()
     end
 end
 
+---@generic T : any
+---@generic S : any
+---@param fun fun(e: `T`): `S`
+---@return fun(ls: `T`[][]): `S`[]
 function pipe.mapFlatten(fun)
     return function(ls)
         return pipe.flatten()(pipe.map(fun)(ls))
     end
 end
 
+---@generic T : any
+---@generic S : any
+---@generic X : any
+---@param ls2 `S`[]
+---@param fun fun(lhs: `T`, rhs: `S`): `X`
+---@return fun(ls1: `T`[]): `X`[]
 function pipe.map2(ls2, fun)
     return function(ls1)
         local result = {}
@@ -154,7 +199,10 @@ function pipe.mapx(...)
     end
 end
 
-
+---@generic T : any
+---@param from integer
+---@param to integer
+---@return fun(ls: `T`[]): `T`[]
 function pipe.range(from, to)
     return function(ls)
         local result = {}
@@ -163,6 +211,9 @@ function pipe.range(from, to)
     end
 end
 
+---@generic T : any
+---@param e `T`
+---@return fun(ls: `T`[]): boolean
 function pipe.contains(e)
     return function(ls)
         for i = 1, #ls do if (ls[i] == e) then return true end end
@@ -170,6 +221,9 @@ function pipe.contains(e)
     end
 end
 
+---@generic T : any
+---@param less? fun(lhs: `T`, rhs: `T`): boolean
+---@return fun(ls: `T`[]): `T`
 function pipe.max(less)
     local less = less or (function(x, y) return x < y end)
     return function(ls)
@@ -177,6 +231,9 @@ function pipe.max(less)
     end
 end
 
+---@generic T : any
+---@param less? fun(lhs: `T`, rhs: `T`): boolean
+---@return fun(ls: `T`[]): `T`
 function pipe.min(less)
     local less = less or (function(x, y) return x < y end)
     return function(ls)
@@ -184,6 +241,8 @@ function pipe.min(less)
     end
 end
 
+---@param newValues table
+---@return fun(table) : table
 function pipe.with(newValues)
     return function(ls)
         local result = {}
@@ -193,6 +252,9 @@ function pipe.with(newValues)
     end
 end
 
+---@generic T : any
+---@param fn? fun(lhs: `T`, rhs: `T`): boolean
+---@return fun(ls: `T`[]): `T`[]
 function pipe.sort(fn)
     return function(ls)
         local result = pipe.with({})(ls)
@@ -201,6 +263,8 @@ function pipe.sort(fn)
     end
 end
 
+---@generic T : any
+---@return fun(): `T`[]
 function pipe.rev()
     return function(ls)
         local result = {}
@@ -211,24 +275,33 @@ function pipe.rev()
     end
 end
 
+---@param n number
+---@return fun(n: number): number
 function pipe.plus(n)
     return function(e)
         return e + n
     end
 end
 
+---@param n number
+---@return fun(n: number): number
 function pipe.mul(n)
     return function(e)
         return e * n
     end
 end
 
+---@return fun(n: number): number
 function pipe.neg()
     return function(e)
         return -e
     end
 end
 
+---@generic T : any
+---@generic S : any
+---@param ls2 `T`[]
+---@param name? string[]
 function pipe.zip(ls2, name)
     name = name or {1, 2}
     return function(ls1)
@@ -238,6 +311,9 @@ function pipe.zip(ls2, name)
     end
 end
 
+---@generic T : any
+---@param n integer
+---@return fun(content: `T`): `T`[]
 function pipe.rep(n)
     return function(content)
         local result = {}
@@ -246,18 +322,24 @@ function pipe.rep(n)
     end
 end
 
+---@param name string
+---@param def any
+---@return fun(el: table): any
 function pipe.select(name, def)
     return function(el)
         return (el[name] == nil) and def or el[name]
     end
 end
 
+---@return fun(x: any): any
 function pipe.noop()
     return function(x)
         return x
     end
 end
 
+---@generic T : any
+---@param name? string[]
 function pipe.interlace(name)
     name = name or {1, 2}
     return function(ls)
