@@ -25,6 +25,48 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
+
+---@class coor2
+---@field x number
+---@field y number
+---@field length coor2 -> number
+---@field length2 coor2 -> number
+---@field normalized coor2 -> coor2
+---@field withZ coor2 -> number -> coor3
+---@field avg coor2 -> coor2
+---@field dot coor2 -> coor2 -> number
+---@field cross coor2 -> coor2 -> number
+---@operator add(coor2): coor2
+---@operator sub(coor2): coor2
+---@operator mul(number): coor2
+---@operator div(number): coor2
+---@operator mod(coor2): number
+---@operator unm(coor2): coor2
+
+---@class coor3
+---@field x number
+---@field y number
+---@field z number
+---@field length coor3 -> number
+---@field length2 coor3 -> number
+---@field normalized coor3 -> coor3
+---@field withZ coor3 -> number -> coor3
+---@field avg coor3 -> coor3
+---@field dot coor3 -> coor3 -> number
+---@field cross coor3 -> coor3 -> coor3
+---@field toTuple coor3 -> table
+---@operator add(coor3): coor3
+---@operator sub(coor3): coor3
+---@operator mul(number): coor3
+---@operator div(number): coor3
+---@operator mod(coor3): number
+---@operator unm(coor3): coor3
+---@operator concat(matrix): coor3
+
+---@class matrix
+---@operator mul(matrix): matrix
+---@operator call(coor3): coor3
+
 local func = require "ust/func"
 
 local coor = {}
@@ -71,12 +113,39 @@ local vecXyMeta = {
     end
 }
 
+---@param self coor2
+---@return number
 local vecXyLength = function(self) return sqrt(self:length2()) end
+
+---@param self coor2
+---@return number
 local vecXyLength2 = function(self) return self.x * self.x + self.y * self.y end
+
+---@param self coor2
+---@return coor2
 local vecXyNormalized = function(self) return self / self:length() end
+
+---@param self coor2
+---@return coor3
 local vecXyZ = function(self, z) return coor.xyz(self.x, self.y, z) end
+
+---@param self coor2
+---@param other coor2
+---@return number
 local vecXyCross = function(self, other) return self.x * other.y - self.y * other.x end
 
+---@param self coor2
+---@param ...coor2
+---@return coor2
+local vecXyAvg = function(self, ...)
+    local pts = {...}
+    return func.fold(pts, self, function(l, r) return l + r end) / (#pts + 1)
+end
+
+---comment
+---@param x number
+---@param y number
+---@return coor2
 function coor.xy(x, y)
     local result = {
         x = x,
@@ -130,16 +199,37 @@ local vecXyzMeta = {
     end
 }
 
+---@param self coor3
+---@return number
 local vecXyzLength = function(self) return sqrt(self:length2()) end
+
+---@param self coor3
+---@return number
 local vecXyzLength2 = function(self) return self.x * self.x + self.y * self.y + self.z * self.z end
+
+---@param self coor3
+---@return table
 local vecXyzNormalized = function(self) return self / self:length() end
 local vecXyzToTuple = function(self) return {self.x, self.y, self.z} end
+
+
+---@param self coor3
+---@param other coor3
+---@return number
 local vecXyzDot = function(self, other) return self.x * other.x + self.y * other.y + self.z * other.z end
+
+---@param self coor3
+---@param other coor3
+---@return coor3
 local vecXyzCross = function(self, other) return coor.xyz(
     self.y * other.z - self.z * other.y,
     self.z * other.x - self.x * other.z,
     self.x * other.y - self.y * other.x)
 end
+
+---@param self coor3
+---@param ...coor3
+---@return coor3
 local vecXyzAvg = function(self, ...)
     local pts = {...}
     return func.fold(pts, self, function(l, r) return l + r end) / (#pts + 1)
@@ -147,6 +237,11 @@ end
 
 coor.xyzAvg = vecXyAvg
 
+---comment
+---@param x number
+---@param y number
+---@param z number
+---@return coor3
 function coor.xyz(x, y, z)
     local result = {
         x = x,
@@ -167,24 +262,38 @@ end
 
 coor.o = coor.xyz(0, 0, 0)
 
+---@param tuple any
+---@return coor3
 function coor.tuple2Vec(tuple)
     return coor.xyz(unpack(tuple))
 end
 
+---@param vec coor3
+---@return table
 function coor.vec2Tuple(vec)
     return {vec.x, vec.y, vec.z}
 end
 
+---@param edge table[]
+---@return coor3
+---@return coor3
 function coor.edge2Vec(edge)
     local pt, vec = unpack(edge)
     return coor.tuple2Vec(pt), coor.tuple2Vec(vec)
 end
 
+---@param pt coor3
+---@param vec coor3
+---@return table[]
 function coor.vec2Edge(pt, vec)
     return {pt:toTuple(), vec:toTuple()}
 end
 
 -- the original transf.mul is ill-formed. The matrix is in form of Y = X.A + b, but mul transposed the matrix for Y = A.X + b
+---comment
+---@param m1 matrix
+---@param m2 matrix
+---@return matrix
 local function mul(m1, m2)
     local m = function(line, col)
         local l = (line - 1) * 4
@@ -221,6 +330,8 @@ function coor.det(m)
     end
 end
 
+---@param m matrix
+---@return matrix
 function coor.inv(m)
     local dX = coor.det(m)
     
@@ -287,7 +398,9 @@ function coor.applyEdges(mpt, mvec)
     end
 end
 
+---@type matrix
 local init = {}
+
 local meta = {
     __mul = function(lhs, rhs)
         local result = mul(lhs, rhs)
@@ -307,6 +420,8 @@ setmetatable(init,
         end
     })
 
+---comment
+---@return matrix
 function coor.I()
     return init * {
         1, 0, 0, 0,
@@ -316,9 +431,11 @@ function coor.I()
     }
 end
 
-function coor.rotZ(rotX)
-    local sx = sin(rotX)
-    local cx = cos(rotX)
+---@param rad number
+---@return matrix
+function coor.rotZ(rad)
+    local sx = sin(rad)
+    local cx = cos(rad)
     
     return init * {
         cx, sx, 0, 0,
@@ -328,9 +445,11 @@ function coor.rotZ(rotX)
     }
 end
 
-function coor.rotY(rotX)
-    local sx = sin(rotX)
-    local cx = cos(rotX)
+---@param rad number
+---@return matrix
+function coor.rotY(rad)
+    local sx = sin(rad)
+    local cx = cos(rad)
     
     return init * {
         cx, 0, sx, 0,
@@ -340,10 +459,11 @@ function coor.rotY(rotX)
     }
 end
 
-
-function coor.rotX(rotX)
-    local sx = sin(rotX)
-    local cx = cos(rotX)
+---@param rad number
+---@return matrix
+function coor.rotX(rad)
+    local sx = sin(rad)
+    local cx = cos(rad)
     
     return init * {
         1, 0, 0, 0,
@@ -353,6 +473,7 @@ function coor.rotX(rotX)
     }
 end
 
+---@return matrix
 function coor.xXY()
     return init * {
         0, 1, 0, 0,
@@ -362,6 +483,7 @@ function coor.xXY()
     }
 end
 
+---@return matrix
 function coor.xXZ()
     return init * {
         0, 0, 1, 0,
@@ -371,6 +493,7 @@ function coor.xXZ()
     }
 end
 
+---@return matrix
 function coor.flipX()
     return init * {
         -1, 0, 0, 0,
@@ -380,7 +503,7 @@ function coor.flipX()
     }
 end
 
-
+---@return matrix
 function coor.flipY()
     return init * {
         1, 0, 0, 0,
@@ -390,6 +513,7 @@ function coor.flipY()
     }
 end
 
+---@return matrix
 function coor.flipZ()
     return init * {
         1, 0, 0, 0,
@@ -399,6 +523,8 @@ function coor.flipZ()
     }
 end
 
+---@param vec coor3
+---@return matrix
 function coor.trans(vec)
     return init * {
         1, 0, 0, 0,
@@ -408,6 +534,8 @@ function coor.trans(vec)
     }
 end
 
+---@param dx number
+---@return matrix
 function coor.transX(dx)
     return init * {
         1, 0, 0, 0,
@@ -417,6 +545,8 @@ function coor.transX(dx)
     }
 end
 
+---@param dy number
+---@return matrix
 function coor.transY(dy)
     return init * {
         1, 0, 0, 0,
@@ -426,6 +556,8 @@ function coor.transY(dy)
     }
 end
 
+---@param dz number
+---@return matrix
 function coor.transZ(dz)
     return init * {
         1, 0, 0, 0,
@@ -435,7 +567,8 @@ function coor.transZ(dz)
     }
 end
 
-
+---@param sx number
+---@return matrix
 function coor.scaleX(sx)
     return init * {
         sx, 0, 0, 0,
@@ -446,6 +579,8 @@ function coor.scaleX(sx)
 end
 
 
+---@param sy number
+---@return matrix
 function coor.scaleY(sy)
     return init * {
         1, 0, 0, 0,
@@ -455,6 +590,8 @@ function coor.scaleY(sy)
     }
 end
 
+---@param sz number
+---@return matrix
 function coor.scaleZ(sz)
     return init * {
         1, 0, 0, 0,
@@ -464,10 +601,14 @@ function coor.scaleZ(sz)
     }
 end
 
+---@param vec coor3
+---@return matrix
 function coor.scale(vec)
     return coor.scaleX(vec.x) * coor.scaleY(vec.y) * coor.scaleZ(vec.z)
 end
 
+---@param s number
+---@return matrix
 function coor.shearXoY(s)
     return init * {
         1, 0, 0, 0,
@@ -477,6 +618,8 @@ function coor.shearXoY(s)
     }
 end
 
+---@param s number
+---@return matrix
 function coor.shearXoZ(s)
     return init * {
         1, 0, 0, 0,
@@ -486,6 +629,8 @@ function coor.shearXoZ(s)
     }
 end
 
+---@param ...matrix
+---@return matrix
 function coor.mul(...)
     local params = {...}
     local m = params[1]
@@ -493,51 +638,6 @@ function coor.mul(...)
         m = m * params[i]
     end
     return m
-end
-
-function coor.shearYoX(s)
-    return init * {
-        1, s, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    }
-end
-
-function coor.shearYoZ(s)
-    return init * {
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, s, 1, 0,
-        0, 0, 0, 1
-    }
-end
-
-function coor.shearYoX(s)
-    return init * {
-        1, s, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    }
-end
-
-function coor.shearZoX(s)
-    return init * {
-        1, 0, s, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    }
-end
-
-function coor.shearZoY(s)
-    return init * {
-        1, 0, 0, 0,
-        0, 1, s, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    }
 end
 
 return coor
