@@ -27,6 +27,15 @@ general.withTag = function(tag)
     end)
 end
 
+---@class mdl
+---@field id string
+---@field tag string
+---@field transf matrix
+
+---@param m string
+---@param tag string
+---@param ... matrix
+---@return mdl
 general.newModel = function(m, tag, ...)
     return {
         id = m,

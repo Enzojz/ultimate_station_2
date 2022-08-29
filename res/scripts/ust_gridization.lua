@@ -14,7 +14,6 @@ local unpack = table.unpack
 local insert = table.insert
 
 -- It's a long single-usage function so I seperate it
-
 local calculateLimit = function(arc)
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
@@ -81,7 +80,15 @@ local function fnQueue(g, modules)
     local gDist = {} -- Group distance
     local mGIndex = {}
     local groups = {}
+    local refMap = {}
     
+    for x, g in pairs(g) do
+        for y, slotId in pairs(g) do
+            local m = modules[slotId]
+            local info = m.info
+        end
+    end
+
     for x, g in pairs(g) do
         local ySeq = func.sort(func.keys(g))
         local slotSeqs = {}
@@ -208,9 +215,10 @@ local function fnQueue(g, modules)
             return {}
         end
     end
-    
+
     return queueGen(g[0][0]), parentMap
 end
+
 
 ust.gridization = function(modules, classedModules)
     local lowestHeight = 2

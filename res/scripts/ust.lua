@@ -19,15 +19,63 @@ local min = math.min
 
 ust.infi = 1e8
 
+---@alias id integer
+---@alias slotid integer
+---@alias slottype integer
+---@alias slotbase integer
+
+---@class slotinfo
+---@field type slottype
+---@field id id
+---@field slotId slotid
+---@field data integer
+---@field pos coor3
+---@field radius number
+---@field straight boolean
+---@field length number
+---@field width number
+---@field ref {left: boolean, right: boolean, prev:boolean, next: boolean}
+---@field octa boolean[]
+---@field comp table<integer, boolean>
+
+---@class projection_size
+---@field lb coor3
+---@field lt coor3
+---@field rb coor3
+---@field rt coor3
+
+---@class module
+---@field info slotinfo
+---@field metadata table
+---@field makeData fun(type: slottype, data: integer): slotid
+
+---@class classified
+---@field type slottype
+---@field id id
+---@field slotId slotid 
+---@field data integer
+---@field info any[]
+---@field slot any[]
+---@field metadata table
+
+---@param id id
+---@param type slottype
+---@return slotbase
 ust.base = function(id, type)
     return id * 100 + type
 end
 
+---@param base slotbase
+---@param data integer
+---@return slotid
 ust.mixData = function(base, data)
         -- local data = data > 0 and data or (1000 - data)
         return (data < 0 and -base or base) + 1000000 * data
 end
 
+---@param info slotinfo
+---@return slotbase
+---@return { data_pos: slotid[], data_radius: slotid[], data_geometry: slotid[], data_ref: slotid[] }
 ust.slotIds = function(info)
     local base = info.type + info.id * 100
     
@@ -60,6 +108,10 @@ ust.slotIds = function(info)
     }
 end
 
+---@param slotId slotid
+---@return slottype
+---@return id
+---@return integer
 ust.slotInfo = function(slotId)
         -- Platform/track
         -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
@@ -81,6 +133,12 @@ ust.slotInfo = function(slotId)
         return type, id, data
 end
 
+---@param pt coor
+---@param vec coor
+---@param length number
+---@param radius number
+---@param isRev boolean
+---@return fun(...: number): arc, arc ...
 ust.arcPacker = function(pt, vec, length, radius, isRev)
     local nVec = vec:withZ(0):normalized()
     local tVec = coor.xyz(-nVec.y, nVec.x, 0)
@@ -96,6 +154,8 @@ ust.arcPacker = function(pt, vec, length, radius, isRev)
         sup = sup,
         inf = inf
     })
+    ---@param ... number
+    ---@return arc, arc ...
     return function(...)
         local result = func.map({...}, function(dr)
             local dr = isRev and -dr or dr
@@ -130,6 +190,7 @@ local function ungroup(fst, ...)
     end
 end
 
+---@return projection_size
 ust.assembleSize = function(lc, rc)
     return {
         lb = lc.i,
@@ -139,79 +200,12 @@ ust.assembleSize = function(lc, rc)
     }
 end
 
-local function mul(m1, m2)
-    local m = function(line, col)
-        local l = (line - 1) * 3
-        return m1[l + 1] * m2[col + 0] + m1[l + 2] * m2[col + 3] + m1[l + 3] * m2[col + 6]
-    end
-    return {
-        m(1, 1), m(1, 2), m(1, 3),
-        m(2, 1), m(2, 2), m(2, 3),
-        m(3, 1), m(3, 2), m(3, 3),
-    }
-end
-
-ust.fitModel2D = function(w, h, d, fitTop, fitLeft)
-    local s = {
-        {
-            coor.xy(0, 0),
-            coor.xy(fitLeft and w or -w, 0),
-            coor.xy(0, fitTop and -h or h),
-        },
-        {
-            coor.xy(0, 0),
-            coor.xy(fitLeft and -w or w, 0),
-            coor.xy(0, fitTop and h or -h),
-        }
-    }
-    
-    local mX = func.map(s,
-        function(s) return {
-            {s[1].x, s[1].y, 1},
-            {s[2].x, s[2].y, 1},
-            {s[3].x, s[3].y, 1},
-        }
-        end)
-    
-    local mXI = func.map(mX, coor.inv3)
-    
-    local fitTop = {fitTop, not fitTop}
-    local fitLeft = {fitLeft, not fitLeft}
-    
-    return function(size, mode, z)
-        local mXI = mXI[mode and 1 or 2]
-        local fitTop = fitTop[mode and 1 or 2]
-        local fitLeft = fitLeft[mode and 1 or 2]
-        local refZ = size.lt.z
-        
-        local t = fitTop and
-            {
-                fitLeft and size.lt or size.rt,
-                fitLeft and size.rt or size.lt,
-                fitLeft and size.lb or size.rb,
-            } or {
-                fitLeft and size.lb or size.rb,
-                fitLeft and size.rb or size.lb,
-                fitLeft and size.lt or size.rt,
-            }
-        
-        local mU = {
-            t[1].x, t[1].y, 1,
-            t[2].x, t[2].y, 1,
-            t[3].x, t[3].y, 1,
-        }
-        
-        local mXi = mul(mXI, mU)
-        
-        return coor.I() * {
-            mXi[1], mXi[2], 0, mXi[3],
-            mXi[4], mXi[5], 0, mXi[6],
-            0, 0, 1, 0,
-            mXi[7], mXi[8], 0, mXi[9]
-        } * coor.scaleZ(z and (z / d) or 1) * coor.transZ(refZ)
-    end
-end
-
+---@param w number
+---@param h number
+---@param d number
+---@param fitTop boolean
+---@param fitLeft boolean
+---@return fun(size: projection_size, mode: boolean, z?: number): matrix
 ust.fitModel = function(w, h, d, fitTop, fitLeft)
     local s = {
         {
@@ -228,6 +222,7 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
         },
     }
     
+    ---@type matrix[]
     local mX = func.map(s, function(s)
         return {
             {s[1].x, s[1].y, s[1].z, 1},
@@ -237,11 +232,16 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
         }
     end)
     
+    ---@type matrix[]
     local mXI = func.map(mX, coor.inv)
     
     local fitTop = {fitTop, not fitTop}
     local fitLeft = {fitLeft, not fitLeft}
     
+    ---@param size projection_size
+    ---@param mode boolean
+    ---@param z? number
+    ---@return matrix
     return function(size, mode, z)
         local z = z or d
         local mXI = mXI[mode and 1 or 2]
@@ -257,6 +257,8 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
                 fitLeft and size.rb or size.lb,
                 fitLeft and size.lt or size.rt,
             }
+
+        ---@type matrix
         local mU = {
             t[1].x, t[1].y, t[1].z, 1,
             t[2].x, t[2].y, t[2].z, 1,
@@ -268,31 +270,19 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
     end
 end
 
+---@generic T : any
+---@return fun(ls: `T`[]): {["s"]: `T`, ["i"]: `T`}[]
 ust.interlace = pipe.interlace({"s", "i"})
 
+---@param f coor3
+---@param t coor3
+---@param tag string
+---@param mdl string
+---@return mdl|nil
 ust.unitLane = function(f, t, tag, mdl) return
     ((t - f):length2() > 1e-2 and (t - f):length2() < 562500)
         and general.newModel(mdl or "ust/person_lane.mdl", tag, general.mRot(t - f), coor.trans(f))
         or nil
-end
-
-ust.stepLane = function(f, t, tag)
-    local vec = t - f
-    local length = vec:length()
-    if (length > 750 or length < 0.1) then return {} end
-    local dZ = abs((f - t).z)
-    if (length > dZ * 3 or length < 5) then
-        return {general.newModel("ust/person_lane.mdl", tag, general.mRot(vec), coor.trans(f))}
-    else
-        local hVec = vec:withZ(0) / 3
-        local fi = f + hVec
-        local ti = t - hVec
-        return {
-            general.newModel("ust/person_lane.mdl", tag, general.mRot(fi - f), coor.trans(f)),
-            general.newModel("ust/person_lane.mdl", tag, general.mRot(ti - fi), coor.trans(fi)),
-            general.newModel("ust/person_lane.mdl", tag, general.mRot(t - ti), coor.trans(ti))
-        }
-    end
 end
 
 ust.defaultParams = function(params)
@@ -310,17 +300,6 @@ ust.defaultParams = function(params)
         return param
     end
 end
-
-ust.terrain = function(config, ref)
-    return pipe.mapn(
-        ref.lc,
-        ref.rc
-    )(function(lc, rc)
-        local size = ust.assembleSize(lc, rc)
-        return pipe.new / size.lt / size.lb / size.rb / size.rt * pipe.map(coor.vec2Tuple)
-    end)
-end
-
 
 function ust.posGen(restTrack, lst, snd, ...)
     if restTrack == 0 then
@@ -346,6 +325,10 @@ function ust.posGen(restTrack, lst, snd, ...)
     end
 end
 
+---@param arc arc
+---@param n integer
+---@return coor3[]
+---@return coor3[]
 ust.basePts = function(arc, n)
     local radDelta = (arc.sup - arc.inf) / n
     local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
@@ -354,6 +337,8 @@ ust.basePts = function(arc, n)
     return pts, vecs
 end
 
+---@param params any
+---@param pos coor3
 ust.initSlotGrid = function(params, pos)
     if not params.slotGrid[pos.z] then params.slotGrid[pos.z] = {} end
     if not params.slotGrid[pos.z][pos.x] then params.slotGrid[pos.z][pos.x] = {} end
@@ -389,29 +374,12 @@ ust.newTopologySlots = function(params, makeData, pos)
     end
 end
 
-ust.getTranfs = function(info, pos, width)
-    local refArc = info.arcs.center
-    if pos == 1 then
-        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
-        return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
-    elseif pos == 3 then
-        local pt = 0.5 * (refArc.sup + refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-        return coor.trans(coor.xyz(width, 0, 0)) * transf
-    elseif pos == 5 then
-        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
-        return quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
-    elseif pos == 7 then
-        local pt = 0.5 * (refArc.sup + refArc.inf)
-        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-        return coor.trans(coor.xyz(-width, 0, 0)) * transf
-    else
-        local pt = 0.5 * (refArc.sup + refArc.inf)
-        return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-    end
-end
-
-
+---@param modules table<slotid, module>
+---@param classified table<id, classified>
+---@param slotId slotid
+---@return slottype
+---@return slotid
+---@return integer
 ust.classifyComp = function(modules, classified, slotId)
     local type, id, data = ust.slotInfo(slotId)
     
@@ -431,6 +399,12 @@ ust.classifyComp = function(modules, classified, slotId)
     return type, id, data
 end
 
+---@param modules table<slotid, module>
+---@param classified table<id, classified>
+---@param slotId slotid
+---@return slottype
+---@return slotid
+---@return integer
 ust.classifyData = function(modules, classified, slotId)
     local type, id, data = ust.slotInfo(slotId)
     
@@ -448,6 +422,12 @@ ust.classifyData = function(modules, classified, slotId)
     return type, id, data
 end
 
+---@param modules table<slotid, module>
+---@param classified table<id, classified>
+---@param slotId slotid
+---@return slottype
+---@return slotid
+---@return integer
 ust.preClassify = function(modules, classified, slotId)
     local type, id, data = ust.slotInfo(slotId)
     
@@ -479,7 +459,6 @@ ust.preClassify = function(modules, classified, slotId)
     
     return type, id, data
 end
-
 
 ust.marking = function(result, slotId, params)
     local id = params.modules[slotId].info.id

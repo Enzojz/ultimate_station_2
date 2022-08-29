@@ -22,7 +22,7 @@ local floor = ma.floor
 ---@field r number
 ---@field inf number
 ---@field sup number
----@field rad fun(arc: arc, pt: coor2) : number
+---@field rad fun(arc: arc, pt: coor) : number
 ---@field length fun(arc: arc) : number
 ---@field pt fun(arc: arc, rad: number): number
 ---@field ptByPt fun(arc: arc, pt: coor): coor
@@ -47,7 +47,7 @@ local floor = ma.floor
 ---comment
 ---@param o coor3|coor2
 ---@param r number
----@param limits limits
+---@param limits? limits
 ---@return arc
 function arc.new(o, r, limits)
     local result = {
@@ -89,7 +89,7 @@ end
 
 ---@param o coor
 ---@param r number
----@param limits limits
+---@param limits? limits
 ---@return arc
 function arc.byOR(o, r, limits) return arc.new(o, r, limits) end
 

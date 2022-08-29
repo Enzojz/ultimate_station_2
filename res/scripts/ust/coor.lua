@@ -68,7 +68,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@operator add(coor): coor
 ---@operator mul(number): coor
 
----@class matrix
+---@class matrix : number[]
 ---@operator mul(matrix): matrix
 ---@operator call(coor3): coor3
 

@@ -1,11 +1,34 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
+local quat = require "ust/quaternion"
 local ust = require "ust"
 
 local insert = table.insert
 local math = math
 local abs = math.abs
 local floor = math.floor
+
+local getTranfs = function(info, pos, width)
+    local refArc = info.arcs.center
+    if pos == 1 then
+        local fwPt = refArc.sup + 0.5 * (refArc.sup - refArc.inf)
+        return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(fwPt)):mRot() * coor.trans(refArc:pt(fwPt))
+    elseif pos == 3 then
+        local pt = 0.5 * (refArc.sup + refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+        return coor.trans(coor.xyz(width, 0, 0)) * transf
+    elseif pos == 5 then
+        local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
+        return quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
+    elseif pos == 7 then
+        local pt = 0.5 * (refArc.sup + refArc.inf)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+        return coor.trans(coor.xyz(-width, 0, 0)) * transf
+    else
+        local pt = 0.5 * (refArc.sup + refArc.inf)
+        return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
+    end
+end
 
 local preProcessAdd = function(modules, change, classedModules, info)
     local maxId = func.max(func.keys(classedModules))
@@ -168,22 +191,22 @@ local slotSetup = function(params, result, slotId)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     if not (info.octa[3]) then
-        local transf = ust.getTranfs(info, 3, metadata.width)
+        local transf = getTranfs(info, 3, metadata.width)
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
     end
     
     if not (info.octa[7]) then
-        local transf = ust.getTranfs(info, 7, metadata.width)
+        local transf = getTranfs(info, 7, metadata.width)
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
     if not info.octa[1] then
-        local transf = ust.getTranfs(info, 1, metadata.width)
+        local transf = getTranfs(info, 1, metadata.width)
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
     end
     
     if not info.octa[5] then
-        local transf = ust.getTranfs(info, 5, metadata.width)
+        local transf = getTranfs(info, 5, metadata.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
 end
