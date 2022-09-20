@@ -25,7 +25,6 @@ WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --]]
-
 ---@class coor2
 ---@field x number
 ---@field y number
@@ -42,7 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@operator div(number): coor2
 ---@operator mod(coor2): number
 ---@operator unm(coor2): coor2
-
+---
 ---@class coor3
 ---@field x number
 ---@field y number
@@ -62,16 +61,31 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ---@operator mod(coor3): number
 ---@operator unm(coor3): coor3
 ---@operator concat(matrix): coor3
-
+---
 ---@alias coor coor2|coor3
 ---@operator sub(coor): coor
 ---@operator add(coor): coor
 ---@operator mul(number): coor
-
----@class matrix : number[]
+---
+---@class matrix
+---@field [1] number
+---@field [2] number
+---@field [3] number
+---@field [4] number
+---@field [5] number
+---@field [6] number
+---@field [7] number
+---@field [8] number
+---@field [9] number
+---@field [10] number
+---@field [11] number
+---@field [12] number
+---@field [13] number
+---@field [14] number
+---@field [15] number
+---@field [16] number
 ---@operator mul(matrix): matrix
 ---@operator call(coor3): coor3
-
 local func = require "ust/func"
 
 local coor = {}
@@ -106,9 +120,9 @@ local vecXyMeta = {
     end,
     __index = function(xy, key)
         if key == 1 then
-          return xy.x
+            return xy.x
         elseif key == 2 then
-          return xy.y
+            return xy.y
         elseif key == 3 then
             return 0
         else
@@ -192,9 +206,9 @@ local vecXyzMeta = {
     end,
     __index = function(xyz, key)
         if key == 1 then
-          return xyz.x
+            return xyz.x
         elseif key == 2 then
-          return xyz.y
+            return xyz.y
         elseif key == 3 then
             return xyz.z
         else
@@ -341,13 +355,13 @@ function coor.inv(m)
     
     local miX = coor.minor(m)
     local mXI = {}
-
+    
     for l = 1, 4 do
         for c = 1, 4 do
             insert(mXI, ((l + c) % 2 == 0 and 1 or -1) * coor.det(miX(c, l)) / dX)
         end
     end
-
+    
     return coor.I() * mXI
 end
 
@@ -362,7 +376,7 @@ function coor.inv3(m)
             insert(mXI, ((l + c) % 2 == 0 and 1 or -1) * coor.det(miX(c, l)) / dX)
         end
     end
-
+    
     return mXI
 end
 
@@ -370,12 +384,12 @@ function coor.decomposite(m)
     local vecTrans = coor.xyz(m[13], m[14], m[15])
     local sx = coor.xyz(m[1], m[2], m[3]):length()
     local sy = coor.xyz(m[5], m[6], m[7]):length()
-    local sz = coor.xyz(m[9], m[10],m[11]):length()
+    local sz = coor.xyz(m[9], m[10], m[11]):length()
     local mRot = {
         m[1] / sx, m[2] / sx, m[3] / sx, 0,
         m[5] / sy, m[6] / sy, m[7] / sy, 0,
-        m[9] / sz, m[10]/ sz, m[11]/ sz, 0,
-        0,         0,         0,         1
+        m[9] / sz, m[10] / sz, m[11] / sz, 0,
+        0, 0, 0, 1
     }
     return vecTrans, coor.I() * mRot, coor.xyz(sx, sy, sz)
 end

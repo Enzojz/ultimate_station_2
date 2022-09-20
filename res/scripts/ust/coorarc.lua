@@ -24,7 +24,7 @@ local floor = ma.floor
 ---@field sup number
 ---@field rad fun(arc: arc, pt: coor) : number
 ---@field length fun(arc: arc) : number
----@field pt fun(arc: arc, rad: number): number
+---@field pt fun(arc: arc, rad: number): coor3
 ---@field ptByPt fun(arc: arc, pt: coor): coor
 ---@field limits fun(arc: arc): limits
 ---@field withLimits fun(arc: arc, limits: limits): arc

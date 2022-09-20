@@ -23,7 +23,7 @@ ust.infi = 1e8
 ---@alias slotid integer
 ---@alias slottype integer
 ---@alias slotbase integer
-
+---
 ---@class slotinfo
 ---@field type slottype
 ---@field id id
@@ -35,29 +35,37 @@ ust.infi = 1e8
 ---@field length number
 ---@field width number
 ---@field ref {left: boolean, right: boolean, prev:boolean, next: boolean}
----@field octa boolean[]
+---@field octa (boolean|integer)[]
 ---@field comp table<integer, boolean>
-
+---@field arcs {left: arc, right:arc, center:arc}
+---@field pts {[1]: {[1]:coor3, [2]: coor3}, [2]: {[1]:coor3, [2]: coor3}}
+---@field refPos coor3
+---
 ---@class projection_size
 ---@field lb coor3
 ---@field lt coor3
 ---@field rb coor3
 ---@field rt coor3
-
+---
 ---@class module
+---@field name string
+---@field variant integer
 ---@field info slotinfo
 ---@field metadata table
 ---@field makeData fun(type: slottype, data: integer): slotid
-
+---
+---@alias modules table<integer, module>
+---
 ---@class classified
+---@field slotId slotid
 ---@field type slottype
 ---@field id id
----@field slotId slotid 
 ---@field data integer
 ---@field info any[]
 ---@field slot any[]
 ---@field metadata table
-
+---
+---@alias classified_modules table<integer, classified>
 ---@param id id
 ---@param type slottype
 ---@return slotbase
@@ -257,7 +265,7 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
                 fitLeft and size.rb or size.lb,
                 fitLeft and size.lt or size.rt,
             }
-
+        
         ---@type matrix
         local mU = {
             t[1].x, t[1].y, t[1].z, 1,
@@ -375,7 +383,7 @@ ust.newTopologySlots = function(params, makeData, pos)
 end
 
 ---@param modules table<slotid, module>
----@param classified table<id, classified>
+---@param classified classified_modules
 ---@param slotId slotid
 ---@return slottype
 ---@return slotid
@@ -400,7 +408,7 @@ ust.classifyComp = function(modules, classified, slotId)
 end
 
 ---@param modules table<slotid, module>
----@param classified table<id, classified>
+---@param classified classified_modules
 ---@param slotId slotid
 ---@return slottype
 ---@return slotid
@@ -423,7 +431,7 @@ ust.classifyData = function(modules, classified, slotId)
 end
 
 ---@param modules table<slotid, module>
----@param classified table<id, classified>
+---@param classified classified_modules
 ---@param slotId slotid
 ---@return slottype
 ---@return slotid
@@ -480,7 +488,7 @@ ust.marking = function(result, slotId, params)
             table.insert(result.models, m)
         end
     end
-
+    
     for i = 1, 11 do
         addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecL[i]):mRot() * coor.trans(ptsL[i]), coor.transX(-0.1))
         addText("⋮", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.1))
@@ -491,7 +499,7 @@ ust.marking = function(result, slotId, params)
         addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecR[i]):mRot() * coor.trans(ptsR[i]), coor.transX(-0.5))
         addText("⋯", quat.byVec(coor.xyz(0, 1, 0), vecC[i]):mRot() * coor.trans(ptsC[i]), coor.transX(-0.5))
     end
-
+    
     if info.ref.left then
         local refPt = ptsL[6]
         local refVec = vecL[6]

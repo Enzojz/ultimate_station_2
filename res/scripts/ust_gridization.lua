@@ -13,14 +13,23 @@ local pi = math.pi
 local unpack = table.unpack
 local insert = table.insert
 
+---@alias grid integer[][][]
+
 -- It's a long single-usage function so I seperate it
+---@param arc arc
+---@return fun(l: line, ptvec: coor3[])
 local calculateLimit = function(arc)
+    ---@param l line
+    ---@param ptvec coor3[]
+    ---@return number
     return function(l, ptvec)
         local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
         return arc:rad(pt)
     end
 end
 
+---@param modules modules
+---@param grid grid
 local function octa(modules, grid)
     for slotId, module in pairs(modules) do
         if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
@@ -70,27 +79,53 @@ local function octa(modules, grid)
     end
 end
 
+---@param g table<integer, table<integer, integer>>
+---@param modules modules
+---@return integer[]
+---@return integer[]
 local function fnQueue(g, modules)
     -- g: all modules in a same z layer
     -- Build the gridization queue
+    
+    ---@type integer[]
     local parentMap = {}
+
+    ---@type integer[][]
     local childrenMap = {}
     
-    local mDist = {} -- Module distance
-    local gDist = {} -- Group distance
-    local mGIndex = {}
-    local groups = {}
-    local refMap = {}
+    -- Module distance
+    ---@type integer[][]
+    local mDist = {} 
     
-    for x, g in pairs(g) do
-        for y, slotId in pairs(g) do
-            local m = modules[slotId]
-            local info = m.info
-        end
-    end
+    -- Group distance
+    ---@type integer[][]
+    local gDist = {}
+
+    -- Module Group Look up table
+    ---@type integer[]
+    local mGIndex = {}
+
+    ---@class group
+    ---@field x integer
+    ---@field slots group_slot[]
+    ---@field order integer
+    ---@field children integer[]
+    ---@field parent integer|boolean
+
+    ---@class group_slot
+    ---@field x integer
+    ---@field y integer
+    ---@field slotId integer
+
+    -- Group list
+    ---@type group[]
+    local groups = {}
 
     for x, g in pairs(g) do
+        ---@type integer[]
         local ySeq = func.sort(func.keys(g))
+
+        ---@type group_slot[][]
         local slotSeqs = {}
         for _, y in ipairs(ySeq) do
             local slotId = g[y]
@@ -103,6 +138,7 @@ local function fnQueue(g, modules)
                 mDist[slotId][m.info.octa[7]] = -1
             end
             
+            ---@type group_slot
             local data = {x = x, y = y, slotId = g[y]}
 
             -- To build a continous module group from ymin to ymax
@@ -150,6 +186,8 @@ local function fnQueue(g, modules)
     end
     
     -- Generate the group parent - children tree
+    ---@param g integer
+    ---@param ... integer
     local function groupTreeGen(g, ...)
         if g then
             local rest = {...}
@@ -166,16 +204,23 @@ local function fnQueue(g, modules)
 
     groups[mGIndex[g[0][0]]].parent = true
     groupTreeGen(groups[mGIndex[g[0][0]]].order)
+
     local groupRef = {}
     
+    ---@param group integer
+    ---@param ... integer
     local function slotTreeGen(group, ...)
         if group then
             local g = groups[group]
             local parentG = g.parent ~= true and groups[g.parent] or nil
             local rest = {...}
             
+            ---@type integer
             local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
+            ---@type integer
             local refX = groupRef[group] and modules[groupRef[group]].info.pos.x or 0
+
+            ---@type group_slot[][]
             local slots = {
                 func.filter(g.slots, function(s) return s.y >= refY end),
                 func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
@@ -207,6 +252,9 @@ local function fnQueue(g, modules)
     end
     slotTreeGen(groups[mGIndex[g[0][0]]].order)
     
+    ---@param slotId integer
+    ---@param ... integer
+    ---@return integer[]
     local function queueGen(slotId, ...)
         if slotId then
             local rest = func.concat({...}, childrenMap[slotId] or {})
@@ -219,9 +267,13 @@ local function fnQueue(g, modules)
     return queueGen(g[0][0]), parentMap
 end
 
-
+---@param modules modules
+---@param classedModules classified_modules
+---@return table
+---@return integer
 ust.gridization = function(modules, classedModules)
     local lowestHeight = 2
+    ---@type grid
     local grid = {}
     for id, info in pairs(classedModules) do
         local pos = modules[info.slotId].info.pos
@@ -401,7 +453,6 @@ ust.gridization = function(modules, classedModules)
                     local packer = ust.arcPacker(yState.pos, yState.vec, yState.length, yState.radius, ref == m.info.octa[1])
                     local ar, arL, arR = packer(-yState.width * 0.5, yState.width * 0.5)
                     
-                    -- if m.info.isRev then arL, arR = arR, arL end
                     -- ALignement of starting point and ending point
 
                     if (

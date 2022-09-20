@@ -21,6 +21,8 @@ local hPlatformList = {200, 280, 380, 550, 680, 760, 915, 960, 1100, 1219, 1250,
 local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 550, 850, 1050}
 local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
+---@param modules modules
+---@return modules
 local function classifyModules(modules)
     local result = {}
     for slotId, m in pairs(modules) do
@@ -60,6 +62,8 @@ local constructionTemplates =
         }
     }
 
+---@param params params
+---@return table
 local createTemplateFn = function(params)
     local baseLength = trackLengths[params.lPlatform + 1]
     local nbTracks = trackNumberList[params.trackNb + 1]
@@ -71,18 +75,17 @@ local createTemplateFn = function(params)
     
     local xOffset = posList[1] and 0 or -1
     -- local trackType = ("%s%s.module"):format(params.capturedParams.moduleList[params.trackType + 1], params.catenary == 1 and "_catenary" or "")
-    
     local result = {}
     
     local yMax = nSeg % 2 == 0 and (nSeg / 2 - 1) or (nSeg - 1) / 2
     local yMin = nSeg % 2 == 0 and (-nSeg / 2) or (1 - nSeg) / 2
-
+    
     for i, isTrack in ipairs(posList) do
         local x = i - 1 + xOffset
         if isTrack then
             for y = yMin, yMax do
                 local info = {
-                    id = (x >= 0  and x or ((#posList + xOffset - 1) - x)) * nSeg + (y >= 0 and y or (yMax - y)) + 1,
+                    id = (x >= 0 and x or ((#posList + xOffset - 1) - x)) * nSeg + (y >= 0 and y or (yMax - y)) + 1,
                     type = 1,
                     pos = coor.xyz(x, y, 0),
                     length = 20,
@@ -99,12 +102,12 @@ local createTemplateFn = function(params)
         else
             for y = yMin, yMax do
                 local info = {
-                    id = (x >= 0  and x or ((#posList + xOffset - 1) - x)) * nSeg + (y >= 0 and y or (yMax - y)) + 1,
+                    id = (x >= 0 and x or ((#posList + xOffset - 1) - x)) * nSeg + (y >= 0 and y or (yMax - y)) + 1,
                     type = 2,
                     pos = coor.xyz(x, y, 0),
                     length = 20,
                     width = 5,
-                    ref = { left = posList[i - 1] == true, right = posList[i + 1] == true }
+                    ref = {left = posList[i - 1] == true, right = posList[i + 1] == true}
                 }
                 local slotId, slotIds = ust.slotIds(info)
                 result[slotId] = "station/rail/ust/era_c/platform.module"
@@ -119,14 +122,16 @@ local createTemplateFn = function(params)
     return result
 end
 
+---@param modules modules
+---@return modules
 local preProcessFn = function(modules, change)
     local classedModules = classifyModules(modules)
-
+    
     local type, id, data = ust.slotInfo(change.slotId)
-
+    
     local info = {
-        type = type, 
-        id = id, 
+        type = type,
+        id = id,
         data = data
     }
     
@@ -142,7 +147,7 @@ local preProcessFn = function(modules, change)
                 modules[ust.mixData(ust.base(id, change.module.metadata.typeId), data)] = change.module
             end
         end
-
+        
         for k, module in pairs(modules) do
             if (module.metadata and module.metadata.preProcessPostAdd) then
                 game.res.script[module.metadata.scriptName][module.metadata.preProcessPostAdd](modules, change, k, classedModules, info)
@@ -155,7 +160,7 @@ local preProcessFn = function(modules, change)
             modules[change.slotId] = nil
         end
     end
-        
+    
     return modules
 end
 
@@ -215,153 +220,196 @@ local upgradeFn = function(_) end
 
 ---@alias vec3 {[1]: number, [2]:number, [3]: number}
 ---@alias vec2 {[1]: number, [2]:number}
-
+---
 ---@class terrain_alignment
 ---@field type "EQUAL"|"LESS"|"GREATER"
 ---@field faces vec3[][]
-
+---
 ---@class ground_face
 ---@field mode {type: "FILL"|"STROKE"|"STROKE_OUTER"|"STROKE_INNER", key: string}
 ---@field face vec3[]
-
+---
 ---@class collider
 ---@field params {halfExtents: vec3}|{points: vec3[]}
 ---@field transf matrix
 ---@field type "BOX"|"CYLINDER"|"POINT_CLOUD"
-
+---
+---@class terminal_group
+---@field terminals {[1]: integer, [2]: integer}[]
+---@field vehicleNodeOverride integer
+---
+---@class station
+---@field terminals integer[]
+---@field tag string
+---
+---@class edge_list
+---@field type "STREET"|"TRACK"
+---@field params {type: string, tramTrackType?: "YES"|"NO", catenary: boolean}
+---@field edgeType? "BRIDGE"|"TUNNEL"
+---@field edgeTypeName? string
+---@field edges {[1]: vec3, [2]: vec3}[]
+---@field snapNodes integer[]
+---@field freeNodes? integer[]
+---@field tag2Nodes table<string, integer[]>
+---
+---@class slotConfig
+---@field maxModules integer
+---@field message string
+---@field skipCollisionCheck boolean
+---
+---@class model
+---@field id string
+---@field transf matrix
+---@field tag string
+---
+---@class slot
+---@field id integer
+---@field type string
+---@field transf matrix
+---@field spacing {[1]: number, [2]: number, [3]: number, [4]: number}
+---@field shape integer
+---@field height number
+---
+---@class param
+---@field key string
+---@field name? string
+---@field uiType? "BUTTON"|"SLIDER"|"COMBOBOX"|"ICON_BUTTON"|"CHECKBOX"
+---@field values string[]
+---@field defaultIndex? integer
+---@field yearFrom? integer
+---@field yearTo integer
+---@field tooltip string
+---
 ---@class params
-
+---@field modules modules
+---@field classedModules classified_modules
+---
 ---@class result
 ---@field entryConnectors table
 ---@field colliders collider[]
----@field terminalGroups table
+---@field terminalGroups terminal_group[]
 ---@field groundFaces ground_face[]
 ---@field terrainAlignmentLists terrain_alignment[]
----@field stations any
----@field dependentSlots any
----@field edgeLists any
----@field slotConfig any
----@field occupied any
----@field cost any
----@field models any
----@field slots any
----@field labelText any
+---@field stations station[]
+---@field edgeLists edge_list[]
+---@field slotConfig table<string, slotConfig>
+---@field models model[]
+---@field slots slot[]
+---@field labelText? table<integer, string[]> 
+---@field cost? integer
+---@field bulldozeCost? integer
+---@field maintenanceCost? integer
 ---@field connectors any
----@field connectionsany
----@field invokeLaterany
-
+---@field connections any
+---@field invokeLater fun()[]
+---
 ---comment
 ---@param params params
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
-    
-    ---@type result
-    local result = {
-        entryConnectors = {},
-        colliders = {},
-        terrainAlignmentLists = {
-            {type = "EQUAL", faces = {}},
-            {type = "LESS", faces = {}},
-            {type = "GREATER", faces = {}}
-        },
-        groundFaces = {},
-        terminalGroups = {},
-        stations = {},
-        dependentSlots = {},
-        edgeLists = {},
-        slotConfig = {},
-        occupied = {{}, {}, {}, {}},
-        cost = 0,
-        models = pipe.new * {},
-        slots = {},
-        labelText = {},
-        connectors = {
-            overpass = {},
-            underpass = {},
-            misc = {}
-        },
-        connections = {
-            underpass = {}
-        },
-        invokeLater = {}
-    }
-
-    params.debug = true --Crash bug when live text is introduced
-    
-    params.classedModules = classifyModules(params.modules)
-    local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
-    -- dump()(params.classedModules)
-    -- dump()(params.modules)
-    
-    params.grid = grid
-    params.lowestHeight = lowestHeight
-    params.platformHeight = params.lowestHeight + hPlatformList[params.hPlatform + 1] * 0.001
-
-    params.slotGrid = {}
-
-    params.trackGroup = {}
-    params.platformGroup = {}
-    params.edgeIndex = {}
-    params.extra = {}
-
-    searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
-    params.edgeGroup = {}
-
-    for slotId, module in pairs(params.modules) do
-        if module.metadata.slotSetup then
-            game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
-        end
-    end
-    
-    for k, s in pairs(game.res.script) do
-        if s.addSlot and k:match("construction/station/rail/ust/") then
-            s.addSlot(params, result)
-        end
-    end
-    
-    result.terminateConstructionHook = function()
-        for i, track in ipairs(params.trackGroup) do
-            local platform = params.platformGroup[i]
-            if platform then
-                local edge = func.map(track, function(t) return params.edgeGroup[t] end)
-                if (platform.right) then
-                    insert(
-                        result.terminalGroups,
-                        {
-                            terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
-                        }
-                )
-                end
-                
-                if (platform.left) then
-                    insert(
-                        result.terminalGroups,
-                        {
-                            terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
-                        }
-                )
-                end
+        ---@type result
+        local result = {
+            entryConnectors = {},
+            colliders = {},
+            terrainAlignmentLists = {
+                {type = "EQUAL", faces = {}},
+                {type = "LESS", faces = {}},
+                {type = "GREATER", faces = {}}
+            },
+            groundFaces = {},
+            terminalGroups = {},
+            stations = {},
+            edgeLists = {},
+            slotConfig = {},
+            cost = 0,
+            models = pipe.new * {},
+            slots = {},
+            labelText = {},
+            connectors = {
+                overpass = {},
+                underpass = {},
+                misc = {}
+            },
+            connections = {
+                underpass = {}
+            },
+            invokeLater = {}
+        }
+        
+        params.debug = true --Crash bug when live text is introduced
+        
+        params.classedModules = classifyModules(params.modules)
+        local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
+        
+        params.grid = grid
+        params.lowestHeight = lowestHeight
+        params.platformHeight = params.lowestHeight + hPlatformList[params.hPlatform + 1] * 0.001
+        
+        params.slotGrid = {}
+        
+        params.trackGroup = {}
+        params.platformGroup = {}
+        params.edgeIndex = {}
+        params.extra = {}
+        
+        searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
+        params.edgeGroup = {}
+        
+        for slotId, module in pairs(params.modules) do
+            if module.metadata.slotSetup then
+                game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
             end
         end
         
-        for _, z in pairs(params.slotGrid) do
-            for _, x in pairs(z) do
-                for _, y in pairs(x) do
-                    for _, s in pairs(y) do
-                        insert(result.slots, s)
+        for k, s in pairs(game.res.script) do
+            if s.addSlot and k:match("construction/station/rail/ust/") then
+                s.addSlot(params, result)
+            end
+        end
+        
+        result.terminateConstructionHook = function()
+            for i, track in ipairs(params.trackGroup) do
+                local platform = params.platformGroup[i]
+                if platform then
+                    local edge = func.map(track, function(t) return params.edgeGroup[t] end)
+                    if (platform.right) then
+                        insert(
+                            result.terminalGroups,
+                            {
+                                terminals = func.map(platform.models, function(p) return {p, 0} end),
+                                vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
+                            }
+                    )
+                    end
+                    
+                    if (platform.left) then
+                        insert(
+                            result.terminalGroups,
+                            {
+                                terminals = func.map(platform.models, function(p) return {p, 0} end),
+                                vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
+                            }
+                    )
                     end
                 end
             end
+            
+            for _, z in pairs(params.slotGrid) do
+                for _, x in pairs(z) do
+                    for _, y in pairs(x) do
+                        for _, s in pairs(y) do
+                            insert(result.slots, s)
+                        end
+                    end
+                end
+            end
+            
+            for _, fn in ipairs(result.invokeLater) do
+                fn()
+            end
         end
-        
-        for _, fn in ipairs(result.invokeLater) do
-            fn()
-        end
-    end
-    return result
+        return result
 end
 
 function data()

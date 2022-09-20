@@ -38,8 +38,8 @@ function line.new(a, b, c)
     return result
 end
 
----@param vec coor2
----@param pt coor2
+---@param vec coor
+---@param pt coor
 ---@return line
 function line.byVecPt(vec, pt)
     local a = vec.y
@@ -48,8 +48,8 @@ function line.byVecPt(vec, pt)
     return line.new(a, b, c)
 end
 
----@param pt1 coor2
----@param pt2 coor2
+---@param pt1 coor
+---@param pt2 coor
 ---@return line
 function line.byPtPt(pt1, pt2)
     return line.byVecPt(pt2 - pt1, pt2)
@@ -69,7 +69,7 @@ function line.vec(l)
 end
 
 ---@param l line
----@param pt coor2
+---@param pt coor
 ---@return line
 function line.pend(l, pt)
     return line.byVecPt(coor.xy(l.a, l.b), pt)
