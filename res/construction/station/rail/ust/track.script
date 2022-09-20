@@ -83,14 +83,27 @@ local slotSetup = function(params, result, slotId)
         spacing = {0, 0, 0, 0}
     })
     
-    if (info.id ~= 1) then
-        insert(result.slots, {
-            id = makeData(2, -2),
-            transf = transfPosC,
-            type = "ust_remove",
-            spacing = {0, 0, 0, 0}
-        })
+    do
+        local octaModules = {}
+        for i = 1, 8 do
+            octaModules[i] = info.octa[i] and params.modules[info.octa[i]] or false
+        end
+        if not (octaModules[1] and octaModules[1].info.ref.prev
+            or octaModules[5] and octaModules[5].info.ref.next
+            or octaModules[3] and octaModules[3].info.ref.left
+            or octaModules[7] and octaModules[7].info.ref.right)
+        then
+            if (info.id ~= 1) then
+                insert(result.slots, {
+                    id = makeData(2, -2),
+                    transf = transfPosC,
+                    type = "ust_remove",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
     end
+    
     
     insert(
         result.slots,
@@ -110,7 +123,7 @@ local slotSetup = function(params, result, slotId)
                 type = "ust_platform",
                 spacing = {0, 0, 0, 0}
             }
-        )
+    )
     end
     
     ust.initSlotGrid(params, pos)

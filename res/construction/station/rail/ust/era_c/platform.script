@@ -97,14 +97,14 @@ local preProcessAdd = function(modules, change, classedModules, info)
             ref = {left = true}
         elseif isPlatform(3) then
             ref = {right = true}
-
+        
         elseif isPlatform(1) and isPlatform(5) then
             ref = {prev = true}
         elseif isPlatform(1) then
             ref = {next = true}
         elseif isPlatform(5) then
             ref = {prev = true}
-                
+        
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) and not isEmpty(5) then
             ref = {prev = true}
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(5) then
@@ -157,13 +157,25 @@ local slotSetup = function(params, result, slotId)
         spacing = {0, 0, 0, 0}
     })
     
-    if (info.id ~= 1) then
-        insert(result.slots, {
-            id = makeData(2, -2),
-            transf = transfPosC,
-            type = "ust_remove",
-            spacing = {0, 0, 0, 0}
-        })
+    do
+        local octaModules = {}
+        for i = 1, 8 do
+            octaModules[i] = info.octa[i] and params.modules[info.octa[i]] or false
+        end
+        if not (octaModules[1] and octaModules[1].info.ref.prev
+            or octaModules[5] and octaModules[5].info.ref.next
+            or octaModules[3] and octaModules[3].info.ref.left
+            or octaModules[7] and octaModules[7].info.ref.right)
+        then
+            if (info.id ~= 1) then
+                insert(result.slots, {
+                    id = makeData(2, -2),
+                    transf = transfPosC,
+                    type = "ust_remove",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
     end
     
     -- SLot to replace itself
@@ -176,7 +188,6 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
-    
     insert(
         result.slots,
         {
@@ -186,7 +197,6 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
-
     ust.initSlotGrid(params, pos)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
