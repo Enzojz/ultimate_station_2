@@ -39,7 +39,9 @@ local classifyGeometry = function(modules, classified, slotId)
     if (type == 57) then
         modules[slotId].info.length = data
     elseif (type == 58) then
-        modules[slotId].info.height = data
+        modules[slotId].info.width = data
+    elseif (type == 59) then
+        modules[slotId].info.extraHeight = data * 0.1
     end
 end
 

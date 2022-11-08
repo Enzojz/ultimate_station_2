@@ -1,0 +1,108 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+local dump = require "luadump"
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+local abs = math.abs
+local pow = math.pow
+local floor = math.floor
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.type == 87 and info.data == 1 then -- Remove modifer
+        modules[ust.base(info.id, 87)] = nil
+    elseif info.type == 87 and info.data == 0 then
+        modules[ust.base(info.id, 87)] = change.module
+    elseif info.type == 88 or info.type == 89 then
+        ust.gridization(modules, classedModules)
+        local id = info.id
+        local m = modules[classedModules[id].slotId]
+        
+        -- Clear previous radius
+        if classedModules[id].slot[59] then
+            modules[classedModules[id].slot[59]] = nil
+        end
+        
+        modules[classedModules[id].slot[87]].variant = 1 - modules[classedModules[id].slot[87]].variant
+        
+        local delta = info.data * 0.1
+        local extraHeight = (m.info.extraHeight or 0) + delta
+        if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
+        
+        local addSlot = ust.mixData(ust.base(id, 59), extraHeight > 0 and extraHeight % 1000 or -(-extraHeight % 1000))
+        modules[addSlot] = {
+            metadata = {isData = true},
+            name = "station/rail/ust/data_height.module",
+            updateScript = {
+                fileName = "",
+                params = {}
+            },
+            variant = 0
+        }
+    end
+end
+
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
+    if info.type < 50 then
+        modules[slotId] = nil
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+end
+
+local classifyData = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    modules[slotId].info.canModifyHeight = true
+end
+
+local addSlot = function(params, result)
+    local anyHeightModifiable = false
+    for _, module in pairs(params.modules) do
+        anyHeightModifiable = anyHeightModifiable or module.info.canModifyHeight
+    end
+    
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
+            local info = module.info
+            local makeData = module.makeData
+            local transfPosC = info.transf
+            
+            if not anyHeightModifiable then
+                table.insert(result.slots, {
+                    id = makeData(87, 0),
+                    transf = transfPosC,
+                    type = "ust_height_modifier",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
+
+function data()
+    return {
+        classify = classifyData,
+        preProcessAdd = preProcessAdd,
+        preProcessPostAdd = preProcessPostAdd,
+        slotSetup = slotSetup,
+        addSlot = addSlot
+    }
+
+end

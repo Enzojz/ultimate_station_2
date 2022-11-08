@@ -33,6 +33,7 @@ ust.infi = 1e8
 ---@field radius number
 ---@field straight boolean
 ---@field length number
+---@field extraHeight number
 ---@field width number
 ---@field ref {left: boolean, right: boolean, prev:boolean, next: boolean}
 ---@field octa (boolean|integer)[]
@@ -101,7 +102,8 @@ ust.slotIds = function(info)
         } or {},
         data_geometry = {
             ust.mixData(ust.base(info.id, 57), info.length),
-            ust.mixData(ust.base(info.id, 58), info.width)
+            ust.mixData(ust.base(info.id, 58), info.width),
+            ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
         },
         data_ref = {
             info.ref and
@@ -128,11 +130,11 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 24 fences 31 5m Entry 32 10m Entry 33 20m Entry
         -- 3 ~ 6 : id
         -- Information
-        -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 radius 56 is_straight 57 length 58 width 60 ref
+        -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref 
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 radius
+        -- 1 ~ 2 : 80 81 82 83 84 85 86 radius 87 extraHeight
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000

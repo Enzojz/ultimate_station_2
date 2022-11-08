@@ -1,0 +1,122 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+
+local unpack = table.unpack
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+local abs = ma.abs
+local floor = math.floor
+
+local dump = require "luadump"
+
+---comment
+---@param result result
+---@param tag string
+---@param slotId number
+---@param params params
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local makeData = params.modules[sId].makeData
+    
+    -- Entry for radius system
+    local arcs = info.arcs
+    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local posC = (posR + posL) * 0.5
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local transfPosC = rotZ * coor.trans(posC)
+    
+    insert(result.slots, {
+        id = makeData(87, 1),
+        transf = transfPosC,
+        type = "ust_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    -- Radius modify system
+    local var = params.modules[params.classedModules[info.id].slot[87]].variant
+    local rad = arcs.center.inf
+    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
+    local vec = (posR - posL):normalized()
+    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local textR = ("%.3f mm"):format(params.platformHeight)
+    
+    local addText = function(label, pos, fAlign, h)
+        local nameModelsF, width = livetext(h or 2)(label)
+        for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            insert(result.models, m)
+        end
+    end
+
+    
+    local centerPts = ust.basePts(info.arcs.center, 20)
+    local rightPts = ust.basePts(info.arcs.right, 20)
+    addText(textR, rightPts[11], function(w) return coor.xyz(-w, 0, -1) end, 0.5)
+
+    for i = -10, 10, 1 do
+        if (i ~= 0) then
+            local dz = coor.xyz(0, 0, i * 0.1)
+            insert(result.slots, {
+                id = makeData(88 + var, i),
+                transf = coor.scale(coor.xyz(1, 0.25, 1)) * coor.trans(centerPts[i + 11] + dz),
+                type = "ust_height_modifier",
+                shape = 2,
+                spacing = {0, 0, 0, 0}
+            })
+            addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[i + 11] + dz, function(w) return coor.xyz(-w, 0, -1) end, 0.5)
+        end
+    end
+
+
+    local ptS, vecS = unpack(info.pts[info.refPos.y < 0 and 2 or 1])
+    vecS = vecS:normalized()
+    if info.refPos.y < 0 then vecS = -vecS end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_HEIGHT_MODIFIER"),
+            description = _("MENU_HEIGHT_MODIFIER_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_modifier"},
+        },
+        type = "ust_height_modifier",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            typeName = "ust_height_modifier",
+            isData = true,
+            type = 2,
+            scriptName = "construction/station/rail/ust/height_modifier",
+            preProcessAdd = "preProcessAdd",
+            preProcessPostAdd = "preProcessPostAdd",
+            classify = "classify",
+            slotSetup = "slotSetup"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
