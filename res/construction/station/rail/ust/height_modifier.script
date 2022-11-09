@@ -22,19 +22,20 @@ local preProcessAdd = function(modules, change, classedModules, info)
         
         -- Clear previous radius
         if classedModules[id].slot[59] then
+            dump()(classedModules[id].slot[59])
             modules[classedModules[id].slot[59]] = nil
         end
         
         modules[classedModules[id].slot[87]].variant = 1 - modules[classedModules[id].slot[87]].variant
         
-        local delta = info.data * 0.1
-        local extraHeight = (m.info.extraHeight or 0) + delta
+        local delta = info.data
+        local extraHeight = (m.info.extraHeight or 0) * 10 + delta
         if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
         
-        local addSlot = ust.mixData(ust.base(id, 59), extraHeight > 0 and extraHeight % 1000 or -(-extraHeight % 1000))
+        local addSlot = ust.mixData(ust.base(id, 59), extraHeight)
         modules[addSlot] = {
             metadata = {isData = true},
-            name = "station/rail/ust/data_height.module",
+            name = "station/rail/ust/data_geometry.module",
             updateScript = {
                 fileName = "",
                 params = {}

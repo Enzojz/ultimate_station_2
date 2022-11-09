@@ -45,7 +45,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
     local vec = (posR - posL):normalized()
     local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local textR = ("%.3f mm"):format(params.platformHeight)
+    local textR = ("%d mm"):format((params.platformHeight + (info.extraHeight or 0)) * 1000)
     
     local addText = function(label, pos, fAlign, h)
         local nameModelsF, width = livetext(h or 2)(label)

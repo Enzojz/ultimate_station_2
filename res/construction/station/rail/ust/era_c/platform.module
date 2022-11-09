@@ -57,7 +57,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    local hRef = params.platformHeight
+    local hRef = params.platformHeight + (info.extraHeight or 0)
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
     

@@ -157,8 +157,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local catenary = closureParams.catenary
         
         local info = params.modules[slotId].info
-        
-        local zOffset = params.modules[slotId].metadata.height - params.lowestHeight
+        dump()(info.extraHeight)
+        local zOffset = params.modules[slotId].metadata.height - params.lowestHeight + (info.extraHeight or 0)
         
         local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
         local e = pipe.new
