@@ -3,104 +3,104 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 3456,
-               offset = 93080
+               count = 1776,
+               offset = 50128
             },
             position = {
-               count = 3456,
-               offset = 89624
+               count = 1776,
+               offset = 48352
             },
             tangent = {
-               count = 3456,
-               offset = 96536
+               count = 1776,
+               offset = 51904
             },
             uv0 = {
-               count = 3456,
-               offset = 99992
+               count = 1776,
+               offset = 53680
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 5184,
-               offset = 108632
+               count = 2880,
+               offset = 58336
             },
             position = {
-               count = 5184,
-               offset = 103448
+               count = 2880,
+               offset = 55456
             },
             tangent = {
-               count = 5184,
-               offset = 113816
+               count = 2880,
+               offset = 61216
             },
             uv0 = {
-               count = 5184,
-               offset = 119000
+               count = 2880,
+               offset = 64096
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 864,
-               offset = 125048
+               count = 480,
+               offset = 67456
             },
             position = {
-               count = 864,
-               offset = 124184
+               count = 480,
+               offset = 66976
             },
             tangent = {
-               count = 864,
-               offset = 125912
+               count = 480,
+               offset = 67936
             },
             uv0 = {
-               count = 864,
-               offset = 126776
+               count = 480,
+               offset = 68416
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 432,
-               offset = 128072
+               count = 240,
+               offset = 69136
             },
             position = {
-               count = 432,
-               offset = 127640
+               count = 240,
+               offset = 68896
             },
             tangent = {
-               count = 432,
-               offset = 128504
+               count = 240,
+               offset = 69376
             },
             uv0 = {
-               count = 432,
-               offset = 128936
+               count = 240,
+               offset = 69616
             }
          }
       }
    },
    vertexAttr = {
       normal = {
-         count = 29808,
+         count = 16128,
          numComp = 3,
-         offset = 7320
+         offset = 3888
       },
       position = {
-         count = 7320,
+         count = 3888,
          numComp = 3,
          offset = 0
       },
       tangent = {
-         count = 39744,
+         count = 21504,
          numComp = 4,
-         offset = 37128
+         offset = 20016
       },
       uv0 = {
-         count = 12752,
+         count = 6832,
          numComp = 2,
-         offset = 76872
+         offset = 41520
       }
    }
 } end

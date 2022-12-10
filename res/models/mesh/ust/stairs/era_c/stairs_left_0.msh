@@ -4,19 +4,19 @@ function data() return {
          indices = {
             normal = {
                count = 240,
-               offset = 11792
+               offset = 11784
             },
             position = {
                count = 240,
-               offset = 11552
+               offset = 11544
             },
             tangent = {
                count = 240,
-               offset = 12032
+               offset = 12024
             },
             uv0 = {
                count = 240,
-               offset = 12272
+               offset = 12264
             }
          }
       },
@@ -24,19 +24,19 @@ function data() return {
          indices = {
             normal = {
                count = 840,
-               offset = 13352
+               offset = 13344
             },
             position = {
                count = 840,
-               offset = 12512
+               offset = 12504
             },
             tangent = {
                count = 840,
-               offset = 14192
+               offset = 14184
             },
             uv0 = {
                count = 840,
-               offset = 15032
+               offset = 15024
             }
          }
       },
@@ -44,19 +44,19 @@ function data() return {
          indices = {
             normal = {
                count = 144,
-               offset = 16016
+               offset = 16008
             },
             position = {
                count = 144,
-               offset = 15872
+               offset = 15864
             },
             tangent = {
                count = 144,
-               offset = 16160
+               offset = 16152
             },
             uv0 = {
                count = 144,
-               offset = 16304
+               offset = 16296
             }
          }
       },
@@ -64,19 +64,19 @@ function data() return {
          indices = {
             normal = {
                count = 72,
-               offset = 16520
+               offset = 16512
             },
             position = {
                count = 72,
-               offset = 16448
+               offset = 16440
             },
             tangent = {
                count = 72,
-               offset = 16592
+               offset = 16584
             },
             uv0 = {
                count = 72,
-               offset = 16664
+               offset = 16656
             }
          }
       }
@@ -98,7 +98,7 @@ function data() return {
          offset = 5088
       },
       uv0 = {
-         count = 1280,
+         count = 1272,
          numComp = 2,
          offset = 10272
       }

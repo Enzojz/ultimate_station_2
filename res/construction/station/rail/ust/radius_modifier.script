@@ -16,6 +16,12 @@ local preProcessAdd = function(radiusFn)
         if info.type == 80 and info.data == 1 then
             modules[ust.base(info.id, 80)] = nil
         elseif info.type == 80 and info.data == 0 then
+            for i = 80, 99 do
+                if modules[ust.base(info.id, i)] then
+                    modules[ust.mixData(ust.base(info.id, i), 1)] = nil
+                    modules[ust.base(info.id, i)] = nil
+                end
+            end
             modules[ust.base(info.id, 80)] = change.module
         elseif info.type >= 81 and info.type <= 86 then
             ust.gridization(modules, classedModules)
@@ -112,14 +118,14 @@ local slotSetup = function(params, result, slotId)
     local id = info.id
     local parent = params.classedModules[id].slotId
     local m = params.modules[parent]
-
+    
     insert(result.slots, {
         id = slotId,
         transf = m.info.transf,
         type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
-    
+
 end
 
 local classifyData = function(modules, classified, slotId)
@@ -133,7 +139,7 @@ local addSlot = function(params, result)
     for _, module in pairs(params.modules) do
         anyRadiusModifiable = anyRadiusModifiable or module.info.canModifyRadius
     end
-
+    
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
         if (module.metadata and module.metadata.isTrack) then

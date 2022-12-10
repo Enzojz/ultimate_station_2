@@ -398,7 +398,7 @@ ust.gridization = function(modules, classedModules)
                             yState.vec = vec
                         end
                     end
-                    
+
                     if not yState.radius then
                         -- If no radius defined
                         if ref == m.info.octa[5] or ref == m.info.octa[1] then
@@ -444,7 +444,6 @@ ust.gridization = function(modules, classedModules)
                             end
                         end
                     end
-                    
                     
                     modules[slotId].info.radius = yState.radius
                     modules[slotId].info.length = yState.length

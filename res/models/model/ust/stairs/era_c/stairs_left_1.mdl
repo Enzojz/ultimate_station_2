@@ -1,48 +1,46 @@
 local laneutil = require "laneutil"
 function data() return {
-    boundingInfo = {
-        bbMax = {0.950006, 0.500000, 8.250011},
-        bbMin = {-1.500529, -0.500002, 6.600004}
-    },
-    collider = {
-        params = {
-        
-        },
-        type = "MESH"
-    },
-    lods = {
-        {
-            node = {
-                materials = {"ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked_2.mtl", "ust/stairs/fence_red_masked.mtl"},
-                mesh = "ust/stairs/era_c/stairs_left_1.msh",
-                name = "stairs_left_1",
-                transf = {
-                    1.000000, 0.000000, 0.000000, 0.000000,
-                    0.000000, 1.000000, 0.000000, 0.000000,
-                    0.000000, 0.000000, 1.000000, 0.000000,
-                    0.000000, 0.000000, 0.000000, 1.000000,
-                }
-            },
-            static = false,
-            visibleFrom = 0,
-            visibleTo = 1000
-        }
-    },
-    metadata = {
-        transportNetworkProvider = {
-            laneLists = {
-                laneutil.createLanes({
-                    curves = {
-                        {
-                            {{0, -0.5, 8}, {0, 0, 8}},
-                            {{0, 0, 8}, {0, 0.5, 8}},
-                            {{0, 0, 8}, {-1, 0, 8}}
-                        }
-                    }
-                }, {"PERSON"}, 20, 3, false)
-            },
-        }
-    
-    },
-    version = 1
+   boundingInfo = {
+      bbMax = { 0.950006, 0.500000, 1.650012 },
+      bbMin = { -1.000003, -0.500002, 0.000004 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked_2.mtl", "ust/stairs/fence_red_masked.mtl" },
+            mesh = "ust/stairs/era_c/stairs_left_1.msh",
+            name = "stairs_left_1",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+      transportNetworkProvider = {
+          laneLists = {
+              laneutil.createLanes({
+                  curves = {
+                      {
+                          {{0, -0.5, 0.4}, {0, 0, 0.4}},
+                          {{0, 0, 0.4}, {0, 0.5, 0.4}},
+                          {{0, 0, 0.4}, {-1, 0, 0.4}}
+                      }
+                  }
+              }, {"PERSON"}, 20, 3, false)
+          },
+      }
+
+   },
+   version = 1
 } end

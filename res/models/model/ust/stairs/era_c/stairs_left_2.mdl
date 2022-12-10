@@ -1,13 +1,10 @@
-local laneutil = require "laneutil"
 function data() return {
    boundingInfo = {
-      bbMax = { 0.950006, 1.449998, 8.250017 },
-      bbMin = { -1.500529, 0.500000, 6.600005 }
+      bbMax = { 0.950006, 1.449998, 1.650016 },
+      bbMin = { -1.000003, 0.500000, 0.000005 }
    },
    collider = {
-      params = {
-
-      },
+      params = {  },
       type = "MESH"
    },
    lods = {

@@ -1,9 +1,16 @@
 local ust = require "ust"
+local dump = require "luadump"
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 90 and info.data == 1 then
         modules[ust.base(info.id, 90)] = nil
     elseif info.type == 90 and info.data == 0 then
+        for i = 80, 99 do
+            if modules[ust.base(info.id, i)] then
+                modules[ust.mixData(ust.base(info.id, i), 1)] = nil
+                modules[ust.base(info.id, i)] = nil
+            end
+        end
         modules[ust.base(info.id, 90)] = change.module
     elseif info.type == 91 then
         ust.gridization(modules, classedModules)
@@ -11,7 +18,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
         
         local oldSlot = classedModules[id].slot[60]
         local _, _, oldData = ust.slotInfo(oldSlot)
-
+        
         if (oldData + info.data ~= 0) then -- Prevent case no ref
             modules[oldSlot] = nil
             
@@ -46,7 +53,7 @@ local addSlot = function(params, result)
     for _, module in pairs(params.modules) do
         anyRefModifiable = anyRefModifiable or module.info.canModifyRef
     end
-
+    
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
         if (module.metadata and (module.metadata.isPlatform or module.metadata.isTrack)) then

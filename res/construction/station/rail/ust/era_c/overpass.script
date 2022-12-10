@@ -26,13 +26,6 @@ local interCoords = {
     coor.xyz(0, -1.45, 0),
 }
 
-local rectBase = {
-    coor.xyz(-1, 0, 0),
-    coor.xyz(1, 0, 0),
-    coor.xyz(1, 11, 0),
-    coor.xyz(-1, 11, 0),
-}
-
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -53,13 +46,19 @@ local addSlot = function(params, result)
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef)
-    local hTrans = coor.trans(hVec)
-    
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
     local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local extraHeight = info.extraHeight or 0
+    local hRef = params.platformHeight
+    local hTrans = coor.transZ(hRef)
+    local htTrans = coor.transZ(hRef + extraHeight)
+    local refLevel = 7.6
+    local hRefTrans = coor.transZ(refLevel)
+
+    local delta = refLevel - 3.6 - hRef
+    local ncomp =  math.floor(delta / 0.2)
     
     local allOverpass = pipe.new * func.values(params.modules)
         * pipe.filter(function(m) return m.metadata.isOverpass end)
@@ -83,7 +82,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local centerPt = centerPts[3]
     local centerVec = centerVecs[3]
     
-    local centerTransf = hTrans * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+    local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+    local centerTransf = hRefTrans * centerTransfZ0
     local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
     
     if slotId == allOverpass[#allOverpass] and #allOverpass > 1 then
@@ -124,7 +124,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end
     end
     
-    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, centerTransf))
+    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hRef) * hTrans * centerTransfZ0))
     
     if closureParams.orientation < 1 and info.octa[1] then
         local m = params.modules[info.octa[1]]
@@ -134,15 +134,29 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local baseRef = ust.basePts(info.arcs.center, 16)[4]
         insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
 
-        local sideVec = interPts[5]:withZ(0) - baseRef
-        local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
+        local sideVec = (interPts[5]:withZ(0) - baseRef):normalized()
+        local sideVecTransf = quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot()
+        
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, hTrans * sideVecTransf * coor.trans(baseRef)))
+
+        for i = 0, ncomp do
+            local h = hRef + 3.6 + 0.2 * i
+            local pos = baseRef + sideVec * (6 + i * 0.25)
+            local transf = sideVecTransf * coor.trans(pos)* coor.transZ(h)
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+        end
+        
+        local rectBase = {
+            coor.xyz(1, 6 + ncomp * 0.25 + 0.25, 0),
+            coor.xyz(-1, 6 + ncomp * 0.25 + 0.25, 0),
+        }
+
+        local sideTransf = sideVecTransf * coor.trans(baseRef) * coor.transZ(hRef + 3.6 + 0.2 * ncomp)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
-        
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf))
-        
+
         local interCoords = {
-            lt = sidePts[3],
-            rt = sidePts[4],
+            lt = sidePts[1],
+            rt = sidePts[2],
             lb = interPts[4],
             rb = interPts[3]
         }
@@ -162,17 +176,31 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local baseRef = ust.basePts(info.arcs.center, 16)[14]
         insert(result.models, ust.unitLane(connectPt, baseRef .. hTrans, tag))
         
-        local sideVec = interPts[6]:withZ(0) - baseRef
-        local sideTransf = hTrans * quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot() * coor.trans(baseRef)
+        local sideVec = (interPts[6]:withZ(0) - baseRef):normalized()
+        local sideVecTransf = quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot()
+        
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, hTrans * sideVecTransf * coor.trans(baseRef)))
+        
+        for i = 0, ncomp do
+            local h = hRef + 3.6 + 0.2 * i
+            local pos = baseRef + sideVec * (6 + i * 0.25)
+            local transf = sideVecTransf * coor.trans(pos)* coor.transZ(h)
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+        end
+
+        local rectBase = {
+            coor.xyz(1, 6 + ncomp * 0.25 + 0.25, 0),
+            coor.xyz(-1, 6 + ncomp * 0.25 + 0.25, 0),
+        }
+
+        local sideTransf = sideVecTransf * coor.trans(baseRef) * coor.transZ(hRef + 3.6 + 0.2 * ncomp)
         local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
-        
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, sideTransf))
-        
+
         local interCoords = {
             lt = interPts[1],
             rt = interPts[2],
-            lb = sidePts[4],
-            rb = sidePts[3],
+            lb = sidePts[2],
+            rb = sidePts[1],
         }
         
         insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt) .. coor.transZ(8), interCoords.lb:avg(interCoords.rb) .. coor.transZ(8), tag))
@@ -200,7 +228,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local centerPt = centerPts[3]
             local centerVec = centerVecs[3]
             
-            local centerTransf = hTrans * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+            local centerTransf = hRefTrans * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
             local prevRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
             
             local overpassCoords = {

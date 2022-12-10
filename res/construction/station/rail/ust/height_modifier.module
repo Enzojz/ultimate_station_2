@@ -64,9 +64,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local dz = coor.xyz(0, 0, i * 0.1)
             insert(result.slots, {
                 id = makeData(88 + var, i),
-                transf = coor.scale(coor.xyz(1, 0.25, 1)) * coor.trans(centerPts[i + 11] + dz),
+                transf = coor.scale(coor.xyz(1, 0.2, 1)) * coor.trans(rightPts[i + 11] + dz),
                 type = "ust_height_modifier",
-                shape = 2,
+                shape = 0,
+                height = i * 0.1 + rightPts[i + 11].z,
                 spacing = {0, 0, 0, 0}
             })
             addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[i + 11] + dz, function(w) return coor.xyz(-w, 0, -1) end, 0.5)

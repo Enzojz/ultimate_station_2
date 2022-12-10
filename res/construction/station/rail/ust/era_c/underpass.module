@@ -12,14 +12,15 @@ local bottomConnector = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef)
-    local hTrans = coor.trans(hVec)
-    
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
     local makeData = params.modules[params.classedModules[id].slotId].makeData
-    
+    local extraHeight = info.extraHeight or 0
+
+    local hRef = params.platformHeight
+    local hVec = coor.xyz(0, 0, hRef + extraHeight)
+    local hTrans = coor.trans(hVec)
+        
     local n = 4
     local centerPts = ust.basePts(info.arcs.center, n)
     local refPos = centerPts[3]

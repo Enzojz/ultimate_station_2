@@ -1,47 +1,101 @@
-local coor = require "ust/coor"
-local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
 local ust = require "ust"
 local dump = require "luadump"
 local insert = table.insert
-local ma = math
-local pi = ma.pi
-local abs = math.abs
-local pow = math.pow
-local floor = math.floor
+
+local setHeight = function(modules, classedModules, slotId, height)
+    local m = modules[slotId]
+    local info = m.info
+    local id = info.id
+
+    if classedModules[id].slot[59] then
+        modules[classedModules[id].slot[59]] = nil
+    end
+
+    local addSlot = ust.mixData(ust.base(id, 59), height)
+    modules[addSlot] = {
+        metadata = {isData = true},
+        name = "station/rail/ust/data_geometry.module",
+        updateScript = {
+            fileName = "",
+            params = {}
+        },
+        variant = 0
+    }
+end
+
+local setPlatformHeight = function(modules, classedModules, slotId, height)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs(info.octa) do
+            if octa and modules[octa] and modules[octa].metadata.isPlatform then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
+        end
+    end
+
+    searchModules(slotId)
+
+    for slotId, _ in pairs(lut) do
+        setHeight(modules, classedModules, slotId, height)
+    end
+end
+
+
+local setTrackHeight = function(modules, classedModules, slotId, height)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        dump()(info.octa)
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and modules[octa].metadata.isTrack then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
+        end
+    end
+
+    searchModules(slotId)
+
+    for slotId, _ in pairs(lut) do
+        setHeight(modules, classedModules, slotId, height)
+    end
+end
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 87 and info.data == 1 then -- Remove modifer
         modules[ust.base(info.id, 87)] = nil
     elseif info.type == 87 and info.data == 0 then
+        for i = 80, 99 do
+            if modules[ust.base(info.id, i)] then
+                modules[ust.mixData(ust.base(info.id, i), 1)] = nil
+                modules[ust.base(info.id, i)] = nil
+            end
+        end
         modules[ust.base(info.id, 87)] = change.module
     elseif info.type == 88 or info.type == 89 then
         ust.gridization(modules, classedModules)
         local id = info.id
         local m = modules[classedModules[id].slotId]
-        
-        -- Clear previous radius
-        if classedModules[id].slot[59] then
-            dump()(classedModules[id].slot[59])
-            modules[classedModules[id].slot[59]] = nil
-        end
-        
+                
         modules[classedModules[id].slot[87]].variant = 1 - modules[classedModules[id].slot[87]].variant
         
         local delta = info.data
         local extraHeight = (m.info.extraHeight or 0) * 10 + delta
         if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
-        
-        local addSlot = ust.mixData(ust.base(id, 59), extraHeight)
-        modules[addSlot] = {
-            metadata = {isData = true},
-            name = "station/rail/ust/data_geometry.module",
-            updateScript = {
-                fileName = "",
-                params = {}
-            },
-            variant = 0
-        }
+
+        if m.metadata.isTrack then
+            setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+        elseif m.metadata.isPlatform then
+            setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+        end
     end
 end
 

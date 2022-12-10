@@ -340,11 +340,11 @@ local updateFn = function(params, closureParams)
         params.debug = true
         
         params.classedModules = classifyModules(params.modules)
-        local grid, lowestHeight = ust.gridization(params.modules, params.classedModules)
+        local grid, refHeight = ust.gridization(params.modules, params.classedModules)
         
         params.grid = grid
-        params.lowestHeight = lowestHeight
-        params.platformHeight = params.lowestHeight + hPlatformList[params.hPlatform + 1] * 0.001
+        params.refHeight = refHeight
+        params.platformHeight = params.refHeight + hPlatformList[params.hPlatform + 1] * 0.001
         
         params.slotGrid = {}
         
