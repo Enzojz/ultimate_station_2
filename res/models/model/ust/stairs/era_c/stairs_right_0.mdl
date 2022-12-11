@@ -1,8 +1,8 @@
 local laneutil = require "laneutil"
 function data() return {
    boundingInfo = {
-      bbMax = { 1.004004, -0.500000, 1.650015 },
-      bbMin = { -0.949995, -1.450008, 0.000006 }
+      bbMax = { 1.004004, -0.500000, 1.250015 },
+      bbMin = { -0.949995, -1.450008, -0.399994 }
    },
    collider = {
       params = {  },
@@ -32,7 +32,7 @@ function data() return {
               laneutil.createLanes({
                   curves = {
                       {
-                          {{0, -1.45, 0.4}, {0, -0.5, 0.4}}
+                          {{0, -1.45, 0}, {0, -0.5, 0}}
                       }
                   }
               }, {"PERSON"}, 20, 3, false)
