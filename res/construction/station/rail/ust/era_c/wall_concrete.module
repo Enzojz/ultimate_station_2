@@ -1,0 +1,84 @@
+local coor = require "ust/coor"
+local ust = require "ust"
+local general = require "ust/general"
+local quat = require "ust/quaternion"
+
+local ma = math
+
+local insert = table.insert
+local dump = require "luadump"
+
+local fitModels = ust.fitModel(0.5, 5, 5, true, true)
+
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local extraHeight = info.extraHeight or 0
+
+    local hTrans = coor.transZ(params.platformHeight + extraHeight)
+    
+    local id = params.modules[slotId].info.id
+    local data = params.modules[slotId].info.data
+    local info = params.modules[params.classedModules[id].slotId].info
+    
+    -- if n == 0 then n = 1 end
+    if data == 3 or data == 7 then 
+        local n = 4
+        local cpts = ust.basePts(info.arcs.center, n)
+        local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
+        
+        for i = 1, n do
+            local coords = {
+                rt = pts[i],
+                rb = pts[i + 1],
+                lt = (cpts[i] - pts[i]):normalized() * 0.5 + pts[i],
+                lb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.5 + pts[i + 1]
+            }
+            
+            insert(result.models, general.newModel("ust/walls/concrete_wall_tl.mdl", tag, coor.scaleZ(3) * hTrans * fitModels(coords, true)))
+            insert(result.models, general.newModel("ust/walls/concrete_wall_br.mdl", tag, coor.scaleZ(3) * hTrans * fitModels(coords, false)))
+        end
+    end
+
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_WALL_CONCRETE"),
+            description = _("MENU_MODULE_WALL_CONCRETE_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_building"},
+        },
+        type = "ust_component_fence",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/era_c/fence",
+            classify = "classify",
+            typeName = "ust_component_fence",
+            isComponent = true,
+            isFence = true,
+            typeId = 24,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -198,7 +198,10 @@ local function addModels(mdlList, transf, tag, result)
 end
 
 local updateFnSide = function(result, transform, tag, slotId, addModelFn, params, config)
-    local hRef = params.platformHeight
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local extraHeight = info.extraHeight or 0
+    local hRef = params.platformHeight + extraHeight
     local hVec = coor.xyz(0, 0, hRef - 0.8)
     local hTrans = coor.trans(hVec)
     local hTransP = coor.trans(coor.xyz(0, 0, hRef))
@@ -330,7 +333,10 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
 end
 
 local updateFnHead = function(result, transform, tag, slotId, addModelFn, params, config)
-    local hRef = params.platformHeight
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local extraHeight = info.extraHeight or 0
+    local hRef = params.platformHeight + extraHeight
     local hVec = coor.xyz(0, 0, hRef - 0.8)
     local hTrans = coor.trans(hVec)
     local hTransP = coor.trans(coor.xyz(0, 0, hRef))

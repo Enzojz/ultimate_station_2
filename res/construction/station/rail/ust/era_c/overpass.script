@@ -175,8 +175,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt), interCoords.lb:avg(interCoords.rb), tag))
         insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
         insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
-    
-    
     end
     
     if closureParams.orientation > -1 and info.octa[5] then
@@ -225,7 +223,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
         insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
 
-        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt) .. coor.transZ(8), interCoords.lb:avg(interCoords.rb) .. coor.transZ(8), tag))
+        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt), interCoords.lb:avg(interCoords.rb), tag))
         insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
         insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
     

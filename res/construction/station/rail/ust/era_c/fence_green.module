@@ -15,6 +15,8 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
+local dump = require "luadump"
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
@@ -29,7 +31,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[params.classedModules[id].slotId].info
     
     -- if n == 0 then n = 1 end
-    
     if data == 3 or data == 7 then 
         local n = 10
         local pts, vec = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)

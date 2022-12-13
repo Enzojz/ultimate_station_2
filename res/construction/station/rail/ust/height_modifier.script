@@ -52,7 +52,6 @@ local setTrackHeight = function(modules, classedModules, slotId, height)
         lut[slotId] = true
         local m = modules[slotId]
         local info = m.info
-        dump()(info.octa)
         for _, octa in ipairs({info.octa[1], info.octa[5]}) do
             if octa and modules[octa] and modules[octa].metadata.isTrack then
                 if not lut[octa] then

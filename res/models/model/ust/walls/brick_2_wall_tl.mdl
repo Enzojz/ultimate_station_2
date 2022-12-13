@@ -1,0 +1,32 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 0.500000, 0.000000, 1.000000 },
+      bbMin = { 0.000000, -5.000000, 0.000000 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/uz/brick_2.mtl", "ust/uv/brick_2.mtl" },
+            mesh = "ust/walls/brick_2_wall_tl.msh",
+            name = "brick_2_wall_tl",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 2000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end
