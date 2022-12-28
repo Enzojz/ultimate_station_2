@@ -11,6 +11,8 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
+local dump = require "luadump"
+
 local fitModels = {
     surface = ust.fitModel(3.3, 5, -2, true, true),
     edge = ust.fitModel(0.85, 5, -2, true, true),
@@ -69,6 +71,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
     local centerPts = ust.basePts(info.arcs.center, n)
+
+    dump()({
+        id = info.id,
+        left = leftPts,
+        right = rightPts
+    })
 
     local leftEdge = {}
     local rightEdge = {}
