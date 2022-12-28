@@ -51,6 +51,7 @@ function data()
                         preProcessRemove = "preProcessRemove",
                         slotSetup = "slotSetup",
                         preClassify = "preClassify",
+                        gridization = "gridization"
                     }
                     
                     mod.category.categories = catenary and { "ust_cat_track_cat" } or { "ust_cat_track" }

@@ -54,6 +54,7 @@ function data()
             preProcessAdd = "preProcessAdd",
             slotSetup = "slotSetup",
             preClassify = "preClassify",
+            gridization = "gridization"
         },
         
         updateFn = updateFn,

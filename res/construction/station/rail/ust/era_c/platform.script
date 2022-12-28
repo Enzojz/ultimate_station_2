@@ -3,10 +3,16 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local ust = require "ust"
 
+local arc = require "ust/coorarc"
+local line = require "ust/coorline"
+
 local insert = table.insert
 local math = math
 local abs = math.abs
 local floor = math.floor
+local pi = math.pi
+
+local ustg = require "ust_gridization"
 
 local getTranfs = function(info, pos, width)
     local refArc = info.arcs.center
@@ -227,12 +233,223 @@ local preProcessRemove = function(modules, change, classedModules, info)
     modules[change.slotId] = nil
 end
 
+---@alias grid integer[][][]
+-- It's a long single-usage function so I seperate it
+---@param arc arc
+---@return fun(l: line, ptvec: coor3[])
+local calculateLimit = function(arc)
+        ---@param l line
+        ---@param ptvec coor3[]
+        ---@return number
+        return function(l, ptvec)
+            local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
+            return arc:rad(pt)
+        end
+end
+
+local platformArcs = function(x, y, z, data)
+    local slotId = data.grid[z][x][y]
+    local m = data.modules[slotId]
+    local ref = m.info.ref or {}
+    m.info.ref = ref
+    
+    local aligned = false;
+    if ref.left or ref.right then
+        local refModule = function(offset)
+            local refModule = data.modules[data.grid[z][x + offset][y]]
+            local refO = refModule.info.arcs.center.o
+            local refRadius = refModule.info.radius + (data.xState.pos[x] - data.xState.pos[x + offset])
+            return refModule,
+                function() return arc.byOR(refO, refRadius - m.info.width * 0.5, refModule.info.arcs.center:limits()) end,
+                function() return arc.byOR(refO, refRadius + m.info.width * 0.5, refModule.info.arcs.center:limits()) end
+        end
+        local calculate = function(arL, arR, refModule, refModule2)
+            local supFar = function(ar)
+                return m.info.octa[1] and ar:rad(data.modules[m.info.octa[1]].info.pts[1][1]) or ar:rad(data.yState.pos)
+            end
+            local infFar = function(ar, refModule)
+                return m.info.refPos.y == 0
+                    and refModule.info.arcs.center.inf
+                    or (m.info.octa[5] and ar:rad(data.modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(data.yState.pos))
+            end
+            local limit = function(limL, limR, p, fFar)
+                if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+                    local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
+                    local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arL.o) or (arL.o - refModule.info.pts[p][1])):normalized()
+                    local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arR.o) or (arR.o - refModule2.info.pts[p][1])):normalized()
+                    local lim = line.byVecPt((vecLimL + vecLimR):normalized(), limit)
+                    return
+                        calculateLimit(arL)(lim, refModule.info.pts[p]),
+                        calculateLimit(arR)(lim, refModule2.info.pts[p]),
+                        fFar(arL, refModule), fFar(arR, refModule2)
+                elseif refModule.metadata.isTrack then
+                    local lim = refModule.info.limits[p]
+                    return
+                        calculateLimit(arL)(lim, refModule.info.pts[p]),
+                        calculateLimit(arR)(lim, refModule.info.pts[p]),
+                        fFar(arL, refModule), fFar(arR, refModule)
+                else
+                    return limL, limR,
+                        fFar(arL, refModule), fFar(arR, refModule)
+                end
+            end
+            if m.info.refPos.y < 0 then
+                local infL, infR, supL, supR = limit(refModule.info.arcs.center.inf, (refModule2 or refModule).info.arcs.center.inf, 1, supFar)
+                arL = arL:withLimits({inf = infL, sup = supL})
+                arR = arR:withLimits({inf = infR, sup = supR})
+            else
+                local supL, supR, infL, infR = limit(refModule.info.arcs.center.sup, (refModule2 or refModule).info.arcs.center.sup, 2, infFar)
+                arL = arL:withLimits({inf = infL, sup = supL})
+                arR = arR:withLimits({inf = infR, sup = supR})
+            end
+            return arL, arR
+        end
+        if ref.left and ref.right then
+            local leftModule, fArL = refModule(-1)
+            local rightModule, _, fArR = refModule(1)
+            arL = fArL()
+            arR = fArR()
+            arL, arR = calculate(arL, arR, leftModule, rightModule)
+        elseif ref.left then
+            local leftModule, fArL, fArR = refModule(-1)
+            arL = fArL()
+            arR = fArR()
+            arL, arR = calculate(arL, arR, leftModule)
+        elseif ref.right then
+            local rightModule, fArL, fArR = refModule(1)
+            arL = fArL()
+            arR = fArR()
+            arL, arR = calculate(arL, arR, rightModule)
+        end
+        aligned = true
+    elseif ref.prev then
+        local arcs = data.modules[m.info.octa[5]].info.arcs
+        
+        arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
+        arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+        
+        arL = arL:withLimits({
+            inf = arL.sup,
+            sup = arL.sup + arL.sup - arL.inf
+        })
+        
+        arR = arR:withLimits({
+            inf = arR.sup,
+            sup = arR.sup - arR.inf + arR.sup
+        })
+        
+        aligned = true
+    elseif ref.next then
+        local arcs = data.modules[m.info.octa[1]].info.arcs
+        
+        arL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
+        arR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+        
+        arL = arL:withLimits({
+            sup = arL.inf,
+            inf = arL.inf + arL.inf - arL.sup
+        })
+        
+        arR = arR:withLimits({
+            sup = arR.inf,
+            inf = arR.inf + arR.inf - arR.sup
+        })
+        
+        aligned = true
+    end
+    
+    if aligned then
+        local pts = {
+            arL:pt(arL.inf):avg(arR:pt(arR.inf)),
+            nil,
+            arL:pt(arL.sup):avg(arR:pt(arR.sup))
+        }
+        pts[2] = arL:ptByPt(pts[1]:avg(pts[3])):avg(arR:ptByPt(pts[1]:avg(pts[3])))
+        local midPts = {
+            pts[1]:avg(pts[2]),
+            pts[3]:avg(pts[2])
+        }
+        
+        local lines = {
+            line.pend(line.byPtPt(pts[1], pts[2]), midPts[1]),
+            line.pend(line.byPtPt(pts[3], pts[2]), midPts[2]),
+        }
+        
+        local o = lines[1] - lines[2]
+        if not o then
+            local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+            local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+            local midPt = pts[1]:avg(pts[3])
+            o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ(0.5 * pi)) * normalLength
+            r = 10e8
+        end
+        
+        o = o:withZ(0)
+        
+        local vecInf = pts[1] - o
+        local vecSup = pts[3] - o
+        
+        local r = vecInf:length()
+        if r > 10e8 then
+            local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
+            local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+            o = pts[1]:avg(pts[3]) + (o - pts[2]):normalized() * normalLength
+            vecInf = pts[1] - o
+            vecSup = pts[3] - o
+            r = 10e8
+        end
+        ar = arc.byOR(o, r)
+        
+        local inf = ar:rad(pts[1])
+        
+        local length = math.asin(vecInf:cross(vecSup).z / (r * r)) * r
+        local sup = inf + length / r
+        ar = ar:withLimits({
+            sup = sup,
+            inf = inf
+        })
+        m.info.radius = (length > 0 and 1 or -1) * r
+        m.info.length = math.abs(length)
+    end
+    
+    m.info.arcs = {
+        left = arL,
+        right = arR,
+        center = ar
+    }
+    m.info.pts = ustg.refArc2Pts(m.info.arcs)
+end
+
+local function gridization(x, y, z, data)
+    local slotId = data.grid[z][x][y]
+    ustg.calculateRaidus(x, y, z, data)
+    ustg.genericArcs(x, y, z, data)
+    
+    coroutine.yield()
+    -- Platform on second loop
+    platformArcs(x, y, z, data)
+    
+    local refArc = data.modules[slotId].info.arcs
+    
+    local gravity = {
+        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+    }
+    
+    data.modules[slotId].info.transf =
+        quat.byVec(coor.xyz(0, 1, 0), gravity[2]):mRot() *
+        coor.trans(gravity[1])
+    
+    data.modules[slotId].info.gravity = gravity
+end
+
 function data()
     return {
         preClassify = ust.preClassify,
         preProcessAdd = preProcessAdd,
         preProcessRemove = preProcessRemove,
-        slotSetup = slotSetup
+        slotSetup = slotSetup,
+        gridization = gridization
     }
 
 end

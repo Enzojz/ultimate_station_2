@@ -7,6 +7,7 @@ local quat = require "ust/quaternion"
 local dump = require "luadump"
 local livetext = require "ust/livetext"
 
+local ustg = require "ust_gridization"
 
 local unpack = table.unpack
 local insert = table.insert
@@ -246,6 +247,28 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
 
 end
 
+local function gridization(x, y, z, data)
+    local slotId = data.grid[z][x][y]
+
+    ustg.calculateRaidus(x, y, z, data)
+    ustg.genericArcs(x, y, z, data)
+    
+    coroutine.yield()
+    
+    local refArc = data.modules[slotId].info.arcs
+                    
+    local gravity = {
+        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
+        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
+    }
+    
+    data.modules[slotId].info.transf =
+        quat.byVec(coor.xyz(0, 1, 0), gravity[2]):mRot() *
+        coor.trans(gravity[1])
+    
+        data.modules[slotId].info.gravity = gravity
+end
+
 function data()
     return {
         preProcessAdd = preProcessAdd,
@@ -255,7 +278,8 @@ function data()
         preClassify = ust.preClassify,
         getModelsFn = function(params)
             return {}
-        end
+        end,
+        gridization = gridization
     }
 
 end
