@@ -38,14 +38,13 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                 if not grid[0][1] then
                     local arc = info.arcs.center
                     local pt = arc:pt(arc.sup)
-                    local vec = arc:tangent(arc.sup)
-                    local offsetVec = vec .. coor.rotZ(math.pi * 0.5)
+                    local vec = (info.arcs.left:pt(info.arcs.left.sup) - info.arcs.right:pt(info.arcs.right.sup)):normalized()
                     
                     for i = -n, n do
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 20 + i),
-                                transf = quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -55,13 +54,12 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                 if not grid[0][5] then
                     local arc = info.arcs.center
                     local pt = arc:pt(arc.inf)
-                    local vec = arc:tangent(arc.inf)
-                    local offsetVec = vec .. coor.rotZ(math.pi * 0.5)
+                    local vec = (info.arcs.right:pt(info.arcs.right.inf) - info.arcs.left:pt(info.arcs.left.inf)):normalized()
                     for i = -n, n do
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 40 + i),
-                                transf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt + (offsetVec * 2.5) * i),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
