@@ -54,7 +54,7 @@ function data()
                         gridization = "gridization"
                     }
                     
-                    mod.category.categories = catenary and { "ust_cat_track_cat" } or { "ust_cat_track" }
+                    mod.category.categories = catenary and {"ust_cat_track_cat"} or {"ust_cat_track"}
                     
                     mod.updateScript.fileName = "construction/station/rail/ust/track.updateFn"
                     mod.updateScript.params = {
@@ -72,18 +72,60 @@ function data()
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
             end
-
+            
+            local bridges = api.res.bridgeTypeRep.getAll()
+            for index, bridgeName in pairs(bridges) do
+                local bridge = api.res.bridgeTypeRep.get(index)
+                
+                local mod = api.type.ModuleDesc.new()
+                mod.fileName = ("station/rail/ust/bridges/%s.module"):format(bridgeName:match("(.+).lua"))
+                
+                mod.availability.yearFrom = bridge.yearFrom
+                mod.availability.yearTo = bridge.yearTo
+                mod.cost.price = 0
+                -- mod.buildMode = "SINGLE"
+                mod.description.name = bridge.name
+                mod.description.description = ""
+                mod.description.icon = bridge.icon
+                
+                mod.type = "ust_bridge"
+                mod.order.value = 0
+                mod.metadata = {
+                    typeName = "ust_bridge",
+                    typeId = 25,
+                    scriptName = "construction/station/rail/ust/bridge",
+                    preProcessAdd = "preProcessAdd",
+                    preProcessRemove = "preProcessRemove",
+                    slotSetup = "slotSetup",
+                    addSlot = "addSlot",
+                    preClassify = "preClassify"
+                }
+                
+                mod.category.categories = {"ust_cat_bridge"}
+                
+                mod.updateScript.fileName = "construction/station/rail/ust/bridge.updateFn"
+                mod.updateScript.params = {
+                    index = index,
+                    name = bridgeName
+                }
+                
+                mod.getModelsScript.fileName = "construction/station/rail/ust/bridge.getModelsFn"
+                mod.getModelsScript.params = {}
+                
+                api.res.moduleRep.add(mod.fileName, mod, true)
+            end
+            
             for index, name in pairs(api.res.moduleRep.getAll()) do
                 if name:match("station/rail/ust/data") then
                     print(name)
                     api.res.moduleRep.setVisible(index, false)
                 end
             end
-
+            
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"
             con.updateScript.params = {
-            }
+                }
         end
     }
 end

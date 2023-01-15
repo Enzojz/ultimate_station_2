@@ -356,12 +356,14 @@ local updateFn = function(params, closureParams)
         searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
         params.edgeGroup = {}
         
+        -- slotSetup adds slots for modules itself
         for slotId, module in pairs(params.modules) do
             if module.metadata.slotSetup then
                 game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
             end
         end
         
+        -- addSlot adds slots for 
         for k, s in pairs(game.res.script) do
             if s.addSlot and k:match("construction/station/rail/ust/") then
                 s.addSlot(params, result)

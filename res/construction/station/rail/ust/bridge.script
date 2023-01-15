@@ -1,0 +1,99 @@
+local ust = require "ust"
+local dump = require "luadump"
+
+local insert = table.insert
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.data == 0 then
+        local addSlot = ust.base(info.id, 25)
+        modules[addSlot] = change.module
+    elseif info.data == -1 then
+        local addSlot = ust.base(info.id, 25)
+        if (modules[addSlot].name == change.module.name) then
+            modules[addSlot] = nil
+        else
+            modules[addSlot] = change.module
+        end
+    elseif info.data == 1 then
+        modules[ust.base(info.id, 25)] = nil
+    end
+end
+
+local preProcessRemove = function(modules, change, classedModules, info)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isTrack) then
+            local info = module.info
+            local makeData = module.makeData
+            local transf = info.transf
+            
+            insert(result.slots, {
+                id = makeData(25, 0),
+                transf = transf,
+                type = "ust_bridge",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+end
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local bridgeName = closureParams.name
+    
+    local id = params.modules[slotId].info.id
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local trackSlotId = params.classedModules[id].slotId
+    
+    insert(result.slots, {
+        id = makeData(25, -1),
+        transf = transform,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    insert(result.invokeLater, function()
+        local trackEdgeIndex = params.edgeIndex[trackSlotId]
+        local trackEdges = result.edgeLists[trackEdgeIndex]
+        if trackEdges then
+            trackEdges.edgeType = "BRIDGE"
+            trackEdges.edgeTypeName = bridgeName
+            alignTerrain = nil
+        end
+    end)
+end
+
+function data()
+    return {
+        preProcessAdd = preProcessAdd,
+        preProcessRemove = preProcessRemove,
+        addSlot = addSlot,
+        slotSetup = slotSetup,
+        updateFn = updateFn,
+        preClassify = ust.preClassify,
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

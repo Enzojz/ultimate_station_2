@@ -1,0 +1,61 @@
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local trackSlotId = params.classedModules[id].slotId
+    
+    table.insert(result.slots, {
+        id = makeData(25, -1),
+        transf = transform,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    table.insert(result.invokeLater, function()
+        local trackEdgeIndex = params.edgeIndex[trackSlotId]
+        local trackEdges = result.edgeLists[trackEdgeIndex]
+        if trackEdges then
+            trackEdges.alignTerrain = false
+        end
+    end)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_BRIDGE_VOID"),
+            description = _("MENU_MODULE_BRIDGE_VOIE_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_bridge"},
+        },
+        type = "ust_bridge",
+        order = {
+            value = 0,
+        },
+        metadata = {
+            typeName = "ust_bridge",
+            typeId = 25,
+            scriptName = "construction/station/rail/ust/bridge",
+            preProcessAdd = "preProcessAdd",
+            preProcessRemove = "preProcessRemove",
+            slotSetup = "slotSetup",
+            addSlot = "addSlot",
+            preClassify = "preClassify"
+        },
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
