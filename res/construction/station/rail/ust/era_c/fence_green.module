@@ -21,14 +21,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
     local extraHeight = info.extraHeight or 0
-
-    local hRef = params.platformHeight
+    local data = params.modules[slotId].info.data
+    local isPlatform = params.modules[params.classedModules[id].slotId].metadata.isPlatform
+    
+    local hRef = isPlatform and params.platformHeight or 0
     local hVec = coor.xyz(0, 0, hRef + extraHeight)
     local hTrans = coor.trans(hVec)
     
-    local id = params.modules[slotId].info.id
-    local data = params.modules[slotId].info.data
-    local info = params.modules[params.classedModules[id].slotId].info
     
     -- if n == 0 then n = 1 end
     if data == 3 or data == 7 then 

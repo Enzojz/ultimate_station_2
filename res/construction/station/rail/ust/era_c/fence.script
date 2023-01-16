@@ -3,7 +3,6 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local insert = table.insert
 -- local dump = require "luadump"
-
 local math = math
 local floor = math.floor
 local abs = math.abs
@@ -11,77 +10,83 @@ local abs = math.abs
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and module.metadata.isPlatform) then
+        if module.metadata and (module.metadata.isPlatform or module.metadata.isTrack) then
             local info = module.info
             local makeData = module.makeData
-            local pos = info.pos
+            
+            local octa7 = params.modules[info.octa[7]]
+            local octa3 = params.modules[info.octa[3]]
             
             local n = 2
             
             local ptsL, vecL = ust.basePts(info.arcs.left, n)
             local ptsR, vecR = ust.basePts(info.arcs.right, n)
+            local refH = (module.metadata.isPlatform and params.platformHeight or 0) + (info.extraHeight or 0)
             
-            local refPtL = ptsL[2]
-            local refVecL = vecL[2]
+            if not (module.metadata.isTrack and octa7 and octa7.isPlatform and octa7.info.extraHeight == info.extraHeight) then
+                local refPtL = ptsL[2] + coor.xyz(0, 0, refH)
+                local refVecL = vecL[2]
+                
+                local transfL =
+                    quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
+                    * coor.trans(refPtL)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(24, 7),
+                        transf = coor.scale(coor.xyz(5, 0.2, 0)) * transfL,
+                        type = "ust_component_fence",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
             
-            local transfL =
-                quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
-                * coor.trans(refPtL)
-            
-            insert(
-                result.slots, {
-                    id = makeData(24, 7),
-                    transf = coor.scale(coor.xyz(5, 0.2, 1)) * transfL,
-                    type = "ust_component_fence",
-                    spacing = {0, 0, 0, 0}
-                })
-            
-            
-            local refPtR = ptsR[2]
-            local refVecR = vecR[2]
-            
-            local transfR =
-                quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
-                * coor.trans(refPtR)
-            
-            insert(
-                result.slots, {
-                    id = makeData(24, 3),
-                    transf = coor.scale(coor.xyz(5, 0.2, 1)) * transfR,
-                    type = "ust_component_fence",
-                    spacing = {0, 0, 0, 0}
-                })
+            if not (module.metadata.isTrack and octa3 and octa3.isPlatform and octa3.info.extraHeight == info.extraHeight) then
+                local refPtR = ptsR[2] + coor.xyz(0, 0, refH)
+                local refVecR = vecR[2]
+                
+                local transfR =
+                    quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
+                    * coor.trans(refPtR)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(24, 3),
+                        transf = coor.scale(coor.xyz(5, 0.2, 0)) * transfR,
+                        type = "ust_component_fence",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
             
             
             if not info.octa[1] then
-                local refPt = ptsR[3]:avg(ptsL[3])
+                local refPt = ptsR[3]:avg(ptsL[3]) + coor.xyz(0, 0, refH)
                 local refVec = (ptsR[3] - ptsL[3]):normalized()
-
+                
                 local transf =
                     quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
-
+                
                 insert(
                     result.slots, {
                         id = makeData(24, 1),
-                        transf = coor.scale(coor.xyz(2, 0.2, 1)) * transf,
+                        transf = coor.scale(coor.xyz(2, 0.2, 0)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
             end
             
             if not info.octa[5] then
-                local refPt = ptsR[1]:avg(ptsL[1])
+                local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, refH)
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
-
+                
                 local transf =
                     quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
-
+                
                 insert(
                     result.slots, {
                         id = makeData(24, 5),
-                        transf = coor.scale(coor.xyz(2, 0.2, 1)) * transf,
+                        transf = coor.scale(coor.xyz(2, 0.2, 0)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })

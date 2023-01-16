@@ -337,7 +337,7 @@ local updateFn = function(params, closureParams)
             invokeLater = {}
         }
         
-        params.debug = true
+        params.debug = false
         
         params.classedModules = classifyModules(params.modules)
         local grid, refHeight = ust.gridization(params.modules, params.classedModules)
