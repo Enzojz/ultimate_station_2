@@ -49,7 +49,7 @@ function data()
             preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             addSlot = "addSlot",
-            preClassify = "preClassify"
+            classify = "classify"
         },
         updateFn = updateFn,
         

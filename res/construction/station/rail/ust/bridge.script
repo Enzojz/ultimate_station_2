@@ -90,7 +90,7 @@ function data()
         addSlot = addSlot,
         slotSetup = slotSetup,
         updateFn = updateFn,
-        preClassify = ust.preClassify,
+        classify = ust.classifyComp,
         getModelsFn = function(params)
             return {}
         end

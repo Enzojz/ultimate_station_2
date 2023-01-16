@@ -98,7 +98,7 @@ function data()
                     preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
                     addSlot = "addSlot",
-                    preClassify = "preClassify"
+                    classify = "classify"
                 }
                 
                 mod.category.categories = {"ust_cat_bridge"}
