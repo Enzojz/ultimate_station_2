@@ -10,6 +10,7 @@ local insert = table.insert
 
 local ma = math
 local pi = ma.pi
+local abs = ma.abs
 
 local fitModels = {
     surface = ust.fitModel(3.3, 5, -2, true, true),
@@ -69,7 +70,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
     local centerPts = ust.basePts(info.arcs.center, n)
-
+    
     local leftEdge = {}
     local rightEdge = {}
     local leftCentre = {}
@@ -96,7 +97,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         rightLane[i] = rightLaneBorder[i] + vec * 1.2
         centerPts[i] = centerPts[i] + hVec
     end
-
+    
     params.extra[slotId] = {
         leftLane = leftLane,
         rightLane = rightLane
@@ -130,6 +131,19 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             rb = rightCentre[sup],
         }
         
+        local width_centre = abs((centre.lt:avg(centre.lb) - centre.rt:avg(centre.rb)):length())
+        local n_center = math.floor(width_centre / 3.3 + 0.75)
+        local vect = (centre.rt - centre.lt) / n_center
+        local vecb = (centre.rb - centre.lb) / n_center
+        local centres = func.map(
+            func.seq(1, n_center or 1),
+            function(n) return {
+                lt = centre.lt + vect * (n - 1),
+                rt = centre.lt + vect * n,
+                lb = centre.lb + vecb * (n - 1),
+                rb = centre.lb + vecb * n,
+            } end)
+        
         local left = {
             lt = leftEdge[inf],
             rt = leftCentre[inf],
@@ -156,30 +170,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         if isLast then
             if isTrack[1] then
-                addLastBlock("ye_centre_t", centre)
+                func.forEach(centres, function(centre) addLastBlock("ye_centre_t", centre) end)
             elseif not info.octa[1] then
                 if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
-                    addLastBlock("ye_centre_t", centre)
+                    func.forEach(centres, function(centre) addLastBlock("ye_centre_t", centre) end)
                 else
-                    addLastBlock("ye_centre", centre)
+                    func.forEach(centres, function(centre) addLastBlock("ye_centre", centre) end)
                 end
             else
-                addLastBlock("yi_centre", centre)
+                func.forEach(centres, function(centre) addLastBlock("yi_centre", centre) end)
             end
         elseif isFirst then
             if isTrack[5] then
-                addBlock("ye_centre_t", centre)
+                func.forEach(centres, function(centre) addBlock("ye_centre_t", centre) end)
             elseif not info.octa[5] then
                 if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
-                    addBlock("ye_centre_t", centre)
+                    func.forEach(centres, function(centre) addBlock("ye_centre_t", centre) end)
                 else
-                    addBlock("ye_centre", centre)
+                    func.forEach(centres, function(centre) addBlock("ye_centre", centre) end)
                 end
             else
-                addBlock("yi_centre", centre)
+                func.forEach(centres, function(centre) addBlock("yi_centre", centre) end)
             end
         else
-            addBlock("yi_centre", centre)
+            func.forEach(centres, function(centre) addBlock("yi_centre", centre) end)
         end
         
         if leftConnected then
@@ -297,7 +311,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 insert(result.models, m)
             end
         end
-
+        
         addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
         
