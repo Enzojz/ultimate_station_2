@@ -109,7 +109,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         {
             id = makeData(21, -1),
             transf = trans,
-            type = "ust_passage",
+            type = "ust_underpass",
             spacing = {0, 0, 0, 0}
         }
 )
@@ -131,18 +131,19 @@ function data()
         category = {
             categories = {"ust_cat_comp"},
         },
-        type = "ust_passage",
+        type = "ust_underpass",
         order = {
             value = 260,
         },
         metadata = {
-            typeName = "ust_passage",
+            typeName = "ust_underpass",
             isUnderpass = true,
             isComponent = true,
             typeId = 21,
             width = 5,
             scriptName = "construction/station/rail/ust/era_c/underpass",
             classify = "classify",
+            addSlot = "addSlot"
         },
         
         updateFn = updateFn,

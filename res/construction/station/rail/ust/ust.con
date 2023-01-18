@@ -295,7 +295,7 @@ local upgradeFn = function(_) end
 ---@field slotConfig table<string, slotConfig>
 ---@field models model[]
 ---@field slots slot[]
----@field labelText? table<integer, string[]> 
+---@field labelText? table<integer, string[]>
 ---@field cost? integer
 ---@field bulldozeCost? integer
 ---@field maintenanceCost? integer
@@ -308,110 +308,112 @@ local upgradeFn = function(_) end
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
-        ---@type result
-        local result = {
-            entryConnectors = {},
-            colliders = {},
-            terrainAlignmentLists = {
-                {type = "EQUAL", faces = {}},
-                {type = "LESS", faces = {}},
-                {type = "GREATER", faces = {}}
-            },
-            groundFaces = {},
-            terminalGroups = {},
-            stations = {},
-            edgeLists = {},
-            slotConfig = {},
-            cost = 0,
-            models = pipe.new * {},
-            slots = {},
-            labelText = {},
-            connectors = {
-                overpass = {},
-                underpass = {},
-                misc = {}
-            },
-            connections = {
-                underpass = {}
-            },
-            invokeLater = {}
-        }
-        
-        params.debug = false
-        
-        params.classedModules = classifyModules(params.modules)
-        local grid, refHeight = ust.gridization(params.modules, params.classedModules)
-        
-        params.grid = grid
-        params.refHeight = refHeight
-        params.platformHeight = params.refHeight + hPlatformList[params.hPlatform + 1] * 0.001
-        
-        params.slotGrid = {}
-        
-        params.trackGroup = {}
-        params.platformGroup = {}
-        params.edgeIndex = {}
-        params.extra = {}
-        
-        searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
-        params.edgeGroup = {}
-        
-        -- slotSetup adds slots for modules itself
-        for slotId, module in pairs(params.modules) do
-            if module.metadata.slotSetup then
-                game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
+    params.debug = false
+
+    ---@type result
+    local result = {
+        entryConnectors = {},
+        colliders = {},
+        callInvalidModules =  true,
+        terrainAlignmentLists = {
+            {type = "EQUAL", faces = {}},
+            {type = "LESS", faces = {}},
+            {type = "GREATER", faces = {}}
+        },
+        groundFaces = {},
+        terminalGroups = {},
+        stations = {},
+        edgeLists = {},
+        slotConfig = {},
+        cost = 0,
+        models = pipe.new * {},
+        slots = {},
+        labelText = {},
+        connectors = {
+            overpass = {},
+            underpass = {},
+            misc = {}
+        },
+        connections = {
+            underpass = {}
+        },
+        invokeLater = {}
+    }
+    
+    params.classedModules = classifyModules(params.modules)
+    
+    local grid, refHeight = ust.gridization(params.modules, params.classedModules)
+    
+    params.grid = grid
+    params.refHeight = refHeight
+    params.platformHeight = params.refHeight + hPlatformList[params.hPlatform + 1] * 0.001
+    
+    params.slotGrid = {}
+    
+    params.trackGroup = {}
+    params.platformGroup = {}
+    params.edgeIndex = {}
+    params.extra = {}
+    
+    searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
+    params.edgeGroup = {}
+    
+    -- slotSetup adds slots for modules itself
+    for slotId, module in pairs(params.modules) do
+        if module.metadata.slotSetup then
+            game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
+        end
+    end
+    
+    -- addSlot adds slots for
+    for k, s in pairs(game.res.script) do
+        if s.addSlot and k:match("construction/station/rail/ust/") then
+            s.addSlot(params, result)
+        end
+    end
+    
+    result.terminateConstructionHook = function()
+        for i, track in ipairs(params.trackGroup) do
+            local platform = params.platformGroup[i]
+            if platform then
+                local edge = func.map(track, function(t) return params.edgeGroup[t] end)
+                if (platform.right) then
+                    insert(
+                        result.terminalGroups,
+                        {
+                            terminals = func.map(platform.models, function(p) return {p, 0} end),
+                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
+                        }
+                )
+                end
+                
+                if (platform.left) then
+                    insert(
+                        result.terminalGroups,
+                        {
+                            terminals = func.map(platform.models, function(p) return {p, 0} end),
+                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
+                        }
+                )
+                end
             end
         end
         
-        -- addSlot adds slots for 
-        for k, s in pairs(game.res.script) do
-            if s.addSlot and k:match("construction/station/rail/ust/") then
-                s.addSlot(params, result)
-            end
-        end
-        
-        result.terminateConstructionHook = function()
-            for i, track in ipairs(params.trackGroup) do
-                local platform = params.platformGroup[i]
-                if platform then
-                    local edge = func.map(track, function(t) return params.edgeGroup[t] end)
-                    if (platform.right) then
-                        insert(
-                            result.terminalGroups,
-                            {
-                                terminals = func.map(platform.models, function(p) return {p, 0} end),
-                                vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
-                            }
-                    )
-                    end
-                    
-                    if (platform.left) then
-                        insert(
-                            result.terminalGroups,
-                            {
-                                terminals = func.map(platform.models, function(p) return {p, 0} end),
-                                vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
-                            }
-                    )
+        for _, z in pairs(params.slotGrid) do
+            for _, x in pairs(z) do
+                for _, y in pairs(x) do
+                    for _, s in pairs(y) do
+                        insert(result.slots, s)
                     end
                 end
             end
-            
-            for _, z in pairs(params.slotGrid) do
-                for _, x in pairs(z) do
-                    for _, y in pairs(x) do
-                        for _, s in pairs(y) do
-                            insert(result.slots, s)
-                        end
-                    end
-                end
-            end
-            
-            for _, fn in ipairs(result.invokeLater) do
-                fn()
-            end
         end
-        return result
+        
+        for _, fn in ipairs(result.invokeLater) do
+            fn()
+        end
+    end
+    return result
 end
 
 function data()

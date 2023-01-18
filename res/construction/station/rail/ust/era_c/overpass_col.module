@@ -1,0 +1,249 @@
+local config = {
+    color = "red"
+}
+
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
+local general = require "ust/general"
+local ust = require "ust"
+local quat = require "ust/quaternion"
+local dump = require "luadump"
+
+local insert = table.insert
+
+local fitModels = {
+    inter = ust.fitModel(2, 1, 7, true, true),
+    overpass = ust.fitModel(1, 2.9, 7, true, true)
+}
+
+local interCoords = {
+    coor.xyz(-1, -1.45, 0),
+    coor.xyz(1, -1.45, 0),
+    coor.xyz(1, 1.45, 0),
+    coor.xyz(-1, 1.45, 0),
+    coor.xyz(0, 1.45, 0),
+    coor.xyz(0, -1.45, 0),
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local extraHeight = info.extraHeight or 0
+    local hPlatform = params.platformHeight + extraHeight
+    local hOverpass = 8
+    local tPlatform = coor.transZ(hPlatform)
+    local tOverpass = coor.transZ(hOverpass)
+    
+    local allOverpass = pipe.new * func.values(params.modules)
+        * pipe.filter(function(m) return m.metadata.isOverpass end)
+        * pipe.map(function(m)
+            local id = m.info.id
+            local pos = params.modules[params.classedModules[id].slotId].info.pos
+            if pos.y == info.pos.y then
+                return {
+                    slotId = m.info.slotId,
+                    x = pos.x
+                }
+            else
+                return nil
+            end
+        end)
+        * pipe.sort(function(l, r) return l.x < r.x end)
+        * pipe.map(pipe.select("slotId"))
+    
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+    
+    local centerPt = centerPts[3]
+    local centerVec = centerVecs[3]
+    
+    local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+    local centerTransf = tOverpass * centerTransfZ0
+    local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
+    
+    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * centerTransfZ0))
+    
+    if #allOverpass > 1 then
+        local currentIndex = false
+        for index, slot in ipairs(allOverpass) do
+            if slot == slotId then
+                currentIndex = index
+                break
+            end
+        end
+        
+        if currentIndex and currentIndex ~= 1 then
+            local prevSlotId = allOverpass[currentIndex - 1]
+            
+            local id = params.modules[prevSlotId].info.id
+            local info = params.modules[params.classedModules[id].slotId].info
+            
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+            local centerPt = centerPts[3]
+            local centerVec = centerVecs[3]
+            
+            local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+            local prevRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
+            
+            local overpassCoords = {
+                lt = prevRect[3],
+                lb = prevRect[2],
+                rt = interPts[4],
+                rb = interPts[1]
+            }
+            
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+        end
+    end
+    
+    
+    if params.modules[info.octa[1]] then
+        local info = params.modules[info.octa[1]].info
+        local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+        local tPlatform = coor.transZ((info.extraHeight or 0))
+        for i = 2, 4 do
+            local pt = centerPts[i]
+            local vec = centerVecs[i]
+            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * tPlatform
+            insert(
+                result.slots,
+                {
+                    id = makeData(25, i + 1),
+                    transf = centerTransfZ0,
+                    type = "ust_overpass_step",
+                    spacing = {0, 0, 0, 0}
+                }
+        )
+        end
+    end
+    
+    if params.modules[info.octa[5]] then
+        local info = params.modules[info.octa[5]].info
+        local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+        local tPlatform = coor.transZ((info.extraHeight or 0))
+        for i = 2, 4 do
+            local pt = centerPts[i]
+            local vec = centerVecs[i]
+            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * tPlatform
+            insert(
+                result.slots,
+                {
+                    id = makeData(25, i - 7),
+                    transf = centerTransfZ0,
+                    type = "ust_overpass_step",
+                    spacing = {0, 0, 0, 0}
+                }
+        )
+        end
+    end
+    
+    for _, i in ipairs({-2, -1, 1, 2}) do
+        local pt = centerPts[i + 3]
+        local vec = centerVecs[i + 3]
+        local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * coor.transZ(extraHeight)
+        dump()(vec)
+        dump()(pt)
+        dump()(extraHeight)
+        insert(
+            result.slots,
+            {
+                id = makeData(25, i),
+                transf = centerTransfZ0,
+                type = "ust_overpass_step",
+                spacing = {0, 0, 0, 0}
+            }
+    )
+    end
+    
+    local stepIdPos = pipe.new * func.seq(1, 7)
+        * pipe.map(function(i) return makeData(25, i) end)
+        * pipe.filter(function(slotId) return params.modules[slotId] or false end)
+    local stepIdNeg = pipe.new
+        * func.seq(-7, -1) * pipe.map(function(i) return makeData(25, i) end)
+        * pipe.filter(function(slotId) return params.modules[slotId] or false end)
+    
+    if slotId == allOverpass[#allOverpass] then
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf))
+        if #stepIdNeg > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        end
+        if #stepIdPos > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf))
+        end
+    elseif slotId == allOverpass[1] then
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf))
+        if #stepIdNeg > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        end
+        if #stepIdPos > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf))
+        end
+    else
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf))
+        if #stepIdNeg > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        end
+        if #stepIdPos > 0 then
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+        else
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf))
+        end
+    end
+
+
+end
+
+local function getModelsFn(result, transform, tag, slotId, addModelFn, params)
+    return {}
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_OVERPASS_COL"),
+            description = _("MENU_MODULE_PLATFORM_OVERPASS_COL"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_overpass",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            typeName = "ust_overpass",
+            isComponent = true,
+            isOverpass = true,
+            typeId = 24,
+            width = 5,
+            scriptName = "construction/station/rail/ust/era_c/overpass",
+            classify = "classify",
+            preProcessAdd = "preProcessAdd"
+        },
+        
+        updateFn = updateFn,
+        getModelsFn = getModelsFn
+    }
+
+end

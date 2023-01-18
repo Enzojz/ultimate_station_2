@@ -1,7 +1,41 @@
 local ust = require "ust"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and module.metadata.isPlatform) then
+            local info = module.info
+            local makeData = module.makeData
+
+            local extraHeight = info.extraHeight or 0
+            local hPlatform = params.platformHeight + extraHeight
+            local tPlatform = coor.transZ(hPlatform)
+            
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 2)
+            
+            local centerPt = centerPts[2]
+            local centerVec = centerVecs[2]
+            
+            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+            local centerTransf = tPlatform * centerTransfZ0
+            
+            table.insert(result.slots, {
+                id = makeData(21, 0),
+                transf = centerTransf,
+                type = "ust_underpass",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+
+end
+
 
 function data()
     return {
         classify = ust.classifyComp,
+        addSlot = addSlot
     }
 end

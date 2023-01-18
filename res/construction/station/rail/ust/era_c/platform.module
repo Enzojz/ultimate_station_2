@@ -160,12 +160,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         
         local addBlock = function(mdl, pos)
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", nil, hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", nil, hTrans * fitMdl[mdl](pos, false)));
         end
         local addLastBlock = function(mdl, pos)
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", nil, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", nil, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
         end
         
         if isLast then

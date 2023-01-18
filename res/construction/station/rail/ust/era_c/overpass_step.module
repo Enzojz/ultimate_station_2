@@ -1,0 +1,167 @@
+local config = {
+    color = "red"
+}
+
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
+local general = require "ust/general"
+local ust = require "ust"
+local quat = require "ust/quaternion"
+
+local dump = require "luadump"
+
+local insert = table.insert
+
+local fitModels = {
+    inter = ust.fitModel(2, 1, 7, true, true),
+    overpass = ust.fitModel(1, 2.9, 7, true, true)
+}
+
+local interCoords = {
+    coor.xyz(-1, -1.45, 0),
+    coor.xyz(1, -1.45, 0),
+    coor.xyz(1, 1.45, 0),
+    coor.xyz(-1, 1.45, 0),
+    coor.xyz(0, 1.45, 0),
+    coor.xyz(0, -1.45, 0),
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    dump()(tag)
+    dump()(slotId)
+    local id = params.modules[slotId].info.id
+    local pos = params.modules[slotId].info.data
+    local info = params.modules[params.classedModules[id].slotId].info
+    
+    local extraHeight = info.extraHeight or 0
+    local hPlatform = params.platformHeight + extraHeight
+    local hOverpass = 8
+    local tPlatform = coor.transZ(hPlatform)
+    local tOverpass = coor.transZ(hOverpass)
+    
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+    
+    local centerPt = centerPts[3]
+    local centerVec = centerVecs[3]
+    
+    local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+    
+    local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
+    
+    local baseRef = centerPts[pos + 3]
+    local sideVec = baseRef and (pos > 0 and -centerVecs[pos + 3] or centerVecs[pos + 3]) or nil
+    
+    if not baseRef then
+        if pos > 2 and params.modules[info.octa[1]] then
+            local info = params.modules[info.octa[1]].info
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+            baseRef = centerPts[pos - 1]
+            sideVec = -centerVecs[pos - 1]
+        elseif pos < -2 and params.modules[info.octa[5]] then
+            local info = params.modules[info.octa[5]].info
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+            baseRef = centerPts[pos + 7]
+            sideVec = centerVecs[pos + 7]
+        end
+    end
+    
+    if baseRef and sideVec then
+        local existsBase = hOverpass - hPlatform > 4
+        local baseLength = existsBase and 6 or 0
+        local ncomp = existsBase and math.ceil((hOverpass - 4 - hPlatform) / 0.2) or math.ceil((hOverpass - hPlatform) / 0.2)
+        local hBase = existsBase and hOverpass - ncomp * 0.2 or hPlatform
+        
+        local sideVecTransf = quat.byVec(coor.xyz(0, 1, 0), sideVec):mRot()
+        if existsBase then
+            local tBase = coor.transZ(hBase - 4)
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, tBase * sideVecTransf * coor.trans(baseRef)))
+        end
+        
+        for i = 0, ncomp - 1 do
+            local h = hBase + 0.2 * i
+            local pos = baseRef + sideVec * (baseLength + i * 0.25)
+            local transf = sideVecTransf * coor.trans(pos) * coor.transZ(h)
+            insert(result.models, general.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+        end
+        
+        local rectBase = {
+            coor.xyz(1, baseLength + ncomp * 0.25, 0),
+            coor.xyz(-1, baseLength + ncomp * 0.25, 0),
+        }
+        
+        local sideTransf = sideVecTransf * coor.trans(baseRef) * coor.transZ(hBase + 0.2 * ncomp)
+        local sidePts = func.map(rectBase, function(pt) return pt .. sideTransf end)
+        
+        local interCoords = pos > 0 and {
+            lt = sidePts[1],
+            rt = sidePts[2],
+            lb = interPts[4],
+            rb = interPts[3]
+        } or {
+            lt = interPts[1],
+            rt = interPts[2],
+            lb = sidePts[2],
+            rb = sidePts[1],
+        }
+        
+        local stairsPts = func.map({
+            coor.xyz(0, baseLength + ncomp * 0.25, 0),
+            coor.xyz(0, baseLength, -ncomp * 0.2),
+            coor.xyz(0, 5, -ncomp * 0.2),
+        },
+        function(pt) return pt .. sideTransf end)
+        
+        insert(result.models, ust.unitLane(stairsPts[1], stairsPts[2], tag))
+        
+        if existsBase then
+            insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
+            insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
+        end
+        
+        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt), interCoords.lb:avg(interCoords.rb), tag))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
+        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
+    end
+end
+
+local function getModelsFn(result, transform, tag, slotId, addModelFn, params)
+    return {}
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_OVERPASS_STEP"),
+            description = _("MENU_MODULE_PLATFORM_OVERPASS_STEP"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_overpass_step",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            typeName = "ust_overpass_step",
+            isComponent = true,
+            typeId = 25,
+            width = 5,
+            scriptName = "construction/station/rail/ust/era_c/overpass",
+            classify = "classify",
+            preProcessAdd = "preProcessAdd"
+        },
+        
+        updateFn = updateFn,
+        getModelsFn = getModelsFn
+    }
+
+end
