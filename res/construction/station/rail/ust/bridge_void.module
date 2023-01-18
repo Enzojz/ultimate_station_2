@@ -32,7 +32,7 @@ function data()
         },
         description = {
             name = _("MENU_MODULE_BRIDGE_VOID"),
-            description = _("MENU_MODULE_BRIDGE_VOIE_DESC"),
+            description = _("MENU_MODULE_BRIDGE_VOID_DESC"),
         },
         category = {
             categories = {"ust_cat_bridge"},

@@ -52,9 +52,10 @@ function data()
             width = 5,
             scriptName = "construction/station/rail/ust/era_c/platform",
             preProcessAdd = "preProcessAdd",
+            preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             preClassify = "preClassify",
-            gridization = "gridization"
+            gridization = "gridizationPlaceholder"
         },
         
         updateFn = updateFn,

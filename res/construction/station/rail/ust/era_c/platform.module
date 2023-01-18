@@ -42,7 +42,6 @@ local fitMdl = {
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local pos = info.pos
-    -- dump()(info)
     local isTrack = {}
     local isPlatform = {}
     local octaModules = {}
@@ -79,8 +78,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rightLaneBorder = {}
     local leftLane = {}
     local rightLane = {}
-    -- dump()(leftPts)
-    -- dump()(rightPts)
+    
     for i = 1, n + 1 do
         local vec = (leftPts[i] - rightPts[i]):normalized()
         leftEdge[i] = leftPts[i]
@@ -303,21 +301,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if params.debug then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
-        local refText = string.format("%s %s %s %s", info.ref.left and "L" or "", info.ref.right and "R" or "", info.ref.next and "N" or "", info.ref.prev and "P" or "")
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
-                insert(result.models, m)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+                table.insert(result.models, m)
             end
         end
         
         addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
-        
-        addText(refText, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -4) end, 0.75)
     end
-
 end
 
 function data()
@@ -351,6 +345,7 @@ function data()
             preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             preClassify = "preClassify",
+            postClassify = "postClassify",
             gridization = "gridization"
         },
         updateFn = updateFn,

@@ -23,21 +23,21 @@ local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17,
 
 ---@param modules modules
 ---@return modules
-local function classifyModules(modules)
+local function classifyModules(modules, params)
     local result = {}
     for slotId, m in pairs(modules) do
         if (m.metadata and m.metadata.preClassify) then
-            game.res.script[m.metadata.scriptName][m.metadata.preClassify](modules, result, slotId)
+            game.res.script[m.metadata.scriptName][m.metadata.preClassify](modules, result, slotId, params)
         end
     end
     for slotId, m in pairs(modules) do
         if (m.metadata and m.metadata.classify) then
-            game.res.script[m.metadata.scriptName][m.metadata.classify](modules, result, slotId)
+            game.res.script[m.metadata.scriptName][m.metadata.classify](modules, result, slotId, params)
         end
     end
     for slotId, m in pairs(modules) do
         if (m.metadata and m.metadata.postClassify) then
-            game.res.script[m.metadata.scriptName][m.metadata.postClassify](modules, result, slotId)
+            game.res.script[m.metadata.scriptName][m.metadata.postClassify](modules, result, slotId, params)
         end
     end
     return result
@@ -340,7 +340,7 @@ local updateFn = function(params, closureParams)
         invokeLater = {}
     }
     
-    params.classedModules = classifyModules(params.modules)
+    params.classedModules = classifyModules(params.modules, params)
     
     local grid, refHeight = ust.gridization(params.modules, params.classedModules)
     

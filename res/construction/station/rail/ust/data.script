@@ -1,9 +1,5 @@
 local coor = require "ust/coor"
 local ust = require "ust"
-local math = math
-local floor = math.floor
-local abs = math.abs
-local dump = require "luadump"
 
 local classifyPos = function(modules, classified, slotId)
     local type, id, data = ust.classifyData(modules, classified, slotId)

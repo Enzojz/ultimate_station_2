@@ -1,6 +1,7 @@
 function data()
 	return {
 		name = _("UST_CAT_BUILDING"),
-		order = 5,
+		desc = _("UST_CAT_COMP_BUILDING"),
+		order = 6,
 	}
 end

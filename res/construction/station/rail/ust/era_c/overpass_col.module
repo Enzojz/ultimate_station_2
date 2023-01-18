@@ -8,7 +8,6 @@ local coor = require "ust/coor"
 local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 
 local insert = table.insert
 
@@ -28,8 +27,9 @@ local interCoords = {
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
     local id = params.modules[slotId].info.id
-    local info = params.modules[params.classedModules[id].slotId].info
-    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    local module = params.modules[params.classedModules[id].slotId]
+    local info = module.info
+    local makeData = module.makeData
     
     local extraHeight = info.extraHeight or 0
     local hPlatform = params.platformHeight + extraHeight
@@ -144,9 +144,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local pt = centerPts[i + 3]
         local vec = centerVecs[i + 3]
         local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * coor.transZ(extraHeight)
-        dump()(vec)
-        dump()(pt)
-        dump()(extraHeight)
         insert(
             result.slots,
             {

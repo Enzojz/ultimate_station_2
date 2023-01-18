@@ -153,7 +153,6 @@ local slotSetup = function(params, result, slotId)
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
-        -- dump()(params.modules[slotId].info)
         local trackType = closureParams.trackType
         local catenary = closureParams.catenary
         

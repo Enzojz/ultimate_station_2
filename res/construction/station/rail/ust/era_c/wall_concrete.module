@@ -56,7 +56,7 @@ function data()
             description = _("MENU_MODULE_WALL_CONCRETE_DESC"),
         },
         category = {
-            categories = {"ust_cat_building"},
+            categories = {"ust_cat_comp"},
         },
         type = "ust_component_fence",
         order = {
