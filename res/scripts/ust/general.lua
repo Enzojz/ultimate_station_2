@@ -45,10 +45,9 @@ general.newModel = function(m, tag, ...)
 end
 
 general.mRot = function(vec)
-    return coor.scaleX(vec:length()) * quat.byVec(coor.xyz(1, 0, 0), (vec)):mRot()
+    return coor.scaleX(vec:length()) * quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
 end
 
-general.linkingLane = function(f, t) return ((t - f):length2() > 1e-2 and (t - f):length2() < 562500) and general.newModel("ust/linking_lane.mdl", general.mRot(t - f), coor.trans(f)) or nil end
 general.unitLane = function(f, t) return ((t - f):length2() > 1e-2 and (t - f):length2() < 562500) and general.newModel("ust/person_lane.mdl", general.mRot(t - f), coor.trans(f)) or nil end
 
 

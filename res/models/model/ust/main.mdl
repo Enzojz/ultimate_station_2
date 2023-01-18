@@ -77,19 +77,6 @@ local generatedData = {
     },
 }
 
-local config = {
-    extend = {21, -21, 0, -38, 4, 0},
-    main = "station/rail/era_c/station_3_main.mdl",
-    con_left = {"station/rail/era_c/station_3_main_con_l_1.mdl", "station/rail/era_c/station_3_main_con_l_2.mdl", "station/rail/era_c/station_3_main_con_l_3.mdl", },
-    con_right = {"station/rail/era_c/station_3_main_con_r_1.mdl", "station/rail/era_c/station_3_main_con_r_2.mdl", "station/rail/era_c/station_3_main_con_r_3.mdl", },
-    end_left = "station/rail/era_c/station_3_main_end_l.mdl",
-    end_right = "station/rail/era_c/station_3_main_end_r.mdl",
-    roof_side = "station/rail/era_c/station_3_roof_perron_side.mdl",
-    roof_head = "station/rail/era_c/station_3_roof_perron_head.mdl",
-    slotIdOffset = 1,
-    translationY = 0,
-}
-
 function data()
     return {
         boundingInfo = {
