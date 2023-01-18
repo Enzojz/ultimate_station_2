@@ -2,10 +2,6 @@ local ust = require "ust"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local insert = table.insert
--- local dump = require "luadump"
-local math = math
-local floor = math.floor
-local abs = math.abs
 
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do

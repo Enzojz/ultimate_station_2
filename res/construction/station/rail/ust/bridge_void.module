@@ -1,17 +1,19 @@
+local insert = table.insert
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local trackSlotId = params.classedModules[id].slotId
     
-    table.insert(result.slots, {
+    insert(result.slots, {
         id = makeData(25, -1),
         transf = transform,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
     
-    table.insert(result.invokeLater, function()
+    insert(result.invokeLater, function()
         local trackEdgeIndex = params.edgeIndex[trackSlotId]
         local trackEdges = result.edgeLists[trackEdgeIndex]
         if trackEdges then

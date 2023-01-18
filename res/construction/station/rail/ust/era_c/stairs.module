@@ -4,7 +4,6 @@ local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
 
-local unpack = table.unpack
 local insert = table.insert
 
 local config = {
@@ -42,26 +41,26 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     for i, arc in ipairs(arcs) do
         local lRad = arc.sup - arc.inf
         if (i > 1 and i < #arcs) then
-            table.insert(platformPts, func.map({0, 0.25, 0.5, 0.75}, function(rad) return arc:pt(rad * lRad + arc.inf) end))
+            insert(platformPts, func.map({0, 0.25, 0.5, 0.75}, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         elseif (i == 1 and i < #arcs) then
             local rad = arc:rad(ptPlatformInf)
             local pct = (rad - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75}, function(radPct) return radPct > pct end)
-            table.insert(rads, 1, pct)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
+            insert(rads, 1, pct)
+            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         elseif (i == #arcs and i > 1) then
             local rad = arc:rad(ptPlatformSup)
             local pct = (rad - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pct end)
-            table.insert(rads, pct)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
+            insert(rads, pct)
+            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
         else
             local pctInf = (arc:rad(ptPlatformInf) - arc.inf) / lRad
             local pctSup = (arc:rad(ptPlatformSup) - arc.inf) / lRad
             local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pctSup and radPct > pctInf end)
-            table.insert(rads, 1, pctInf)
-            table.insert(rads, pctSup)
-            table.insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
+            insert(rads, 1, pctInf)
+            insert(rads, pctSup)
+            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
             break
         end
     end
@@ -70,7 +69,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local vecTangent = (ptBuildingSup - ptBuildingInf) * (1 / (#platformPts - 1))
     
-    table.insert(result.models, general.newModel("station/rail/era_a/stairs.mdl", tag, hTrans * transform));
+    insert(result.models, general.newModel("station/rail/era_a/stairs.mdl", tag, hTrans * transform));
 
     -- Terrains
     local terrainAlignmentLists = pipe.new /
@@ -82,7 +81,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         }
         * pipe.map(pipe.map(coor.vec2Tuple))
     
-    table.insert(result.terrainAlignmentLists, {
+    insert(result.terrainAlignmentLists, {
         type = "EQUAL",
         faces = terrainAlignmentLists,
         optional = true
@@ -101,7 +100,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
                 * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
             local lpt = closesetPt.pt
-            table.insert(result.models, ust.unitLane(lpt, pt, tag))
+            insert(result.models, ust.unitLane(lpt, pt, tag))
         end
     end)
 end

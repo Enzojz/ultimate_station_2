@@ -1,11 +1,11 @@
 local func = require "ust/func"
-local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local general = require "ust/general"
 local ust = require "ust"
--- local dump = require "luadump"
-
+local unpack = table.unpack
+local insert = table.insert
+-- 
 local bottomConnector = {
     coor.xyz(2, -6.5, -4),
     coor.xyz(-2, -6.5, -4)
@@ -30,7 +30,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
         * coor.trans(refPos)
     
-    table.insert(result.models, general.newModel("ust/platform/era_c/underpass.mdl", tag, trans));
+    insert(result.models, general.newModel("ust/platform/era_c/underpass.mdl", tag, trans));
     
     local pts = func.map({
         coor.xyz(-2, 1, 0),
@@ -40,8 +40,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     }, function(pt) return pt .. trans end)
     
     
-    -- table.insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
-    table.insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
+    -- insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
+    insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
     
     result.connectors.underpass[slotId] = {pos = info.pos, connectors = func.map(bottomConnector, function(pt) return pt .. trans end)}
     result.connections.underpass[slotId] = {}
@@ -61,7 +61,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                     local target = xyc[pos.y < 0 and 2 or 1]
                     local vec = leftConnector - target
                     if leftTarget then
-                        local distance = table.unpack(leftTarget)
+                        local distance = unpack(leftTarget)
                         if vec:length2() < distance then
                             leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
                         end
@@ -72,7 +72,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                     local target = xyc[pos.y < 0 and 1 or 2]
                     local vec = rightConnector - target
                     if rightTarget then
-                        local distance = table.unpack(rightTarget)
+                        local distance = unpack(rightTarget)
                         if vec:length2() < distance then
                             rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
                         end
@@ -84,27 +84,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
         
         if leftTarget then
-            local _, from, to, slotIdTarget = table.unpack(leftTarget)
+            local _, from, to, slotIdTarget = unpack(leftTarget)
             if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
-                table.insert(result.models, ust.unitLane(from, to, nil))
-                table.insert(result.connections.underpass[slotIdTarget], slotId)
-                table.insert(result.connections.underpass[slotId], slotIdTarget)
+                insert(result.models, ust.unitLane(from, to, nil))
+                insert(result.connections.underpass[slotIdTarget], slotId)
+                insert(result.connections.underpass[slotId], slotIdTarget)
             end
         end
         if rightTarget then
-            local _, from, to, slotIdTarget = table.unpack(rightTarget)
+            local _, from, to, slotIdTarget = unpack(rightTarget)
             if not func.contains(result.connections.underpass[slotIdTarget], slotId) then
-                table.insert(result.models, ust.unitLane(from, to, nil))
-                table.insert(result.connections.underpass[slotIdTarget], slotId)
-                table.insert(result.connections.underpass[slotId], slotIdTarget)
+                insert(result.models, ust.unitLane(from, to, nil))
+                insert(result.connections.underpass[slotIdTarget], slotId)
+                insert(result.connections.underpass[slotId], slotIdTarget)
             end
         end
     end
     
-    table.insert(result.invokeLater, invokeLater)
+    insert(result.invokeLater, invokeLater)
     
     -- SLot to replace itself
-    table.insert(
+    insert(
         result.slots,
         {
             id = makeData(21, -1),

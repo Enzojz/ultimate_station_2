@@ -9,7 +9,6 @@ local general = require "ust/general"
 local insert = table.insert
 local unpack = table.unpack
 
-local dump = require "luadump"
 
 local addSlotFn = function(params, result, width, spacing, moduleId)
     for id, info in pairs(params.classedModules) do
@@ -87,7 +86,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                     {arc:pt(arc.inf), d.pos.inf},
                 }
                 for _, ptId in ipairs(pts) do
-                    local pt, octapos = table.unpack(ptId)
+                    local pt, octapos = unpack(ptId)
                     local vec = (info.arcs.left:ptByPt(pt) - info.arcs.right:ptByPt(pt)):normalized()
                     local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * (width / 2)
                     local vecInf = -vecSup
@@ -105,7 +104,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                             if not xInfo.sup then
                                 local x = func.filter(arc:xLine(lnSup, true), pipe.noop())
                                 if #x == 1 then
-                                    local pt = table.unpack(x)
+                                    local pt = unpack(x)
                                     xInfo.sup = {
                                         y = y,
                                         rad = arc:rad(pt),
@@ -117,7 +116,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                             if not xInfo.inf then
                                 local x = func.filter(arc:xLine(lnInf, true), pipe.noop())
                                 if #x == 1 then
-                                    local pt = table.unpack(x)
+                                    local pt = unpack(x)
                                     xInfo.inf = {
                                         y = y,
                                         rad = arc:rad(pt),

@@ -90,35 +90,6 @@ local config = {
     translationY = 0,
 }
 
-local children = {}
-
-
-local mdlList = {
-    config.con_left,
-    config.con_right,
-    {config.end_left},
-    {config.end_left},
-    {config.roof_side},
-    {config.roof_head},
-    {config.main}
-}
-
-
-local function children()
-    local result = {}
-
-    for _, mdl in ipairs(mdlList) do
-        table.insert(result,
-        {
-            id = mdl,
-            transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
-            type = "MESH"
-        }
-        );
-    end
-    
-end
-
 function data()
     return {
         boundingInfo = {

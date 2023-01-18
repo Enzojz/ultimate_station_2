@@ -7,7 +7,6 @@ local general = require "ust/general"
 local pipe = require "ust/pipe"
 local ust = require "ust_gridization"
 local livetext = require "ust/livetext"
-local dump = require "luadump"
 
 local math = math
 local pi = math.pi

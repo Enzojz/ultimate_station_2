@@ -9,7 +9,6 @@ local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
-local dump = require "luadump"
 
 local insert = table.insert
 
@@ -28,8 +27,6 @@ local interCoords = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
-    dump()(tag)
-    dump()(slotId)
     local id = params.modules[slotId].info.id
     local pos = params.modules[slotId].info.data
     local info = params.modules[params.classedModules[id].slotId].info

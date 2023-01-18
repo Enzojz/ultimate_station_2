@@ -5,7 +5,6 @@ local arc = require "ust/coorarc"
 local line = require "ust/coorline"
 local quat = require "ust/quaternion"
 local ust = {}
-local dump = require "luadump"
 
 local math = math
 local pi = math.pi

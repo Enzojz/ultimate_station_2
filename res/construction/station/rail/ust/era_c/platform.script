@@ -8,13 +8,10 @@ local line = require "ust/coorline"
 
 local insert = table.insert
 local math = math
-local abs = math.abs
-local floor = math.floor
 local pi = math.pi
 
 local ustg = require "ust_gridization"
 
-local dump = require "luadump"
 
 local getTranfs = function(info, pos, width)
     local refArc = info.arcs.center

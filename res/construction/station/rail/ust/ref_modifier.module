@@ -1,10 +1,7 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
 local ust = require "ust"
-local dump = require "luadump"
 
-local unpack = table.unpack
 local insert = table.insert
 local ma = math
 local pi = ma.pi
@@ -30,7 +27,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local addSlot = function(cond, data, transf)
         if cond then
-            table.insert(result.slots, {
+            insert(result.slots, {
                 id = makeData(91, data),
                 transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf,
                 type = "ust_ref_modifier",
@@ -38,7 +35,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 shape = 2
             })
             
-            table.insert(result.slots, {
+            insert(result.slots, {
                 id = makeData(91, data),
                 transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf,
                 type = "ust_ref_modifier",
@@ -46,7 +43,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 shape = 2
             })
         else
-            table.insert(result.slots, {
+            insert(result.slots, {
                 id = makeData(91, data),
                 transf = transf,
                 type = "ust_ref_modifier",

@@ -1,12 +1,8 @@
 local coor = require "ust/coor"
 local ust = require "ust"
 local general = require "ust/general"
-local quat = require "ust/quaternion"
-
-local ma = math
 
 local insert = table.insert
-local dump = require "luadump"
 
 local fitModels = ust.fitModel(0.5, 5, 5, true, true)
 

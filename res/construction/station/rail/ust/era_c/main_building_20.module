@@ -1,11 +1,4 @@
-local func = require "ust/func"
 local coor = require "ust/coor"
-local pipe = require "ust/pipe"
-local ust = require "ust"
-local general = require "ust/general"
-
-local unpack = table.unpack
-local insert = table.insert
 
 local generatedData = {
     ["assets"] = {

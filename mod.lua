@@ -1,5 +1,4 @@
-﻿local dump = require "luadump"
-function data()
+﻿function data()
     return {
         info = {
             severityAdd = "NONE",

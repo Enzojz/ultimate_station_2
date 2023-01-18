@@ -1,15 +1,12 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
-local ust = require "ust"
 
-local unpack = table.unpack
 local insert = table.insert
 local ma = math
 local pi = ma.pi
 local abs = ma.abs
 local pow = math.pow
-local floor = math.floor
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local id = params.modules[slotId].info.id

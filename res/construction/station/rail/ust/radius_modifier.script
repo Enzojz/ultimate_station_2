@@ -1,12 +1,7 @@
-local coor = require "ust/coor"
-local quat = require "ust/quaternion"
-local livetext = require "ust/livetext"
 local ust = require "ust"
-local dump = require "luadump"
 local insert = table.insert
 local ma = math
 local pi = ma.pi
-local abs = math.abs
 local pow = math.pow
 local floor = math.floor
 

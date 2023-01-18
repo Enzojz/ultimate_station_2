@@ -1,5 +1,4 @@
 local ust = require "ust"
-local dump = require "luadump"
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 90 and info.data == 1 then

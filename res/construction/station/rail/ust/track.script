@@ -2,20 +2,14 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-local general = require "ust/general"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 local livetext = require "ust/livetext"
 
 local ustg = require "ust_gridization"
 
-local unpack = table.unpack
 local insert = table.insert
 local ma = math
 local pi = ma.pi
-local abs = ma.abs
-local pow = ma.pow
-
 
 local preProcessAdd = function(modules, change, classedModules, info)
     local maxId = func.max(func.keys(classedModules))

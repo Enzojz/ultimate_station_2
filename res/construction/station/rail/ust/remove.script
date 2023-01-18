@@ -1,4 +1,3 @@
-local dump = require "luadump"
 function data()
     return {
         preProcessAdd = function(modules, change, classedModules, info)
