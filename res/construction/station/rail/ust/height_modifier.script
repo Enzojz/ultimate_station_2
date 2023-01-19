@@ -1,4 +1,5 @@
 local ust = require "ust"
+local coor = require "ust/coor"
 local insert = table.insert
 
 local setHeight = function(modules, classedModules, slotId, height)
@@ -68,22 +69,18 @@ local setTrackHeight = function(modules, classedModules, slotId, height)
 end
 
 local preProcessAdd = function(modules, change, classedModules, info)
-    if info.type == 87 and info.data == 1 then -- Remove modifer
-        modules[ust.base(info.id, 87)] = nil
-    elseif info.type == 87 and info.data == 0 then
-        for i = 80, 99 do
-            if modules[ust.base(info.id, i)] then
-                modules[ust.mixData(ust.base(info.id, i), 1)] = nil
-                modules[ust.base(info.id, i)] = nil
-            end
-        end
-        modules[ust.base(info.id, 87)] = change.module
-    elseif info.type == 88 or info.type == 89 then
+    if info.type == 83 and info.data == 9 then -- Remove modifer
+        modules[ust.base(info.id, 83)] = nil
+    elseif info.type == 83 and info.data == -1 then
+        ust.gridization(modules, classedModules)
+        modules[classedModules[info.idid].slot[59]] = nil
+        modules[ust.base(info.id, 83)] = nil
+    elseif info.type == 83 and info.data == 0 then
+        modules[ust.base(info.id, 83)] = change.module
+    elseif info.type == 84 then
         ust.gridization(modules, classedModules)
         local id = info.id
         local m = modules[classedModules[id].slotId]
-                
-        modules[classedModules[id].slot[87]].variant = 1 - modules[classedModules[id].slot[87]].variant
         
         local delta = info.data
         local extraHeight = (m.info.extraHeight or 0) * 10 + delta
@@ -98,7 +95,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
 end
 
 local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
-    if info.type < 50 then
+    if info.type < 50 or (info.type > 79 and info.type ~= 83 and info.type ~= 84) then
         modules[slotId] = nil
     end
 end
@@ -135,11 +132,12 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
-            local transfPosC = info.transf
+            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
+            local transfPosC = info.transf * coor.transZ(refH)
             
             if not anyHeightModifiable then
                 table.insert(result.slots, {
-                    id = makeData(87, 0),
+                    id = makeData(83, 0),
                     transf = transfPosC,
                     type = "ust_height_modifier",
                     spacing = {0, 0, 0, 0}

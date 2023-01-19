@@ -17,63 +17,110 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
+    local refH = (params.modules[sId].metadata.isPlatform and params.platformHeight or params.modules[sId].metadata.height) + (params.modules[sId].info.extraHeight or 0)
+    local transZ = coor.transZ(refH)
     local makeData = params.modules[sId].makeData
     
     -- Entry for radius system
     local arcs = info.arcs
-    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
-    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-    local vec = (posR - posL):normalized()
-    local posC = (posR + posL) * 0.5
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local transfPosC = rotZ * coor.trans(posC)
+    local transf = info.transf * transZ
     
     insert(result.slots, {
-        id = makeData(87, 1),
-        transf = transfPosC,
+        id = makeData(83, 9),
+        transf = transf,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
     
-    -- Radius modify system
-    local var = params.modules[params.classedModules[info.id].slot[87]].variant
     local rad = arcs.center.inf
     local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
     local vec = (posR - posL):normalized()
     local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local textR = ("%d mm"):format((params.platformHeight + (info.extraHeight or 0)) * 1000)
+    local textR = ("H: %d mm"):format(refH * 1000)
     
-    local addText = function(label, pos, fAlign, h)
+    local addText = function(label, pos, fTrans, h)
         local nameModelsF, width = livetext(h or 2)(label)
-        for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+        for _, m in ipairs(nameModelsF(function() return fTrans(width) * rotZ * coor.trans(pos) * transZ end)) do
             insert(result.models, m)
         end
     end
-
     
     local centerPts = ust.basePts(info.arcs.center, 20)
     local rightPts = ust.basePts(info.arcs.right, 20)
-    addText(textR, rightPts[11], function(w) return coor.xyz(-w, 0, -1) end, 0.5)
+    local leftPts = ust.basePts(info.arcs.left, 20)
+    
+    addText(textR, centerPts[11], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX(-0.5 * pi) end, 0.5)
+    
+    insert(result.slots, {
+        id = makeData(83, -1),
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[9]) * transZ,
+        type = "ust_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+    addText("⊘", centerPts[9], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX(-0.5 * pi) end, 1)
+    
 
     for i = -10, 10, 1 do
         if (i ~= 0) then
             local dz = coor.xyz(0, 0, i * 0.1)
             insert(result.slots, {
-                id = makeData(88 + var, i),
-                transf = coor.scale(coor.xyz(1, 0.2, 1)) * coor.trans(rightPts[i + 11] + dz),
+                id = makeData(84, i),
+                transf = coor.rotY(0.5 * pi) * coor.scale(coor.xyz(1, 1, 0.05)) * coor.trans(leftPts[i % 2 == 1 and 14 or 13] + dz) * transZ,
                 type = "ust_height_modifier",
                 shape = 0,
-                height = i * 0.1 + rightPts[i + 11].z,
                 spacing = {0, 0, 0, 0}
             })
-            addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[i + 11] + dz, function(w) return coor.xyz(-w, 0, -1) end, 0.5)
+            
+            insert(result.slots, {
+                id = makeData(84, i),
+                transf = coor.rotY(-0.5 * pi) * coor.scale(coor.xyz(1, 1, 0.05)) * coor.trans(rightPts[i % 2 == 1 and 8 or 9] + dz) * transZ,
+                type = "ust_height_modifier",
+                shape = 0,
+                spacing = {0, 0, 0, 0}
+            })
+
+            if i % 2 == 1 then
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[15] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[7] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
+            else
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[12] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[10] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
+            end
         end
     end
 
+    
+    -- local addSlot = function(cond, data, transf)
+    --     if cond then
+    --         insert(result.slots, {
+    --             id = makeData(91, data),
+    --             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
+    --             type = "ust_ref_modifier",
+    --             spacing = {0, 0, 0, 0},
+    --             shape = 2
+    --         })
+            
+    --         insert(result.slots, {
+    --             id = makeData(91, data),
+    --             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
+    --             type = "ust_ref_modifier",
+    --             spacing = {0, 0, 0, 0},
+    --             shape = 2
+    --         })
+    --     else
+    --         insert(result.slots, {
+    --             id = makeData(91, data),
+    --             transf = transf * coor.transZ(refH),
+    --             type = "ust_ref_modifier",
+    --             spacing = {0, 0, 0, 0},
+    --             shape = 1
+    --         })
+    --     end
+    -- end
 
-    local ptS, vecS = unpack(info.pts[info.refPos.y < 0 and 2 or 1])
-    vecS = vecS:normalized()
-    if info.refPos.y < 0 then vecS = -vecS end
+
+
 end
 
 function data()

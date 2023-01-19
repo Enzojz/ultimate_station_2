@@ -130,10 +130,11 @@ ust.slotInfo = function(slotId)
         -- 3 ~ 6 : id
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
+        --       : 61 gradient inf 62 gradient sup 63 wall gradient [7] 64 wall gradient [3]
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 83 84 85 86 radius 87 extraHeight
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 ref
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
@@ -474,7 +475,7 @@ ust.marking = function(result, slotId, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     
-    local hRef = params.platformHeight
+    local hRef = params.platformHeight + (info.extraHeight or 0)
     local hVec = coor.xyz(0, 0, hRef)
     local hTrans = coor.trans(hVec)
     

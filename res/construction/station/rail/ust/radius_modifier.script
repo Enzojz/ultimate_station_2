@@ -1,4 +1,6 @@
 local ust = require "ust"
+local coor = require "ust/coor"
+
 local insert = table.insert
 local ma = math
 local pi = ma.pi
@@ -11,14 +13,8 @@ local preProcessAdd = function(radiusFn)
         if info.type == 80 and info.data == 1 then
             modules[ust.base(info.id, 80)] = nil
         elseif info.type == 80 and info.data == 0 then
-            for i = 80, 99 do
-                if modules[ust.base(info.id, i)] then
-                    modules[ust.mixData(ust.base(info.id, i), 1)] = nil
-                    modules[ust.base(info.id, i)] = nil
-                end
-            end
             modules[ust.base(info.id, 80)] = change.module
-        elseif info.type >= 81 and info.type <= 86 then
+        else
             ust.gridization(modules, classedModules)
             local id = info.id
             local m = modules[classedModules[id].slotId]
@@ -35,12 +31,21 @@ local preProcessAdd = function(radiusFn)
             if classedModules[id].slot[56] then
                 modules[classedModules[id].slot[56]] = nil
             end
-            
-            modules[classedModules[id].slot[80]].variant = 1 - modules[classedModules[id].slot[80]].variant
-            
-            if info.type >= 81 and info.type <= 84 then
-                -- 81 82 radius value
-                -- 83 84 directional
+            if info.type == 80 and info.data == 2 then
+                -- Make straight
+                local addSlot = ust.mixData(ust.base(id, 56), 0)
+                modules[addSlot] = {
+                    metadata = {isData = true},
+                    name = "station/rail/ust/data_radius.module",
+                    updateScript = {
+                        fileName = "",
+                        params = {}
+                    },
+                    variant = 0
+                }
+            elseif info.type >= 81 and info.type <= 82 then
+                -- 81 radius value
+                -- 82 directional
                 local radius = radiusFn(info.data, m, m.info.radius)
                 if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
                 
@@ -65,20 +70,6 @@ local preProcessAdd = function(radiusFn)
                     },
                     variant = 0
                 }
-            elseif info.type == 85 or info.type == 86 then
-                -- Make straight
-                if info.data == 0 then
-                    local addSlot = ust.mixData(ust.base(id, 56), 0)
-                    modules[addSlot] = {
-                        metadata = {isData = true},
-                        name = "station/rail/ust/data_radius.module",
-                        updateScript = {
-                            fileName = "",
-                            params = {}
-                        },
-                        variant = 0
-                    }
-                end
             end
         end
     end
@@ -103,7 +94,7 @@ local preProcessAddRough =
     end)
 
 local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
-    if info.type < 50 then
+    if info.type < 50 or info.type > 82 then
         modules[slotId] = nil
     end
 end
@@ -139,8 +130,9 @@ local addSlot = function(params, result)
         local module = params.modules[info.slotId]
         if (module.metadata and module.metadata.isTrack) then
             local info = module.info
+            local height = module.metadata.height + (info.extraHeight or 0)
             local makeData = module.makeData
-            local transfPosC = info.transf
+            local transfPosC = info.transf * coor.transZ(height)
             
             if not anyRadiusModifiable then
                 table.insert(result.slots, {

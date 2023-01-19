@@ -1,17 +1,12 @@
 local ust = require "ust"
+local coor = require "ust/coor"
 
 local preProcessAdd = function(modules, change, classedModules, info)
-    if info.type == 90 and info.data == 1 then
-        modules[ust.base(info.id, 90)] = nil
-    elseif info.type == 90 and info.data == 0 then
-        for i = 80, 99 do
-            if modules[ust.base(info.id, i)] then
-                modules[ust.mixData(ust.base(info.id, i), 1)] = nil
-                modules[ust.base(info.id, i)] = nil
-            end
-        end
-        modules[ust.base(info.id, 90)] = change.module
-    elseif info.type == 91 then
+    if info.type == 85 and info.data == 1 then
+        modules[ust.base(info.id, 85)] = nil
+    elseif info.type == 85 and info.data == 0 then
+        modules[ust.base(info.id, 85)] = change.module
+    elseif info.type == 86 then
         ust.gridization(modules, classedModules)
         local id = info.id
         
@@ -36,7 +31,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
 end
 
 local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
-    if info.type < 50 then
+    if info.type < 50 or (info.type > 79 and info.type ~= 85 and info.type ~= 86) then
         modules[slotId] = nil
     end
 end
@@ -58,11 +53,12 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isPlatform or module.metadata.isTrack)) then
             local info = module.info
             local makeData = module.makeData
-            local transfPosC = info.transf
+            local refH = params.platformHeight + (info.extraHeight or 0)
+            local transfPosC = info.transf * coor.transZ(refH)
             
             if not anyRefModifiable or info.canModifyRef then
                 table.insert(result.slots, {
-                    id = makeData(90, 0),
+                    id = makeData(85, 0),
                     transf = transfPosC,
                     type = "ust_ref_modifier",
                     spacing = {0, 0, 0, 0}

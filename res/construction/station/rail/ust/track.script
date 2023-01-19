@@ -262,6 +262,14 @@ local function gridization(x, y, z, data)
         data.modules[slotId].info.gravity = gravity
 end
 
+---@param modules table<slotid, module>
+---@param classified classified_modules
+---@param slotId slotid
+---@param params any
+local postClassify = function(modules, classified, slotId, params)
+    modules[slotId].info.height = modules[slotId].info.extraHeight or 0
+end
+
 function data()
     return {
         preProcessAdd = preProcessAdd,
@@ -269,6 +277,7 @@ function data()
         slotSetup = slotSetup,
         updateFn = updateFn,
         preClassify = ust.preClassify,
+        postClassify = postClassify,
         getModelsFn = function(params)
             return {}
         end,

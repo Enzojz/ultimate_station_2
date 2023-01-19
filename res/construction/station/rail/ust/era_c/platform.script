@@ -507,9 +507,27 @@ local function gridizationPlaceholder(x, y, z, data)
     data.modules[slotId].info.gravity = gravity
 end
 
+---@param modules table<slotid, module>
+---@param classified classified_modules
+---@param slotId slotid
+---@param params any
+local postClassify = function(modules, classified, slotId, params)
+    modules[slotId].info.height = params.platformHeight + (modules[slotId].info.extraHeight or 0)
+end
+
+---@param modules table<slotid, module>
+---@param classified classified_modules
+---@param slotId slotid
+---@param params any
+local postClassifyPlaceholder = function(modules, classified, slotId, params)
+    modules[slotId].info.height = modules[slotId].info.extraHeight or 0
+end
+
 function data()
     return {
         preClassify = ust.preClassify,
+        postClassify = postClassify,
+        postClassifyPlaceholder = postClassifyPlaceholder,
         preProcessAdd = preProcessAdd,
         preProcessRemove = preProcessRemove,
         slotSetup = slotSetup,

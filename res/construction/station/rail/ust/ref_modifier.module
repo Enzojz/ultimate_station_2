@@ -11,11 +11,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     local isPlatform = params.modules[sId].metadata.isPlatform
+    local refH = params.platformHeight + (info.extraHeight or 0)
     local makeData = params.modules[sId].makeData
     
     insert(result.slots, {
-        id = makeData(90, 1),
-        transf = info.transf,
+        id = makeData(85, 1),
+        transf = info.transf * coor.transZ(refH),
         type = "ust_ref_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -28,24 +29,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local addSlot = function(cond, data, transf)
         if cond then
             insert(result.slots, {
-                id = makeData(91, data),
-                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf,
+                id = makeData(86, data),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 2
             })
             
             insert(result.slots, {
-                id = makeData(91, data),
-                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf,
+                id = makeData(86, data),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 2
             })
         else
             insert(result.slots, {
-                id = makeData(91, data),
-                transf = transf,
+                id = makeData(86, data),
+                transf = transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 1
