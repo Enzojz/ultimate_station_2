@@ -1,0 +1,49 @@
+local config = {
+    width = 2,
+    pole = "ust/fences/green_pole_1.mdl",
+    fence = "ust/fences/green_1.mdl",
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/era_c/fence"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_FENCE_GREEN"),
+            description = _("MENU_MODULE_FENCE_GREEN_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_component_fence",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/era_c/fence",
+            classify = "classify",
+            typeName = "ust_component_fence",
+            isComponent = true,
+            isFence = true,
+            typeId = 24,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

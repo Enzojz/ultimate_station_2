@@ -11,13 +11,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
     local extraHeight = info.extraHeight or 0
-    local data = params.modules[slotId].info.data
     local isPlatform = params.modules[params.classedModules[id].slotId].metadata.isPlatform
+    local baseHeight = (isPlatform and params.platformHeight or 0) + extraHeight
+    local data = params.modules[slotId].info.data
 
-    local hTrans = coor.transZ((isPlatform and params.platformHeight or 0) + extraHeight)
+    local hTrans = coor.transZ(baseHeight)
     
-    -- if n == 0 then n = 1 end
-    if data == 3 or data == 7 then 
+    if data == 3 or data == 7 then
+        local h = 3
+        local sideModule = info.octa[data] and params.modules[info.octa[data]]
+        if sideModule then
+            local info = sideModule.info
+            local extraHeight = info.extraHeight or 0
+            local isPlatform = sideModule.metadata.isPlatform
+            local sideHeight = (isPlatform and params.platformHeight or 0) + extraHeight
+            if sideHeight - baseHeight > 3 then
+                h = sideHeight - baseHeight
+            end
+        end
         local n = 4
         local cpts = ust.basePts(info.arcs.center, n)
         local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
@@ -30,8 +41,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 lb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.5 + pts[i + 1]
             }
             
-            insert(result.models, general.newModel("ust/walls/concrete_wall_tl.mdl", tag, coor.scaleZ(3) * hTrans * fitModels(coords, true)))
-            insert(result.models, general.newModel("ust/walls/concrete_wall_br.mdl", tag, coor.scaleZ(3) * hTrans * fitModels(coords, false)))
+            insert(result.models, general.newModel("ust/walls/concrete_wall_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
+            insert(result.models, general.newModel("ust/walls/concrete_wall_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
         end
     end
 
