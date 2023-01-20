@@ -126,15 +126,16 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
         -- 3 ~ 6 : id
         -- Component
-        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 23 overpass steps 24 fences 25 bridge 31 5m Entry 32 10m Entry 33 20m Entry
+        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 23 overpass steps 24 fences 25 bridge 26 tunnel 31 5m Entry 32 10m Entry 33 20m Entry
         -- 3 ~ 6 : id
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
         --       : 61 gradient inf 62 gradient sup 63 wall gradient [7] 64 wall gradient [3]
+        --       : 65 fence color 66 overpass color
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 ref
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 ref 87 88 gradient 89 90 wall gradient
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000

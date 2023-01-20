@@ -205,22 +205,22 @@ local slotSetup = function(params, result, slotId)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     if not (info.octa[3]) then
-        local transf = getTranfs(info, 3, metadata.width)
+        local transf = getTranfs(info, 3, info.width)
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
     end
     
     if not (info.octa[7]) then
-        local transf = getTranfs(info, 7, metadata.width)
+        local transf = getTranfs(info, 7, info.width)
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
     if not info.octa[1] then
-        local transf = getTranfs(info, 1, metadata.width)
+        local transf = getTranfs(info, 1, info.width)
         newTopologySlots(pos.x, pos.y + 1, transf, 1)
     end
     
     if not info.octa[5] then
-        local transf = getTranfs(info, 5, metadata.width)
+        local transf = getTranfs(info, 5, info.width)
         newTopologySlots(pos.x, pos.y - 1, transf, 5)
     end
 end

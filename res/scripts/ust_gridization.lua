@@ -270,13 +270,9 @@ ust.calculateRaidus = function(x, y, z, data)
         m.info.width = m.metadata.width or 5
     end
     
-    local width = m.info.width
+    coroutine.yield()
     
-    local yState = {
-        width = width,
-        radius = m.info.straight and 10e8 or m.info.radius,
-        length = m.info.length
-    }
+    local yState = {}
     
     local ref = data.parentMap[slotId]-- Anchor is the reference point
     
@@ -306,17 +302,17 @@ ust.calculateRaidus = function(x, y, z, data)
         end
     end
     
-    if not yState.radius then
+    if not m.info.radius then
         -- If no radius defined
         if ref == m.info.octa[5] or ref == m.info.octa[1] then
-            yState.radius = data.modules[ref].info.radius
+            m.info.radius = data.modules[ref].info.radius
         elseif ref == m.info.octa[3] then
-            yState.radius = data.modules[m.info.octa[3]].info.radius - (data.modules[m.info.octa[3]].metadata.width + m.metadata.width) * 0.5
+            m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.modules[m.info.octa[3]].info.width + m.info.width) * 0.5
         elseif ref == m.info.octa[7] then
-            yState.radius = data.modules[m.info.octa[7]].info.radius + (data.modules[m.info.octa[7]].metadata.width + m.metadata.width) * 0.5
+            m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.modules[m.info.octa[7]].info.width + m.info.width) * 0.5
         end
         
-        if not yState.radius then
+        if not m.info.radius then
             -- If the the radius is still unknown
             local loop = {}
             if m.metadata.isTrack or m.metadata.isPlaceholder then
@@ -341,19 +337,17 @@ ust.calculateRaidus = function(x, y, z, data)
             end
             for i = loop[1], loop[2], loop[3] do
                 if data.grid[z][i] and data.grid[z][i][y] and data.modules[data.grid[z][i][y]].info.radius then
-                    yState.radius = data.modules[data.grid[z][i][y]].info.radius + (data.xState.pos[x] - data.xState.pos[i])
+                    m.info.radius = data.modules[data.grid[z][i][y]].info.radius + (data.xState.pos[x] - data.xState.pos[i])
                     break
                 end
             end
-            if not yState.radius then
+            if not m.info.radius then
                 -- Make it straight
-                yState.radius = 10e8
+                m.info.radius = 10e8
             end
         end
     end
     
-    data.modules[slotId].info.radius = yState.radius
-    data.modules[slotId].info.length = yState.length
     data.yState = yState
 end
 
@@ -361,8 +355,8 @@ ust.genericArcs = function(x, y, z, data)
     local slotId = data.grid[z][x][y]
     local ref = data.parentMap[slotId]
     local m = data.modules[slotId]
-    local packer = ust.arcPacker(data.yState.pos, data.yState.vec, data.yState.length, data.yState.radius, ref == m.info.octa[1])
-    local ar, arL, arR = packer(-data.yState.width * 0.5, data.yState.width * 0.5)
+    local packer = ust.arcPacker(data.yState.pos, data.yState.vec, m.info.length, m.info.radius, ref == m.info.octa[1])
+    local ar, arL, arR = packer(-m.info.width * 0.5, m.info.width * 0.5)
     
     -- ALignement of starting point and ending point
     if (
@@ -540,19 +534,15 @@ ust.gridization = function(modules, classedModules)
             end
         end
         
-        for _, fn in ipairs(cr) do
-            local result = coroutine.resume(fn)
-            if not result then
-                error(debug.traceback(fn))
+        for i = 1, 3 do
+            for _, fn in ipairs(cr) do
+                local result = coroutine.resume(fn)
+                if not result then
+                    error(debug.traceback(fn))
+                end
             end
         end
 
-        for _, fn in ipairs(cr) do
-            local result = coroutine.resume(fn)
-            if not result then
-                error(debug.traceback(fn))
-            end
-        end
     end
     return grid, lowestHeight
 end

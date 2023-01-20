@@ -114,7 +114,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
             local extraHeight = (m.info.extraHeight or 0) * 10 + delta
             if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
             
-            
             if m.metadata.isTrack then
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlatform then
