@@ -26,7 +26,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local transf = info.transf * transZ
     
     insert(result.slots, {
-        id = makeData(83, 9),
+        id = makeData(83, -1),
         transf = transf,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
@@ -52,15 +52,65 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     addText(textR, centerPts[11], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX(-0.5 * pi) end, 0.5)
     
     insert(result.slots, {
-        id = makeData(83, -1),
+        id = makeData(83, -2),
         transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[9]) * transZ,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
-
+    
     addText("⊘", centerPts[9], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX(-0.5 * pi) end, 1)
     
-
+    if info.octa[1] and params.modules[info.octa[1]] then
+        insert(result.slots, {
+            id = makeData(83, 1),
+            transf = coor.rotZ(0.5 * pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[21]) * transZ,
+            type = "ust_height_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = 1
+        })
+    end
+    
+    if info.octa[5] and params.modules[info.octa[5]] then
+        insert(result.slots, {
+            id = makeData(83, 5),
+            transf = coor.rotZ(-0.5 * pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[1]) * transZ,
+            type = "ust_height_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = 1
+        })
+    end
+    
+    if info.octa[3] and params.modules[info.octa[3]] then
+        insert(result.slots, {
+            id = makeData(83, 3),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(rightPts[11]) * transZ,
+            type = "ust_height_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = 1
+        })
+    end
+    
+    if info.octa[7] and params.modules[info.octa[7]] then
+        insert(result.slots, {
+            id = makeData(83, 7),
+            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(leftPts[11]) * transZ,
+            type = "ust_height_modifier",
+            spacing = {0, 0, 0, 0},
+            shape = 1
+        })
+    end
+    
+    insert(result.slots, {
+        id = makeData(83, -3),
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[13]) * transZ,
+        type = "ust_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    addText("⤨", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX(-0.5 * pi) end, 1)
+    addText("⤪", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX(-0.5 * pi) end, 1)
+    
+    
     for i = -10, 10, 1 do
         if (i ~= 0) then
             local dz = coor.xyz(0, 0, i * 0.1)
@@ -79,7 +129,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 shape = 0,
                 spacing = {0, 0, 0, 0}
             })
-
+            
             if i % 2 == 1 then
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[15] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[7] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
@@ -90,37 +140,33 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
 
-    
-    -- local addSlot = function(cond, data, transf)
-    --     if cond then
-    --         insert(result.slots, {
-    --             id = makeData(91, data),
-    --             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
-    --             type = "ust_ref_modifier",
-    --             spacing = {0, 0, 0, 0},
-    --             shape = 2
-    --         })
-            
-    --         insert(result.slots, {
-    --             id = makeData(91, data),
-    --             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
-    --             type = "ust_ref_modifier",
-    --             spacing = {0, 0, 0, 0},
-    --             shape = 2
-    --         })
-    --     else
-    --         insert(result.slots, {
-    --             id = makeData(91, data),
-    --             transf = transf * coor.transZ(refH),
-    --             type = "ust_ref_modifier",
-    --             spacing = {0, 0, 0, 0},
-    --             shape = 1
-    --         })
-    --     end
-    -- end
 
-
-
+-- local addSlot = function(cond, data, transf)
+--     if cond then
+--         insert(result.slots, {
+--             id = makeData(91, data),
+--             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
+--             type = "ust_ref_modifier",
+--             spacing = {0, 0, 0, 0},
+--             shape = 2
+--         })
+--         insert(result.slots, {
+--             id = makeData(91, data),
+--             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
+--             type = "ust_ref_modifier",
+--             spacing = {0, 0, 0, 0},
+--             shape = 2
+--         })
+--     else
+--         insert(result.slots, {
+--             id = makeData(91, data),
+--             transf = transf * coor.transZ(refH),
+--             type = "ust_ref_modifier",
+--             spacing = {0, 0, 0, 0},
+--             shape = 1
+--         })
+--     end
+-- end
 end
 
 function data()

@@ -6,21 +6,23 @@ local setHeight = function(modules, classedModules, slotId, height)
     local m = modules[slotId]
     local info = m.info
     local id = info.id
-
+    
     if classedModules[id].slot[59] then
         modules[classedModules[id].slot[59]] = nil
     end
-
-    local addSlot = ust.mixData(ust.base(id, 59), height)
-    modules[addSlot] = {
-        metadata = {isData = true},
-        name = "station/rail/ust/data_geometry.module",
-        updateScript = {
-            fileName = "",
-            params = {}
-        },
-        variant = 0
-    }
+    
+    if height then
+        local addSlot = ust.mixData(ust.base(id, 59), height)
+        modules[addSlot] = {
+            metadata = {isData = true},
+            name = "station/rail/ust/data_geometry.module",
+            updateScript = {
+                fileName = "",
+                params = {}
+            },
+            variant = 0
+        }
+    end
 end
 
 local setPlatformHeight = function(modules, classedModules, slotId, height)
@@ -29,7 +31,7 @@ local setPlatformHeight = function(modules, classedModules, slotId, height)
         lut[slotId] = true
         local m = modules[slotId]
         local info = m.info
-        for _, octa in ipairs(info.octa) do
+        for _, octa in ipairs({info.octa[1], info.octa[5], info.octa[3], info.octa[7]}) do
             if octa and modules[octa] and modules[octa].metadata.isPlatform then
                 if not lut[octa] then
                     searchModules(octa)
@@ -37,9 +39,9 @@ local setPlatformHeight = function(modules, classedModules, slotId, height)
             end
         end
     end
-
+    
     searchModules(slotId)
-
+    
     for slotId, _ in pairs(lut) do
         setHeight(modules, classedModules, slotId, height)
     end
@@ -60,36 +62,64 @@ local setTrackHeight = function(modules, classedModules, slotId, height)
             end
         end
     end
-
+    
     searchModules(slotId)
-
+    
     for slotId, _ in pairs(lut) do
         setHeight(modules, classedModules, slotId, height)
     end
 end
 
 local preProcessAdd = function(modules, change, classedModules, info)
-    if info.type == 83 and info.data == 9 then -- Remove modifer
+    if info.type == 83 and info.data == -1 then -- Remove modifer
         modules[ust.base(info.id, 83)] = nil
-    elseif info.type == 83 and info.data == -1 then
+    elseif info.type == 83 and info.data == -2 then
         ust.gridization(modules, classedModules)
-        modules[classedModules[info.idid].slot[59]] = nil
-        modules[ust.base(info.id, 83)] = nil
+        if classedModules[info.id].slot[59] then
+            modules[classedModules[info.id].slot[59]] = nil
+        end
     elseif info.type == 83 and info.data == 0 then
         modules[ust.base(info.id, 83)] = change.module
-    elseif info.type == 84 then
+    else
         ust.gridization(modules, classedModules)
         local id = info.id
         local m = modules[classedModules[id].slotId]
-        
-        local delta = info.data
-        local extraHeight = (m.info.extraHeight or 0) * 10 + delta
-        if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
-
-        if m.metadata.isTrack then
-            setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
-        elseif m.metadata.isPlatform then
-            setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+        if info.type == 83 and info.data > 0 then
+            local slotId = m.info.octa[info.data]
+            if slotId and modules[slotId] then
+                local extraHeight = (modules[slotId].info.extraHeight or 0) * 10
+                if extraHeight == 0 then
+                    extraHeight = nil
+                end
+                
+                if m.metadata.isTrack then
+                    setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+                elseif m.metadata.isPlatform then
+                    setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+                end
+            end
+        elseif info.type == 83 and info.data == -3 then
+            local extraHeight = (m.info.extraHeight or 0) * 10
+            if extraHeight == 0 then
+                extraHeight = nil
+            end
+            
+            if m.metadata.isTrack then
+                setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isPlatform then
+                setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            end
+        elseif info.type == 84 then
+            local delta = info.data
+            local extraHeight = (m.info.extraHeight or 0) * 10 + delta
+            if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
+            
+            
+            if m.metadata.isTrack then
+                setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isPlatform then
+                setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            end
         end
     end
 end
