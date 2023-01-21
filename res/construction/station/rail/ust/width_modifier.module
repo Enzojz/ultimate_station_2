@@ -41,92 +41,52 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local addText = function(label, pos, fTrans, h)
         local nameModelsF, width = livetext(h or 2)(label)
-        for _, m in ipairs(nameModelsF(function() return fTrans(width) * rotZ * coor.trans(pos) * transZ end)) do
+        for _, m in ipairs(nameModelsF(function() return fTrans(width) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos) * transZ end)) do
             insert(result.models, m)
         end
     end
     
-    local centerPts = ust.basePts(info.arcs.center, 4)
-    local rightPts = ust.basePts(info.arcs.right, 4)
-    local leftPts = ust.basePts(info.arcs.left, 4)
+    local centerPts = ust.basePts(info.arcs.center, 12)
+    local rightPts = ust.basePts(info.arcs.right, 12)
+    local leftPts = ust.basePts(info.arcs.left, 12)
     
-    addText(textR, centerPts[3], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX(-0.5 * pi) end, 0.5)
+    addText(textR, centerPts[7], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) end, 0.5)
     
     insert(result.slots, {
         id = makeData(85, -2),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[2]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[4]) * transZ,
         type = "ust_width_modifier",
         spacing = {0, 0, 0, 0}
     })
     
-    addText("⊘", centerPts[2], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX(-0.5 * pi) end, 1)
-    
-    if info.octa[1] and params.modules[info.octa[1]] then
-        insert(result.slots, {
-            id = makeData(85, 1),
-            transf = coor.rotZ(0.5 * pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[5]) * transZ,
-            type = "ust_width_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = 1
-        })
-    end
-    
-    if info.octa[5] and params.modules[info.octa[5]] then
-        insert(result.slots, {
-            id = makeData(85, 5),
-            transf = coor.rotZ(-0.5 * pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[1]) * transZ,
-            type = "ust_width_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = 1
-        })
-    end
-    
-    if info.octa[3] and params.modules[info.octa[3]] then
-        insert(result.slots, {
-            id = makeData(85, 3),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(rightPts[3]) * transZ,
-            type = "ust_width_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = 1
-        })
-    end
-    
-    if info.octa[7] and params.modules[info.octa[7]] then
-        insert(result.slots, {
-            id = makeData(85, 7),
-            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(leftPts[3]) * transZ,
-            type = "ust_width_modifier",
-            spacing = {0, 0, 0, 0},
-            shape = 1
-        })
-    end
-        
+    addText("⊘", centerPts[4], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) end, 1)
+         
     for i = -10, 10, 1 do
         if (i ~= 0) then
-            local dw = coor.xyz(i * 0.05, 0, 0)
+            local dw = coor.xyz(i * 0.1, 0, 0)
             insert(result.slots, {
                 id = makeData(86, info.width * 10 + i),
-                transf = coor.scale(coor.xyz(0.025, 1, 1)) * coor.trans(leftPts[3] - dw) * transZ,
+                transf = coor.scale(coor.xyz(0.025, 1,2, 1)) * coor.trans(leftPts[7] - dw) * transZ,
                 type = "ust_width_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
             })
             
-            -- insert(result.slots, {
-            --     id = makeData(86, i),
-            --     transf = coor.scale(coor.xyz(1, 1, 0.05)) * coor.trans(rightPts[i % 2 == 1 and 8 or 9] + dw) * transZ,
-            --     type = "ust_width_modifier",
-            --     shape = 0,
-            --     spacing = {0, 0, 0, 0}
-            -- })
+            insert(result.slots, {
+                id = makeData(86, info.width * 10 + i),
+                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(rightPts[7] + dw) * transZ,
+                type = "ust_width_modifier",
+                shape = 0,
+                spacing = {0, 0, 0, 0}
+            })
             
-            -- if i % 2 == 1 then
-            --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[3] + dw, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
-            --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[3] + dw, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
-            -- else
-            --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[3] + dw, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
-            --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[3] + dw, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
-            -- end
+            if i % 2 == 1 then
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[6] - dw, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[6] + dw, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY(0.5 * pi) * coor.transX(0.1) end, 0.25)
+            else
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[8] - dw, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotY(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[8] + dw, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotY(0.5 * pi) * coor.transX(0.1) end, 0.25)
+            end
         end
     end
 end

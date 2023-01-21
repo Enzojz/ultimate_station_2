@@ -53,16 +53,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
         local m = modules[classedModules[id].slotId]
         if info.type == 85 and info.data == -2 then
             setWidth(modules, classedModules, classedModules[info.id].slotId)
-        elseif info.type == 85 and info.data > 0 then
-            local slotId = m.info.octa[info.data]
-            if slotId and modules[slotId] then
-                local width = info.data
-                if width == m.metadata.width * 10 then
-                    width = nil
-                end
-                
-                setWidth(modules, classedModules, classedModules[id].slotId, width)
-            end
         elseif info.type == 86 then
             local width = info.data
             if width == m.metadata.width * 10 then
