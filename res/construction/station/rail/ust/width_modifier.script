@@ -1,0 +1,143 @@
+local ust = require "ust"
+local coor = require "ust/coor"
+local insert = table.insert
+
+local setWidth = function(modules, classedModules, slotId, width)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and (modules[octa].metadata.isPlatform or modules[octa].metadata.isPlaceholder) then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
+        end
+    end
+    
+    searchModules(slotId)
+    for slotId, _ in pairs(lut) do
+        local m = modules[slotId]
+        local info = m.info
+        local id = info.id
+        
+        if classedModules[id].slot[58] then
+            modules[classedModules[id].slot[58]] = nil
+        end
+        
+        if width then
+            local addSlot = ust.mixData(ust.base(id, 58), width)
+            modules[addSlot] = {
+                metadata = {isData = true},
+                name = "station/rail/ust/data_geometry.module",
+                updateScript = {
+                    fileName = "",
+                    params = {}
+                },
+                variant = 0
+            }
+        end
+    end
+end
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.type == 85 and info.data == -1 then -- Remove modifer
+        modules[ust.base(info.id, 85)] = nil
+    elseif info.type == 85 and info.data == 0 then
+        modules[ust.base(info.id, 85)] = change.module
+    else
+        ust.gridization(modules, classedModules)
+        local id = info.id
+        local m = modules[classedModules[id].slotId]
+        if info.type == 85 and info.data == -2 then
+            setWidth(modules, classedModules, classedModules[info.id].slotId)
+        elseif info.type == 85 and info.data > 0 then
+            local slotId = m.info.octa[info.data]
+            if slotId and modules[slotId] then
+                local width = info.data
+                if width == m.metadata.width * 10 then
+                    width = nil
+                end
+                
+                setWidth(modules, classedModules, classedModules[id].slotId, width)
+            end
+        elseif info.type == 86 then
+            local width = info.data
+            if width == m.metadata.width * 10 then
+                width = nil
+            elseif width > 999 then
+                width = 999
+            elseif width < 5 then
+                width = 5
+            end
+            
+            setWidth(modules, classedModules, classedModules[id].slotId, width)
+        end
+    end
+end
+
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
+    if info.type < 50 or (info.type > 79 and info.type ~= 85 and info.type ~= 86) then
+        modules[slotId] = nil
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_width_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+end
+
+local classifyData = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    modules[slotId].info.canModifyWidth = true
+end
+
+local addSlot = function(params, result)
+    local anyWidthModifiable = false
+    for _, module in pairs(params.modules) do
+        anyWidthModifiable = anyWidthModifiable or module.info.canModifyWidth
+    end
+    
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and (module.metadata.isPlatform or module.metadata.isPlaceholder)) then
+            local info = module.info
+            local makeData = module.makeData
+            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
+            local transfPosC = info.transf * coor.transZ(refH)
+            
+            if not anyWidthModifiable then
+                table.insert(result.slots, {
+                    id = makeData(85, 0),
+                    transf = transfPosC,
+                    type = "ust_width_modifier",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
+
+function data()
+    return {
+        classify = classifyData,
+        preProcessAdd = preProcessAdd,
+        preProcessPostAdd = preProcessPostAdd,
+        slotSetup = slotSetup,
+        addSlot = addSlot
+    }
+
+end

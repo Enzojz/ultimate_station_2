@@ -15,7 +15,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local makeData = params.modules[sId].makeData
     
     insert(result.slots, {
-        id = makeData(85, 1),
+        id = makeData(91, 1),
         transf = info.transf * coor.transZ(refH),
         type = "ust_ref_modifier",
         spacing = {0, 0, 0, 0}
@@ -29,7 +29,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local addSlot = function(cond, data, transf)
         if cond then
             insert(result.slots, {
-                id = makeData(86, data),
+                id = makeData(92, data),
                 transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
@@ -37,7 +37,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
             
             insert(result.slots, {
-                id = makeData(86, data),
+                id = makeData(92, data),
                 transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
@@ -45,7 +45,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
         else
             insert(result.slots, {
-                id = makeData(86, data),
+                id = makeData(92, data),
                 transf = transf * coor.transZ(refH),
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},

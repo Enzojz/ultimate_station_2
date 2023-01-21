@@ -21,6 +21,8 @@ function data()
             MENU_REF_MODIFIER_DESC = "To change the dependency relation between platform/track blocks.",
             MENU_HEIGHT_MODIFIER = "Platform height modifier",
             MENU_HEIGHT_MODIFIER_DESC = "To adjust the height of platforms individually.",
+            MENU_WIDTH_MODIFIER = "Platform width modifier",
+            MENU_WIDTH_MODIFIER_DESC = "To adjust the width of platforms.",
             MENU_WITH_CAT = " with catenary",
             MENU_TRACK_NR = "Track number",
             MENU_TRACK_TYPE = "Track type",

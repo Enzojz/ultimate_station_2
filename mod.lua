@@ -117,7 +117,6 @@
             
             for index, name in pairs(api.res.moduleRep.getAll()) do
                 if name:match("station/rail/ust/data") then
-                    print(name)
                     api.res.moduleRep.setVisible(index, false)
                 end
             end

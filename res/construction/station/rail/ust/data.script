@@ -30,12 +30,13 @@ end
 
 local classifyGeometry = function(modules, classified, slotId)
     local type, id, data = ust.classifyData(modules, classified, slotId)
+
     local slotId = classified[id].slotId
     
     if (type == 57) then
         modules[slotId].info.length = data
     elseif (type == 58) then
-        modules[slotId].info.width = data
+        modules[slotId].info.width = data * 0.1
     elseif (type == 59) then
         modules[slotId].info.extraHeight = data * 0.1
     end

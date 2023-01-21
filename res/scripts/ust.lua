@@ -101,7 +101,7 @@ ust.slotIds = function(info)
         } or {},
         data_geometry = {
             ust.mixData(ust.base(info.id, 57), info.length),
-            ust.mixData(ust.base(info.id, 58), info.width),
+            ust.mixData(ust.base(info.id, 58), info.width * 10),
             ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
         },
         data_ref = {
@@ -135,7 +135,7 @@ ust.slotInfo = function(slotId)
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 ref 87 88 gradient 89 90 wall gradient
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall gradient 91 92 ref
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000

@@ -139,34 +139,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             end
         end
     end
-
-
--- local addSlot = function(cond, data, transf)
---     if cond then
---         insert(result.slots, {
---             id = makeData(91, data),
---             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
---             type = "ust_ref_modifier",
---             spacing = {0, 0, 0, 0},
---             shape = 2
---         })
---         insert(result.slots, {
---             id = makeData(91, data),
---             transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
---             type = "ust_ref_modifier",
---             spacing = {0, 0, 0, 0},
---             shape = 2
---         })
---     else
---         insert(result.slots, {
---             id = makeData(91, data),
---             transf = transf * coor.transZ(refH),
---             type = "ust_ref_modifier",
---             spacing = {0, 0, 0, 0},
---             shape = 1
---         })
---     end
--- end
 end
 
 function data()

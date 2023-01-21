@@ -2,11 +2,11 @@ local ust = require "ust"
 local coor = require "ust/coor"
 
 local preProcessAdd = function(modules, change, classedModules, info)
-    if info.type == 85 and info.data == 1 then
-        modules[ust.base(info.id, 85)] = nil
-    elseif info.type == 85 and info.data == 0 then
-        modules[ust.base(info.id, 85)] = change.module
-    elseif info.type == 86 then
+    if info.type == 91 and info.data == 1 then
+        modules[ust.base(info.id, 91)] = nil
+    elseif info.type == 91 and info.data == 0 then
+        modules[ust.base(info.id, 91)] = change.module
+    elseif info.type == 92 then
         ust.gridization(modules, classedModules)
         local id = info.id
         
@@ -31,7 +31,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
 end
 
 local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
-    if info.type < 50 or (info.type > 79 and info.type ~= 85 and info.type ~= 86) then
+    if info.type < 50 or (info.type > 79 and info.type ~= 91 and info.type ~= 92) then
         modules[slotId] = nil
     end
 end
@@ -58,7 +58,7 @@ local addSlot = function(params, result)
             
             if not anyRefModifiable or info.canModifyRef then
                 table.insert(result.slots, {
-                    id = makeData(85, 0),
+                    id = makeData(91, 0),
                     transf = transfPosC,
                     type = "ust_ref_modifier",
                     spacing = {0, 0, 0, 0}
