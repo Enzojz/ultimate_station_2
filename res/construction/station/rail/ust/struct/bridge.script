@@ -1,14 +1,17 @@
 local ust = require "ust"
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
 
 local insert = table.insert
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.data == 0 then
         ust.gridization(modules, classedModules)
-
+        
         local addSlot = ust.base(info.id, 25)
         modules[addSlot] = change.module
-
+        
         if classedModules[info.id].slot[26] then
             modules[classedModules[info.id].slot[26]] = nil
         end
@@ -34,10 +37,11 @@ end
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and module.metadata.isTrack) then
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
-            local transf = info.transf
+            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
+            local transf = info.transf * coor.transZ(refH)
             
             insert(result.slots, {
                 id = makeData(25, 0),
@@ -65,27 +69,65 @@ end
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
     local bridgeName = closureParams.name
     
-    local id = params.modules[slotId].info.id
-    local makeData = params.modules[params.classedModules[id].slotId].makeData
-    
-    local trackSlotId = params.classedModules[id].slotId
+    local info = params.modules[slotId].info
+    local trackSlotId = params.classedModules[info.id].slotId
+    local module = params.modules[trackSlotId]
+    local makeData = params.modules[params.classedModules[info.id].slotId].makeData
+    local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (module.info.extraHeight or 0)
+    local transf = module.info.transf * coor.transZ(refH)
     
     insert(result.slots, {
         id = makeData(25, -1),
-        transf = transform,
+        transf = transf,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
     
-    insert(result.invokeLater, function()
-        local trackEdgeIndex = params.edgeIndex[trackSlotId]
-        local trackEdges = result.edgeLists[trackEdgeIndex]
-        if trackEdges then
-            trackEdges.edgeType = "BRIDGE"
-            trackEdges.edgeTypeName = bridgeName
-            alignTerrain = nil
-        end
-    end)
+    if module.metadata.isTrack then
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.edgeType = "BRIDGE"
+                trackEdges.edgeTypeName = bridgeName
+                alignTerrain = nil
+            end
+        end)
+    elseif module.metadata.isPlatform then
+        local info = module.info
+        local zOffset = 0.53 - params.refHeight + (info.extraHeight or 0)
+        local length = info.arcs.center:length()
+        local baseEdge = {
+            {
+                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:tangent(info.arcs.center.inf) * length,
+            },
+            {
+                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:tangent(info.arcs.center.sup) * length,
+            },
+        }
+        
+        result.terrainLists[info.id].equal = nil
+        
+        insert(result.invokeLater, function()
+            insert(result.edgeLists, {
+                type = "TRACK",
+                alignTerrain = false,
+                params = {
+                    type = "ust_mock.lua",
+                    catenary = false,
+                },
+                edgeType = "BRIDGE",
+                edgeTypeName = bridgeName,
+                edges = func.map(baseEdge, pipe.map(coor.vec2Tuple)),
+                snapNodes = {},
+                freeNodes = {},
+                tag2nodes = {},
+                slot = slotId
+            })
+        end)
+    end
 end
 
 function data()

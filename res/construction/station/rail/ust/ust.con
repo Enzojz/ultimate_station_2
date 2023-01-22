@@ -83,7 +83,7 @@ local createTemplateFn = function(params)
                 result[slotId] = "station/rail/ust/tracks/high_speed.module"
                 for m, slotIds in pairs(slotIds) do
                     for _, slotId in ipairs(slotIds) do
-                        result[slotId] = string.format("station/rail/ust/%s.module", m)
+                        result[slotId] = string.format("station/rail/ust/data/%s.module", m)
                     end
                 end
             end
@@ -101,7 +101,7 @@ local createTemplateFn = function(params)
                 result[slotId] = "station/rail/ust/era_c/platform.module"
                 for m, slotIds in pairs(slotIds) do
                     for _, slotId in ipairs(slotIds) do
-                        result[slotId] = string.format("station/rail/ust/%s.module", m)
+                        result[slotId] = string.format("station/rail/ust/data/%s.module", m)
                     end
                 end
             end
@@ -116,14 +116,6 @@ local preProcessFn = function(modules, change)
     local classedModules = classifyModules(modules)
     
     local type, id, data = ust.slotInfo(change.slotId)
-    
-    for slotId, m in pairs(modules) do
-        local m1 = m.name:match("station/rail/ust/data_(.+).module")
-        if (m1) then
-            dump()(("station/rail/ust/data/%s.module"):format(m1))
-            m.name = ("station/rail/ust/data/%s.module"):format(m1)
-        end
-    end
     
     local info = {
         type = type,
@@ -316,6 +308,7 @@ local updateFn = function(params, closureParams)
             {type = "LESS", faces = {}},
             {type = "GREATER", faces = {}}
         },
+        terrainLists = {},
         groundFaces = {},
         terminalGroups = {},
         stations = {},
@@ -415,6 +408,19 @@ local updateFn = function(params, closureParams)
         for _, fn in ipairs(result.invokeLater) do
             fn()
         end
+        
+        for id, terrains in pairs(result.terrainLists) do
+            if terrains.equal then
+                insert(result.terrainAlignmentLists[1].faces, terrains.equal)
+            end
+            if terrains.less then
+                insert(result.terrainAlignmentLists[2].faces, terrains.equal)
+            end
+            if terrains.greater then
+                insert(result.terrainAlignmentLists[3].faces, terrains.equal)
+            end
+        end
+        
     end
     return result
 end

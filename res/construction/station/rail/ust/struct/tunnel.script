@@ -2,7 +2,6 @@ local ust = require "ust"
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
-local dump = require "luadump"
 
 local insert = table.insert
 
@@ -41,7 +40,8 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
-            local transf = info.transf
+            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
+            local transf = info.transf * coor.transZ(refH)
             
             insert(result.slots, {
                 id = makeData(26, 0),
@@ -73,10 +73,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
     local makeData = module.makeData
+    local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (module.info.extraHeight or 0)
+    local transf = module.info.transf * coor.transZ(refH)
     
     insert(result.slots, {
         id = makeData(26, -1),
-        transf = transform,
+        transf = transf,
         type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })
@@ -105,6 +107,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 info.arcs.center:tangent(info.arcs.center.sup) * length,
             },
         }
+
+        result.terrainLists[info.id].equal = nil
         
         insert(result.invokeLater, function()
             insert(result.edgeLists, {
@@ -119,8 +123,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 edges = func.map(baseEdge, pipe.map(coor.vec2Tuple)),
                 snapNodes = {},
                 freeNodes = {},
-                tag2nodes = {
-                },
+                tag2nodes = {},
                 slot = slotId
             })
         end)
