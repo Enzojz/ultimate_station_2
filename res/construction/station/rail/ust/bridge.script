@@ -4,8 +4,14 @@ local insert = table.insert
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.data == 0 then
+        ust.gridization(modules, classedModules)
+
         local addSlot = ust.base(info.id, 25)
         modules[addSlot] = change.module
+
+        if classedModules[info.id].slot[26] then
+            modules[classedModules[info.id].slot[26]] = nil
+        end
     elseif info.data == -1 then
         local addSlot = ust.base(info.id, 25)
         if (modules[addSlot].name == change.module.name) then

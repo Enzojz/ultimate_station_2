@@ -1,0 +1,143 @@
+local ust = require "ust"
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+local coor = require "ust/coor"
+local dump = require "luadump"
+
+local insert = table.insert
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.data == 0 then
+        ust.gridization(modules, classedModules)
+        
+        local addSlot = ust.base(info.id, 26)
+        modules[addSlot] = change.module
+        
+        if classedModules[info.id].slot[25] then
+            modules[classedModules[info.id].slot[25]] = nil
+        end
+    elseif info.data == -1 then
+        local addSlot = ust.base(info.id, 26)
+        if (modules[addSlot].name == change.module.name) then
+            modules[addSlot] = nil
+        else
+            modules[addSlot] = change.module
+        end
+    elseif info.data == 1 then
+        modules[ust.base(info.id, 26)] = nil
+    end
+end
+
+local preProcessRemove = function(modules, change, classedModules, info)
+    for _, slotId in pairs(classedModules[info.id].slot) do
+        modules[slotId] = nil
+    end
+    modules[change.slotId] = nil
+end
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
+            local info = module.info
+            local makeData = module.makeData
+            local transf = info.transf
+            
+            insert(result.slots, {
+                id = makeData(26, 0),
+                transf = transf,
+                type = "ust_tunnel",
+                spacing = {0, 0, 0, 0}
+            })
+        end
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_tunnel",
+        spacing = {0, 0, 0, 0}
+    })
+end
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, closureParams)
+    local tunnelName = closureParams.name
+    
+    local info = params.modules[slotId].info
+    local trackSlotId = params.classedModules[info.id].slotId
+    local module = params.modules[trackSlotId]
+    local makeData = module.makeData
+    
+    insert(result.slots, {
+        id = makeData(26, -1),
+        transf = transform,
+        type = "ust_tunnel",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    if module.metadata.isTrack then
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.edgeType = "TUNNEL"
+                trackEdges.edgeTypeName = tunnelName
+                alignTerrain = nil
+            end
+        end)
+    elseif module.metadata.isPlatform then
+        local info = module.info
+        local zOffset = 0.53 - params.refHeight + (info.extraHeight or 0)
+        local length = info.arcs.center:length()
+        local baseEdge = {
+            {
+                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:tangent(info.arcs.center.inf) * length,
+            },
+            {
+                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:tangent(info.arcs.center.sup) * length,
+            },
+        }
+        
+        insert(result.invokeLater, function()
+            insert(result.edgeLists, {
+                type = "TRACK",
+                alignTerrain = false,
+                params = {
+                    type = "ust_mock.lua",
+                    catenary = false,
+                },
+                edgeType = "TUNNEL",
+                edgeTypeName = tunnelName,
+                edges = func.map(baseEdge, pipe.map(coor.vec2Tuple)),
+                snapNodes = {},
+                freeNodes = {},
+                tag2nodes = {
+                },
+                slot = slotId
+            })
+        end)
+    end
+end
+
+function data()
+    return {
+        preProcessAdd = preProcessAdd,
+        preProcessRemove = preProcessRemove,
+        addSlot = addSlot,
+        slotSetup = slotSetup,
+        updateFn = updateFn,
+        classify = ust.classifyComp,
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

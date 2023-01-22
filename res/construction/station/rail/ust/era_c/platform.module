@@ -296,7 +296,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     local face = pipe.new + leftEdge + func.rev(rightEdge)
-    insert(result.terrainAlignmentLists[1].faces, face * pipe.map(coor.vec2Tuple))
+    -- insert(result.terrainAlignmentLists[1].faces, face * pipe.map(coor.vec2Tuple))
     
     if params.debug then
         local text = tostring(info.id)

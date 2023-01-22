@@ -32,7 +32,6 @@
                     mod.availability.yearFrom = track.yearFrom
                     mod.availability.yearTo = track.yearTo
                     mod.cost.price = 0
-                    -- mod.buildMode = "SINGLE"
                     mod.description.name = track.name .. (catenary and _("MENU_WITH_CAT") or "")
                     mod.description.description = track.desc .. (catenary and _("MENU_WITH_CAT") or "")
                     mod.description.icon = track.icon
@@ -83,7 +82,6 @@
                 mod.availability.yearFrom = bridge.yearFrom
                 mod.availability.yearTo = bridge.yearTo
                 mod.cost.price = 0
-                -- mod.buildMode = "SINGLE"
                 mod.description.name = bridge.name
                 mod.description.description = ""
                 mod.description.icon = bridge.icon
@@ -110,6 +108,48 @@
                 }
                 
                 mod.getModelsScript.fileName = "construction/station/rail/ust/bridge.getModelsFn"
+                mod.getModelsScript.params = {}
+                
+                api.res.moduleRep.add(mod.fileName, mod, true)
+            end
+
+            
+            local tunnels = api.res.tunnelTypeRep.getAll()
+            for index, tunnelName in pairs(tunnels) do
+                local tunnel = api.res.tunnelTypeRep.get(index)
+                
+                local mod = api.type.ModuleDesc.new()
+                mod.fileName = ("station/rail/ust/tunnels/%s.module"):format(tunnelName:match("(.+).lua"))
+                
+                mod.availability.yearFrom = tunnel.yearFrom
+                mod.availability.yearTo = tunnel.yearTo
+                mod.cost.price = 0
+                mod.description.name = tunnel.name
+                mod.description.description = ""
+                mod.description.icon = tunnel.icon
+                
+                mod.type = "ust_tunnel"
+                mod.order.value = 0
+                mod.metadata = {
+                    typeName = "ust_tunnel",
+                    typeId = 25,
+                    scriptName = "construction/station/rail/ust/tunnel",
+                    preProcessAdd = "preProcessAdd",
+                    preProcessRemove = "preProcessRemove",
+                    slotSetup = "slotSetup",
+                    addSlot = "addSlot",
+                    classify = "classify"
+                }
+                
+                mod.category.categories = {"ust_cat_tunnel"}
+                
+                mod.updateScript.fileName = "construction/station/rail/ust/tunnel.updateFn"
+                mod.updateScript.params = {
+                    index = index,
+                    name = tunnelName
+                }
+                
+                mod.getModelsScript.fileName = "construction/station/rail/ust/tunnel.getModelsFn"
                 mod.getModelsScript.params = {}
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)
