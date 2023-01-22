@@ -167,7 +167,7 @@ function data()
             typeName = "ust_height_modifier",
             isData = true,
             type = 2,
-            scriptName = "construction/station/rail/ust/height_modifier",
+            scriptName = "construction/station/rail/ust/modifier/height",
             preProcessAdd = "preProcessAdd",
             preProcessPostAdd = "preProcessPostAdd",
             classify = "classify",

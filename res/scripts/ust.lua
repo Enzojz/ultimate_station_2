@@ -88,23 +88,23 @@ ust.slotIds = function(info)
     local base = info.type + info.id * 100
     
     return base, {
-        data_pos = {
+        pos = {
             ust.mixData(ust.base(info.id, 51), info.pos.x),
             ust.mixData(ust.base(info.id, 52), info.pos.y),
             ust.mixData(ust.base(info.id, 53), info.pos.z)
         },
-        data_radius = info.radius and {
+        radius = info.radius and {
             ust.mixData(ust.base(info.id, 54), info.radius > 0 and info.radius % 1000 or -(-info.radius % 1000)),
             ust.mixData(ust.base(info.id, 55), info.radius > 0 and math.floor(info.radius / 1000) or -(math.floor(-info.radius / 1000))),
         } or info.straight and {
             ust.mixData(ust.base(info.id, 56), 0)
         } or {},
-        data_geometry = {
+        geometry = {
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 58), info.width * 10),
             ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
         },
-        data_ref = {
+        ref = {
             info.ref and
             ust.mixData(ust.base(info.id, 60),
                 (info.ref.left and 1 or 0) +

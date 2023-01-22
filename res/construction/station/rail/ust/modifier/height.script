@@ -15,7 +15,7 @@ local setHeight = function(modules, classedModules, slotId, height)
         local addSlot = ust.mixData(ust.base(id, 59), height)
         modules[addSlot] = {
             metadata = {isData = true},
-            name = "station/rail/ust/data_geometry.module",
+            name = "station/rail/ust/data/geometry.module",
             updateScript = {
                 fileName = "",
                 params = {}

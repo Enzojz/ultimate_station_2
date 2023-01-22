@@ -44,7 +44,7 @@
                         width = track.trackDistance,
                         height = track.railBase + track.railHeight,
                         typeId = 1,
-                        scriptName = "construction/station/rail/ust/track",
+                        scriptName = "construction/station/rail/ust/struct/track",
                         preProcessAdd = "preProcessAdd",
                         preProcessRemove = "preProcessRemove",
                         slotSetup = "slotSetup",
@@ -55,14 +55,14 @@
                     
                     mod.category.categories = catenary and {"ust_cat_track_cat"} or {"ust_cat_track"}
                     
-                    mod.updateScript.fileName = "construction/station/rail/ust/track.updateFn"
+                    mod.updateScript.fileName = "construction/station/rail/ust/struct/track.updateFn"
                     mod.updateScript.params = {
                         trackType = trackName .. ".lua",
                         catenary = catenary,
                         trackWidth = track.trackDistance
                     }
                     
-                    mod.getModelsScript.fileName = "construction/station/rail/ust/track.getModelsFn"
+                    mod.getModelsScript.fileName = "construction/station/rail/ust/struct/track.getModelsFn"
                     mod.getModelsScript.params = {}
                     
                     api.res.moduleRep.add(mod.fileName, mod, true)
@@ -91,7 +91,7 @@
                 mod.metadata = {
                     typeName = "ust_bridge",
                     typeId = 25,
-                    scriptName = "construction/station/rail/ust/bridge",
+                    scriptName = "construction/station/rail/ust/struct/bridge",
                     preProcessAdd = "preProcessAdd",
                     preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
@@ -101,13 +101,13 @@
                 
                 mod.category.categories = {"ust_cat_bridge"}
                 
-                mod.updateScript.fileName = "construction/station/rail/ust/bridge.updateFn"
+                mod.updateScript.fileName = "construction/station/rail/ust/struct/bridge.updateFn"
                 mod.updateScript.params = {
                     index = index,
                     name = bridgeName
                 }
                 
-                mod.getModelsScript.fileName = "construction/station/rail/ust/bridge.getModelsFn"
+                mod.getModelsScript.fileName = "construction/station/rail/ust/struct/bridge.getModelsFn"
                 mod.getModelsScript.params = {}
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)
@@ -133,7 +133,7 @@
                 mod.metadata = {
                     typeName = "ust_tunnel",
                     typeId = 25,
-                    scriptName = "construction/station/rail/ust/tunnel",
+                    scriptName = "construction/station/rail/ust/struct/tunnel",
                     preProcessAdd = "preProcessAdd",
                     preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
@@ -143,13 +143,13 @@
                 
                 mod.category.categories = {"ust_cat_tunnel"}
                 
-                mod.updateScript.fileName = "construction/station/rail/ust/tunnel.updateFn"
+                mod.updateScript.fileName = "construction/station/rail/ust/struct/tunnel.updateFn"
                 mod.updateScript.params = {
                     index = index,
                     name = tunnelName
                 }
                 
-                mod.getModelsScript.fileName = "construction/station/rail/ust/tunnel.getModelsFn"
+                mod.getModelsScript.fileName = "construction/station/rail/ust/struct/tunnel.getModelsFn"
                 mod.getModelsScript.params = {}
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)

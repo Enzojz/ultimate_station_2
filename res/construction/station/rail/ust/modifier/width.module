@@ -117,7 +117,7 @@ function data()
             typeName = "ust_width_modifier",
             isData = true,
             type = 2,
-            scriptName = "construction/station/rail/ust/width_modifier",
+            scriptName = "construction/station/rail/ust/modifier/width",
             preProcessAdd = "preProcessAdd",
             preProcessPostAdd = "preProcessPostAdd",
             classify = "classify",

@@ -23,9 +23,9 @@ function data()
         metadata = {
             isHidden = true,
             isData = true,
-            scriptName = "construction/station/rail/ust/data",
+            scriptName = "construction/station/rail/ust/data/data",
             slotSetup = "slotSetup",
-            classify = "classifyGeometry",
+            classify = "classifyPos",
         },
         updateFn = function() end,
         getModelsFn = function() return {} end

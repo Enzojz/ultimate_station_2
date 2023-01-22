@@ -2,6 +2,7 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
+local dump = require "luadump"
 
 local unpack = table.unpack
 local insert = table.insert
@@ -113,8 +114,16 @@ end
 ---@return modules
 local preProcessFn = function(modules, change)
     local classedModules = classifyModules(modules)
-
+    
     local type, id, data = ust.slotInfo(change.slotId)
+    
+    for slotId, m in pairs(modules) do
+        local m1 = m.name:match("station/rail/ust/data_(.+).module")
+        if (m1) then
+            dump()(("station/rail/ust/data/%s.module"):format(m1))
+            m.name = ("station/rail/ust/data/%s.module"):format(m1)
+        end
+    end
     
     local info = {
         type = type,
@@ -296,12 +305,12 @@ local upgradeFn = function(_) end
 ---@return result
 local updateFn = function(params, closureParams)
     params.debug = false
-
+    
     ---@type result
     local result = {
         entryConnectors = {},
         colliders = {},
-        callInvalidModules =  true,
+        callInvalidModules = true,
         terrainAlignmentLists = {
             {type = "EQUAL", faces = {}},
             {type = "LESS", faces = {}},
@@ -334,7 +343,7 @@ local updateFn = function(params, closureParams)
             game.res.script[m.metadata.scriptName][m.metadata.postClassify](params.modules, result, slotId, params)
         end
     end
-
+    
     
     local grid, refHeight = ust.gridization(params.modules, params.classedModules)
     

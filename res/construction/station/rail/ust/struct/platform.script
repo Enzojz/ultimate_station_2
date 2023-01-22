@@ -134,7 +134,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
             for _, slotId in ipairs(slotIds) do
                 modules[slotId] = {
                     metadata = {isData = true},
-                    name = string.format("station/rail/ust/%s.module", m),
+                    name = string.format("station/rail/ust/data/%s.module", m),
                     updateScript = {
                         fileName = "",
                         params = {}

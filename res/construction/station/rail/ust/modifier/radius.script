@@ -36,7 +36,7 @@ local preProcessAdd = function(radiusFn)
                 local addSlot = ust.mixData(ust.base(id, 56), 0)
                 modules[addSlot] = {
                     metadata = {isData = true},
-                    name = "station/rail/ust/data_radius.module",
+                    name = "station/rail/ust/data/radius.module",
                     updateScript = {
                         fileName = "",
                         params = {}
@@ -52,7 +52,7 @@ local preProcessAdd = function(radiusFn)
                 local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
                 modules[addSlot] = {
                     metadata = {isData = true},
-                    name = "station/rail/ust/data_radius.module",
+                    name = "station/rail/ust/data/radius.module",
                     updateScript = {
                         fileName = "",
                         params = {}
@@ -63,7 +63,7 @@ local preProcessAdd = function(radiusFn)
                 local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
                 modules[addSlot] = {
                     metadata = {isData = true},
-                    name = "station/rail/ust/data_radius.module",
+                    name = "station/rail/ust/data/radius.module",
                     updateScript = {
                         fileName = "",
                         params = {}

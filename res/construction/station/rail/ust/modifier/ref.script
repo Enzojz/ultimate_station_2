@@ -19,7 +19,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
             local addSlot = ust.mixData(ust.base(id, 60), info.data)
             modules[addSlot] = {
                 metadata = {isData = true},
-                name = "station/rail/ust/data_ref.module",
+                name = "station/rail/ust/data/ref.module",
                 updateScript = {
                     fileName = "",
                     params = {}

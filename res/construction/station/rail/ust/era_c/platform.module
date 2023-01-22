@@ -340,7 +340,7 @@ function data()
             isPlatform = true,
             typeId = 2,
             width = 5,
-            scriptName = "construction/station/rail/ust/era_c/platform",
+            scriptName = "construction/station/rail/ust/struct/platform",
             preProcessAdd = "preProcessAdd",
             preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",

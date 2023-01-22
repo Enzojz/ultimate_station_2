@@ -46,7 +46,7 @@ function data()
         metadata = {
             typeName = "ust_bridge",
             typeId = 25,
-            scriptName = "construction/station/rail/ust/bridge",
+            scriptName = "construction/station/rail/ust/struct/bridge",
             preProcessAdd = "preProcessAdd",
             preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",

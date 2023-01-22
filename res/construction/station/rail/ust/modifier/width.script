@@ -31,7 +31,7 @@ local setWidth = function(modules, classedModules, slotId, width)
             local addSlot = ust.mixData(ust.base(id, 58), width)
             modules[addSlot] = {
                 metadata = {isData = true},
-                name = "station/rail/ust/data_geometry.module",
+                name = "station/rail/ust/data/geometry.module",
                 updateScript = {
                     fileName = "",
                     params = {}
