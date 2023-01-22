@@ -28,6 +28,8 @@ local function classifyModules(modules)
             game.res.script[m.metadata.scriptName][m.metadata.classify](modules, result, slotId)
         end
     end
+
+    
     return result
 end
 

@@ -7,7 +7,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
     elseif info.type == 91 and info.data == 0 then
         modules[ust.base(info.id, 91)] = change.module
     elseif info.type == 92 then
-        ust.gridization(modules, classedModules)
         local id = info.id
         
         local oldSlot = classedModules[id].slot[60]

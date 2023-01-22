@@ -1,27 +1,40 @@
 local ust = require "ust"
 local coor = require "ust/coor"
+local dump = require "luadump"
 
 local insert = table.insert
 
-local preProcessAdd = function(modules, change, classedModules, info)
-    if info.data == 0 then
-        ust.gridization(modules, classedModules)
-        
-        local addSlot = ust.base(info.id, 27)
-        modules[addSlot] = change.module
-        
-        if classedModules[info.id].slot[26] then
-            modules[classedModules[info.id].slot[26]] = nil
+local setCatenary = function(modules, classedModules, slotId, module)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and modules[octa].metadata.isTrack then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
         end
-    elseif info.data == -1 then
-        local addSlot = ust.base(info.id, 27)
-        if (modules[addSlot].name == change.module.name) then
-            modules[addSlot] = nil
+    end
+    searchModules(slotId)
+    for slotId, _ in pairs(lut) do
+        local m = modules[slotId]
+        if module then
+            modules[m.makeData(27, 0)] = module
         else
-            modules[addSlot] = change.module
+            modules[m.makeData(27, 0)] = nil 
         end
-    elseif info.data == 1 then
-        modules[ust.base(info.id, 27)] = nil
+    end
+end
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    ust.octa(modules, classedModules)
+    if info.data == 0 then
+        setCatenary(modules, classedModules, classedModules[info.id].slotId, change.module)
+    elseif info.data == -1 then
+        setCatenary(modules, classedModules, classedModules[info.id].slotId)
     end
 end
 

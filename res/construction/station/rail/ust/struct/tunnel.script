@@ -7,7 +7,7 @@ local insert = table.insert
 
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.data == 0 then
-        ust.gridization(modules, classedModules)
+        ust.octa(modules, classedModules)
         
         local addSlot = ust.base(info.id, 26)
         modules[addSlot] = change.module

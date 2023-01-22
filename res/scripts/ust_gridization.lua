@@ -14,8 +14,18 @@ local insert = table.insert
 
 
 ---@param modules modules
----@param grid grid
-local function octa(modules, grid)
+---@param classedModules classified_modules
+---@return grid
+ust.octa = function(modules, classedModules)
+    local grid = {}
+    for id, info in pairs(classedModules) do
+        local pos = modules[info.slotId].info.pos
+        local x, y, z = pos.x, pos.y, pos.z
+        if not grid[z] then grid[z] = {} end
+        if not grid[z][x] then grid[z][x] = {} end
+        grid[z][x][y] = info.slotId
+    end
+    
     for slotId, module in pairs(modules) do
         if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
             local info = module.info
@@ -62,6 +72,7 @@ local function octa(modules, grid)
             end
         end
     end
+    return grid
 end
 
 ---@param g table<integer, table<integer, integer>>
@@ -425,16 +436,7 @@ end
 ust.gridization = function(modules, classedModules)
     local lowestHeight = 2
     ---@type grid
-    local grid = {}
-    for id, info in pairs(classedModules) do
-        local pos = modules[info.slotId].info.pos
-        local x, y, z = pos.x, pos.y, pos.z
-        if not grid[z] then grid[z] = {} end
-        if not grid[z][x] then grid[z][x] = {} end
-        grid[z][x][y] = info.slotId
-    end
-    
-    octa(modules, grid)
+    local grid = ust.octa(modules, classedModules)
     
     for z, g in pairs(grid) do
         

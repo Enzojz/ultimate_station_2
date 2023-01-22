@@ -74,14 +74,14 @@ local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 83 and info.data == -1 then -- Remove modifer
         modules[ust.base(info.id, 83)] = nil
     elseif info.type == 83 and info.data == -2 then
-        ust.gridization(modules, classedModules)
+        ust.octa(modules, classedModules)
         if classedModules[info.id].slot[59] then
             modules[classedModules[info.id].slot[59]] = nil
         end
     elseif info.type == 83 and info.data == 0 then
         modules[ust.base(info.id, 83)] = change.module
     else
-        ust.gridization(modules, classedModules)
+        ust.octa(modules, classedModules)
         local id = info.id
         local m = modules[classedModules[id].slotId]
         if info.type == 83 and info.data > 0 then
