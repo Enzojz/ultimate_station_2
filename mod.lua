@@ -25,48 +25,46 @@
                 local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
                 local trackName = trackName:match("(.+).lua")
                 local baseFileName = ("station/rail/ust/tracks/%s"):format(trackName)
-                for __, catenary in pairs({false, true}) do
-                    local mod = api.type.ModuleDesc.new()
-                    mod.fileName = ("%s%s.module"):format(baseFileName, catenary and "_catenary" or "")
-                    
-                    mod.availability.yearFrom = track.yearFrom
-                    mod.availability.yearTo = track.yearTo
-                    mod.cost.price = 0
-                    mod.description.name = track.name .. (catenary and _("MENU_WITH_CAT") or "")
-                    mod.description.description = track.desc .. (catenary and _("MENU_WITH_CAT") or "")
-                    mod.description.icon = track.icon
-                    
-                    mod.type = "ust_track"
-                    mod.order.value = 0
-                    mod.metadata = {
-                        typeName = "ust_track",
-                        isTrack = true,
-                        width = track.trackDistance,
-                        height = track.railBase + track.railHeight,
-                        typeId = 1,
-                        scriptName = "construction/station/rail/ust/struct/track",
-                        preProcessAdd = "preProcessAdd",
-                        preProcessRemove = "preProcessRemove",
-                        slotSetup = "slotSetup",
-                        preClassify = "preClassify",
-                        -- postClassify = "postClassify",
-                        gridization = "gridization"
-                    }
-                    
-                    mod.category.categories = catenary and {"ust_cat_track_cat"} or {"ust_cat_track"}
-                    
-                    mod.updateScript.fileName = "construction/station/rail/ust/struct/track.updateFn"
-                    mod.updateScript.params = {
-                        trackType = trackName .. ".lua",
-                        catenary = catenary,
-                        trackWidth = track.trackDistance
-                    }
-                    
-                    mod.getModelsScript.fileName = "construction/station/rail/ust/struct/track.getModelsFn"
-                    mod.getModelsScript.params = {}
-                    
-                    api.res.moduleRep.add(mod.fileName, mod, true)
-                end
+
+                local mod = api.type.ModuleDesc.new()
+                mod.fileName = ("%s.module"):format(baseFileName)
+                
+                mod.availability.yearFrom = track.yearFrom
+                mod.availability.yearTo = track.yearTo
+                mod.cost.price = 0
+                mod.description.name = track.name
+                mod.description.description = track.desc
+                mod.description.icon = track.icon
+                
+                mod.type = "ust_track"
+                mod.order.value = 0
+                mod.metadata = {
+                    typeName = "ust_track",
+                    isTrack = true,
+                    width = track.trackDistance,
+                    height = track.railBase + track.railHeight,
+                    typeId = 1,
+                    scriptName = "construction/station/rail/ust/struct/track",
+                    preProcessAdd = "preProcessAdd",
+                    preProcessRemove = "preProcessRemove",
+                    slotSetup = "slotSetup",
+                    preClassify = "preClassify",
+                    -- postClassify = "postClassify",
+                    gridization = "gridization"
+                }
+                
+                mod.category.categories = {"ust_cat_track"}
+                
+                mod.updateScript.fileName = "construction/station/rail/ust/struct/track.updateFn"
+                mod.updateScript.params = {
+                    trackType = trackName .. ".lua",
+                    trackWidth = track.trackDistance
+                }
+                
+                mod.getModelsScript.fileName = "construction/station/rail/ust/struct/track.getModelsFn"
+                mod.getModelsScript.params = {}
+                
+                api.res.moduleRep.add(mod.fileName, mod, true)
                 table.insert(trackModuleList, baseFileName)
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
@@ -112,7 +110,7 @@
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)
             end
-
+            
             
             local tunnels = api.res.tunnelTypeRep.getAll()
             for index, tunnelName in pairs(tunnels) do

@@ -234,7 +234,7 @@ function data()
             isOverpass = true,
             typeId = 24,
             width = 5,
-            scriptName = "construction/station/rail/ust/era_c/overpass",
+            scriptName = "construction/station/rail/ust/struct/overpass",
             classify = "classify",
             preProcessAdd = "preProcessAdd"
         },

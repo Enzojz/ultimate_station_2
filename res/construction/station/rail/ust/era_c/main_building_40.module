@@ -95,7 +95,7 @@ local config = {
 
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    game.res.script["construction/station/rail/ust/era_c/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+    game.res.script["construction/station/rail/ust/struct/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
 end
 
 function data()
@@ -120,7 +120,7 @@ function data()
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/main_building",
+            scriptName = "construction/station/rail/ust/struct/main_building",
             classify = "classify",
             typeName = "ust_component_main_40",
             isComponent = true,

@@ -128,7 +128,7 @@ function data()
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/roof",
+            scriptName = "construction/station/rail/ust/struct/roof",
             classify = "classify",
             typeName = "ust_roof",
             isRoof = true,

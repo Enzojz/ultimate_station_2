@@ -126,7 +126,7 @@ function data()
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/main_building",
+            scriptName = "construction/station/rail/ust/struct/main_building",
             classify = "classify",
             typeName = "ust_component_main_10",
             isComponent = true,

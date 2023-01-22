@@ -141,7 +141,7 @@ function data()
             isComponent = true,
             typeId = 21,
             width = 5,
-            scriptName = "construction/station/rail/ust/era_c/underpass",
+            scriptName = "construction/station/rail/ust/struct/underpass",
             classify = "classify",
             addSlot = "addSlot"
         },

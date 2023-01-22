@@ -87,7 +87,7 @@ function data()
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/fence",
+            scriptName = "construction/station/rail/ust/struct/fence",
             classify = "classify",
             typeName = "ust_component_fence",
             isComponent = true,

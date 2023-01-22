@@ -1,0 +1,69 @@
+local insert = table.insert
+local coor = require "ust/coor"
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    
+    local info = params.modules[slotId].info
+    local trackSlotId = params.classedModules[info.id].slotId
+    local module = params.modules[trackSlotId]
+    local makeData = params.modules[params.classedModules[info.id].slotId].makeData
+    local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (module.info.extraHeight or 0)
+    local transf = module.info.transf * coor.transZ(refH)
+    
+    insert(result.slots, {
+        id = makeData(27, -1),
+        transf = transf,
+        type = "ust_catenary",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    if module.metadata.isTrack then
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.params.catenary = true
+            end
+        end)
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_CATENARY"),
+            description = _("MENU_MODULE_CATENARY_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_catenary",
+        order = {
+            value = 0,
+        },
+        metadata = {
+            typeName = "ust_catenary",
+            typeId = 25,
+            scriptName = "construction/station/rail/ust/struct/catenary",
+            preProcessAdd = "preProcessAdd",
+            preProcessRemove = "preProcessRemove",
+            slotSetup = "slotSetup",
+            addSlot = "addSlot",
+            classify = "classify"
+        },
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

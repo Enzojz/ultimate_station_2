@@ -5,8 +5,6 @@ function data()
             MOD_DESC = "",
             MENU_NAME = "Ultimate Station",
             MENU_DESC = "A fully customizable station with infinit of possibilities.",
-            UST_CAT_TRACK = "Tracks",
-            UST_CAT_TRACK_CAT = "Electrified Tracks",
             UST_CAT_PLATFORM = "Platforms",
             UST_CAT_MODIFIER = "Modifiers",
             UST_CAT_BUILDING = "Buildings",
