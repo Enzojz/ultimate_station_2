@@ -93,7 +93,7 @@ function data()
             typeName = "ust_radius_modifier",
             isData = true,
             type = 2,
-            scriptName = "construction/station/rail/ust/radius_modifier",
+            scriptName = "construction/station/rail/ust/modifier/radius",
             preProcessAdd = "preProcessAddRough",
             preProcessPostAdd = "preProcessPostAdd",
             classify = "classify",

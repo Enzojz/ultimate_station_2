@@ -11,6 +11,7 @@ function data()
             UST_CAT_COMP = "Components",
             UST_CAT_BRIDGE = "Bridges",
             UST_CAT_TUNNEL = "Tunnels",
+            UST_CAT_TRACK = "Tracks",
             UST_CAT_HELPER = "Helpers",
             MENU_RADIUS_PRECISE_MODIFIER = "Numeric radius modifer",
             MENU_RADIUS_PRECISE_MODIFIER_DESC = "To change the radius of tracks in a precise way.",
