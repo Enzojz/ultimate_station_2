@@ -50,6 +50,7 @@ function data()
             isPlaceholder = true,
             typeId = 3,
             width = 5,
+            height = 0,
             scriptName = "construction/station/rail/ust/struct/platform",
             preProcessAdd = "preProcessAdd",
             preProcessRemove = "preProcessRemove",
