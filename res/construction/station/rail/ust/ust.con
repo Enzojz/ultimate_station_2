@@ -15,7 +15,7 @@ local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 5
 local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
 ---@param modules modules
----@return modules
+---@return classified_modules
 local function classifyModules(modules)
     local result = {}
     for slotId, m in pairs(modules) do
@@ -113,8 +113,8 @@ local constructionTemplates = {
 
 ---@param params params
 ---@return table
-local createTemplateFn = function(params, q)
-    return game.res.script["construction/station/rail/ust/ust"]["createTemplateFn"](params, q)
+local createTemplateFn = function(params)
+    return game.res.script["construction/station/rail/ust/ust"]["createTemplateFn"](params)
 end
 
 ---@param modules modules
@@ -211,7 +211,41 @@ local function searchTerminalGroups(params, current, ...)
     searchTerminalGroups(params, ...)
 end
 
-local upgradeFn = function(_) end
+
+local upgradeFn = function(params)
+    local classedModules = classifyModules(params.modules)
+    ust.octa(params.modules, classedModules)
+    local result = {}
+    local lut = {}
+    local function searchTracks(slotId)
+        lut[slotId] = true
+        local m = params.modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and params.modules[octa] and params.modules[octa].metadata.isTrack then
+                if not lut[octa] then
+                    searchTracks(octa)
+                end
+            end
+        end
+    end
+    searchTracks(params.slotId)
+    
+    if params.catenaryToggle == 1 then
+        for slotId, _ in pairs(lut) do
+            local module = params.modules[slotId]
+            insert(result, {module.makeData(27, 0), "station/rail/ust/struct/catenary.module"})
+        end
+    end
+    
+    if params.trackTypeToggle == 1 then
+        for slotId, _ in pairs(lut) do
+        insert(result, {slotId, "station/rail/ust/tracks/high_speed.module"})
+        end
+    end
+    
+    return result
+end
 
 ---@alias vec3 {[1]: number, [2]:number, [3]: number}
 ---@alias vec2 {[1]: number, [2]:number}
