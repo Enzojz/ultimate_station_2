@@ -240,7 +240,8 @@ local upgradeFn = function(params)
     
     if params.trackTypeToggle == 1 then
         for slotId, _ in pairs(lut) do
-        insert(result, {slotId, "station/rail/ust/tracks/high_speed.module"})
+            local module = params.modules[slotId]
+            insert(result, {slotId, ("station/rail/ust/tracks/%s.module"):format(module.name:match("high_speed") and "standard" or "high_speed")})
         end
     end
     
