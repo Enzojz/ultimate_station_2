@@ -21,13 +21,12 @@
             local trackModuleList = {}
             local trackIconList = {}
             local trackNames = {}
-            for __, trackName in pairs(tracks) do
+            for i, trackName in pairs(tracks) do
                 local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
                 local trackName = trackName:match("(.+).lua")
-                local baseFileName = ("station/rail/ust/tracks/%s"):format(trackName)
 
                 local mod = api.type.ModuleDesc.new()
-                mod.fileName = ("%s.module"):format(baseFileName)
+                mod.fileName = ("station/rail/ust/tracks/%s.module"):format(trackName)
                 
                 mod.availability.yearFrom = track.yearFrom
                 mod.availability.yearTo = track.yearTo
@@ -37,7 +36,7 @@
                 mod.description.icon = track.icon
                 
                 mod.type = "ust_track"
-                mod.order.value = 0
+                mod.order.value = i + 1
                 mod.metadata = {
                     typeName = "ust_track",
                     isTrack = true,
@@ -65,7 +64,7 @@
                 mod.getModelsScript.params = {}
                 
                 api.res.moduleRep.add(mod.fileName, mod, true)
-                table.insert(trackModuleList, baseFileName)
+                table.insert(trackModuleList, mod.fileName)
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
             end
@@ -85,7 +84,7 @@
                 mod.description.icon = bridge.icon
                 
                 mod.type = "ust_bridge"
-                mod.order.value = 0
+                mod.order.value = index
                 mod.metadata = {
                     typeName = "ust_bridge",
                     typeId = 25,
@@ -127,7 +126,7 @@
                 mod.description.icon = tunnel.icon
                 
                 mod.type = "ust_tunnel"
-                mod.order.value = 0
+                mod.order.value = index
                 mod.metadata = {
                     typeName = "ust_tunnel",
                     typeId = 25,
@@ -160,9 +159,25 @@
             end
             
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
-            -- con.updateScript.fileName = "construction/station/rail/ust/ust.updateFn"
-            con.updateScript.params = {
-                }
+            con.createTemplateScript.fileName = "construction/station/rail/ust/ust.createTemplateFn"
+            con.createTemplateScript.params = { trackModuleList = trackModuleList }
+            
+            local data = api.type.DynamicConstructionTemplate.new()
+            for i = 1, #con.constructionTemplates[1].data.params do
+                local p = con.constructionTemplates[1].data.params[i]
+                local param = api.type.ScriptParam.new()
+                param.key = p.key
+                param.name = p.name
+                if (p.key == "trackType") then
+                    param.values = trackNames
+                else
+                    param.values = p.values
+                end
+                param.defaultIndex = p.defaultIndex or 0
+                param.uiType = p.uiType
+                data.params[i] = param
+            end
+            con.constructionTemplates[1].data = data
         end
     }
 end

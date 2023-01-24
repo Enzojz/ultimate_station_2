@@ -111,7 +111,7 @@ function data()
         },
         type = "ust_width_modifier",
         order = {
-            value = 260,
+            value = 4,
         },
         metadata = {
             typeName = "ust_width_modifier",

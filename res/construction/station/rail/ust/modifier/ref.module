@@ -151,7 +151,7 @@ function data()
         },
         type = "ust_ref_modifier",
         order = {
-            value = 260,
+            value = 1,
         },
         metadata = {
             typeName = "ust_ref_modifier",

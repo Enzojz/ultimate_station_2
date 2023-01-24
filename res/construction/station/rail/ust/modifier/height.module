@@ -161,7 +161,7 @@ function data()
         },
         type = "ust_height_modifier",
         order = {
-            value = 260,
+            value = 5,
         },
         metadata = {
             typeName = "ust_height_modifier",

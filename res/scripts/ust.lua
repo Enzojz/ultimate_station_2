@@ -99,9 +99,12 @@ ust.slotIds = function(info)
         } or info.straight and {
             ust.mixData(ust.base(info.id, 56), 0)
         } or {},
-        geometry = {
+        geometry = info.width and {
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 58), info.width * 10),
+            ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
+        } or {
+            ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
         },
         ref = {
@@ -312,26 +315,24 @@ ust.defaultParams = function(params)
     end
 end
 
-function ust.posGen(restTrack, lst, snd, ...)
+function ust.posGen(restTrack, lastPlatform, lst, snd, ...)
     if restTrack == 0 then
         if lst and snd then
             return {false, lst, snd, ...}
-        else
+        elseif lastPlatform and lst then
+            return {false, lst, snd, ...}
+        else 
             return {lst, snd, ...}
-        end
-    elseif lst == nil then
-        return {}
-    elseif snd == nil then
-        if lst then
-            return ust.posGen(restTrack, false, true)
-        else
-            return ust.posGen(restTrack - 1, true, false)
         end
     else
         if lst and snd then
-            return ust.posGen(restTrack, false, lst, snd, ...)
-        else
-            return ust.posGen(restTrack - 1, true, lst, snd, ...)
+            return ust.posGen(restTrack, lastPlatform, false, lst, snd, ...)
+        elseif lst and snd == false then
+            return ust.posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
+        elseif lst and snd == nil then
+            return ust.posGen(restTrack - 1, lastPlatform, false, lst)
+        elseif not lst then
+            return ust.posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
         end
     end
 end

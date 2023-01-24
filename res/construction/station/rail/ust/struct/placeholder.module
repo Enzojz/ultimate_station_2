@@ -43,7 +43,7 @@ function data()
         },
         type = "ust_placeholder",
         order = {
-            value = 1,
+            value = 2,
         },
         metadata = {
             typeName = "ust_placeholder",

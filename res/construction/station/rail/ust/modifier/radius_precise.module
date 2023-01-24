@@ -108,7 +108,7 @@ function data()
         },
         type = "ust_radius_modifier",
         order = {
-            value = 260,
+            value = 2,
         },
         metadata = {
             typeName = "ust_radius_modifier",
