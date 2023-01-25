@@ -1,0 +1,57 @@
+local ust = require "ust"
+
+local setColor = function(modules, typeId, slotId, data, module)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and modules[octa].metadata.isPlatform then
+                if not lut[octa] then
+                    if modules[modules[octa].makeData(typeId, data)] then
+                        searchModules(octa)
+                    end
+                end
+            end
+        end
+    end
+    
+    searchModules(slotId)
+    for slotId, _ in pairs(lut) do
+        local m = modules[slotId]
+        modules[m.makeData(typeId, data + 20)] = module
+    end
+end
+
+local preProcessAdd = function(modules, change, classedModules, info)
+    ust.octa(modules, classedModules)
+    setColor(modules, info.type, classedModules[info.id].slotId, info.data - 10, change.module)
+end
+
+local preProcessRemove = function(modules, change, classedModules, info)
+    modules[change.slotId] = nil
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local m = params.modules[params.classedModules[id].slotId]
+    table.insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_color",
+        spacing = {0, 0, 0, 0}
+    })
+end
+
+
+function data()
+    return {
+        preProcessAdd = preProcessAdd,
+        preProcessRemove = preProcessRemove,
+        classify = ust.classifyComp,
+        slotSetup = slotSetup
+    }
+
+end

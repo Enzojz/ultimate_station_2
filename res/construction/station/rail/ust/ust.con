@@ -338,13 +338,13 @@ end
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
-    params.debug = false
+    params.debug = true
     
     ---@type result
     local result = {
         entryConnectors = {},
         colliders = {},
-        callInvalidModules = true,
+        -- callInvalidModules = true,
         terrainAlignmentLists = {
             {type = "EQUAL", faces = {}},
             {type = "LESS", faces = {}},

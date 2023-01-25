@@ -1,7 +1,7 @@
 local config = {
     width = 2,
-    pole = "ust/fences/green/pole_3.mdl",
-    fence = "ust/fences/green/fence_3.mdl",
+    pole = "ust/fences/%s/pole_3.mdl",
+    fence = "ust/fences/%s/fence_3.mdl",
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
