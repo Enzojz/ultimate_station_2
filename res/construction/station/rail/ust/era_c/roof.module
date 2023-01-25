@@ -33,8 +33,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rightPts = ust.basePts(info.arcs.right, n)
     local centerPts = ust.basePts(info.arcs.center, n)
     
-    local isFirst = not (info.octa[1] and params.modules[info.octa[1]].info.comp[22])
-    local isLast = not (info.octa[5] and params.modules[info.octa[5]].info.comp[22])
+    local isFirst = not (info.octa[1] and params.modules[info.octa[1]].info.comp[28])
+    local isLast = not (info.octa[5] and params.modules[info.octa[5]].info.comp[28])
     
     local edges = {
         {}, {}, {}, {}, {}, {}, {}
@@ -99,7 +99,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     insert(
         result.slots,
         {
-            id = makeData(22, -1),
+            id = makeData(28, -1),
             transf = trans,
             type = "ust_roof",
             spacing = {0, 0, 0, 0}
@@ -133,7 +133,7 @@ function data()
             typeName = "ust_roof",
             isRoof = true,
             isComponent = true,
-            typeId = 22,
+            typeId = 28,
             width = 5
         },
         

@@ -179,7 +179,7 @@ function data()
         metadata = {
             typeName = "ust_overpass_step",
             isComponent = true,
-            typeId = 25,
+            typeId = 23,
             width = 5,
             scriptName = "construction/station/rail/ust/struct/overpass",
             classify = "classify",

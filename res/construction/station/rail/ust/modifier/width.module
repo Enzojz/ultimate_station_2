@@ -116,7 +116,7 @@ function data()
         metadata = {
             typeName = "ust_width_modifier",
             isData = true,
-            type = 2,
+            type = 85,
             scriptName = "construction/station/rail/ust/modifier/width",
             preProcessAdd = "preProcessAdd",
             preProcessPostAdd = "preProcessPostAdd",

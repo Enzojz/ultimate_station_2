@@ -232,7 +232,7 @@ function data()
             typeName = "ust_overpass",
             isComponent = true,
             isOverpass = true,
-            typeId = 24,
+            typeId = 22,
             width = 5,
             scriptName = "construction/station/rail/ust/struct/overpass",
             classify = "classify",

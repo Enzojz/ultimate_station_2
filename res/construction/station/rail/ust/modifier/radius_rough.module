@@ -92,7 +92,7 @@ function data()
         metadata = {
             typeName = "ust_radius_modifier",
             isData = true,
-            type = 2,
+            type = 80,
             scriptName = "construction/station/rail/ust/modifier/radius",
             preProcessAdd = "preProcessAddRough",
             preProcessPostAdd = "preProcessPostAdd",

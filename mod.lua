@@ -129,7 +129,7 @@
                 mod.order.value = index
                 mod.metadata = {
                     typeName = "ust_tunnel",
-                    typeId = 25,
+                    typeId = 26,
                     scriptName = "construction/station/rail/ust/struct/tunnel",
                     preProcessAdd = "preProcessAdd",
                     preProcessRemove = "preProcessRemove",

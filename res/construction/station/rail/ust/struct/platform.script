@@ -77,7 +77,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
         }
         
         local function isTrack(pos)
-            return octa[pos] and modules[octa[pos]].metadata.isTrack
+            return octa[pos] and (modules[octa[pos]].metadata.isTrack or modules[octa[pos]].metadata.isPlaceholder)
         end
         
         local function isPlatform(pos)
@@ -469,29 +469,6 @@ local function gridization(x, y, z, data)
     coroutine.yield()
     -- Platform on second loop
     platformArcs(x, y, z, data)
-    
-    local refArc = data.modules[slotId].info.arcs
-    
-    local gravity = {
-        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-    }
-    
-    data.modules[slotId].info.transf =
-        quat.byVec(coor.xyz(0, 1, 0), gravity[2]):mRot() *
-        coor.trans(gravity[1])
-    
-    data.modules[slotId].info.gravity = gravity
-end
-
-local function gridizationPlaceholder(x, y, z, data)
-    local slotId = data.grid[z][x][y]
-    ustg.calculateRaidus(x, y, z, data)
-    ustg.genericArcs(x, y, z, data)
-    
-    coroutine.yield()
-    -- Platform on second loop
-    -- platformArcs(x, y, z, data)
     
     local refArc = data.modules[slotId].info.arcs
     

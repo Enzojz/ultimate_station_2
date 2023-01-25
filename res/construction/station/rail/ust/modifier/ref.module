@@ -156,7 +156,7 @@ function data()
         metadata = {
             typeName = "ust_ref_modifier",
             isData = true,
-            type = 2,
+            type = 92,
             scriptName = "construction/station/rail/ust/modifier/ref",
             preProcessAdd = "preProcessAdd",
             preProcessPostAdd = "preProcessPostAdd",

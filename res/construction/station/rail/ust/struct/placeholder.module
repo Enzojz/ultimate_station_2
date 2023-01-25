@@ -57,7 +57,7 @@ function data()
             slotSetup = "slotSetup",
             preClassify = "preClassify",
             -- postClassify = "postClassify",
-            gridization = "gridizationPlaceholder"
+            gridization = "gridization"
         },
         
         updateFn = updateFn,
