@@ -16,7 +16,7 @@ function data()
             description = _("MENU_MODULE_COLOR_WHITE_DESC"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_color"},
         },
         type = "ust_color",
         order = {
@@ -26,7 +26,7 @@ function data()
             color = "white",
             typeId = 29,
             typeName = "ust_color",
-            scriptName = "construction/station/rail/ust/comp/color",
+            scriptName = "construction/station/rail/ust/color/color",
             preProcessAdd = "preProcessAdd",
             slotSetup = "slotSetup",
             classify = "classify"

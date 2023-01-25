@@ -12,21 +12,21 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_COLOR_GREEN"),
-            description = _("MENU_MODULE_COLOR_GREEN_DESC"),
+            name = _("MENU_MODULE_COLOR_WHITE"),
+            description = _("MENU_MODULE_COLOR_WHITE_DESC"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_color"},
         },
         type = "ust_color",
         order = {
-            value = 2,
+            value = 4,
         },
         metadata = {
-            color = "green",
+            color = "yellow",
             typeId = 29,
             typeName = "ust_color",
-            scriptName = "construction/station/rail/ust/comp/color",
+            scriptName = "construction/station/rail/ust/color/color",
             preProcessAdd = "preProcessAdd",
             slotSetup = "slotSetup",
             classify = "classify"

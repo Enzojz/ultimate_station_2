@@ -329,6 +329,7 @@ function data()
         description = {
             name = _("MENU_MODULE_PLATFORM"),
             description = _("MENU_MODULE_PLATFORM_DESC"),
+            icon = "ui/construction/station/rail/modular_station/platform_passenger_era_c.tga"
         },
         category = {
             categories = {"ust_cat_platform"},

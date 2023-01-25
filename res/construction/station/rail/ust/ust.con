@@ -339,7 +339,7 @@ end
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
-    params.debug = true
+    -- params.debug = true
     
     ---@type result
     local result = {

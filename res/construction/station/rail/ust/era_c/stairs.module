@@ -117,6 +117,7 @@ function data()
         description = {
             name = _("MENU_MODULE_STAIRS_ENTRY"),
             description = _("MENU_MODULE_STAIRS_ENTRY_DESC"),
+            icon = "ui/construction/station/rail/modular_station/stairs.tga"
         },
         category = {
             categories = {"ust_cat_building"},

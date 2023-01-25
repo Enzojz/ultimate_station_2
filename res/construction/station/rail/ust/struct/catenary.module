@@ -41,6 +41,7 @@ function data()
         description = {
             name = _("MENU_MODULE_CATENARY"),
             description = _("MENU_MODULE_CATENARY_DESC"),
+            icon = "ui/tracks/electrify.tga"
         },
         category = {
             categories = {"ust_cat_comp"},

@@ -16,17 +16,17 @@ function data()
             description = _("MENU_MODULE_COLOR_RED_DESC"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_color"},
         },
         type = "ust_color",
         order = {
-            value = 2,
+            value = 3,
         },
         metadata = {
             color = "red",
             typeId = 29,
             typeName = "ust_color",
-            scriptName = "construction/station/rail/ust/comp/color",
+            scriptName = "construction/station/rail/ust/color/color",
             preProcessAdd = "preProcessAdd",
             slotSetup = "slotSetup",
             classify = "classify"
