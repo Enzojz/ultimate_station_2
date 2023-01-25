@@ -45,24 +45,24 @@ function data()
 	t.tunnelWallMaterial = "track/transparent.mtl"
 	t.tunnelHullMaterial = "track/transparent.mtl"
 
-	t.catenaryPoleModel = "mus/void.mdl"
-	t.catenaryMultiPoleModel = "mus/void.mdl"
-	t.catenaryMultiGirderModel = "mus/void.mdl"
-	t.catenaryMultiInnerPoleModel = "mus/void.mdl"
+	t.catenaryPoleModel = "ust/void.mdl"
+	t.catenaryMultiPoleModel = "ust/void.mdl"
+	t.catenaryMultiGirderModel = "ust/void.mdl"
+	t.catenaryMultiInnerPoleModel = "ust/void.mdl"
 
-	t.bumperModel = "mus/void.mdl"
+	t.bumperModel = "ust/void.mdl"
 	t.switchSignalModel = "railroad/switch_box.mdl"
 
 	t.fillGroundTex = "ballast_fill_stone.lua"
 	t.borderGroundTex = "ballast.lua"
 
-	t.railModel ="mus/void.mdl"
-	t.sleeperModel = "mus/void.mdl"
+	t.railModel ="ust/void.mdl"
+	t.sleeperModel = "ust/void.mdl"
 	t.trackStraightModel = {
-		"mus/void.mdl",
-		"mus/void.mdl",
-		"mus/void.mdl",
-		"mus/void.mdl",
+		"ust/void.mdl",
+		"ust/void.mdl",
+		"ust/void.mdl",
+		"ust/void.mdl",
 	}
 	
 	t.cost = 0.0
