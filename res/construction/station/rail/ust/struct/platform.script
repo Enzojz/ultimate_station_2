@@ -508,8 +508,7 @@ function data()
         preProcessAdd = preProcessAdd,
         preProcessRemove = preProcessRemove,
         slotSetup = slotSetup,
-        gridization = gridization,
-        gridizationPlaceholder = gridizationPlaceholder
+        gridization = gridization
     }
 
 end
