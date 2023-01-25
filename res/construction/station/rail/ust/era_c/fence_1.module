@@ -19,8 +19,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_FENCE_GREEN"),
-            description = _("MENU_MODULE_FENCE_GREEN_DESC"),
+            name = _("MENU_MODULE_FENCE"),
+            description = _("MENU_MODULE_FENCE_DESC"),
         },
         category = {
             categories = {"ust_cat_comp"},
