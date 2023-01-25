@@ -54,11 +54,24 @@ end
 
 local preProcessRemove = function(modules, change, classedModules, info)
     if info.id ~= 1 then
-        modules[change.slotId] = nil
-        for slotId, m in pairs(modules) do
-            local __, moduleId = ust.slotInfo(slotId)
-            if moduleId == info.id then
-                modules[slotId] = nil
+        ust.octa(modules, classedModules)
+        local info = modules[change.slotId].info
+        local octaModules = {}
+        for i = 1, 8 do
+            octaModules[i] = info.octa[i] and modules[info.octa[i]] or false
+        end
+        if not (
+            octaModules[1] and octaModules[1].info.ref.prev
+            or octaModules[5] and octaModules[5].info.ref.next
+            or octaModules[3] and octaModules[3].info.ref.left
+            or octaModules[7] and octaModules[7].info.ref.right)
+        then
+            modules[change.slotId] = nil
+            for slotId, m in pairs(modules) do
+                local __, moduleId = ust.slotInfo(slotId)
+                if moduleId == info.id then
+                    modules[slotId] = nil
+                end
             end
         end
     end
@@ -68,9 +81,10 @@ local slotSetup = function(params, result, slotId)
     local module = params.modules[slotId]
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
+    local zOffset = params.modules[slotId].metadata.height - params.refHeight + (info.extraHeight or 0)
     
     local arcs = info.arcs
-    local transfPosC = info.transf
+    local transfPosC = info.transf * coor.transZ(zOffset)
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata

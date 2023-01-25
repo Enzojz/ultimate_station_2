@@ -152,8 +152,9 @@ local slotSetup = function(params, result, slotId)
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
     local pos = info.pos
-    local metadata = params.modules[slotId].metadata
-    local transfPosC = info.transf
+    
+    local hRef = params.platformHeight + (info.extraHeight or 0)
+    local transfPosC = info.transf * coor.transZ(hRef)
     
     insert(result.slots, {
         id = slotId,
@@ -227,11 +228,24 @@ end
 
 local preProcessRemove = function(modules, change, classedModules, info)
     if info.id ~= 1 then
-        modules[change.slotId] = nil
-        for slotId, m in pairs(modules) do
-            local __, moduleId = ust.slotInfo(slotId)
-            if moduleId == info.id then
-                modules[slotId] = nil
+        ust.octa(modules, classedModules)
+        local info = modules[change.slotId].info
+        local octaModules = {}
+        for i = 1, 8 do
+            octaModules[i] = info.octa[i] and modules[info.octa[i]] or false
+        end
+        if not (
+            octaModules[1] and octaModules[1].info.ref.prev
+            or octaModules[5] and octaModules[5].info.ref.next
+            or octaModules[3] and octaModules[3].info.ref.left
+            or octaModules[7] and octaModules[7].info.ref.right)
+        then
+            modules[change.slotId] = nil
+            for slotId, m in pairs(modules) do
+                local __, moduleId = ust.slotInfo(slotId)
+                if moduleId == info.id then
+                    modules[slotId] = nil
+                end
             end
         end
     end
@@ -377,7 +391,7 @@ local platformArcs = function(x, y, z, data)
             inf = arcR.sup,
             sup = arcR.sup - arcR.inf + arcR.sup
         })
-    
+        
         realigned = true
     elseif ref.next then
         local arcs = data.modules[m.info.octa[1]].info.arcs
@@ -394,7 +408,7 @@ local platformArcs = function(x, y, z, data)
             sup = arcR.inf,
             inf = arcR.inf + arcR.inf - arcR.sup
         })
-
+        
         realigned = true
     end
     
@@ -451,7 +465,7 @@ local platformArcs = function(x, y, z, data)
             sup = sup,
             inf = inf
         })
-
+        
         m.info.radius = (length > 0 and 1 or -1) * r
         m.info.length = math.abs(length)
         
@@ -461,7 +475,7 @@ local platformArcs = function(x, y, z, data)
             center = ar
         }
     end
-
+    
     m.info.pts = ustg.refArc2Pts(m.info.arcs)
     m.info.calculateTag = true;
 end
