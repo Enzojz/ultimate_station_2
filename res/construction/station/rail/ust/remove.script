@@ -1,12 +1,16 @@
+local ust = require "ust"
 function data()
     return {
         preProcessAdd = function(modules, change, classedModules, info)
             if info.id ~= 1 then
-                for _, slotId in pairs(classedModules[info.id].slot) do
-                    modules[slotId] = nil
-                end
                 modules[classedModules[info.id].slotId] = nil
                 modules[change.slotId] = nil
+                for slotId, m in pairs(modules) do
+                    local __, moduleId = ust.slotInfo(slotId)
+                    if moduleId == info.id then
+                        modules[slotId] = nil
+                    end
+                end
             end
         end
     }

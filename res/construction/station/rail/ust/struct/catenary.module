@@ -54,7 +54,6 @@ function data()
             typeId = 25,
             scriptName = "construction/station/rail/ust/struct/catenary",
             preProcessAdd = "preProcessAdd",
-            preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             addSlot = "addSlot",
             classify = "classify"

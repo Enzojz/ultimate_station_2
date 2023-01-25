@@ -90,7 +90,6 @@
                     typeId = 25,
                     scriptName = "construction/station/rail/ust/struct/bridge",
                     preProcessAdd = "preProcessAdd",
-                    preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
                     addSlot = "addSlot",
                     classify = "classify"
@@ -132,7 +131,6 @@
                     typeId = 26,
                     scriptName = "construction/station/rail/ust/struct/tunnel",
                     preProcessAdd = "preProcessAdd",
-                    preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
                     addSlot = "addSlot",
                     classify = "classify"

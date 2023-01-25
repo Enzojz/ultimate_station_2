@@ -149,8 +149,9 @@ local preProcessFn = function(modules, change)
             end
         end
     else
-        if change.module.metadata.preProcessRemove then
-            game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessRemove](modules, change, classedModules, info)
+        local m = modules[change.slotId]
+        if m.metadata.preProcessRemove then
+            game.res.script[m.metadata.scriptName][m.metadata.preProcessRemove](modules, change, classedModules, info)
         else
             modules[change.slotId] = nil
         end

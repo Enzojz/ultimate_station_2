@@ -53,10 +53,15 @@ local preProcessAdd = function(modules, change, classedModules, info)
 end
 
 local preProcessRemove = function(modules, change, classedModules, info)
-    for _, slotId in pairs(classedModules[info.id].slot) do
-        modules[slotId] = nil
+    if info.id ~= 1 then
+        modules[change.slotId] = nil
+        for slotId, m in pairs(modules) do
+            local __, moduleId = ust.slotInfo(slotId)
+            if moduleId == info.id then
+                modules[slotId] = nil
+            end
+        end
     end
-    modules[change.slotId] = nil
 end
 
 local slotSetup = function(params, result, slotId)
