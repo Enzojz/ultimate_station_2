@@ -25,13 +25,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
     end
 end
 
-local preProcessRemove = function(modules, change, classedModules, info)
-    for _, slotId in pairs(classedModules[info.id].slot) do
-        modules[slotId] = nil
-    end
-    modules[change.slotId] = nil
-end
-
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -131,7 +124,6 @@ end
 function data()
     return {
         preProcessAdd = preProcessAdd,
-        preProcessRemove = preProcessRemove,
         addSlot = addSlot,
         slotSetup = slotSetup,
         updateFn = updateFn,

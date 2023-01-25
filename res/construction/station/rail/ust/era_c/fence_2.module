@@ -32,6 +32,7 @@ function data()
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",
             classify = "classify",
+            preProcessRemove = "preProcessRemove",
             typeName = "ust_component_fence",
             isComponent = true,
             isFence = true,

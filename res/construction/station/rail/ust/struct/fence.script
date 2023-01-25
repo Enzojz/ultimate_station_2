@@ -3,6 +3,8 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 
+
+local dump = require "luadump"
 local insert = table.insert
 
 local addSlot = function(params, result)
@@ -113,12 +115,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
             type = "ust_color",
             spacing = {0, 0, 0, 0}
         })
-
+    
     local colorModule = params.modules[m.makeData(24, 20 + data)]
     local color = colorModule and colorModule.metadata.color or "green"
     
     -- if n == 0 then n = 1 end
-    if data == 3 or data == 7 then 
+    if data == 3 or data == 7 then
         local n = 20 / config.width
         local pts, vec = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
         
@@ -148,11 +150,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
         local n = 2
         local ptsL = ust.basePts(info.arcs.left, n)
         local ptsR = ust.basePts(info.arcs.right, n)
-
+        
         local vec = (ptsR[rank] - ptsL[rank]):normalized()
-
+        
         for i = 1, 2 do
-            local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i * 2 - 1) / 4 
+            local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i * 2 - 1) / 4
             local transf = hTrans
                 * coor.scaleX(2.5 / config.width)
                 * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
@@ -173,11 +175,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
 
 end
 
+local preProcessRemove = function(modules, change, classedModules, info)
+    modules[change.slotId] = nil
+    if modules[change.slotId + ust.mixData(0, 20)] then
+        modules[change.slotId + ust.mixData(0, 20)] = nil
+    end
+end
 
 function data()
     return {
         classify = ust.classifyComp,
         addSlot = addSlot,
-        updateFn = updateFn
+        updateFn = updateFn,
+        preProcessRemove = preProcessRemove
     }
 end

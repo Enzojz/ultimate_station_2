@@ -28,7 +28,6 @@ function data()
             typeName = "ust_color",
             scriptName = "construction/station/rail/ust/comp/color",
             preProcessAdd = "preProcessAdd",
-            preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             classify = "classify"
         },

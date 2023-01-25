@@ -29,10 +29,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
     setColor(modules, info.type, classedModules[info.id].slotId, info.data - 10, change.module)
 end
 
-local preProcessRemove = function(modules, change, classedModules, info)
-    modules[change.slotId] = nil
-end
-
 local slotSetup = function(params, result, slotId)
     local info = params.modules[slotId].info
     local id = info.id
@@ -49,7 +45,6 @@ end
 function data()
     return {
         preProcessAdd = preProcessAdd,
-        preProcessRemove = preProcessRemove,
         classify = ust.classifyComp,
         slotSetup = slotSetup
     }
