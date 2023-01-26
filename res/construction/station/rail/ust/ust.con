@@ -339,8 +339,6 @@ end
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
-    -- params.debug = true
-    
     ---@type result
     local result = {
         entryConnectors = {},
@@ -483,6 +481,12 @@ function data()
         constructionTemplates = constructionTemplates,
         createTemplateFn = createTemplateFn,
         params = {
+            {
+                key = "debug",
+                name = _("MENU_DEBUG"),
+                values = {_("No"), _("Yes")},
+                defaultIndex = 0
+            },
         },
         upgradeFn = upgradeFn,
         updateFn = updateFn,

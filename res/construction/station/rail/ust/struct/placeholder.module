@@ -8,13 +8,13 @@ local pi = ma.pi
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local info = params.modules[slotId].info
 
-    if params.debug then
+    if params.debug == 1 then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos + coor.xyz(0, 0, 3)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), info.gravity[2]):mRot() * coor.trans(pos) end)) do
                 table.insert(result.models, m)
             end
         end

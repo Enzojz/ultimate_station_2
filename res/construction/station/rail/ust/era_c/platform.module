@@ -168,30 +168,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         if isLast then
             if isTrack[1] then
-                func.forEach(centres, function(centre) addLastBlock("ye_centre_t", centre) end)
+                func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
             elseif not info.octa[1] then
                 if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
-                    func.forEach(centres, function(centre) addLastBlock("ye_centre_t", centre) end)
+                    func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
                 else
-                    func.forEach(centres, function(centre) addLastBlock("ye_centre", centre) end)
+                    func.forEach(centres, function(centre)addLastBlock("ye_centre", centre) end)
                 end
             else
-                func.forEach(centres, function(centre) addLastBlock("yi_centre", centre) end)
+                func.forEach(centres, function(centre)addLastBlock("yi_centre", centre) end)
             end
         elseif isFirst then
             if isTrack[5] then
-                func.forEach(centres, function(centre) addBlock("ye_centre_t", centre) end)
+                func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
             elseif not info.octa[5] then
                 if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
-                    func.forEach(centres, function(centre) addBlock("ye_centre_t", centre) end)
+                    func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
                 else
-                    func.forEach(centres, function(centre) addBlock("ye_centre", centre) end)
+                    func.forEach(centres, function(centre)addBlock("ye_centre", centre) end)
                 end
             else
-                func.forEach(centres, function(centre) addBlock("yi_centre", centre) end)
+                func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
             end
         else
-            func.forEach(centres, function(centre) addBlock("yi_centre", centre) end)
+            func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
         end
         
         if leftConnected then
@@ -300,7 +300,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         equal = face * pipe.map(coor.vec2Tuple)
     }
     
-    if params.debug then
+    if params.debug == 1 then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
         
