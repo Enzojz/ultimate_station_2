@@ -11,7 +11,7 @@ local addSlot = function(params, result)
             local transf = info.transf
             
             insert(result.slots, {
-                id = makeData(22, 0),
+                id = makeData(28, 0),
                 transf = transf,
                 type = "ust_roof",
                 spacing = {0, 0, 0, 0}
