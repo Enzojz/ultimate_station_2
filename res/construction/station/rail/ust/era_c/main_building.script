@@ -6,6 +6,8 @@ local coor = require "ust/coor"
 local line = require "ust/coorline"
 local general = require "ust/general"
 
+local dump = require "luadump"
+
 local insert = table.insert
 local unpack = table.unpack
 
@@ -50,7 +52,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                     end
                 end
                 
-                if not grid[0][5] then
+                if not grid[0][-1] then
                     local arc = info.arcs.center
                     local pt = arc:pt(arc.inf)
                     local vec = (info.arcs.right:pt(info.arcs.right.inf) - info.arcs.left:pt(info.arcs.left.inf)):normalized()

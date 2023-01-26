@@ -18,6 +18,11 @@ local insert = table.insert
 ---@return grid
 ust.octa = function(modules, classedModules)
     local grid = {}
+
+    -- 8 1 2
+    -- 7 x 3
+    -- 6 5 4
+
     for id, info in pairs(classedModules) do
         local pos = modules[info.slotId].info.pos
         local x, y, z = pos.x, pos.y, pos.z
