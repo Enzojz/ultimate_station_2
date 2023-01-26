@@ -1,0 +1,76 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+local general = require "ust/general"
+
+local insert = table.insert
+
+local fitModels = ust.fitModel(0.5, 5, 5, true, true)
+
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local baseHeight = info.height
+    local data = params.modules[slotId].info.data
+    
+    local hTrans = coor.transZ(baseHeight)
+    
+    if data == 3 or data == 7 then
+        local n = 2
+        local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
+        
+        for i = 1, n do
+            local refPt = pts[i]:avg(pts[i + 1])
+            local refVec = pts[i] - pts[i + 1]
+            local lengthScale = refVec:length() / 10
+            local transf = hTrans
+                * coor.scaleX(lengthScale)
+                * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
+                * coor.trans(refPt)
+            
+            insert(result.models, general.newModel("asset/track_multi_sound_insulation_10m.mdl", tag, coor.transY(3.2) * transf));
+        end
+    end
+
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_SOUND_INSULATION"),
+            description = _("MENU_MODULE_SOUND_INSULATION_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_wall"},
+        },
+        type = "ust_component_fence",
+        order = {
+            value = 200,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/fence",
+            classify = "classify",
+            typeName = "ust_component_fence",
+            isComponent = true,
+            isFence = true,
+            typeId = 24,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

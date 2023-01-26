@@ -92,15 +92,15 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_WALL_CONCRETE"),
-            description = _("MENU_MODULE_WALL_CONCRETE_DESC"),
+            name = _("MENU_MODULE_WALL_ARCH"),
+            description = _("MENU_MODULE_WALL_ARCH_DESC"),
         },
         category = {
             categories = {"ust_cat_wall"},
         },
         type = "ust_component_fence",
         order = {
-            value = 203,
+            value = 204,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",

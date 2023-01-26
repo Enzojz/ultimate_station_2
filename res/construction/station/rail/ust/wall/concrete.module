@@ -89,7 +89,7 @@ function data()
         },
         type = "ust_component_fence",
         order = {
-            value = 200,
+            value = 201,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",
