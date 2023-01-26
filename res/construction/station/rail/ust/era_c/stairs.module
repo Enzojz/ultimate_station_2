@@ -3,6 +3,7 @@ local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
 local general = require "ust/general"
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -17,57 +18,12 @@ local connectors = {
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hTrans = coor.transZ(-0.8)
     
+    local id = params.modules[slotId].info.id
     local data = params.modules[slotId].info.data
-    
-    -- Main building to platform faces
-    local extra = params.extra[slotId]
-    
-    local arcs = extra.arcs
-    local ptBuildingInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 5
-    local ptBuildingSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 5
-    
-    local vecEdge = (ptBuildingSupEdge - ptBuildingInfEdge):normalized() * 0.85
-    
-    local ptBuildingInf = ptBuildingInfEdge + vecEdge
-    local ptBuildingSup = ptBuildingSupEdge - vecEdge
-    
-    local ptPlatformInf = extra.xInfo.inf.pt + vecEdge
-    local ptPlatformSup = extra.xInfo.sup.pt - vecEdge
-    
-    local platformPts = {}
-    for i, arc in ipairs(arcs) do
-        local lRad = arc.sup - arc.inf
-        if (i > 1 and i < #arcs) then
-            insert(platformPts, func.map({0, 0.25, 0.5, 0.75}, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        elseif (i == 1 and i < #arcs) then
-            local rad = arc:rad(ptPlatformInf)
-            local pct = (rad - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75}, function(radPct) return radPct > pct end)
-            insert(rads, 1, pct)
-            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        elseif (i == #arcs and i > 1) then
-            local rad = arc:rad(ptPlatformSup)
-            local pct = (rad - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pct end)
-            insert(rads, pct)
-            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-        else
-            local pctInf = (arc:rad(ptPlatformInf) - arc.inf) / lRad
-            local pctSup = (arc:rad(ptPlatformSup) - arc.inf) / lRad
-            local rads = func.filter({0, 0.25, 0.5, 0.75, 1}, function(radPct) return radPct < pctSup and radPct > pctInf end)
-            insert(rads, 1, pctInf)
-            insert(rads, pctSup)
-            insert(platformPts, func.map(rads, function(rad) return arc:pt(rad * lRad + arc.inf) end))
-            break
-        end
-    end
-    
-    platformPts = func.flatten(platformPts)
-    
-    local vecTangent = (ptBuildingSup - ptBuildingInf) * (1 / (#platformPts - 1))
+    local moduleSlotId = params.classedModules[id].slotId
     
     insert(result.models, general.newModel("station/rail/era_a/stairs.mdl", tag, hTrans * transform));
-
+    
     -- Terrains
     local terrainAlignmentLists = pipe.new /
         {
@@ -83,23 +39,32 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         faces = terrainAlignmentLists,
         optional = true
     })
-
-    -- Main building to platform Connection
-    insert(result.invokeLater, function()
-        local lanePts = pipe.new * params.extra[slotId].slotIds
-            * pipe.map(function(slotId) return data > 5 and params.extra[slotId].leftLane or params.extra[slotId].rightLane end)
-            * pipe.flatten()
-            * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
-        
-        for _, pt in ipairs(connectors) do
-            local pt = pt .. transform
-            local closesetPt = lanePts
-                * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
-                * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
-            local lpt = closesetPt.pt
-            insert(result.models, ust.unitLane(lpt, pt, tag))
-        end
-    end)
+    
+    if data % 10 ~= 0 then
+        insert(result.invokeLater, function()
+            local lanePts = {}
+            if data < 10 then
+                if data < 5 then
+                    lanePts = params.extra[moduleSlotId].rightLane
+                else
+                    lanePts = params.extra[moduleSlotId].leftLane
+                end
+            elseif data < 30 then
+                lanePts = {params.extra[moduleSlotId].leftLane[#params.extra[moduleSlotId].leftLane], params.extra[moduleSlotId].rightLane[#params.extra[moduleSlotId].rightLane]}
+            else
+                lanePts = {params.extra[moduleSlotId].leftLane[1], params.extra[moduleSlotId].rightLane[1]}
+            end
+            
+            for _, pt in ipairs(connectors) do
+                local pt = pt .. transform
+                local closesetPt = pipe.new * lanePts
+                    * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
+                    * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
+                local lpt = closesetPt.pt
+                insert(result.models, ust.unitLane(lpt, pt, tag))
+            end
+        end)
+    end
 end
 function data()
     return {
