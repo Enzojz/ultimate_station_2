@@ -455,9 +455,6 @@ local updateFn = function(params, closureParams)
             fn()
         end
 
-        dump()({[5]=result.terrainLists[5]})
-        dump()({[45]=result.terrainLists[45]})
-        
         for id, terrains in pairs(result.terrainLists) do
             if terrains.equal then
                 for _, t in ipairs(terrains.equal) do

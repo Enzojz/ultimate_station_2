@@ -89,7 +89,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                 }
                 for _, ptId in ipairs(pts) do
                     local pt, octapos = unpack(ptId)
-                    local vec = (info.arcs.left:ptByPt(pt) - info.arcs.right:ptByPt(pt)):normalized()
+                    local vec = arc:tangent(arc:rad(pt)):normalized() .. coor.rotZ(0.5 * math.pi)
                     local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * (width / 2)
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
@@ -219,6 +219,9 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     local ptPlatformSup = extra.xInfo.sup.pt - vecEdge
     
     local addBlock = function(mdl, pos)
+        if data < 5 then
+            pos.lt, pos.lb, pos.rt, pos.rb = pos.rt, pos.rb, pos.lt, pos.lb
+        end
         insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * coor.transZ(info.height)));
         insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * coor.transZ(info.height)));
     end
