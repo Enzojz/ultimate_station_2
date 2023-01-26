@@ -44,8 +44,7 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isTrack) then
             local info = module.info
             local makeData = module.makeData
-            local refH = module.metadata.height + (info.extraHeight or 0)
-            local transf = info.transf * coor.transZ(refH)
+            local transf = info.transf * coor.transZ(info.height)
             
             insert(result.slots, {
                 id = makeData(27, 0),

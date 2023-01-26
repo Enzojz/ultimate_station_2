@@ -4,7 +4,7 @@ Soon after the release of Transport Fever 2, I started thinking about this mod, 
 
 Only in spring of 2021, after some important upgrades of the game, with the experience of compact tunnel entry and flying junction preview version, "the idea" finally comes into my head, at that time, I though the work could be done in 3 months, as I worked the "Ultimate Station" for Transport Fever 1 in 3 months, but I was wrong, it took me almost two years to complete. Maybe it's late for the game, but I hope you like it as well.
 
-The main reason that I took so long time to finish it, is all about programming details, this mod is, in fact, an evolutionary framework to the vanilla modular construction, which is the base of all enhancements that would be possible with this mod, while keeping the user interface in a friendly manner. 
+The main reason that I took so long time to finish it, is all about programming details. This mod is, in fact, an evolutionary framework to the vanilla modular construction, which is the base of all enhancements that would be possible with this mod, while keeping the user interface in a friendly manner. 
 
 Features:
 - Adjustable radii for each segment of track
@@ -46,6 +46,7 @@ function data()
             UST_CAT_BRIDGE = "Bridges",
             UST_CAT_TUNNEL = "Tunnels",
             UST_CAT_COLOR = "Color & Textures",
+            MENU_DEBUG = "Debug Mode",
             MENU_RADIUS_PRECISE_MODIFIER = "Numeric radius modifer",
             MENU_RADIUS_PRECISE_MODIFIER_DESC = "To change the radius of tracks in a precise way.",
             MENU_RADIUS_ROUGH_MODIFIER = "Directional radius modifier",

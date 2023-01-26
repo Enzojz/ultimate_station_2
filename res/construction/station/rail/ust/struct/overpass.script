@@ -11,12 +11,9 @@ local addSlot = function(params, result)
             local info = module.info
             local makeData = module.makeData
 
-            local extraHeight = info.extraHeight or 0
-            local hPlatform = module.metadata.isPlatform and params.platformHeight + extraHeight or 0
-            local tPlatform = coor.transZ(hPlatform)
-            
+            local tPlatform = coor.transZ(info.height)
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 2)
-            
+
             local centerPt = centerPts[2]
             local centerVec = centerVecs[2]
             

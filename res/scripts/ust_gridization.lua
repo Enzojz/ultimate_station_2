@@ -434,7 +434,6 @@ end
 ---@return table
 ---@return integer
 ust.gridization = function(modules, classedModules)
-    local lowestHeight = 2
     ---@type grid
     local grid = ust.octa(modules, classedModules)
     
@@ -503,13 +502,7 @@ ust.gridization = function(modules, classedModules)
             return function()
                 local slotId = grid[z][x][y]
                 local m = modules[slotId]
-                
-                if m.metadata.isTrack then
-                    if m.metadata.height < lowestHeight then
-                        lowestHeight = m.metadata.height
-                    end
-                end
-                
+                                
                 local data = {
                     modules = modules,
                     grid = grid,
@@ -546,7 +539,7 @@ ust.gridization = function(modules, classedModules)
         end
 
     end
-    return grid, lowestHeight
+    return grid
 end
 
 

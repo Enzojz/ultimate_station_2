@@ -81,10 +81,9 @@ local slotSetup = function(params, result, slotId)
     local module = params.modules[slotId]
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
-    local zOffset = params.modules[slotId].metadata.height - params.refHeight + (info.extraHeight or 0)
     
     local arcs = info.arcs
-    local transfPosC = info.transf * coor.transZ(zOffset)
+    local transfPosC = info.transf * coor.transZ(info.height)
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
@@ -143,12 +142,12 @@ local slotSetup = function(params, result, slotId)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     if not (info.octa[3]) then
-        local transf = coor.trans(coor.xyz(metadata.width, 0, 0)) * transfPosC
+        local transf = coor.transX(metadata.width) * transfPosC
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
     end
     
     if not (info.octa[7]) then
-        local transf = coor.trans(coor.xyz(-metadata.width, 0, 0)) * transfPosC
+        local transf = coor.transX(-metadata.width) * transfPosC
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
@@ -169,7 +168,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local trackType = closureParams.trackType
     
     local info = params.modules[slotId].info
-    local zOffset = params.modules[slotId].metadata.height - params.refHeight + (info.extraHeight or 0)
     
     local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
     local e = pipe.new
@@ -181,11 +179,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local length = (pos[idx[2]] - pos[idx[1]]) * info.length
             return {
                 {
-                    info.arcs.center:pt(inf) + coor.xyz(0, 0, zOffset),
+                    info.arcs.center:pt(inf) + coor.xyz(0, 0, info.height),
                     info.arcs.center:tangent(inf) * length
                 },
                 {
-                    info.arcs.center:pt(sup) + coor.xyz(0, 0, zOffset),
+                    info.arcs.center:pt(sup) + coor.xyz(0, 0, info.height),
                     info.arcs.center:tangent(sup) * length
                 }
             }
@@ -233,7 +231,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * coor.transZ(zOffset + 0.5) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * coor.transZ(info.height + 0.5) end)) do
                 insert(result.models, m)
             end
         end
@@ -270,7 +268,7 @@ end
 ---@param slotId slotid
 ---@param params any
 local postClassify = function(modules, classified, slotId, params)
-    modules[slotId].info.height = modules[slotId].info.extraHeight or 0
+    modules[slotId].info.height = (params.refHeight - modules[slotId].metadata.height) + (modules[slotId].info.extraHeight or 0)
 end
 
 function data()

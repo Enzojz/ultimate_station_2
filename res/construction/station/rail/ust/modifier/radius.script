@@ -130,9 +130,8 @@ local addSlot = function(params, result)
         local module = params.modules[info.slotId]
         if (module.metadata and module.metadata.isTrack) then
             local info = module.info
-            local height = module.metadata.height + (info.extraHeight or 0)
             local makeData = module.makeData
-            local transfPosC = info.transf * coor.transZ(height)
+            local transfPosC = info.transf * coor.transZ(info.height)
             
             if not anyRadiusModifiable then
                 table.insert(result.slots, {

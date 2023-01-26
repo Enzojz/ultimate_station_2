@@ -17,8 +17,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
-    local refH = (params.modules[sId].metadata.isPlatform and params.platformHeight or params.modules[sId].metadata.height) + (params.modules[sId].info.extraHeight or 0)
-    local transZ = coor.transZ(refH)
+    local transZ = coor.transZ(info.height)
     local makeData = params.modules[sId].makeData
     
     -- Entry for radius system
@@ -134,8 +133,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[15] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[7] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
             else
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[12] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[10] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[12] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ(-0.5 * pi) * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[10] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ(0.5 * pi) * coor.transX(0.1) end, 0.25)
             end
         end
     end

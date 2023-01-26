@@ -31,8 +31,7 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
-            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
-            local transf = info.transf * coor.transZ(refH)
+            local transf = info.transf * coor.transZ(info.height)
             
             insert(result.slots, {
                 id = makeData(25, 0),
@@ -64,8 +63,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
     local makeData = params.modules[params.classedModules[info.id].slotId].makeData
-    local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (module.info.extraHeight or 0)
-    local transf = module.info.transf * coor.transZ(refH)
+    local transf = module.info.transf * coor.transZ(module.info.height)
     
     insert(result.slots, {
         id = makeData(25, -1),
@@ -86,15 +84,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end)
     elseif module.metadata.isPlatform then
         local info = module.info
-        local zOffset = 0.53 - params.refHeight + (info.extraHeight or 0)
         local length = info.arcs.center:length()
         local baseEdge = {
             {
-                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, info.extraHeight),
                 info.arcs.center:tangent(info.arcs.center.inf) * length,
             },
             {
-                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, zOffset),
+                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, info.extraHeight),
                 info.arcs.center:tangent(info.arcs.center.sup) * length,
             },
         }

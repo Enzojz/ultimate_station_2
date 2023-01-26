@@ -11,7 +11,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     local isPlatform = params.modules[sId].metadata.isPlatform
-    local refH = params.platformHeight + (info.extraHeight or 0)
+    local refH = info.height
     local makeData = params.modules[sId].makeData
     
     insert(result.slots, {

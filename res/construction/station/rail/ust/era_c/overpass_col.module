@@ -31,8 +31,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local info = module.info
     local makeData = module.makeData
     
-    local extraHeight = info.extraHeight or 0
-    local hPlatform = module.metadata.isPlatform and params.platformHeight + extraHeight or 0
+    local hPlatform = info.height
     local hOverpass = 8
     local tPlatform = coor.transZ(hPlatform)
     local tOverpass = coor.transZ(hOverpass)
@@ -103,7 +102,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     if params.modules[info.octa[1]] then
         local info = params.modules[info.octa[1]].info
         local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-        local tPlatform = coor.transZ(params.platformHeight + (info.extraHeight or 0))
+        local tPlatform = coor.transZ(info.height)
         for i = 2, 4 do
             local pt = centerPts[i]
             local vec = centerVecs[i]
@@ -123,7 +122,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     if params.modules[info.octa[5]] then
         local info = params.modules[info.octa[5]].info
         local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-        local tPlatform = coor.transZ(params.platformHeight + (info.extraHeight or 0))
+        local tPlatform = coor.transZ(info.height)
         for i = 2, 4 do
             local pt = centerPts[i]
             local vec = centerVecs[i]

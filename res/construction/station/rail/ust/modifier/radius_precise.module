@@ -13,7 +13,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     local makeData = params.modules[sId].makeData
-    local hRef = params.modules[sId].metadata.height + (info.extraHeight or 0)
     
     -- Entry for radius system
     local arcs = info.arcs
@@ -22,7 +21,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local vec = (posR - posL):normalized()
     local posC = (posR + posL) * 0.5
     local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local transfPosC = rotZ * coor.trans(posC) * coor.transZ(hRef)
+    local transfPosC = rotZ * coor.trans(posC) * coor.transZ(info.height)
     
     insert(result.slots, {
         id = makeData(80, 1),
@@ -45,7 +44,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos + coor.xyz(0, 0, 0.1 + hRef)) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos) * coor.transZ(0.1 + info.height) end)) do
                 insert(result.models, m)
             end
         end
@@ -53,7 +52,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local addSlot = function(id, data, pos, shape, rot)
             insert(result.slots, {
                 id = makeData(id, data),
-                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(hRef),
+                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(info.height),
                 type = "ust_radius_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = shape or 0

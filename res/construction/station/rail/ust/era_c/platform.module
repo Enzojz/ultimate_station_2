@@ -57,9 +57,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    local hRef = params.platformHeight + (info.extraHeight or 0)
-    local hVec = coor.xyz(0, 0, hRef)
-    local hTrans = coor.trans(hVec)
+    local hVec = coor.xyz(0, 0, info.height)
+    local hTrans = coor.transZ(info.height)
     
     local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left)
     local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right)
@@ -348,7 +347,7 @@ function data()
             preProcessRemove = "preProcessRemove",
             slotSetup = "slotSetup",
             preClassify = "preClassify",
-            -- postClassify = "postClassify",
+            postClassify = "postClassify",
             gridization = "gridization"
         },
         updateFn = updateFn,

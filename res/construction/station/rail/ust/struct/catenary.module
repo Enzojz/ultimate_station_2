@@ -7,8 +7,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
     local makeData = params.modules[params.classedModules[info.id].slotId].makeData
-    local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (module.info.extraHeight or 0)
-    local transf = module.info.transf * coor.transZ(refH)
+    local transf = module.info.transf * coor.transZ(module.info.height)
     
     insert(result.slots, {
         id = makeData(27, -1),

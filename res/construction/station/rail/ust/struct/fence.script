@@ -21,10 +21,9 @@ local addSlot = function(params, result)
             
             local ptsL, vecL = ust.basePts(info.arcs.left, n)
             local ptsR, vecR = ust.basePts(info.arcs.right, n)
-            local refH = (module.metadata.isPlatform and params.platformHeight or 0) + (info.extraHeight or 0)
             
-            if not (module.metadata.isTrack and octa7 and octa7.isPlatform and octa7.info.extraHeight == info.extraHeight) then
-                local refPtL = ptsL[2] + coor.xyz(0, 0, refH)
+            if not (module.metadata.isTrack and octa7 and octa7.isPlatform and octa7.info.height == info.height) then
+                local refPtL = ptsL[2] + coor.xyz(0, 0, info.height)
                 local refVecL = vecL[2]
                 
                 local transfL =
@@ -40,8 +39,8 @@ local addSlot = function(params, result)
                     })
             end
             
-            if not (module.metadata.isTrack and octa3 and octa3.isPlatform and octa3.info.extraHeight == info.extraHeight) then
-                local refPtR = ptsR[2] + coor.xyz(0, 0, refH)
+            if not (module.metadata.isTrack and octa3 and octa3.isPlatform and octa3.info.height == info.height) then
+                local refPtR = ptsR[2] + coor.xyz(0, 0, info.height)
                 local refVecR = vecR[2]
                 
                 local transfR =
@@ -59,7 +58,7 @@ local addSlot = function(params, result)
             
             
             if not info.octa[1] then
-                local refPt = ptsR[3]:avg(ptsL[3]) + coor.xyz(0, 0, refH)
+                local refPt = ptsR[3]:avg(ptsL[3]) + coor.xyz(0, 0, info.height)
                 local refVec = (ptsR[3] - ptsL[3]):normalized()
                 
                 local transf =
@@ -76,7 +75,7 @@ local addSlot = function(params, result)
             end
             
             if not info.octa[5] then
-                local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, refH)
+                local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, info.height)
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
                 
                 local transf =
@@ -100,13 +99,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
     local id = params.modules[slotId].info.id
     local m = params.modules[params.classedModules[id].slotId]
     local info = m.info
-    local extraHeight = info.extraHeight or 0
     local data = params.modules[slotId].info.data
-    local isPlatform = m.metadata.isPlatform
     
-    local hRef = isPlatform and params.platformHeight or 0
-    local hVec = coor.xyz(0, 0, hRef + extraHeight)
-    local hTrans = coor.trans(hVec)
+    local hTrans = coor.transZ(info.height)
     
     insert(
         result.slots, {

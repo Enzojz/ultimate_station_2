@@ -48,7 +48,7 @@
                     preProcessRemove = "preProcessRemove",
                     slotSetup = "slotSetup",
                     preClassify = "preClassify",
-                    -- postClassify = "postClassify",
+                    postClassify = "postClassify",
                     gridization = "gridization"
                 }
                 

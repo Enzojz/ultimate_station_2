@@ -32,8 +32,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local module = params.modules[params.classedModules[id].slotId]
     local info = module.info
     
-    local extraHeight = info.extraHeight or 0
-    local hPlatform = module.metadata.isPlatform and params.platformHeight + extraHeight or 0
+    local hPlatform = info.height
     local hOverpass = 8
     local tPlatform = coor.transZ(hPlatform)
     local tOverpass = coor.transZ(hOverpass)

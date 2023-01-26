@@ -21,14 +21,14 @@ local getTranfs = function(info, pos, width)
     elseif pos == 3 then
         local pt = 0.5 * (refArc.sup + refArc.inf)
         local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-        return coor.trans(coor.xyz(width, 0, 0)) * transf
+        return coor.transX(width) * transf
     elseif pos == 5 then
         local bwPt = refArc.inf - 0.5 * (refArc.sup - refArc.inf)
         return quat.byVec(coor.xyz(0, -1, 0), refArc:tangent(bwPt)):mRot() * coor.trans(refArc:pt(bwPt))
     elseif pos == 7 then
         local pt = 0.5 * (refArc.sup + refArc.inf)
         local transf = quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
-        return coor.trans(coor.xyz(-width, 0, 0)) * transf
+        return coor.transX(-width) * transf
     else
         local pt = 0.5 * (refArc.sup + refArc.inf)
         return quat.byVec(coor.xyz(0, 1, 0), refArc:tangent(pt)):mRot() * coor.trans(refArc:pt(pt))
@@ -153,8 +153,7 @@ local slotSetup = function(params, result, slotId)
     local makeData = params.modules[slotId].makeData
     local pos = info.pos
     
-    local hRef = params.platformHeight + (info.extraHeight or 0)
-    local transfPosC = info.transf * coor.transZ(hRef)
+    local transfPosC = info.transf * coor.transZ(info.height)
     
     insert(result.slots, {
         id = slotId,

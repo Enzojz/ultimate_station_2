@@ -15,10 +15,12 @@ local connectors = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    local hTransP = coor.trans(coor.xyz(0, 0, hRef))
+    local id = params.modules[slotId].info.id
+    local module = params.modules[params.classedModules[id].slotId]
+    local info = module.info
+
+    local hTrans = coor.transZ(info.height - 0.8)
+    local hTransP = coor.transZ(info.height)
     
     local data = params.modules[slotId].info.data
     

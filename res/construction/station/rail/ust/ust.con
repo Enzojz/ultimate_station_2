@@ -339,6 +339,14 @@ end
 ---@param closureParams any
 ---@return result
 local updateFn = function(params, closureParams)
+    local refHeight = pipe.new * func.values(params.modules)
+        * pipe.filter(function(m) return m.metadata.isTrack end)
+        * pipe.map(function(m) return m.metadata.height end)
+        * pipe.max()
+    
+    params.refHeight = refHeight or 0
+    params.platformHeight = params.refHeight + hPlatformList[params.hPlatform + 1] * 0.001
+    
     ---@type result
     local result = {
         entryConnectors = {},
@@ -371,19 +379,13 @@ local updateFn = function(params, closureParams)
     }
     
     params.classedModules = classifyModules(params.modules)
-    
     for slotId, m in pairs(params.modules) do
         if (m.metadata and m.metadata.postClassify) then
             game.res.script[m.metadata.scriptName][m.metadata.postClassify](params.modules, result, slotId, params)
         end
     end
     
-    
-    local grid, refHeight = ust.gridization(params.modules, params.classedModules)
-    
-    params.grid = grid
-    params.refHeight = refHeight
-    params.platformHeight = params.refHeight + hPlatformList[params.hPlatform + 1] * 0.001
+    params.grid = ust.gridization(params.modules, params.classedModules)
     
     params.slotGrid = {}
     
