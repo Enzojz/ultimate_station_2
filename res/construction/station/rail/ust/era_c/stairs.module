@@ -117,7 +117,7 @@ function data()
             icon = "ui/construction/station/rail/modular_station/stairs.tga"
         },
         category = {
-            categories = {"ust_cat_building"},
+            categories = {"ust_cat_entry"},
         },
         type = "ust_component_main_10",
         order = {

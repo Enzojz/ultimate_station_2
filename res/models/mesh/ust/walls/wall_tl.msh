@@ -3,40 +3,40 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 48,
-               offset = 748
+               count = 12,
+               offset = 592
             },
             position = {
-               count = 48,
-               offset = 700
+               count = 12,
+               offset = 580
             },
             tangent = {
-               count = 48,
-               offset = 796
+               count = 12,
+               offset = 604
             },
             uv0 = {
-               count = 48,
-               offset = 844
+               count = 12,
+               offset = 616
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 12,
-               offset = 904
+               count = 48,
+               offset = 676
             },
             position = {
-               count = 12,
-               offset = 892
+               count = 48,
+               offset = 628
             },
             tangent = {
-               count = 12,
-               offset = 916
+               count = 48,
+               offset = 724
             },
             uv0 = {
-               count = 12,
-               offset = 928
+               count = 48,
+               offset = 772
             }
          }
       }
@@ -58,7 +58,7 @@ function data() return {
          offset = 252
       },
       uv0 = {
-         count = 208,
+         count = 88,
          numComp = 2,
          offset = 492
       }

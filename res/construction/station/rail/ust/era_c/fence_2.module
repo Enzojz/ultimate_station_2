@@ -23,11 +23,11 @@ function data()
             description = _("MENU_MODULE_FENCE_DESC"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_wall"},
         },
         type = "ust_component_fence",
         order = {
-            value = 260,
+            value = 101,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",

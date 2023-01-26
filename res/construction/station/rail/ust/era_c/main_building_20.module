@@ -75,12 +75,12 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_MAIN_BUILDING_20"),
-            description = _("MENU_MODULE_MAIN_BUILDING_20_DESC"),
+            name = _("MENU_MODULE_MAIN_ENTRY_20"),
+            description = _("MENU_MODULE_MAIN_ENTRY_20_DESC"),
             icon = "ui/construction/station/rail/modular_station/main_building_2_era_c.tga"
         },
         category = {
-            categories = {"ust_cat_building"},
+            categories = {"ust_cat_entry"},
         },
         type = "ust_component_main_20",
         order = {

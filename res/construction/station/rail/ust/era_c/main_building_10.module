@@ -52,12 +52,12 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_MAIN_BUILDING_10"),
-            description = _("MENU_MODULE_MAIN_BUILDING_10_DESC"),
+            name = _("MENU_MODULE_MAIN_ENTRY_10"),
+            description = _("MENU_MODULE_MAIN_ENTRY_10_DESC"),
             icon = "ui/construction/station/rail/modular_station/main_building_1_era_c.tga"
         },
         category = {
-            categories = {"ust_cat_building"},
+            categories = {"ust_cat_entry"},
         },
         type = "ust_component_main_10",
         order = {

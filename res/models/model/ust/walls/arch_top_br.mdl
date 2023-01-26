@@ -1,7 +1,7 @@
 function data() return {
    boundingInfo = {
-      bbMax = { 0, 3, 0 },
-      bbMin = { -5, 0, -0.500000 }
+      bbMax = { 0, 5, 3.000005 },
+      bbMin = { -0.500000, -0.000001, 0 }
    },
    collider = {
       params = {
@@ -12,9 +12,9 @@ function data() return {
    lods = {
       {
          node = {
-            materials = { "ust/uz/concrete.mtl", "ust/uv/concrete.mtl" },
-            mesh = "ust/walls/concrete_beam_br.msh",
-            name = "concrete_beam_br",
+            materials = { "ust/uv/brick.mtl", "ust/uz/brick.mtl" },
+            mesh = "ust/walls/arch_top_br.msh",
+            name = "arch_top_br",
             transf = {
                1.000000, 0.000000, 0.000000, 0.000000, 
                0.000000, 1.000000, 0.000000, 0.000000, 

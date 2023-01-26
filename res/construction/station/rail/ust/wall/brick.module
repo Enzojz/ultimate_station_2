@@ -43,8 +43,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
             }
             
-            insert(result.models, general.newModel("ust/walls/brick_wall_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
-            insert(result.models, general.newModel("ust/walls/brick_wall_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
+            insert(result.models, general.newModel("ust/walls/brick_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
+            insert(result.models, general.newModel("ust/walls/brick_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
         end
     elseif data == 1 or data == 5 then
         local rank = data == 5 and 1 or 3
@@ -64,8 +64,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             lb = (ptsL[2] - ptsL[rank]):normalized() * 0.25 + ptsL[rank]
         }
         
-        insert(result.models, general.newModel("ust/walls/brick_wall_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
-        insert(result.models, general.newModel("ust/walls/brick_wall_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
+        insert(result.models, general.newModel("ust/walls/brick_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
+        insert(result.models, general.newModel("ust/walls/brick_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
     end
 
 end
@@ -85,11 +85,11 @@ function data()
             description = _("MENU_MODULE_WALL_CONCRETE_DESC"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_wall"},
         },
         type = "ust_component_fence",
         order = {
-            value = 260,
+            value = 201,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",

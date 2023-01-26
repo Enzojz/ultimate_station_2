@@ -169,11 +169,11 @@ function data()
             description = _("MENU_MODULE_PLATFORM_OVERPASS_STEP"),
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_comp", "ust_cat_entry"},
         },
         type = "ust_overpass_step",
         order = {
-            value = 260,
+            value = 201,
         },
         metadata = {
             typeName = "ust_overpass_step",

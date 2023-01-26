@@ -10,7 +10,7 @@ local insert = table.insert
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if module.metadata and (module.metadata.isPlatform or module.metadata.isTrack) then
+        if module.metadata then
             local info = module.info
             local makeData = module.makeData
             

@@ -225,7 +225,7 @@ function data()
         },
         type = "ust_overpass",
         order = {
-            value = 260,
+            value = 200,
         },
         metadata = {
             typeName = "ust_overpass",
