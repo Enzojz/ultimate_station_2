@@ -97,10 +97,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 info.arcs.center:tangent(info.arcs.center.sup) * length,
             },
         }
-
-        result.terrainLists[info.id].equal = nil
         
         insert(result.invokeLater, function()
+            result.terrainLists[info.id].equal = nil
+            result.terrainLists[info.id].equalOpt = nil
+
             insert(result.edgeLists, {
                 type = "TRACK",
                 alignTerrain = false,

@@ -1,19 +1,31 @@
 local insert = table.insert
+local coor = require "ust/coor"
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local trackSlotId = params.classedModules[id].slotId
-    
+    local info = params.modules[trackSlotId].info
+    local transZ = coor.transZ(info.height)
+
     insert(result.slots, {
         id = makeData(25, -1),
-        transf = transform,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transform * transZ,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+    insert(result.slots, {
+        id = makeData(25, -1),
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transform * transZ,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
     
     insert(result.invokeLater, function()
+        result.terrainLists[info.id].equal = nil
+        result.terrainLists[info.id].equalOpt = nil
+
         local trackEdgeIndex = params.edgeIndex[trackSlotId]
         local trackEdges = result.edgeLists[trackEdgeIndex]
         if trackEdges then

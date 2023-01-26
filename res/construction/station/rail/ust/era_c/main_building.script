@@ -318,11 +318,9 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
         / (pipe.new * platformPts + func.rev(buildingPts))
         * pipe.map(pipe.map(coor.vec2Tuple))
     
-    insert(result.terrainAlignmentLists, {
-        type = "EQUAL",
-        faces = terrainAlignmentLists,
-        optional = true
-    })
+    for _, t in ipairs(terrainAlignmentLists) do
+        insert(result.terrainLists[info.id].equalOpt, t)
+    end
 end
 
 local updateFnHead = function(result, transform, tag, slotId, addModelFn, params, config)
@@ -348,10 +346,10 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     local blocks = pipe.new
         * func.seq(-config.width / 10, config.width / 10)
         * pipe.map(function(x) return x * 5 end)
-
+    
     blocks[1] = -config.width * 0.5 + 0.85
     blocks[#blocks] = config.width * 0.5 - 0.85
-
+    
     for _, x in ipairs(blocks * pipe.interlace()) do
         local r, l = unpack(x)
         addBlock("ye_centre", {
@@ -386,11 +384,9 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
         }
         * pipe.map(pipe.map(coor.vec2Tuple))
     
-    insert(result.terrainAlignmentLists, {
-        type = "EQUAL",
-        faces = terrainAlignmentLists,
-        optional = true
-    })
+    for _, t in ipairs(terrainAlignmentLists) do
+        insert(result.terrainLists[info.id].equalOpt, t)
+    end
     
     
     local id = params.modules[slotId].info.id

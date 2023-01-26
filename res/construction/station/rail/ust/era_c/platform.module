@@ -41,7 +41,6 @@ local fitMdl = {
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
-    local pos = info.pos
     local isTrack = {}
     local isPlatform = {}
     local octaModules = {}
@@ -295,9 +294,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     local face = pipe.new + leftEdge + func.rev(rightEdge)
-    result.terrainLists[info.id] = {
-        equal = face * pipe.map(coor.vec2Tuple)
-    }
+    
+    ust.initTerrainList(result, info.id)
+
+    insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(info.extraHeight or 0) end) * pipe.map(coor.vec2Tuple))
     
     if params.debug == 1 then
         local text = tostring(info.id)

@@ -535,4 +535,17 @@ ust.marking = function(result, slotId, params)
     end
 end
 
+ust.initTerrainList = function(result, id)
+    if not result.terrainLists[id] then
+        result.terrainLists[id] = {
+            equal = {},
+            less = {},
+            greater = {},
+            equalOpt = {},
+            lessOpt = {},
+            greaterOpt = {},
+        }
+    end
+end
+
 return ust

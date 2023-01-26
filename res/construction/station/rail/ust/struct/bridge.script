@@ -67,7 +67,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     insert(result.slots, {
         id = makeData(25, -1),
-        transf = transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+
+    insert(result.slots, {
+        id = makeData(25, -1),
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
@@ -96,9 +103,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             },
         }
         
-        result.terrainLists[info.id].equal = nil
         
         insert(result.invokeLater, function()
+            result.terrainLists[info.id].equal = nil
+            result.terrainLists[info.id].equalOpt = nil
+            
             insert(result.edgeLists, {
                 type = "TRACK",
                 alignTerrain = false,

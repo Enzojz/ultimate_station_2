@@ -355,7 +355,10 @@ local updateFn = function(params, closureParams)
         terrainAlignmentLists = {
             {type = "EQUAL", faces = {}},
             {type = "LESS", faces = {}},
-            {type = "GREATER", faces = {}}
+            {type = "GREATER", faces = {}},
+            {type = "EQUAL", faces = {}, optional = true},
+            {type = "LESS", faces = {}, optional = true},
+            {type = "GREATER", faces = {}, optional = true}
         },
         terrainLists = {},
         groundFaces = {},
@@ -451,18 +454,43 @@ local updateFn = function(params, closureParams)
         for _, fn in ipairs(result.invokeLater) do
             fn()
         end
+
+        dump()({[5]=result.terrainLists[5]})
+        dump()({[45]=result.terrainLists[45]})
         
         for id, terrains in pairs(result.terrainLists) do
             if terrains.equal then
-                insert(result.terrainAlignmentLists[1].faces, terrains.equal)
+                for _, t in ipairs(terrains.equal) do
+                    insert(result.terrainAlignmentLists[1].faces, t)
+                end
             end
             if terrains.less then
-                insert(result.terrainAlignmentLists[2].faces, terrains.equal)
+                for _, t in ipairs(terrains.less) do
+                    insert(result.terrainAlignmentLists[2].faces, t)
+                end
             end
             if terrains.greater then
-                insert(result.terrainAlignmentLists[3].faces, terrains.equal)
+                for _, t in ipairs(terrains.greater) do
+                    insert(result.terrainAlignmentLists[3].faces, t)
+                end
+            end
+            if terrains.equalOpt then
+                for _, t in ipairs(terrains.equalOpt) do
+                    insert(result.terrainAlignmentLists[4].faces, t)
+                end
+            end
+            if terrains.lessOpt then
+                for _, t in ipairs(terrains.lessOpt) do
+                    insert(result.terrainAlignmentLists[5].faces, t)
+                end
+            end
+            if terrains.greaterOpt then
+                for _, t in ipairs(terrains.greaterOpt) do
+                    insert(result.terrainAlignmentLists[6].faces, t)
+                end
             end
         end
+
     
     end
     return result

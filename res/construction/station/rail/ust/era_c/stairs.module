@@ -15,12 +15,7 @@ local connectors = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    local id = params.modules[slotId].info.id
-    local module = params.modules[params.classedModules[id].slotId]
-    local info = module.info
-
     local hTrans = coor.transZ(-0.8)
-    local hTransP = coor.transZ(info.height)
     
     local data = params.modules[slotId].info.data
     
