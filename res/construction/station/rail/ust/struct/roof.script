@@ -1,4 +1,5 @@
 local ust = require "ust"
+local coor = require "ust/coor"
 
 local insert = table.insert
 
@@ -8,7 +9,7 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local transf = info.transf
+            local transf = info.transf * coor.transZ(info.height)
             
             insert(result.slots, {
                 id = makeData(28, 0),

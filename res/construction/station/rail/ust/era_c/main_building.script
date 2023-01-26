@@ -43,7 +43,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 20 + i),
-                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i) * coor.transZ(info.height),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -58,7 +58,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 40 + i),
-                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i) * coor.transZ(info.height),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -145,7 +145,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, octapos),
-                                transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
+                                transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5) * coor.transZ(info.height),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -197,10 +197,7 @@ end
 local updateFnSide = function(result, transform, tag, slotId, addModelFn, params, config)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
-    local hRef = info.height
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    local hTransP = coor.transZ(hRef)
+    local hTrans = coor.transZ(-0.8)
     
     local data = params.modules[slotId].info.data
     
@@ -220,8 +217,8 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     local ptPlatformSup = extra.xInfo.sup.pt - vecEdge
     
     local addBlock = function(mdl, pos)
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
+        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * coor.transZ(info.height)));
+        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * coor.transZ(info.height)));
     end
     
     local platformPts = {}
@@ -293,7 +290,7 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
             * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
         
         for _, pt in ipairs(config.connectors) do
-            local pt = pt .. (hTransP * transform)
+            local pt = pt .. transform
             local closesetPt = lanePts
                 * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
                 * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)
@@ -331,10 +328,7 @@ end
 local updateFnHead = function(result, transform, tag, slotId, addModelFn, params, config)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
-    local hRef = info.height
-    local hVec = coor.xyz(0, 0, hRef - 0.8)
-    local hTrans = coor.trans(hVec)
-    local hTransP = coor.transZ(hRef)
+    local hTrans = coor.transZ(-0.8)
     
     local data = params.modules[slotId].info.data
     
@@ -347,8 +341,8 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     end
     
     local addBlock = function(mdl, pos)
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTransP * fitMdl[mdl](pos, true)));
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTransP * fitMdl[mdl](pos, false)));
+        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * transform));
+        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * transform));
     end
     
     local blocks = pipe.new
@@ -361,25 +355,25 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     for _, x in ipairs(blocks * pipe.interlace()) do
         local r, l = unpack(x)
         addBlock("ye_centre", {
-            lt = coor.xyz(l, -5, 0) .. transform,
-            lb = coor.xyz(l, 0, 0) .. transform,
-            rt = coor.xyz(r, -5, 0) .. transform,
-            rb = coor.xyz(r, 0, 0) .. transform
+            lt = coor.xyz(l, -5, 0),
+            lb = coor.xyz(l, 0, 0),
+            rt = coor.xyz(r, -5, 0),
+            rb = coor.xyz(r, 0, 0)
         });
     end
     
     addBlock("xe_ye_left", {
-        lt = coor.xyz(config.width * 0.5, -5, 0) .. transform,
-        lb = coor.xyz(config.width * 0.5, 0, 0) .. transform,
-        rt = coor.xyz(config.width * 0.5 - 0.85, -5, 0) .. transform,
-        rb = coor.xyz(config.width * 0.5 - 0.85, 0, 0) .. transform
+        lt = coor.xyz(config.width * 0.5, -5, 0),
+        lb = coor.xyz(config.width * 0.5, 0, 0),
+        rt = coor.xyz(config.width * 0.5 - 0.85, -5, 0),
+        rb = coor.xyz(config.width * 0.5 - 0.85, 0, 0)
     });
     
     addBlock("xe_ye_right", {
-        lt = coor.xyz(-(config.width * 0.5 - 0.85), -5, 0) .. transform,
-        lb = coor.xyz(-(config.width * 0.5 - 0.85), 0, 0) .. transform,
-        rt = coor.xyz(-config.width * 0.5, -5, 0) .. transform,
-        rb = coor.xyz(-config.width * 0.5, 0, 0) .. transform
+        lt = coor.xyz(-(config.width * 0.5 - 0.85), -5, 0),
+        lb = coor.xyz(-(config.width * 0.5 - 0.85), 0, 0),
+        rt = coor.xyz(-config.width * 0.5, -5, 0),
+        rb = coor.xyz(-config.width * 0.5, 0, 0)
     });
     
     -- Terrains
@@ -412,7 +406,7 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
             if y == pos.y then
                 local module = params.modules[slotId]
                 if module and module.metadata.isPlatform then
-                    insert(pts, module.info.arcs.center:pt(data < 30 and module.info.arcs.center.sup or module.info.arcs.center.inf) .. hTransP)
+                    insert(pts, module.info.arcs.center:pt(data < 30 and module.info.arcs.center.sup or module.info.arcs.center.inf) .. coor.transZ(info.height))
                 end
             end
         end
@@ -425,7 +419,7 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
             * pipe.filter(function(pt) return ((pt - ptBuildingSup):dot(vecTangent)) * ((pt - ptBuildingInf):dot(vecTangent)) < 0 end)
         
         for _, pt in ipairs(config.connectors) do
-            local pt = pt .. (hTransP * transform)
+            local pt = pt .. transform
             local closesetPt = lanePts
                 * pipe.map(function(lpt) return {pt = lpt, distance = (lpt - pt):length2()} end)
                 * pipe.min(function(lhs, rhs) return lhs.distance < rhs.distance end)

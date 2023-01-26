@@ -10,9 +10,9 @@ local abs = ma.abs
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local id = params.modules[slotId].info.id
-    local sId = params.classedModules[id].slotId
-    local info = params.modules[sId].info
-    local makeData = params.modules[sId].makeData
+    local targetSlotId = params.classedModules[id].slotId
+    local info = params.modules[targetSlotId].info
+    local makeData = params.modules[targetSlotId].makeData
     
     -- Entry for radius system
     local arcs = info.arcs

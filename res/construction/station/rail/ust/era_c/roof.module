@@ -20,8 +20,11 @@ local roofFitModels = {
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
-    local hRef = params.platformHeight
-    local hVec = coor.xyz(0, 0, hRef)
+    local id = params.modules[slotId].info.id
+    local module = params.modules[params.classedModules[id].slotId]
+    local info = module.info
+
+    local hVec = coor.xyz(0, 0, info.height)
     local hTrans = coor.trans(hVec)
     
     local id = params.modules[slotId].info.id
