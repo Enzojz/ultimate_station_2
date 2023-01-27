@@ -39,7 +39,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local textR = info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
     
     local nameModelsF, width = livetext(2)(textR)
-    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(posC) * coor.transZ(0.1 + info.height) end)) do
+    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX90N * rotZ * coor.trans(posC) * coor.transZ(0.1 + info.height) end)) do
         insert(result.models, m)
     end
     

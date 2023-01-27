@@ -3,8 +3,6 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 
-
-local dump = require "luadump"
 local insert = table.insert
 
 local addSlot = function(params, result)

@@ -2,7 +2,6 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-local dump = require "luadump"
 
 local unpack = table.unpack
 local insert = table.insert

@@ -307,13 +307,13 @@ ust.calculateRaidus = function(x, y, z, data)
             local pos = data.modules[ref].info.pts[1][1]
             local vec = data.modules[ref].info.pts[1][2]
             
-            yState.pos = pos + (vec:normalized() .. coor.rotZ(-0.5 * pi)) * (data.xState.pos[x] - data.xState.pos[x + 1])
+            yState.pos = pos + (vec:normalized() .. coor.rotZ90N) * (data.xState.pos[x] - data.xState.pos[x + 1])
             yState.vec = vec
         elseif ref == m.info.octa[7] then
             local pos = data.modules[ref].info.pts[1][1]
             local vec = data.modules[ref].info.pts[1][2]
             
-            yState.pos = pos + (vec:normalized() .. coor.rotZ(-0.5 * pi)) * (data.xState.pos[x] - data.xState.pos[x - 1])
+            yState.pos = pos + (vec:normalized() .. coor.rotZ90N) * (data.xState.pos[x] - data.xState.pos[x - 1])
             yState.vec = vec
         end
     end
@@ -431,7 +431,7 @@ ust.genericArcs = function(x, y, z, data)
     
     -- Generic ref pts
     m.info.pts = ust.refArc2Pts(m.info.arcs)
-    m.info.limits = func.map(m.info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ(0.5 * pi), ptvec[1]) end)
+    m.info.limits = func.map(m.info.pts, function(ptvec) return line.byVecPt(ptvec[2] .. coor.rotZ90P, ptvec[1]) end)
 end
 
 ---@param modules modules

@@ -231,13 +231,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * coor.transZ(info.height + 0.5) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * coor.transZ(info.height + 0.5) end)) do
                 insert(result.models, m)
             end
         end
         
         addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        
+        ust.marking(result, slotId, params)
     end
 end
 

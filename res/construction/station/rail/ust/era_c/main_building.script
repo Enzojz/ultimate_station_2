@@ -6,8 +6,6 @@ local coor = require "ust/coor"
 local line = require "ust/coorline"
 local general = require "ust/general"
 
-local dump = require "luadump"
-
 local insert = table.insert
 local unpack = table.unpack
 
@@ -89,8 +87,8 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                 }
                 for _, ptId in ipairs(pts) do
                     local pt, octapos = unpack(ptId)
-                    local vec = arc:tangent(arc:rad(pt)):normalized() .. coor.rotZ(0.5 * math.pi)
-                    local vecSup = (vec .. coor.rotZ(-0.5 * math.pi)) * (width / 2)
+                    local vec = arc:tangent(arc:rad(pt)):normalized() .. coor.rotZ90P
+                    local vecSup = (vec .. coor.rotZ90N) * (width / 2)
                     local vecInf = -vecSup
                     local lnSup = line.byVecPt(vec, pt + vecSup)
                     local lnInf = line.byVecPt(vec, pt + vecInf)

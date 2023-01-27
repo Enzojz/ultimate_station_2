@@ -488,7 +488,7 @@ ust.marking = function(result, slotId, params)
     
     local addText = function(label, transf, f)
         local nameModelsF, width = livetext(2)(label)
-        for _, m in ipairs(nameModelsF(function() return (f or coor.I()) * coor.transZ(-0.85) * coor.rotX(-0.5 * pi) * hTrans * transf end)) do
+        for _, m in ipairs(nameModelsF(function() return (f or coor.I()) * coor.transZ(-0.85) * coor.rotX90N * hTrans * transf end)) do
             table.insert(result.models, m)
         end
     end

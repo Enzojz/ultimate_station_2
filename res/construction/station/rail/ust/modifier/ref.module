@@ -53,11 +53,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
         end
     end
-    ust.marking(result, slotId, params)
-    
-    for _, octa in ipairs(info.octa) do
-        if octa then
-            ust.marking(result, octa, params)
+
+    if params.debug ~= 1 then
+        ust.marking(result, slotId, params)
+        
+        for _, octa in ipairs(info.octa) do
+            if octa then
+                ust.marking(result, octa, params)
+            end
         end
     end
     

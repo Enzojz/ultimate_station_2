@@ -1,6 +1,5 @@
 local ust = require "ust"
 local coor = require "ust/coor"
-local dump = require "luadump"
 
 local insert = table.insert
 

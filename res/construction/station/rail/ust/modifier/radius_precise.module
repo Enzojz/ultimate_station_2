@@ -45,7 +45,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * rotZ * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height) end)) do
                 insert(result.models, m)
             end
         end
