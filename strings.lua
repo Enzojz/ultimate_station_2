@@ -150,7 +150,7 @@ function data()
         },
         zh_CN = {
             MOD_NAME = "终极车站",
-            MOD_DESC = en,
+            MOD_DESC = zhcn,
             MENU_NAME = "终极车站",
             MENU_DESC = "充满无尽定制可能性的车站.",
             UST_CAT_TRACK = "股道",
