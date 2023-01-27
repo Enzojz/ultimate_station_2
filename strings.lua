@@ -1,10 +1,10 @@
 local en = [[This mod gives you possibility to create a station with less contraint as possible.
 
-Soon after the release of Transport Fever 2, I started thinking about this mod, which should take advantage of modular construction from Transport Fever 2, combining with the technique that I have first used to implement the "Utimate Station" mod for Transport Fever 1. The whole journay is not so easy, I created some mods in 2020 to get familiar with Transport Fever 2 and to discover all kinds to technique possibilities, also with these experiences I made some feedback to Urban Games to make the mechansim of modular construction more complete.
+Soon after the release of Transport Fever 2, I started thinking about this mod, which should take advantage of its modular construction, combining with the technique that I have first used to implement the "Utimate Station" mod for the first edition the game. The whole journay is not so easy, I created some mods in 2020 to get familiar with Transport Fever 2 and to discover all kinds to technique possibilities, also with these experiences I made some feedback to Urban Games to make the mechansim of modular construction more complete.
 
 Only in spring of 2021, after some important upgrades of the game, with the experience of compact tunnel entry and flying junction preview version, "the idea" finally comes into my head, at that time, I though the work could be done in 3 months, as I worked the "Ultimate Station" for Transport Fever 1 in 3 months, but I was wrong, it took me almost two years to complete. Maybe it's late for the game, but I hope you like it as well.
 
-The main reason that I took so long time to finish it, is all about programming details. This mod is, in fact, an evolutionary framework to the vanilla modular construction, which is the base of all enhancements that would be possible with this mod, while keeping the user interface in a friendly manner. 
+The main reason that I took so long time to finish it, is all about programming details. This mod adds an evolutionary framework to the vanilla modular construction, which is the base of all enhancements that would be possible with this mod, while keeping the user interface in a friendly manner. 
 
 Features:
 - Adjustable radii for each segment of track
@@ -22,14 +22,47 @@ Evoltion to come
 - Adjustable slope for each track and platform
 - Some extra components for tunnel station construction
 - Some extra components such as underpass entry
-- Tram and bus lanes
 - 1850 and 1920 era components
+- Tram and bus lanes
 
 The main disadvtange of this mod is that it is not compatible with none of module which is designed for vanilla modular construction, since they work differently. If you are an modder, you are welcomed to ask about implemention details.
 
 Before the first use of this mod, I suggest to watch the tutorial video, because this mod may work differently to what you think.
 
 Hope you like it.]]
+
+local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自己的车站。
+
+我在运输狂热2发布后不久即开始思考如何使用其模块化功能，结合我为第一代游戏设计的“终极车站”模组中使用的技术制作一个功能远远超过原生车站的、强大的车站模组。但是整个过程并不顺利，在2020年我通过为二代制作一些不同模组熟悉了游戏背后的不同机制，并且通过向Urban Games提供反馈的方式让游戏在建造车站方面进行了一些改进。
+
+直到2021年春天，游戏在经历了一些升级之后，一个绝妙的主意蹦进我脑中，此项目才算正式开工。一开始我认为整个工作大约可以花三个月完成，因为为第一代游戏写的“终极车站”就是花了三个月完成的。但是我错了，我最终花了接近两年的时间才完成这件事。尽管数次跳票，但是我希望你们都喜欢。
+
+花了这么多时间的主要原因都和编程上的细节有关。这个模组从本质上来说，是在原由的模块化机制的技术上增加了一层运行框架，这层框架使得玩家可以通过一个友好的界面操作各种增加的功能。
+
+模组特色:
+- 可以单独调整每段轨道的半径
+- 可以单独调整股道和站台的高度
+- 可以单独调整每个站台的宽度
+- 将站台或股道建造在桥上
+- 在站台或轨道上搭建隧道
+- 灵活自由的天桥
+- 灵活自由的地道
+- 自带挡土墙和围栏
+
+本模组没有完成全部功能，但是以现在的状态发布并不会影响新功能的加入
+以下是计划中的新功能
+- 可以调整的挡土墙高度
+- 可以调整的站台或股道坡度
+- 一些用于半地下站台和股道的组件
+- 一些配合地道使用的组件
+- 1850和1920年组件
+- 有轨电车和巴士道
+
+该模组的主要缺点是无法直接使用为现有原生模块化车站开发的模组，因为本模组在技术实现上与之不同。如果你对于将其他模组内容进行适配的工作感兴趣的话，可以和我联系，我会提供一些实现细节上的帮助。
+
+在使用本模组之前，推荐先阅读使用教程，因为它肯定和你认为的用法不同。
+
+祝使用愉快！]]
 
 function data()
     local profile = {
@@ -58,7 +91,6 @@ function data()
             MENU_HEIGHT_MODIFIER_DESC = "To adjust the height of platforms individually.",
             MENU_WIDTH_MODIFIER = "Platform width modifier",
             MENU_WIDTH_MODIFIER_DESC = "To adjust the width of platforms.",
-            MENU_WITH_CAT = " with catenary",
             MENU_TRACK_NR = "Track count",
             MENU_TRACK_TYPE = "Track type",
             MENU_TRACK_CAT = "Catenary",
@@ -74,11 +106,11 @@ function data()
             MENU_MODULE_FENCE = "Green platform fences",
             MENU_MODULE_FENCE_DESC = "Some green platform fences",
             MENU_MODULE_MAIN_ENTRY_10 = "Small Station main entry",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Station main entry of 10m wide.",
             MENU_MODULE_MAIN_ENTRY_20 = "Midlle Station main entry",
-            MENU_MODULE_MAIN_ENTRY_20_DESC = "",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "Station main entry of 20m wide.",
             MENU_MODULE_MAIN_ENTRY_40 = "Large Station main entry",
-            MENU_MODULE_MAIN_ENTRY_40_DESC = "",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "Station main entry of 40m wide.",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "Platform overpass",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Place a platform overpass node.",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "Step access to platform overpass",
@@ -86,7 +118,7 @@ function data()
             MENU_MODULE_PLATFORM_PLACEHOLDER = "Layout placeholder",
             MENU_MODULE_PLATFORM_PLACEHOLDER_DESC = "To make an empty space between platforms or tracks.",
             MENU_MODULE_PLATFORM = "Platform",
-            MENU_MODULE_PLATFORM_DESC = "A platform",
+            MENU_MODULE_PLATFORM_DESC = "A section platform of approximately 20m long.",
             MENU_MODULE_PLATFORM_ROOF = "Platform Roof",
             MENU_MODULE_PLATFORM_ROOF_DESC = "Simple roof over platform",
             MENU_MODULE_STAIRS_ENTRY = "Stairs entry",
@@ -115,6 +147,88 @@ function data()
             MENU_MODULE_COLOR_YELLOW_DESC = "Yellow for some applicable components",
             MENU_MODULE_CATENARY = "Catenary switch",
             MENU_MODULE_CATENARY_DESC = "Electrify or unelectrify tracks"
+        },
+        zh_CN = {
+            MOD_NAME = "终极车站",
+            MOD_DESC = en,
+            MENU_NAME = "终极车站",
+            MENU_DESC = "充满无尽定制可能性的车站.",
+            UST_CAT_TRACK = "股道",
+            UST_CAT_PLATFORM = "站台",
+            UST_CAT_MODIFIER = "几何修改器",
+            UST_CAT_ENTRY = "入口",
+            UST_CAT_COMP = "站台组件",
+            UST_CAT_BRIDGE = "桥梁",
+            UST_CAT_TUNNEL = "隧道",
+            UST_CAT_WALL = "围栏和墙",
+            UST_CAT_COLOR = "纹理和色彩",
+            MENU_DEBUG = "调试信息",
+            MENU_RADIUS_PRECISE_MODIFIER = "半径值修改器",
+            MENU_RADIUS_PRECISE_MODIFIER_DESC = "以最精确的方式改变轨道的半径。",
+            MENU_RADIUS_ROUGH_MODIFIER = "快速半径修改器",
+            MENU_RADIUS_ROUGH_MODIFIER_DESC = "以符合直觉的方式改变轨道的半径。",
+            MENU_REF_MODIFIER = "参考点修改器",
+            MENU_REF_MODIFIER_DESC = "改变站台和轨道在位置几何之间的依赖关系。",
+            MENU_HEIGHT_MODIFIER = "站台高度修改器",
+            MENU_HEIGHT_MODIFIER_DESC = "单独改变站台的高度。",
+            MENU_WIDTH_MODIFIER = "站台宽度修改器",
+            MENU_WIDTH_MODIFIER_DESC = "改变站台的宽度。",
+            MENU_TRACK_NR = "股道数量",
+            MENU_TRACK_TYPE = "轨道类型",
+            MENU_TRACK_CAT = "接触网",
+            YES = "是",
+            NO = "否",
+            MENU_RADIUS = "半径",
+            MENU_PLATFORM_LENGTH = "站台长度",
+            MENU_PLATFORM_HEIGHT = "站台高度",
+            MENU_PLATFORM_WIDTH = "站台宽度",
+            MENU_PLATFORM_LEFT = "左侧站台",
+            MENU_PLATFORM_RIGHT = "右侧站台",
+            AUTO = "自动",
+            MENU_MODULE_FENCE = "站台围栏",
+            MENU_MODULE_FENCE_DESC = "一些站台围栏",
+            MENU_MODULE_MAIN_ENTRY_10 = "车站入口（小）",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米宽的车站入口",
+            MENU_MODULE_MAIN_ENTRY_20 = "车站入口（中）",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "20米宽的车站入口",
+            MENU_MODULE_MAIN_ENTRY_40 = "车站入口（大）",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "40米宽的车站入口",
+            MENU_MODULE_PLATFORM_OVERPASS_COL = "站台天桥",
+            MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在站台上放置一个天桥节点。",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP = "站台天桥楼梯",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP_DESC = "在站台上方式通往天桥的楼梯。",
+            MENU_MODULE_PLATFORM_PLACEHOLDER = "布局占位",
+            MENU_MODULE_PLATFORM_PLACEHOLDER_DESC = "在股道和站台之间创建空的间隔。",
+            MENU_MODULE_PLATFORM = "站台",
+            MENU_MODULE_PLATFORM_DESC = "一节站台，约20米长。",
+            MENU_MODULE_PLATFORM_ROOF = "雨棚",
+            MENU_MODULE_PLATFORM_ROOF_DESC = "最常见的雨棚",
+            MENU_MODULE_STAIRS_ENTRY = "简易入口",
+            MENU_MODULE_STAIRS_ENTRY_DESC = "10米宽的简易车站入口",
+            MENU_MODULE_PLATFORM_UNDERPASS = "站台地道入口",
+            MENU_MODULE_PLATFORM_UNDERPASS_DESC = "在站台上放置一个地道入口",
+            MENU_MODULE_WALL_CONCRETE = "混凝土墙",
+            MENU_MODULE_WALL_CONCRETE_DESC = "混凝土制挡土墙",
+            MENU_MODULE_WALL_BRICK = "砖墙",
+            MENU_MODULE_WALL_BRICK_DESC = "砖制挡土墙",
+            MENU_MODULE_WALL_ARCH = "拱墙",
+            MENU_MODULE_WALL_ARCH_DESC = "带拱的砖制挡土墙",
+            MENU_MODULE_SOUND_INSULATION = "隔音墙",
+            MENU_MODULE_SOUND_INSULATION_DESC = "常见的隔音墙",
+            MENU_MODULE_BRIDGE_VOID = "悬浮器",
+            MENU_MODULE_BRIDGE_VOID_DESC = "配合高度修改器使用，让轨道或者站台悬浮在空中。",
+            MODULE_REMOVE_HELPER = "移除助手",
+            MODULE_REMOVE_HELPER_DESC = "方便移除站台或者轨道。",
+            MENU_MODULE_COLOR_GREEN = "绿色",
+            MENU_MODULE_COLOR_GREEN_DESC = "把适用的组件刷成绿色。",
+            MENU_MODULE_COLOR_RED = "红色",
+            MENU_MODULE_COLOR_RED_DESC = "把适用的组件刷成红色。",
+            MENU_MODULE_COLOR_WHITE = "白色",
+            MENU_MODULE_COLOR_WHITE_DESC = "把适用的组件刷成白色。",
+            MENU_MODULE_COLOR_YELLOW = "黄色",
+            MENU_MODULE_COLOR_YELLOW_DESC = "把适用的组件刷成黄色。",
+            MENU_MODULE_CATENARY = "安装/拆除接触网",
+            MENU_MODULE_CATENARY_DESC = "用来安装或者拆除接触网。"
         }
     }
     return profile
