@@ -647,6 +647,13 @@ function coor.shearXoZ(s)
     }
 end
 
+coor.rotZ90P = coor.rotZ(0.5 * math.pi)
+coor.rotZ90N = coor.rotZ(-0.5 * math.pi)
+coor.rotX90P = coor.rotX(0.5 * math.pi)
+coor.rotX90N = coor.rotX(-0.5 * math.pi)
+coor.rotY90P = coor.rotY(0.5 * math.pi)
+coor.rotY90N = coor.rotY(-0.5 * math.pi)
+
 ---@param ...matrix
 ---@return matrix
 function coor.mul(...)

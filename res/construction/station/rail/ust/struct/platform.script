@@ -12,7 +12,6 @@ local pi = math.pi
 
 local ustg = require "ust_gridization"
 
-
 local getTranfs = function(info, pos, width)
     local refArc = info.arcs.center
     if pos == 1 then
@@ -295,6 +294,7 @@ local platformArcs = function(x, y, z, data)
         end
         local limit = function(limL, limR, p, fFar)
             if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+                -- Two sides are tracks
                 local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
                 local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arcL.o) or (arcL.o - refModule.info.pts[p][1])):normalized()
                 local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arcR.o) or (arcR.o - refModule2.info.pts[p][1])):normalized()
@@ -303,15 +303,27 @@ local platformArcs = function(x, y, z, data)
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     calculateLimit(arcR)(lim, refModule2.info.pts[p]),
                     fFar(arcL, refModule), fFar(arcR, refModule2)
-            elseif refModule.metadata.isTrack then
+            elseif refModule.metadata.isTrack and not refModule2 then
                 local lim = refModule.info.limits[p]
                 return
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     calculateLimit(arcR)(lim, refModule.info.pts[p]),
-                    fFar(arcL, refModule), fFar(arcR, refModule)
+                    fFar(arcL, refModule), fFar(arcR, (refModule2 or refModule))
+            elseif refModule2 and refModule2.metadata.isTrack and not refModule.metadata.isTrack then
+                local lim = refModule2.info.limits[p]
+                return
+                    limL,
+                    calculateLimit(arcR)(lim, refModule2.info.pts[p]),
+                    fFar(arcL, refModule), fFar(arcR, refModule2)
+            elseif refModule2 and refModule.metadata.isTrack and not refModule2.metadata.isTrack then
+                local lim = refModule2.info.limits[p]
+                return
+                    calculateLimit(arcL)(lim, refModule.info.pts[p]),
+                    limR,
+                    fFar(arcL, refModule), fFar(arcR, refModule2)
             else
                 return limL, limR,
-                    fFar(arcL, refModule), fFar(arcR, refModule)
+                    fFar(arcL, refModule), fFar(arcR, refModule2 or refModule)
             end
         end
         if m.info.refPos.y < 0 then
@@ -435,7 +447,7 @@ local platformArcs = function(x, y, z, data)
             local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
             local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
             local midPt = pts[1]:avg(pts[3])
-            o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ(0.5 * pi)) * normalLength
+            o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ90P) * normalLength
             r = 10e8
         end
         
