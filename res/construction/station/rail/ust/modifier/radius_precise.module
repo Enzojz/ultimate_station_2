@@ -11,8 +11,9 @@ local pow = math.pow
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
-    local info = params.modules[sId].info
-    local makeData = params.modules[sId].makeData
+    local m = params.modules[sId]
+    local info = m.info
+    local makeData = m.makeData
     
     -- Entry for radius system
     local arcs = info.arcs
@@ -44,7 +45,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos) * coor.transZ(0.1 + info.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX(-0.5 * pi) * rotZ * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height) end)) do
                 insert(result.models, m)
             end
         end
@@ -60,18 +61,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
         
         if (i == 0) then
-            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         elseif (i == 1) then
             addSlot(80, 2, posP)
-            addText("∞ ⊘", posC, function(w) return coor.xyz(-w * 0.5, 0, -1) end)
+            addText("∞ ⊘", posC, function(w) return coor.xyz(-w * 0.5, 0, 0) end)
             if (params.classedModules[info.id].slot[54] or params.classedModules[info.id].slot[55] or params.classedModules[info.id].slot[56]) then
                 addSlot(80, 3, posN)
             end
         elseif i == 7 then
-            addText("+", posP, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
-            addText("-", posN, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            addText("+", posP, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+            addText("-", posN, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         elseif i == 8 then
-            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, -1) end)
+            addText(textR, posC, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         else
             local delta = pow(10, i - 2)
             if info.radius >= 10e8 or (abs((info.radius or 0) + delta) >= 50 and (info.radius or 0) + delta < 999999) then
@@ -82,7 +83,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 local dir = (info.radius and info.radius < 999999 and (info.radius < 0 or (info.radius > 0 and info.radius - delta > 0))) and coor.xyz(1, 0, 0) or coor.xyz(-1, 0, 0)
                 addSlot(81, -i + 1, posN, 1, quat.byVec(dir, vec):mRot())
             end
-            addText(string.format("∙ %d ∙", delta), posC, function(w) return coor.xyz(-w * 0.5, 0, -0.75) end, 1.5)
+            addText(string.format("∙ %d ∙", delta), posC, function(w) return coor.xyz(-w * 0.5, 0, 0) end, 1.5)
         end
     end
 end

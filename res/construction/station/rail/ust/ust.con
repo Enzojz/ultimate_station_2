@@ -65,7 +65,7 @@ local constructionTemplates = {
                     name = _("MENU_TRACK_NR"),
                     values = func.map(trackNumberList, tostring),
                     uiType = "SLIDER",
-                    defaultIndex = 0
+                    defaultIndex = 1
                 },
                 {
                     key = "lPlatform",
