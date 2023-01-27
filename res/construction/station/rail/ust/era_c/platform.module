@@ -5,6 +5,7 @@ local ust = require "ust"
 local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -298,6 +299,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     ust.initTerrainList(result, info.id)
 
     insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(info.extraHeight or 0) end) * pipe.map(coor.vec2Tuple))
+    
+    local groundFace = func.map(face, coor.vec2Tuple)
+    
+    insert(result.groundFaces, {
+        face = groundFace,
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    })
     
     if params.debug == 1 then
         local text = tostring(info.id)

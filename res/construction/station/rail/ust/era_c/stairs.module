@@ -39,6 +39,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         faces = terrainAlignmentLists,
         optional = true
     })
+
+    local groundFace = func.map({
+        coor.xyz(config.extend[1], config.extend[4], 0.0) .. transform,
+        coor.xyz(config.extend[1], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[4], 0.0) .. transform,
+    }, coor.vec2Tuple)
+    
+    insert(result.groundFaces, {
+        face = groundFace,
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    })
     
     if data % 10 ~= 0 then
         insert(result.invokeLater, function()

@@ -326,6 +326,27 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     for _, t in ipairs(terrainAlignmentLists) do
         insert(result.terrainLists[info.id].equalOpt, t)
     end
+    
+    local groundFace = func.map({
+        coor.xyz(config.extend[1], config.extend[4], 0.0) .. transform,
+        coor.xyz(config.extend[1], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[4], 0.0) .. transform,
+    }, coor.vec2Tuple)
+    
+    insert(result.groundFaces, {
+        face = groundFace,
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    })
 end
 
 local updateFnHead = function(result, transform, tag, slotId, addModelFn, params, config)
@@ -428,6 +449,27 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
             insert(result.models, ust.unitLane(lpt, pt, tag))
         end
     end)
+    
+    local groundFace = func.map({
+        coor.xyz(config.extend[1], config.extend[4], 0.0) .. transform,
+        coor.xyz(config.extend[1], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[3], 0.0) .. transform,
+        coor.xyz(config.extend[2], config.extend[4], 0.0) .. transform,
+    }, coor.vec2Tuple)
+    
+    insert(result.groundFaces, {
+        face = groundFace,
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    })
 end
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params, config)
