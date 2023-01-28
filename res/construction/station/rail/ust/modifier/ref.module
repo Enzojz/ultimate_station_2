@@ -107,10 +107,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     if isPlatform then
-        local i = info.pos.y < 0 and 1 or 3
+        local i = 3
         local refPt = ptsC[i]
         local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(-1, 0, 0), refVec):mRot() * coor.trans(refPt)
         
         if info.octa[1] and params.modules[info.octa[1]] and not params.modules[info.octa[1]].info.ref.prev then
             if not info.ref.next then
@@ -121,10 +121,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     if isPlatform then
-        local i = info.pos.y < 0 and 3 or 1
+        local i = 1
         local refPt = ptsC[i]
         local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(1, 0, 0), refVec):mRot() * coor.trans(refPt)
         
         if info.octa[5] and params.modules[info.octa[5]] and not params.modules[info.octa[5]].info.ref.next then
             if not info.ref.prev then

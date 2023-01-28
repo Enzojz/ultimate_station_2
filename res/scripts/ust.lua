@@ -507,30 +507,30 @@ ust.marking = function(result, slotId, params)
     if info.ref.left then
         local refPt = ptsL[6]
         local refVec = vecL[6]
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and -1 or 1, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(0, 1, 0), refVec):mRot() * coor.trans(refPt)
         addText("⋘", transf, coor.transX(0.2))
     end
     
     if info.ref.right then
         local refPt = ptsR[6]
         local refVec = vecR[6]
-        local transf = quat.byVec(coor.xyz(0, info.pos.y < 0 and 1 or -1, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(0, -1, 0), refVec):mRot() * coor.trans(refPt)
         addText("⋘", transf, coor.transX(0.2))
     end
     
     if info.ref.next then
-        local i = info.pos.y < 0 and 1 or 11
+        local i = 11
         local refPt = ptsC[i]
         local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and 1 or -1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(-1, 0, 0), refVec):mRot() * coor.trans(refPt)
         addText("⋘", transf, coor.transX(0.2))
     end
     
     if info.ref.prev then
-        local i = info.pos.y < 0 and 11 or 1
+        local i = 1
         local refPt = ptsC[i]
         local refVec = vecC[i]
-        local transf = quat.byVec(coor.xyz(info.pos.y < 0 and -1 or 1, 0, 0), refVec):mRot() * coor.trans(refPt)
+        local transf = quat.byVec(coor.xyz(1, 0, 0), refVec):mRot() * coor.trans(refPt)
         addText("⋘", transf, coor.transX(0.2))
     end
 end

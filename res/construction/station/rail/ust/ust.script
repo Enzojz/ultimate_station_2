@@ -21,9 +21,9 @@ local createTemplateFn = function(params)
     
     local posList = pipe.new * func.rev(ust.posGen(nbTracks, params.platformRight == 0, params.platformLeft == 0))
     
-    local indexRefTrack = posList * pipe.map(function (t, i) return {t, i} end) * pipe.filter(function(t) return t[1] end)
+    local indexRefTrack = posList * pipe.map(function(t, i) return {t, i} end) * pipe.filter(function(t) return t[1] end)
     local xOffset = -indexRefTrack[math.ceil(nbTracks / 2)][2] + 1
-
+    
     local result = {}
     
     local yMax = nSeg % 2 == 0 and (nSeg / 2 - 1) or (nSeg - 1) / 2
@@ -64,7 +64,7 @@ local createTemplateFn = function(params)
                     pos = coor.xyz(x, y, 0),
                     length = 20,
                     width = width,
-                    ref = {left = posList[i - 1] == true, right = posList[i + 1] == true}
+                    ref = {left = x > 0, right = x < 0, prev = x == 0 and y > 0, next = x == 0 and y < 0}
                 }
                 if info.id == 1 and radius ~= ust.infi then
                     info.radius = radius

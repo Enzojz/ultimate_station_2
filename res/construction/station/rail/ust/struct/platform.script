@@ -303,12 +303,6 @@ local platformArcs = function(x, y, z, data)
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     calculateLimit(arcR)(lim, refModule2.info.pts[p]),
                     fFar(arcL, refModule), fFar(arcR, refModule2)
-            elseif refModule.metadata.isTrack and not refModule2 then
-                local lim = refModule.info.limits[p]
-                return
-                    calculateLimit(arcL)(lim, refModule.info.pts[p]),
-                    calculateLimit(arcR)(lim, refModule.info.pts[p]),
-                    fFar(arcL, refModule), fFar(arcR, (refModule2 or refModule))
             elseif refModule2 and refModule2.metadata.isTrack and not refModule.metadata.isTrack then
                 local lim = refModule2.info.limits[p]
                 return
@@ -321,6 +315,12 @@ local platformArcs = function(x, y, z, data)
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     limR,
                     fFar(arcL, refModule), fFar(arcR, refModule2)
+            elseif refModule.metadata.isTrack and not refModule2 then
+                local lim = refModule.info.limits[p]
+                return
+                    calculateLimit(arcL)(lim, refModule.info.pts[p]),
+                    calculateLimit(arcR)(lim, refModule.info.pts[p]),
+                    fFar(arcL, refModule), fFar(arcR, refModule)
             else
                 return limL, limR,
                     fFar(arcL, refModule), fFar(arcR, refModule2 or refModule)
