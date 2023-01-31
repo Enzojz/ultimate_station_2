@@ -1,16 +1,14 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
-local arc = require "ust/coorarc"
 local line = require "ust/coorline"
-local quat = require "ust/quaternion"
-local ust = {}
-local math = math
-local pi = math.pi
 
+local pi = math.pi
 local unpack = table.unpack
 local insert = table.insert
+local remove = table.remove
 
+local ust = {}
 
 ---@param modules modules
 ---@param classedModules classified_modules

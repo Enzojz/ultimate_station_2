@@ -5,7 +5,6 @@ local config = {
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
-local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
@@ -62,7 +61,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local centerTransf = tOverpass * centerTransfZ0
     local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
     
-    insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * centerTransfZ0))
+    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * centerTransfZ0))
     
     if #allOverpass > 1 then
         local currentIndex = false
@@ -93,8 +92,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 rb = interPts[1]
             }
             
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
         end
     end
     
@@ -162,40 +161,40 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         * pipe.filter(function(slotId) return params.modules[slotId] or false end)
     
     if slotId == allOverpass[#allOverpass] then
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf))
         if #stepIdNeg > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if #stepIdPos > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf))
         end
     elseif slotId == allOverpass[1] then
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf))
         if #stepIdNeg > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if #stepIdPos > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_2.mdl", tag, centerTransf))
         end
     else
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_y_1.mdl", tag, centerTransf))
         if #stepIdNeg > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         end
         if #stepIdPos > 0 then
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_y_0.mdl", tag, coor.flipX() * coor.flipY() * centerTransf))
         else
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_y_2.mdl", tag, centerTransf))
         end
     end
 

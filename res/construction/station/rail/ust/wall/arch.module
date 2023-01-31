@@ -1,7 +1,5 @@
 local coor = require "ust/coor"
-local quat = require "ust/quaternion"
 local ust = require "ust"
-local general = require "ust/general"
 
 local insert = table.insert
 
@@ -44,15 +42,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             }
             
             if data == 7 then
-                insert(result.models, general.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, general.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-                insert(result.models, general.newModel("ust/walls/arch_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, general.newModel("ust/walls/arch_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
             else
-                insert(result.models, general.newModel("ust/walls/arch_top_br.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, general.newModel("ust/walls/arch_top_tl.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-                insert(result.models, general.newModel("ust/walls/arch_br.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, general.newModel("ust/walls/arch_tl.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
                 end
         end
     elseif data == 1 or data == 5 then
@@ -73,10 +71,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             lb = (ptsL[2] - ptsL[rank]):normalized() * 0.25 + ptsL[rank]
         }
         
-        insert(result.models, general.newModel("ust/walls/arch_wall_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-        insert(result.models, general.newModel("ust/walls/arch_wall_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-        insert(result.models, general.newModel("ust/walls/arch_wall_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-        insert(result.models, general.newModel("ust/walls/arch_wall_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
+        insert(result.models, ust.newModel("ust/walls/arch_wall_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
+        insert(result.models, ust.newModel("ust/walls/arch_wall_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
+        insert(result.models, ust.newModel("ust/walls/arch_wall_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
+        insert(result.models, ust.newModel("ust/walls/arch_wall_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
     end
 
 end

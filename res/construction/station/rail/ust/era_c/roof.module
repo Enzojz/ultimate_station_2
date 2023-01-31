@@ -1,6 +1,5 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
-local general = require "ust/general"
 local ust = require "ust"
 
 local insert = table.insert
@@ -77,14 +76,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             }
             
             if isFirst and i == n then
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, true)));
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, false)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, true)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", 6 - k), tag, coor.flipX() * coor.flipY() * roofFitModels[k](coords, false)));
             elseif isLast and i == 1 then
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_end_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_end_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
             else
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
-                insert(result.models, general.newModel(string.format("ust/platform/era_c/roof_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_%d_tl.mdl", k), tag, roofFitModels[k](coords, true)));
+                insert(result.models, ust.newModel(string.format("ust/platform/era_c/roof_%d_br.mdl", k), tag, roofFitModels[k](coords, false)));
             end
         end
         
@@ -93,8 +92,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local pos = edges[7][i + 1]
             
             local transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pos)
-            insert(result.models, general.newModel("ust/platform/era_c/pole.mdl", tag, transf));
-            insert(result.models, general.newModel("ust/platform/era_c/arm.mdl", tag, transf));
+            insert(result.models, ust.newModel("ust/platform/era_c/pole.mdl", tag, transf));
+            insert(result.models, ust.newModel("ust/platform/era_c/arm.mdl", tag, transf));
         end
     end
     

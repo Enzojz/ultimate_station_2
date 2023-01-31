@@ -2,7 +2,6 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-local general = require "ust/general"
 
 local insert = table.insert
 
@@ -21,7 +20,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local data = params.modules[slotId].info.data
     local moduleSlotId = params.classedModules[id].slotId
     
-    insert(result.models, general.newModel("station/rail/era_a/stairs.mdl", tag, hTrans * transform));
+    insert(result.models, ust.newModel("station/rail/era_a/stairs.mdl", tag, hTrans * transform));
     
     -- Terrains
     local terrainAlignmentLists = pipe.new /

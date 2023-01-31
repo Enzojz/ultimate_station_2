@@ -4,7 +4,6 @@ local pipe = require "ust/pipe"
 local quat = require "ust/quaternion"
 local coor = require "ust/coor"
 local line = require "ust/coorline"
-local general = require "ust/general"
 
 local insert = table.insert
 local unpack = table.unpack
@@ -189,7 +188,7 @@ local fitMdl = {
 local function addModels(mdlList, transf, tag, result)
     for mdl, transfs in pairs(mdlList) do
         for _, t in ipairs(transfs) do
-            insert(result, general.newModel(mdl, tag, coor.mul(t, transf)));
+            insert(result, ust.newModel(mdl, tag, coor.mul(t, transf)));
         end
     end
 end
@@ -220,8 +219,8 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
         if data < 5 then
             pos.lt, pos.lb, pos.rt, pos.rb = pos.rt, pos.rb, pos.lt, pos.lb
         end
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * coor.transZ(info.height)));
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * coor.transZ(info.height)));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * coor.transZ(info.height)));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * coor.transZ(info.height)));
     end
     
     local platformPts = {}
@@ -307,7 +306,7 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     end
     
     for _, mdl in ipairs(config.mdlList) do
-        insert(result.models, general.newModel(mdl, tag, hTrans * transform));
+        insert(result.models, ust.newModel(mdl, tag, hTrans * transform));
     end
     
     -- Terrains
@@ -359,12 +358,12 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     end
     
     for _, mdl in ipairs(config.mdlList) do
-        insert(result.models, general.newModel(mdl, tag, hTrans * transform));
+        insert(result.models, ust.newModel(mdl, tag, hTrans * transform));
     end
     
     local addBlock = function(mdl, pos)
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * transform));
-        insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * transform));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * transform));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * transform));
     end
     
     local blocks = pipe.new

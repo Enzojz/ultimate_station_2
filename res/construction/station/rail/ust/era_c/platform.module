@@ -2,7 +2,6 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-local general = require "ust/general"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
 
@@ -156,12 +155,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         
         local addBlock = function(mdl, pos)
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
         end
         local addLastBlock = function(mdl, pos)
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, general.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
         end
         
         if isLast then

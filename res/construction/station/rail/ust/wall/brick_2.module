@@ -1,7 +1,5 @@
 local coor = require "ust/coor"
-local quat = require "ust/quaternion"
 local ust = require "ust"
-local general = require "ust/general"
 
 local insert = table.insert
 
@@ -43,8 +41,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
             }
             
-            insert(result.models, general.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
-            insert(result.models, general.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
         end
     elseif data == 1 or data == 5 then
         local rank = data == 5 and 1 or 3
@@ -64,8 +62,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             lb = (ptsL[2] - ptsL[rank]):normalized() * 0.25 + ptsL[rank]
         }
         
-        insert(result.models, general.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
-        insert(result.models, general.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
+        insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
+        insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
     end
 
 end

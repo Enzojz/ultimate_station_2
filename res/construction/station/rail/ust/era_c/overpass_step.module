@@ -5,7 +5,6 @@ local config = {
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
-local general = require "ust/general"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
@@ -77,14 +76,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local baseVecTransf = quat.byVec(coor.xyz(0, 1, 0), baseVec):mRot()
         if existsBase then
             local tBase = coor.transZ(hBase - 4)
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_base.mdl", tag, tBase * baseVecTransf * coor.trans(baseRef)))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_base.mdl", tag, tBase * baseVecTransf * coor.trans(baseRef)))
         end
         
         for i = 0, ncomp - 1 do
             local h = hBase + 0.2 * i
             local pos = baseRef + baseVec * (baseLength + i * 0.25)
             local transf = baseVecTransf * coor.trans(pos) * coor.transZ(h)
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
         end
         
         local rectBase = {
@@ -132,20 +131,20 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end
         
         insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt), interCoords.lb:avg(interCoords.rb), tag))
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
-        insert(result.models, general.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
         
         if pos == 13 or pos == 14 then
             local pt = (baseRef - centerPt) * 0.4 + centerPt
             local vec = baseRef - centerPt
             local vecTransf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot()
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
         end
         if pos == 52 or pos == 53 then
             local pt = (baseRef - centerPt) * 0.4 + centerPt
             local vec = baseRef - centerPt
             local vecTransf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot()
-            insert(result.models, general.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
+            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
         end
     end
 end

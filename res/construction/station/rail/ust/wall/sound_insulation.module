@@ -1,7 +1,6 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local ust = require "ust"
-local general = require "ust/general"
 
 local insert = table.insert
 
@@ -29,7 +28,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                 * coor.trans(refPt)
             
-            insert(result.models, general.newModel("asset/track_multi_sound_insulation_10m.mdl", tag, coor.transY(3.2) * transf));
+            insert(result.models, ust.newModel("asset/track_multi_sound_insulation_10m.mdl", tag, coor.transY(3.2) * transf));
         end
     end
 

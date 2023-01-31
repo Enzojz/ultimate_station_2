@@ -1,7 +1,6 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
-local general = require "ust/general"
 local ust = require "ust"
 local unpack = table.unpack
 local insert = table.insert
@@ -27,7 +26,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
         * coor.trans(refPos)
     
-    insert(result.models, general.newModel("ust/platform/era_c/underpass.mdl", tag, trans));
+    insert(result.models, ust.newModel("ust/platform/era_c/underpass.mdl", tag, trans));
     
     local pts = func.map({
         coor.xyz(-2, 1, 0),

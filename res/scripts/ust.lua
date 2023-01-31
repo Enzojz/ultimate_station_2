@@ -1,20 +1,16 @@
 local func = require "ust/func"
 local coor = require "ust/coor"
 local arc = require "ust/coorarc"
-local line = require "ust/coorline"
 local quat = require "ust/quaternion"
-local general = require "ust/general"
-local pipe = require "ust/pipe"
 local ust = require "ust_gridization"
 local livetext = require "ust/livetext"
 
 local math = math
-local pi = math.pi
 local abs = math.abs
-local ceil = math.ceil
 local floor = math.floor
 local unpack = table.unpack
-local min = math.min
+
+local insert = table.insert
 
 ust.infi = 1e8
 
@@ -182,38 +178,6 @@ ust.arcPacker = function(pt, vec, length, radius, isRev)
     end
 end
 
-local function ungroup(fst, ...)
-    local f = {...}
-    return function(lst, ...)
-        local l = {...}
-        return function(result, c)
-            if (fst and lst) then
-                return ungroup(unpack(f))(unpack(l))(
-                    result /
-                    (
-                    (fst[1] - lst[1]):length2() < (fst[1] - lst[#lst]):length2()
-                    and (fst * pipe.range(2, #fst) * pipe.rev() + {fst[1]:avg(lst[1])} + lst * pipe.range(2, #lst))
-                    or (fst * pipe.range(2, #fst) * pipe.rev() + {fst[1]:avg(lst[#lst])} + lst * pipe.rev() * pipe.range(2, #lst))
-                    ),
-                    floor((#fst + #lst) * 0.5)
-            )
-            else
-                return result / c
-            end
-        end
-    end
-end
-
----@return projection_size
-ust.assembleSize = function(lc, rc)
-    return {
-        lb = lc.i,
-        lt = lc.s,
-        rb = rc.i,
-        rt = rc.s
-    }
-end
-
 ---@param w number
 ---@param h number
 ---@param d number
@@ -284,9 +248,9 @@ ust.fitModel = function(w, h, d, fitTop, fitLeft)
     end
 end
 
----@generic T : any
----@return fun(ls: `T`[]): {["s"]: `T`, ["i"]: `T`}[]
-ust.interlace = pipe.interlace({"s", "i"})
+ust.mRot = function(vec)
+    return coor.scaleX(vec:length()) * quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+end
 
 ---@param f coor3
 ---@param t coor3
@@ -295,27 +259,28 @@ ust.interlace = pipe.interlace({"s", "i"})
 ---@return mdl|nil
 ust.unitLane = function(f, t, tag, mdl) return
     ((t - f):length2() > 1e-2 and (t - f):length2() < 562500)
-        and general.newModel(mdl or "ust/person_lane.mdl", tag, general.mRot(t - f), coor.trans(f))
+        and ust.newModel(mdl or "ust/person_lane.mdl", tag, ust.mRot(t - f), coor.trans(f))
         or nil
 end
 
-ust.defaultParams = function(params)
-    local defParams = params()
-    return function(param)
-        local function limiter(d, u)
-            return function(v) return v and v < u and v or d end
-        end
-        param.trackType = param.trackType or 0
-        param.catenary = param.catenary or 0
-        
-        func.forEach(
-            func.filter(defParams, function(p) return p.key ~= "tramTrack" end),
-            function(i)param[i.key] = limiter(i.defaultIndex or 0, #i.values)(param[i.key]) end)
-        return param
-    end
+---@class mdl
+---@field id string
+---@field tag string
+---@field transf matrix
+
+---@param m string
+---@param tag string
+---@param ... matrix
+---@return mdl
+ust.newModel = function(m, tag, ...)
+    return {
+        id = m,
+        transf = coor.mul(...),
+        tag = tag
+    }
 end
 
-function ust.posGen(restTrack, lastPlatform, lst, snd, ...)
+local function posGen(restTrack, lastPlatform, lst, snd, ...)
     if restTrack == 0 then
         if lst and snd then
             return {false, lst, snd, ...}
@@ -326,16 +291,18 @@ function ust.posGen(restTrack, lastPlatform, lst, snd, ...)
         end
     else
         if lst and snd then
-            return ust.posGen(restTrack, lastPlatform, false, lst, snd, ...)
+            return posGen(restTrack, lastPlatform, false, lst, snd, ...)
         elseif lst and snd == false then
-            return ust.posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
+            return posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
         elseif lst and snd == nil then
-            return ust.posGen(restTrack - 1, lastPlatform, false, lst)
+            return posGen(restTrack - 1, lastPlatform, false, lst)
         elseif not lst then
-            return ust.posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
+            return posGen(restTrack - 1, lastPlatform, true, lst, snd, ...)
         end
     end
 end
+
+ust.posGen = posGen
 
 ---@param arc arc
 ---@param n integer
@@ -547,5 +514,59 @@ ust.initTerrainList = function(result, id)
         }
     end
 end
+
+local function searchTerminalGroups(params, current, ...)
+    if current == nil then
+        return
+    end
+    
+    local m = params.modules[current]
+    if m.metadata.isTrack and not m.info.trackGroup then
+        while m.info.octa[1] and params.modules[m.info.octa[1]].metadata.isTrack do
+            m = params.modules[m.info.octa[1]]
+        end
+        
+        local groupLeft = {{}}
+        local groupRight = {{}}
+        
+        repeat
+            if not m.info.trackGroup then
+                m.info.trackGroup = {}
+            end
+            if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
+                insert(groupLeft[#groupLeft], m.info.slotId)
+            elseif (#groupLeft[#groupLeft] > 0) then
+                insert(groupLeft, {})
+            end
+            if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
+                insert(groupRight[#groupRight], m.info.slotId)
+            elseif (#groupRight[#groupRight] > 0) then
+                insert(groupRight, {})
+            end
+            m = params.modules[m.info.octa[5]]
+        until not m or not m.metadata.isTrack
+        
+        for _, groupLeft in ipairs(groupLeft) do
+            if (#groupLeft > 0) then
+                insert(params.trackGroup, groupLeft)
+                for _, slotId in ipairs(groupLeft) do
+                    params.modules[slotId].info.trackGroup.left = #params.trackGroup
+                end
+            end
+        end
+        
+        for _, groupRight in ipairs(groupRight) do
+            if (#groupRight > 0) then
+                insert(params.trackGroup, groupRight)
+                for _, slotId in ipairs(groupRight) do
+                    params.modules[slotId].info.trackGroup.right = #params.trackGroup
+                end
+            end
+        end
+    end
+    searchTerminalGroups(params, ...)
+end
+
+ust.searchTerminalGroups = searchTerminalGroups
 
 return ust
