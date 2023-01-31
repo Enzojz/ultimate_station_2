@@ -5,7 +5,6 @@ local arc = require "ust/coorarc"
 local line = require "ust/coorline"
 local quat = require "ust/quaternion"
 local ust = {}
-local dump = require "luadump"
 local math = math
 local pi = math.pi
 
@@ -18,11 +17,10 @@ local insert = table.insert
 ---@return grid
 ust.octa = function(modules, classedModules)
     local grid = {}
-
+    
     -- 8 1 2
     -- 7 x 3
     -- 6 5 4
-
     for id, info in pairs(classedModules) do
         local pos = modules[info.slotId].info.pos
         local x, y, z = pos.x, pos.y, pos.z
@@ -85,185 +83,96 @@ end
 ---@return integer[]
 ---@return integer[]
 local function fnQueue(g, modules)
-    -- g: all modules in a same z layer
-    -- Build the gridization queue
-    ---@type integer[]
-    local parentMap = {}
-    
-    ---@type integer[][]
-    local childrenMap = {}
-    
-    -- Module distance
-    ---@type integer[][]
-    local mDist = {}
-    
-    -- Group distance
-    ---@type integer[][]
-    local gDist = {}
-    
-    -- Module Group Look up table
-    ---@type integer[]
-    local mGIndex = {}
-    
-    ---@class group
-    ---@field x integer
-    ---@field slots group_slot[]
-    ---@field order integer
-    ---@field children integer[]
-    ---@field parent integer|boolean
-    ---@class group_slot
-    ---@field x integer
-    ---@field y integer
-    ---@field slotId integer
-    -- Group list
-    ---@type group[]
     local groups = {}
     
     for x, g in pairs(g) do
-        ---@type integer[]
+        insert(groups, {})
         local ySeq = func.sort(func.keys(g))
-        
-        ---@type group_slot[][]
-        local slotSeqs = {}
-        for _, y in ipairs(ySeq) do
+        local function f(y, yNext, ...)
             local slotId = g[y]
-            local m = modules[slotId]
-            if not mDist[slotId] then mDist[slotId] = {} end
-            if m.info.octa[3] then -- Module on the right
-                mDist[slotId][m.info.octa[3]] = 1
-            end
-            if m.info.octa[7] then -- Module on the left
-                mDist[slotId][m.info.octa[7]] = -1
-            end
-            
-            ---@type group_slot
-            local data = {x = x, y = y, slotId = g[y]}
-            
-            -- To build a continous module group from ymin to ymax
-            if #slotSeqs == 0 then
-                slotSeqs[1] = {data}
-            else
-                local lastSeq = slotSeqs[#slotSeqs]
-                if (lastSeq[#lastSeq].y == y - 1) then
-                    insert(slotSeqs[#slotSeqs], data)-- If continous
-                else
-                    insert(slotSeqs, {data})-- Otherwise create a new seq
+            insert(groups[#groups], slotId)
+            if yNext then
+                if yNext - y > 1 then
+                    insert(groups[#groups], slotId)
+                    insert(groups, {})
                 end
+                f(yNext, ...)
             end
         end
-        for _, slots in ipairs(slotSeqs) do
-            local gId = #groups + 1 -- Define group id
-            insert(groups, {slots = slots, x = x, order = gId, children = {}})
-            for _, seq in ipairs(slots) do
-                mGIndex[seq.slotId] = gId -- Module to group LUT
+        f(unpack(ySeq))
+    end
+    
+    local parentMap = {}
+    local moduleDeps = {}
+    
+    local function slotDeps(module)
+        local pos = module.info.pos
+        for _, posocta in ipairs({{"next", 1}, {"right", 3}, {"prev", 5}, {"left", 7}}) do
+            local pos, octa = unpack(posocta)
+            if module.info.ref[pos] then
+                if not moduleDeps[module.info.octa[octa]] then
+                    moduleDeps[module.info.octa[octa]] = {}
+                end
+                insert(moduleDeps[module.info.octa[octa]], module.info.slotId)
             end
         end
     end
     
-    -- Calculate group distance
-    for i, groupL in ipairs(groups) do
-        if not gDist[i] then gDist[i] = {} end
-        for j, groupR in ipairs(groups) do
-            if not gDist[j] then gDist[j] = {} end
-            local distX = groupL.x - groupR.x
-            if i < j and (distX == 1 or distX == -1) then
-                for _, slotL in ipairs(groupL.slots) do
-                    for _, slotR in ipairs(groupR.slots) do
-                        local slotIdL = slotL.slotId
-                        local slotIdR = slotR.slotId
-                        if mDist[slotIdL][slotIdR] then
-                            gDist[i][j] = mDist[slotIdL][slotIdR]
-                            gDist[j][i] = mDist[slotIdL][slotIdR]
-                            break
-                        end
-                    end
-                    if gDist[i][j] then break end
-                end
-            end
+    for x, g in pairs(g) do
+        local ySeq = func.sort(func.keys(g))
+        for _, y in ipairs(ySeq) do
+            slotDeps(modules[g[y]])
         end
     end
     
-    -- Generate the group parent - children tree
-    ---@param g integer
-    ---@param ... integer
-    local function groupTreeGen(g, ...)
-        if g then
-            local rest = {...}
-            for n, _ in pairs(gDist[g]) do
-                if not groups[n].parent then
-                    insert(groups[g].children, n)
-                    insert(rest, n)
-                    groups[n].parent = g
-                end
-            end
-            groupTreeGen(unpack(rest))
-        end
-    end
+    local queue = {}
+    local monoYDeps = {g[0][0]}
+    local monoXDeps = {}
+    local doubleDeps = {}
+    local depthMap = {[g[0][0]] = 0}
     
-    groups[mGIndex[g[0][0]]].parent = true
-    groupTreeGen(groups[mGIndex[g[0][0]]].order)
-    
-    local groupRef = {}
-    
-    ---@param group integer
-    ---@param ... integer
-    local function slotTreeGen(group, ...)
-        if group then
-            local g = groups[group]
-            local parentG = g.parent ~= true and groups[g.parent] or nil
-            local rest = {...}
-            
-            ---@type integer
-            local refY = groupRef[group] and modules[groupRef[group]].info.pos.y or 0
-            ---@type integer
-            local refX = groupRef[group] and modules[groupRef[group]].info.pos.x or 0
-            
-            ---@type group_slot[][]
-            local slots = {
-                func.filter(g.slots, function(s) return s.y >= refY end),
-                func.rev(func.filter(g.slots, function(s) return s.y <= refY end))
-            }
-            
-            for _, slots in ipairs(slots) do
-                for i, slot in ipairs(slots) do
-                    modules[slot.slotId].info.refPos = coor.xyz(parentG and g.x - parentG.x or 0, slot.y - refY, 0)
-                    if not childrenMap[slot.slotId] then childrenMap[slot.slotId] = {} end
-                    if slots[i + 1] and not parentMap[slots[i + 1]] then
-                        parentMap[slots[i + 1].slotId] = slot.slotId
-                        insert(childrenMap[slot.slotId], slots[i + 1].slotId)
-                    end
-                end
-                for i, slot in ipairs(slots) do
-                    for slotIdR, v in pairs(mDist[slot.slotId] or {}) do
-                        local groupR = mGIndex[slotIdR]
-                        if func.contains(g.children, groupR) and not func.contains(rest, groupR) and not parentMap[slotIdR] then
-                            groupRef[groupR] = slotIdR
-                            insert(rest, groupR)
-                            parentMap[slotIdR] = slot.slotId
-                            insert(childrenMap[slot.slotId], slotIdR)
-                        end
+    while #monoXDeps > 0 or #monoYDeps > 0 or #doubleDeps > 0 do
+        local slotId = #monoYDeps > 0 and remove(monoYDeps, 1) or (#monoXDeps > 0 and remove(monoXDeps, 1) or remove(doubleDeps, 1))
+        local module = modules[slotId]
+        insert(queue, slotId)
+        if moduleDeps[slotId] then
+            for _, depSlotId in ipairs(moduleDeps[slotId]) do
+                local mDep = modules[depSlotId]
+                if not parentMap[depSlotId] then
+                    if mDep.info.ref.left and mDep.info.ref.right then
+                        insert(doubleDeps, depSlotId)
+                        parentMap[depSlotId] = slotId
+                        depthMap[depSlotId] = depthMap[slotId] + 1
+                    elseif mDep.info.octa[1] == module.info.slotId or mDep.info.octa[5] == module.info.slotId then
+                        insert(monoYDeps, depSlotId)
+                        parentMap[depSlotId] = slotId
+                        depthMap[depSlotId] = depthMap[slotId] + 1
+                    elseif mDep.info.octa[3] == module.info.slotId or mDep.info.octa[7] == module.info.slotId then
+                        insert(monoXDeps, depSlotId)
+                        parentMap[depSlotId] = slotId
+                        depthMap[depSlotId] = depthMap[slotId] + 1
                     end
                 end
             end
-            slotTreeGen(unpack(rest))
         end
     end
-    
-    slotTreeGen(groups[mGIndex[g[0][0]]].order)
-    
-    ---@param slotId integer
-    ---@param ... integer
-    ---@return integer[]
-    local function queueGen(slotId, ...)
-        if slotId then
-            local rest = func.concat({...}, childrenMap[slotId] or {})
-            return {slotId, unpack(queueGen(unpack(rest)))}
+    for _, slotIds in ipairs(groups) do
+        local modules = func.map(slotIds, function(slotId) return modules[slotId] end)
+        local validModules = func.filter(modules, function(module) return not (module.info.ref.left and module.info.ref.right) end)
+        if #validModules > 0 then
+            local shallowest = func.min(validModules, function(lhs, rhs) return depthMap[lhs.info.slotId] < depthMap[rhs.info.slotId] end)
+            for _, m in ipairs(modules) do
+                m.info.refPos = m.info.pos - shallowest.info.pos
+            end
         else
-            return {}
+            local shallowest = func.min(modules, function(lhs, rhs) return depthMap[lhs.info.slotId] < depthMap[rhs.info.slotId] end)
+            for _, m in ipairs(modules) do
+                m.info.refPos = m.info.pos - shallowest.info.pos
+            end
         end
     end
     
-    return queueGen(g[0][0]), parentMap
+    return pipe.new * queue, parentMap
 end
 
 ust.refArc2Pts = function(refArc)
@@ -321,49 +230,14 @@ ust.calculateRaidus = function(x, y, z, data)
     
     if not m.info.radius then
         m.info.radius = 10e8
-        -- -- If no radius defined
-        -- if ref == m.info.octa[5] or ref == m.info.octa[1] then
-        --     m.info.radius = data.modules[ref].info.radius
-        -- elseif ref == m.info.octa[3] then
-        --     m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.xState.width[x + 1] + data.xState.width[x]) * 0.5
-        -- elseif ref == m.info.octa[7] then
-        --     m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
-        -- end
-        
-        -- if not m.info.radius then
-        --     -- If the the radius is still unknown
-        --     local loop = {}
-        --     if m.metadata.isTrack or m.metadata.isPlaceholder then
-        --         -- For tracks search innner side
-        --         loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(data.xPos) or func.min(data.xNeg) or 0), (x < 0 and 1 or -1)}
-        --     elseif m.metadata.isPlatform then
-        --         if (x < 0) then
-        --             if m.info.octa[3] and m.info.octa[7] and data.modules[m.info.octa[3]].metadata.isPlatform and (data.modules[m.info.octa[7]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[7]].info.radius then
-        --                 -- Left track right platform, and track with radius defined, search the outter side
-        --                 loop = {x - 1, func.min(data.xNeg), -1}
-        --             else
-        --                 loop = {x + 1, func.max(data.xPos) or 0, 1}
-        --             end
-        --         else
-        --             if m.info.octa[7] and m.info.octa[3] and data.modules[m.info.octa[7]].metadata.isPlatform and (data.modules[m.info.octa[3]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[3]].info.radius then
-        --                 -- Right track and left platform...
-        --                 loop = {x + 1, func.max(data.xPos), 1}
-        --             else
-        --                 loop = {x - 1, func.min(data.xNeg) or 0, -1}
-        --             end
-        --         end
-        --     end
-        --     for i = loop[1], loop[2], loop[3] do
-        --         if data.grid[z][i] and data.grid[z][i][y] and data.modules[data.grid[z][i][y]].info.radius then
-        --             m.info.radius = data.modules[data.grid[z][i][y]].info.radius + (data.xState.pos[x] - data.xState.pos[i])
-        --             break
-        --         end
-        --     end
-        --     if not m.info.radius then
-        --         -- Make it straight
-        --         m.info.radius = 10e8
-        --     end
-        -- end
+        -- If no radius defined
+        if ref == m.info.octa[5] or ref == m.info.octa[1] then
+            m.info.radius = data.modules[ref].info.radius
+        elseif ref == m.info.octa[3] then
+            m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.xState.width[x + 1] + data.xState.width[x]) * 0.5
+        elseif ref == m.info.octa[7] then
+            m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
+        end
     end
     
     data.yState = yState
@@ -372,7 +246,6 @@ end
 ust.genericArcs = function(x, y, z, data)
     local slotId = data.grid[z][x][y]
     local ref = data.parentMap[slotId]
-    dump()({slotId, ref})
     local m = data.modules[slotId]
     local packer = ust.arcPacker(data.yState.pos, data.yState.vec, m.info.length, m.info.radius, ref == m.info.octa[1])
     local ar, arL, arR = packer(-m.info.width * 0.5, m.info.width * 0.5)
@@ -442,12 +315,14 @@ end
 ---@return table
 ---@return integer
 ust.gridization = function(modules, classedModules)
-    ---@type grid
     local grid = ust.octa(modules, classedModules)
     
     for z, g in pairs(grid) do
-        
         local queue, parentMap = fnQueue(g, modules)
+        local queue2 = queue * pipe.filter(function(slotId) return not (modules[slotId].info.ref.left and modules[slotId].info.ref.right) end)
+            + queue * pipe.filter(function(slotId) return modules[slotId].info.ref.left and modules[slotId].info.ref.right end)
+        
+        local globalQueue = queue + queue + queue2
         
         -- Build the gridization queue
         -- Collect X postion and width information
@@ -508,9 +383,6 @@ ust.gridization = function(modules, classedModules)
         -- Process in Y axis
         local processY = function(fn, x, y)
             return function()
-                local slotId = grid[z][x][y]
-                local m = modules[slotId]
-                                
                 local data = {
                     modules = modules,
                     grid = grid,
@@ -526,29 +398,25 @@ ust.gridization = function(modules, classedModules)
         
         local cr = {}
         
-        for _, current in ipairs(queue) do
-            local m = modules[current]
+        for _, slotId in ipairs(queue) do
+            local m = modules[slotId]
             if (m.metadata.scriptName and game.res.script[m.metadata.scriptName]) then
                 local fn = game.res.script[m.metadata.scriptName][m.metadata.gridization or "gridization"]
                 if fn then
-                    local pos = modules[current].info.pos
-                    insert(cr, coroutine.create(processY(fn, pos.x, pos.y)))
+                    local pos = modules[slotId].info.pos
+                    cr[slotId] = coroutine.create(processY(fn, pos.x, pos.y))
                 end
             end
         end
         
-        for i = 1, 3 do
-            for _, fn in ipairs(cr) do
-                local result = coroutine.resume(fn)
-                if not result then
-                    error(debug.traceback(fn))
-                end
+        for _, slotId in ipairs(globalQueue) do
+            local result = coroutine.resume(cr[slotId])
+            if not result then
+                error(debug.traceback(cr[slotId]))
             end
         end
-
     end
     return grid
 end
-
 
 return ust

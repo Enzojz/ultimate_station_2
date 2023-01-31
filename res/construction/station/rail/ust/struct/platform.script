@@ -270,8 +270,7 @@ end
 local platformArcs = function(x, y, z, data)
     local slotId = data.grid[z][x][y]
     local m = data.modules[slotId]
-    local ref = m.info.ref or {}
-    m.info.ref = ref
+    local ref = m.info.ref
     
     local refModule = function(offset)
         local refModule = data.modules[data.grid[z][x + offset][y]]
@@ -485,7 +484,7 @@ local platformArcs = function(x, y, z, data)
             center = ar
         }
     end
-    
+
     m.info.pts = ustg.refArc2Pts(m.info.arcs)
     m.info.calculateTag = true;
 end
