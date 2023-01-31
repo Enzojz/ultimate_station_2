@@ -320,49 +320,50 @@ ust.calculateRaidus = function(x, y, z, data)
     end
     
     if not m.info.radius then
-        -- If no radius defined
-        if ref == m.info.octa[5] or ref == m.info.octa[1] then
-            m.info.radius = data.modules[ref].info.radius
-        elseif ref == m.info.octa[3] then
-            m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.xState.width[x + 1] + data.xState.width[x]) * 0.5
-        elseif ref == m.info.octa[7] then
-            m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
-        end
+        m.info.radius = 10e8
+        -- -- If no radius defined
+        -- if ref == m.info.octa[5] or ref == m.info.octa[1] then
+        --     m.info.radius = data.modules[ref].info.radius
+        -- elseif ref == m.info.octa[3] then
+        --     m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.xState.width[x + 1] + data.xState.width[x]) * 0.5
+        -- elseif ref == m.info.octa[7] then
+        --     m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
+        -- end
         
-        if not m.info.radius then
-            -- If the the radius is still unknown
-            local loop = {}
-            if m.metadata.isTrack or m.metadata.isPlaceholder then
-                -- For tracks search innner side
-                loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(data.xPos) or func.min(data.xNeg) or 0), (x < 0 and 1 or -1)}
-            elseif m.metadata.isPlatform then
-                if (x < 0) then
-                    if m.info.octa[3] and m.info.octa[7] and data.modules[m.info.octa[3]].metadata.isPlatform and (data.modules[m.info.octa[7]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[7]].info.radius then
-                        -- Left track right platform, and track with radius defined, search the outter side
-                        loop = {x - 1, func.min(data.xNeg), -1}
-                    else
-                        loop = {x + 1, func.max(data.xPos) or 0, 1}
-                    end
-                else
-                    if m.info.octa[7] and m.info.octa[3] and data.modules[m.info.octa[7]].metadata.isPlatform and (data.modules[m.info.octa[3]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[3]].info.radius then
-                        -- Right track and left platform...
-                        loop = {x + 1, func.max(data.xPos), 1}
-                    else
-                        loop = {x - 1, func.min(data.xNeg) or 0, -1}
-                    end
-                end
-            end
-            for i = loop[1], loop[2], loop[3] do
-                if data.grid[z][i] and data.grid[z][i][y] and data.modules[data.grid[z][i][y]].info.radius then
-                    m.info.radius = data.modules[data.grid[z][i][y]].info.radius + (data.xState.pos[x] - data.xState.pos[i])
-                    break
-                end
-            end
-            if not m.info.radius then
-                -- Make it straight
-                m.info.radius = 10e8
-            end
-        end
+        -- if not m.info.radius then
+        --     -- If the the radius is still unknown
+        --     local loop = {}
+        --     if m.metadata.isTrack or m.metadata.isPlaceholder then
+        --         -- For tracks search innner side
+        --         loop = {x + (x < 0 and 1 or -1), (x < 0 and func.max(data.xPos) or func.min(data.xNeg) or 0), (x < 0 and 1 or -1)}
+        --     elseif m.metadata.isPlatform then
+        --         if (x < 0) then
+        --             if m.info.octa[3] and m.info.octa[7] and data.modules[m.info.octa[3]].metadata.isPlatform and (data.modules[m.info.octa[7]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[7]].info.radius then
+        --                 -- Left track right platform, and track with radius defined, search the outter side
+        --                 loop = {x - 1, func.min(data.xNeg), -1}
+        --             else
+        --                 loop = {x + 1, func.max(data.xPos) or 0, 1}
+        --             end
+        --         else
+        --             if m.info.octa[7] and m.info.octa[3] and data.modules[m.info.octa[7]].metadata.isPlatform and (data.modules[m.info.octa[3]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder) and data.modules[m.info.octa[3]].info.radius then
+        --                 -- Right track and left platform...
+        --                 loop = {x + 1, func.max(data.xPos), 1}
+        --             else
+        --                 loop = {x - 1, func.min(data.xNeg) or 0, -1}
+        --             end
+        --         end
+        --     end
+        --     for i = loop[1], loop[2], loop[3] do
+        --         if data.grid[z][i] and data.grid[z][i][y] and data.modules[data.grid[z][i][y]].info.radius then
+        --             m.info.radius = data.modules[data.grid[z][i][y]].info.radius + (data.xState.pos[x] - data.xState.pos[i])
+        --             break
+        --         end
+        --     end
+        --     if not m.info.radius then
+        --         -- Make it straight
+        --         m.info.radius = 10e8
+        --     end
+        -- end
     end
     
     data.yState = yState
@@ -371,6 +372,7 @@ end
 ust.genericArcs = function(x, y, z, data)
     local slotId = data.grid[z][x][y]
     local ref = data.parentMap[slotId]
+    dump()({slotId, ref})
     local m = data.modules[slotId]
     local packer = ust.arcPacker(data.yState.pos, data.yState.vec, m.info.length, m.info.radius, ref == m.info.octa[1])
     local ar, arL, arR = packer(-m.info.width * 0.5, m.info.width * 0.5)

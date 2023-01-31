@@ -11,6 +11,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     local isPlatform = params.modules[sId].metadata.isPlatform
+    local isTrack = params.modules[sId].metadata.isTrack
     local refH = info.height
     local makeData = params.modules[sId].makeData
     
@@ -53,7 +54,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
         end
     end
-
+    
     if params.debug ~= 1 then
         ust.marking(result, slotId, params)
         
@@ -75,7 +76,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 if (sum ~= 0) then
                     addSlot(info.ref.left, sum, transf)
                 end
-            elseif params.modules[info.octa[7]].metadata.isTrack then
+            elseif isTrack then
                 if info.ref.left then
                     addSlot(true, 0, transf)
                 else
@@ -96,7 +97,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 if sum ~= 0 then
                     addSlot(info.ref.right, sum, transf)
                 end
-            elseif params.modules[info.octa[3]].metadata.isTrack then
+            elseif isTrack then
                 if info.ref.right then
                     addSlot(true, 0, transf)
                 else
@@ -106,7 +107,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    if isPlatform then
+    do
         local i = 3
         local refPt = ptsC[i]
         local refVec = vecC[i]
@@ -120,7 +121,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     end
     
-    if isPlatform then
+    do
         local i = 1
         local refPt = ptsC[i]
         local refVec = vecC[i]

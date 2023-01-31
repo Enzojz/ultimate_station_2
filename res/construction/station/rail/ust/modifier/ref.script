@@ -31,6 +31,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
                 },
                 variant = 0
             }
+            modules[ust.base(info.id, 91)] = nil
         end
     end
 end

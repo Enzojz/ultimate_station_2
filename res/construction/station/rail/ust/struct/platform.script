@@ -37,21 +37,20 @@ end
 local preProcessAdd = function(modules, change, classedModules, info)
     local maxId = func.max(func.keys(classedModules))
     
-    local grid = {}
-    for id, info in pairs(classedModules) do
-        local pos = modules[info.slotId].info.pos
-        local x, y, z = pos.x, pos.y, pos.z
-        if not grid[z] then grid[z] = {} end
-        if not grid[z][x] then grid[z][x] = {} end
-        grid[z][x][y] = info.slotId
-    end
-    
-    
     if (info.data == -1) then
         local id = info.id
         local slotId = classedModules[id].slotId
         modules[slotId].name = change.module.name
     else
+        local grid = {}
+        for id, info in pairs(classedModules) do
+            local pos = modules[info.slotId].info.pos
+            local x, y, z = pos.x, pos.y, pos.z
+            if not grid[z] then grid[z] = {} end
+            if not grid[z][x] then grid[z][x] = {} end
+            grid[z][x][y] = info.slotId
+        end
+
         local refPos = modules[classedModules[info.id].slotId].info.pos
         
         local pos = ({
