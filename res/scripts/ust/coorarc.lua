@@ -35,6 +35,7 @@ local floor = ma.floor
 ---@field tangent fun(arc: arc, rad: number) : coor3
 ---@field rev fun(arc: arc) : arc
 ---@field xLine fun(line: line, betweenLimit?: fun(x: number, y: number, z: number): coor3) : coor3[]
+---@field basePts coor3[][]
 ---@operator div(line): coor3[]
 ---@operator sub(arc): coor3[]
 ---@operator mul(number): arc
@@ -67,7 +68,8 @@ function arc.new(o, r, limits)
         extra = arc.extra,
         tangent = arc.tangent,
         rev = arc.rev,
-        xLine = arc.intersectionLine
+        xLine = arc.intersectionLine,
+        basePts = {}
     }
     setmetatable(result, {
         __sub = arc.intersectionArc,

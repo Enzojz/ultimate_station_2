@@ -267,7 +267,6 @@ end
 ---@field id string
 ---@field tag string
 ---@field transf matrix
-
 ---@param m string
 ---@param tag string
 ---@param ... matrix
@@ -286,7 +285,7 @@ local function posGen(restTrack, lastPlatform, lst, snd, ...)
             return {false, lst, snd, ...}
         elseif lastPlatform and lst then
             return {false, lst, snd, ...}
-        else 
+        else
             return {lst, snd, ...}
         end
     else
@@ -309,11 +308,14 @@ ust.posGen = posGen
 ---@return coor3[]
 ---@return coor3[]
 ust.basePts = function(arc, n)
-    local radDelta = (arc.sup - arc.inf) / n
-    local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
-    local pts = func.map(rads, function(rad) return arc:pt(rad) end)
-    local vecs = func.map(rads, function(rad) return arc:tangent(rad) end)
-    return pts, vecs
+    if not arc.basePts[n] then
+        local radDelta = (arc.sup - arc.inf) / n
+        local rads = func.map(func.seq(0, n), function(i) return arc.inf + i * radDelta end)
+        local pts = func.map(rads, function(rad) return arc:pt(rad) end)
+        local vecs = func.map(rads, function(rad) return arc:tangent(rad) end)
+        arc.basePts[n] = {pts, vecs}
+    end
+    return unpack(arc.basePts[n])
 end
 
 ---@param params any
