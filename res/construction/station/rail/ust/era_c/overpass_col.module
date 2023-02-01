@@ -8,6 +8,8 @@ local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
+local dump = require "luadump"
+
 local insert = table.insert
 
 local fitModels = {
@@ -46,9 +48,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                     x = pos.x
                 }
             else
-                return nil
+                return false
             end
         end)
+        * pipe.filter(function(m) return m end)
         * pipe.sort(function(l, r) return l.x < r.x end)
         * pipe.map(pipe.select("slotId"))
     
@@ -97,7 +100,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end
     end
     
-    
     if params.modules[info.octa[1]] then
         local info = params.modules[info.octa[1]].info
         local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
@@ -105,14 +107,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         for i = 2, 4 do
             local pt = centerPts[i]
             local vec = centerVecs[i]
-            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * tPlatform
+            local centerTransfZ0 = (quat.byVec(coor.xyz(1, 0, 0), vec):mRot()) * coor.trans(pt) * tPlatform
             insert(
                 result.slots,
                 {
                     id = makeData(25, 10 + i),
-                    transf = centerTransfZ0,
+                    transf = coor.transX(-1) * centerTransfZ0,
                     type = "ust_overpass_step",
-                    spacing = {0, 0, 0, 0}
+                    spacing = {0, 0, 0, 0},
+                    shape = 1
                 }
         )
         end
@@ -125,14 +128,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         for i = 2, 4 do
             local pt = centerPts[i]
             local vec = centerVecs[i]
-            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * tPlatform
+            local centerTransfZ0 = (quat.byVec(coor.xyz(-1, 0, 0), vec):mRot()) * coor.trans(pt) * tPlatform
             insert(
                 result.slots,
                 {
                     id = makeData(25, 50 + i),
-                    transf = centerTransfZ0,
+                    transf = coor.transX(-1) * centerTransfZ0,
                     type = "ust_overpass_step",
-                    spacing = {0, 0, 0, 0}
+                    spacing = {0, 0, 0, 0},
+                    shape = 1
                 }
         )
         end
@@ -141,14 +145,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     for _, i in ipairs({1, 2, 4, 5}) do
         local pt = centerPts[i]
         local vec = centerVecs[i]
-        local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), vec):mRot()) * coor.trans(pt) * tPlatform
+        local centerTransfZ0 = (quat.byVec(coor.xyz(i > 3 and 1 or -1, 0, 0), vec):mRot()) * coor.trans(pt) * tPlatform
         insert(
             result.slots,
             {
                 id = makeData(25, 30 + (6 - i)),
-                transf = centerTransfZ0,
+                transf = coor.transX(-1) * centerTransfZ0,
                 type = "ust_overpass_step",
-                spacing = {0, 0, 0, 0}
+                spacing = {0, 0, 0, 0},
+                shape = 1
             }
     )
     end

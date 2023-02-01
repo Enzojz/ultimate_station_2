@@ -315,7 +315,9 @@ ust.basePts = function(arc, n)
         local vecs = func.map(rads, function(rad) return arc:tangent(rad) end)
         arc.basePts[n] = {pts, vecs}
     end
-    return unpack(arc.basePts[n])
+    local pts, vec = unpack(arc.basePts[n])
+    return func.map(pts, function(pt) return coor.xyz(pt.x, pt.y, pt.z) end),
+        func.map(vec, function(pt) return coor.xyz(pt.x, pt.y, pt.z) end)
 end
 
 ---@param params any
