@@ -8,8 +8,6 @@ local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
-local dump = require "luadump"
-
 local insert = table.insert
 
 local fitModels = {
