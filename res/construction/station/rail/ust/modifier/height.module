@@ -44,7 +44,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    local centerPts = ust.basePts(info.arcs.center, 20)
+    local centerPts, vecs = ust.basePts(info.arcs.center, 20)
     local rightPts = ust.basePts(info.arcs.right, 20)
     local leftPts = ust.basePts(info.arcs.left, 20)
     
@@ -52,17 +52,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     insert(result.slots, {
         id = makeData(83, -2),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[9]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[9]):mRot() * coor.trans(centerPts[9]) * transZ,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
     
     addText("⊘", centerPts[9], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
     
+
     if info.octa[1] and params.modules[info.octa[1]] then
         insert(result.slots, {
             id = makeData(83, 1),
-            transf = coor.rotZ90P * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[21]) * transZ,
+            transf = coor.rotZ90P * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[21]):mRot() * coor.trans(centerPts[21]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -72,7 +73,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if info.octa[5] and params.modules[info.octa[5]] then
         insert(result.slots, {
             id = makeData(83, 5),
-            transf = coor.rotZ90N * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[1]) * transZ,
+            transf = coor.rotZ90N * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[1]):mRot() * coor.trans(centerPts[1]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -82,7 +83,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if info.octa[3] and params.modules[info.octa[3]] then
         insert(result.slots, {
             id = makeData(83, 3),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(rightPts[11]) * transZ,
+            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(rightPts[11]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -92,7 +93,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if info.octa[7] and params.modules[info.octa[7]] then
         insert(result.slots, {
             id = makeData(83, 7),
-            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(leftPts[11]) * transZ,
+            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(leftPts[11]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -101,7 +102,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     insert(result.slots, {
         id = makeData(83, -3),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * coor.trans(centerPts[13]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[13]):mRot() * coor.trans(centerPts[13]) * transZ,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -110,12 +111,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     addText("⤪", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
     
     
+    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot()
     for i = -10, 10, 1 do
         if (i ~= 0) then
             local dz = coor.xyz(0, 0, i * 0.1)
             insert(result.slots, {
                 id = makeData(84, i),
-                transf = coor.rotY90P * coor.scale(coor.xyz(1, 1, 0.05)) * coor.trans(leftPts[i % 2 == 1 and 14 or 13] + dz) * transZ,
+                transf = coor.rotY90P * coor.scale(coor.xyz(1, 1, 0.05)) * rotZ * coor.trans(leftPts[i % 2 == 1 and 14 or 13] + dz) * transZ,
                 type = "ust_height_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
@@ -123,7 +125,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             insert(result.slots, {
                 id = makeData(84, i),
-                transf = coor.rotY90N * coor.scale(coor.xyz(1, 1, 0.05)) * coor.trans(rightPts[i % 2 == 1 and 8 or 9] + dz) * transZ,
+                transf = coor.rotY90N * coor.scale(coor.xyz(1, 1, 0.05)) * rotZ * coor.trans(rightPts[i % 2 == 1 and 8 or 9] + dz) * transZ,
                 type = "ust_height_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
