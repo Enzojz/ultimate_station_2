@@ -1,0 +1,105 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+
+local insert = table.insert
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
+    local id = params.modules[slotId].info.id
+    local module = params.modules[params.classedModules[id].slotId]
+    local info = module.info
+
+    local hVec = coor.xyz(0, 0, info.height)
+    local hTrans = coor.trans(hVec)
+    
+    local id = params.modules[slotId].info.id
+    local info = params.modules[params.classedModules[id].slotId].info
+    local makeData = params.modules[params.classedModules[id].slotId].makeData
+    
+    local n = 4
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    local centerPts = ust.basePts(info.arcs.center, n)
+    
+    local edges = {
+        {}, {}, {}, {}, {}, {}, {}
+    }
+    
+    for i = 1, n + 1 do
+        local vec = (leftPts[i] - rightPts[i]):normalized()
+        edges[1][i] = leftPts[i]
+        edges[6][i] = rightPts[i]
+        
+        edges[2][i] = leftPts[i] - vec * 0.27
+        edges[5][i] = rightPts[i] + vec * 0.27
+        
+        edges[7][i] = centerPts[i]
+        edges[3][i] = centerPts[i] + vec * 0.25
+        edges[4][i] = centerPts[i] - vec * 0.25
+        
+        for k = 1, 7 do
+            edges[k][i] = edges[k][i] + hVec
+        end
+    end
+    
+    local refVec = (leftPts[3] - rightPts[3]):normalized()
+    local refPt = centerPts[3]
+    
+    local trans = hTrans
+        * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
+        * coor.trans(refPt)
+    
+    for i = 1, n do
+        if i % 2 == 1 then
+            local vec = (edges[1][i + 1] - edges[6][i + 1]):normalized()
+            local pos = edges[7][i + 1]
+            
+            local transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pos)
+            insert(result.models, ust.newModel("station/rail/asset/era_c_perron_pillar.mdl", tag, transf));
+            insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag, coor.transZ(2.5) * coor.rotZ90P * transf));
+            -- insert(result.models, ust.newModel("station/rail/asset/era_c_perron_number.mdl", tag, coor.transZ(2.5) * coor.rotZ90P * transf));
+            insert(result.models, ust.newModel("station/rail/asset/era_c_perron_holder.mdl", tag, coor.transZ(2.5) * coor.rotZ90N * transf));
+            insert(result.models, ust.newModel("station/rail/asset/era_c_small_clock.mdl", tag, coor.trans(coor.xyz(1.16, 0.25, 2.5)) * transf));
+            insert(result.models, ust.newModel("station/rail/asset/era_c_small_clock.mdl", tag, coor.trans(coor.xyz(-1.16, 0.25, 2.5)) * transf));
+        end
+    end
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_ROOF"),
+            description = _("MENU_MODULE_PLATFORM_ROOF_DESC"),
+            -- icon = "ui/construction/station/rail/modular_station/platform_passenger_roof_era_c.tga"
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_component_general",
+        order = {
+            value = 2,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/comp",
+            classify = "classify",
+            typeName = "ust_component_general",
+            isComponent = true,
+            typeId = 40,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

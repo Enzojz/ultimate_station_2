@@ -9,13 +9,13 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local slotId = makeData(28, 0)
+            local slotId = makeData(40, 0)
             local transf = info.transf * coor.transZ(params.modules[slotId] and (info.height - 1) or info.height)
             
             insert(result.slots, {
-                id = slotId,
+                id = makeData(40, 0),
                 transf = transf,
-                type = "ust_roof",
+                type = "ust_component_general",
                 spacing = {0, 0, 0, 0}
             })
         end
@@ -26,7 +26,7 @@ end
 function data()
     return {
         classify = ust.classifyComp,
-        addSlot = addSlot,
+        addSlot = addSlot
     }
 
 end
