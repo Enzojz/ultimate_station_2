@@ -11,7 +11,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     insert(result.slots, {
         id = makeData(27, -1),
-        transf = transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
+        type = "ust_catenary",
+        spacing = {0, 0, 0, 0}
+    })
+    insert(result.slots, {
+        id = makeData(27, -1),
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
         type = "ust_catenary",
         spacing = {0, 0, 0, 0}
     })
@@ -54,7 +60,6 @@ function data()
             typeId = 25,
             scriptName = "construction/station/rail/ust/struct/catenary",
             preProcessAdd = "preProcessAdd",
-            slotSetup = "slotSetup",
             addSlot = "addSlot",
             classify = "classify"
         },

@@ -55,24 +55,10 @@ local addSlot = function(params, result)
     end
 end
 
-local slotSetup = function(params, result, slotId)
-    local info = params.modules[slotId].info
-    local id = info.id
-    local parent = params.classedModules[id].slotId
-    local m = params.modules[parent]
-    insert(result.slots, {
-        id = slotId,
-        transf = m.info.transf,
-        type = "ust_catenary",
-        spacing = {0, 0, 0, 0}
-    })
-end
-
 function data()
     return {
         preProcessAdd = preProcessAdd,
         addSlot = addSlot,
-        slotSetup = slotSetup,
         classify = ust.classifyComp
     }
 

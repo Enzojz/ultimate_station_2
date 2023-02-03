@@ -98,17 +98,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     end
     
     insert(result.invokeLater, invokeLater)
-    
-    -- SLot to replace itself
-    insert(
-        result.slots,
-        {
-            id = makeData(21, -1),
-            transf = trans,
-            type = "ust_underpass",
-            spacing = {0, 0, 0, 0}
-        }
-)
 end
 function data()
     return {

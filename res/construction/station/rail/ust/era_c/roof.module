@@ -96,17 +96,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             insert(result.models, ust.newModel("ust/platform/era_c/arm.mdl", tag, transf));
         end
     end
-    
-    -- SLot to replace itself
-    insert(
-        result.slots,
-        {
-            id = makeData(28, -1),
-            transf = trans,
-            type = "ust_roof",
-            spacing = {0, 0, 0, 0}
-        }
-)
 end
 function data()
     return {
