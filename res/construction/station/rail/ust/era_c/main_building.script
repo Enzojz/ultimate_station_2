@@ -69,85 +69,89 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
             local lrData = {
                 {
                     fnArc = function(arcs) return arcs.left end,
-                    pos = {sup = 8, mid = 7, inf = 6}
+                    pos = {sup = 8, mid = 7, inf = 6},
+                    cond = not grid[-1][0]
                 },
                 {
                     fnArc = function(arcs) return arcs.right end,
-                    pos = {sup = 2, mid = 3, inf = 4}
+                    pos = {sup = 2, mid = 3, inf = 4},
+                    cond = not grid[1][0]
                 }
             }
             
             for _, d in ipairs(lrData) do
-                local arc = d.fnArc(info.arcs)
-                local pts = {
-                    {arc:pt(arc.sup), d.pos.sup},
-                    {arc:pt((arc.sup + arc.inf) * 0.5), d.pos.mid},
-                    {arc:pt(arc.inf), d.pos.inf},
-                }
-                for _, ptId in ipairs(pts) do
-                    local pt, octapos = unpack(ptId)
-                    local vec = arc:tangent(arc:rad(pt)):normalized() .. coor.rotZ90P
-                    local vecSup = (vec .. coor.rotZ90N) * (width / 2)
-                    local vecInf = -vecSup
-                    local lnSup = line.byVecPt(vec, pt + vecSup)
-                    local lnInf = line.byVecPt(vec, pt + vecInf)
-                    local xInfo = {
-                        sup = nil,
-                        inf = nil
+                if d.cond then
+                    local arc = d.fnArc(info.arcs)
+                    local pts = {
+                        {arc:pt(arc.sup), d.pos.sup},
+                        {arc:pt((arc.sup + arc.inf) * 0.5), d.pos.mid},
+                        {arc:pt(arc.inf), d.pos.inf},
                     }
-                    for y = -2, 2 do
-                        local m = grid[0][y]
-                        if (m and m.metadata.isPlatform) then
-                            local arc = d.fnArc(m.info.arcs)
-                            
-                            if not xInfo.sup then
-                                local x = func.filter(arc:xLine(lnSup, true), pipe.noop())
-                                if #x == 1 then
-                                    local pt = unpack(x)
-                                    xInfo.sup = {
-                                        y = y,
-                                        rad = arc:rad(pt),
-                                        pt = pt,
-                                        arc = arc
-                                    }
-                                end
-                            end
-                            if not xInfo.inf then
-                                local x = func.filter(arc:xLine(lnInf, true), pipe.noop())
-                                if #x == 1 then
-                                    local pt = unpack(x)
-                                    xInfo.inf = {
-                                        y = y,
-                                        rad = arc:rad(pt),
-                                        pt = pt,
-                                        arc = arc
-                                    }
-                                end
-                            end
-                        else
-                            if (xInfo.sup and not xInfo.inf) or (xInfo.inf and not xInfo.sup) then
-                                break
-                            end
-                        end
-                        if xInfo.sup and xInfo.inf then break end
-                    end
-                    if xInfo.sup and xInfo.inf then
-                        params.extra[makeData(moduleId, octapos)] = {
-                            seq = func.seq(xInfo.inf.y, xInfo.sup.y),
-                            slotIds = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return grid[0][y].info.slotId end),
-                            arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
-                            vecNormal = octapos > 5 and vec or -vec,
-                            xInfo = xInfo,
-                            lnSup = lnSup,
-                            lnInf = lnInf
+                    for _, ptId in ipairs(pts) do
+                        local pt, octapos = unpack(ptId)
+                        local vec = arc:tangent(arc:rad(pt)):normalized() .. coor.rotZ90P
+                        local vecSup = (vec .. coor.rotZ90N) * (width / 2)
+                        local vecInf = -vecSup
+                        local lnSup = line.byVecPt(vec, pt + vecSup)
+                        local lnInf = line.byVecPt(vec, pt + vecInf)
+                        local xInfo = {
+                            sup = nil,
+                            inf = nil
                         }
-                        insert(
-                            result.slots, {
-                                id = makeData(moduleId, octapos),
-                                transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5) * coor.transZ(info.height),
-                                type = "ust_component_main_" .. width,
-                                spacing = spacing
-                            })
+                        for y = -2, 2 do
+                            local m = grid[0][y]
+                            if (m and m.metadata.isPlatform) then
+                                local arc = d.fnArc(m.info.arcs)
+                                
+                                if not xInfo.sup then
+                                    local x = func.filter(arc:xLine(lnSup, true), pipe.noop())
+                                    if #x == 1 then
+                                        local pt = unpack(x)
+                                        xInfo.sup = {
+                                            y = y,
+                                            rad = arc:rad(pt),
+                                            pt = pt,
+                                            arc = arc
+                                        }
+                                    end
+                                end
+                                if not xInfo.inf then
+                                    local x = func.filter(arc:xLine(lnInf, true), pipe.noop())
+                                    if #x == 1 then
+                                        local pt = unpack(x)
+                                        xInfo.inf = {
+                                            y = y,
+                                            rad = arc:rad(pt),
+                                            pt = pt,
+                                            arc = arc
+                                        }
+                                    end
+                                end
+                            else
+                                if (xInfo.sup and not xInfo.inf) or (xInfo.inf and not xInfo.sup) then
+                                    break
+                                end
+                            end
+                            if xInfo.sup and xInfo.inf then break end
+                        end
+                        if xInfo.sup and xInfo.inf then
+                            params.extra[makeData(moduleId, octapos)] = {
+                                seq = func.seq(xInfo.inf.y, xInfo.sup.y),
+                                slotIds = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return grid[0][y].info.slotId end),
+                                arcs = func.map(func.seq(xInfo.inf.y, xInfo.sup.y), function(y) return d.fnArc(grid[0][y].info.arcs) end),
+                                vecNormal = octapos > 5 and vec or -vec,
+                                xInfo = xInfo,
+                                lnSup = lnSup,
+                                lnInf = lnInf
+                            }
+                            insert(
+                                result.slots, {
+                                    id = makeData(moduleId, octapos),
+                                    transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5) * coor.transZ(info.height),
+                                    type = "ust_component_main_" .. width,
+                                    spacing = spacing
+                                })
+                        end
                     end
                 end
             end
