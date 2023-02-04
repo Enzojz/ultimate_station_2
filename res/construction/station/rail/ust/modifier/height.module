@@ -15,13 +15,13 @@ local pi = ma.pi
 ---@param params params
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
-    local sId = params.classedModules[id].slotId
-    local info = params.modules[sId].info
-    local transZ = coor.transZ(info.height)
-    local makeData = params.modules[sId].makeData
+    local m = params.modules[params.classedModules[id].slotId]
+    local info = m.info
+    local makeData = m.makeData
     
-    -- Entry for radius system
-    local arcs = info.arcs
+   
+    local transZ = coor.transZ(m.metadata.isTrack and (info.height + m.metadata.height + 0.1) or info.height)
+   
     local transf = info.transf * transZ
     
     insert(result.slots, {
@@ -31,10 +31,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         spacing = {0, 0, 0, 0}
     })
     
-    local rad = arcs.center.inf
-    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-    local vec = (posR - posL):normalized()
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local centerPts, vecs = ust.basePts(info.arcs.center, 20)
+    local rightPts = ust.basePts(info.arcs.right, 20)
+    local leftPts = ust.basePts(info.arcs.left, 20)
+
+    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot()
     local textR = ("H: %d mm"):format(info.height * 1000)
     
     local addText = function(label, pos, fTrans, h)
@@ -43,10 +44,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             insert(result.models, m)
         end
     end
-    
-    local centerPts, vecs = ust.basePts(info.arcs.center, 20)
-    local rightPts = ust.basePts(info.arcs.right, 20)
-    local leftPts = ust.basePts(info.arcs.left, 20)
     
     addText(textR, centerPts[11], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX90N end, 0.5)
     
