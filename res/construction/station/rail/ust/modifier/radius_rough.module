@@ -1,5 +1,6 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
+local ust = require "ust"
 local livetext = require "ust/livetext"
 
 local unpack = table.unpack
@@ -11,37 +12,53 @@ local abs = ma.abs
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local id = params.modules[slotId].info.id
     local targetSlotId = params.classedModules[id].slotId
-    local info = params.modules[targetSlotId].info
-    local makeData = params.modules[targetSlotId].makeData
+    local m = params.modules[targetSlotId]
+    local info = m.info
+    local makeData = m.makeData
     
     -- Entry for radius system
-    local arcs = info.arcs
-    local rad = (arcs.center.inf + arcs.center.sup) * 0.5
-    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-    local vec = (posR - posL):normalized()
-    local posC = (posR + posL) * 0.5
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local transfPosC = rotZ * coor.trans(posC) * coor.transZ(info.height)
     
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+    
+    local arcs = info.arcs
+
+    local addText = function(text, index)
+        local nameModelsF, width = livetext(2)(text)
+        for _, m in ipairs(nameModelsF(function()
+            return 
+                coor.trans(coor.xyz(-0.5 * width, 0, -1)) 
+                * coor.rotX90N 
+                * quat.byVec(coor.xyz(0, 1, 0), centerVecs[index]):mRot() 
+                * coor.trans(centerPts[index]) 
+                * coor.transZ(0.1 + m.metadata.height + info.height) end)) do
+            insert(result.models, m)
+        end
+    end
+
     insert(result.slots, {
         id = makeData(80, 1),
-        transf = transfPosC,
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[3]):mRot() * coor.trans(centerPts[3]) * coor.transZ(0.1 + m.metadata.height + info.height),
+        type = "ust_radius_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+    insert(result.slots, {
+        id = makeData(80, 2),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[4]):mRot() * coor.trans(centerPts[4]) * coor.transZ(0.1 + m.metadata.height + info.height),
         type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
     
-    -- Radius modify system
-    local rad = arcs.center.inf
-    local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
-    local vec = (posR - posL):normalized()
-    local posC = (posR + posL) * 0.5
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
-    local textR = info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+")
-    
-    local nameModelsF, width = livetext(2)(textR)
-    for _, m in ipairs(nameModelsF(function() return coor.trans(coor.xyz(-0.5 * width, 0, -1)) * coor.rotX90N * rotZ * coor.trans(posC) * coor.transZ(0.1 + info.height) end)) do
-        insert(result.models, m)
-    end
+    insert(result.slots, {
+        id = makeData(80, 3),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[5]):mRot() * coor.trans(centerPts[5]) * coor.transZ(0.1 + m.metadata.height + info.height),
+        type = "ust_radius_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+    addText(info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+"), 2)
+    addText("∞", 4)
+    addText("⊘", 5)
     
     local ptS, vecS = unpack(info.pts[info.refPos.y < 0 and 2 or 1])
     vecS = vecS:normalized()
@@ -56,7 +73,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 local dst = o + (vecS * r .. coor.rotZ(pi * 0.5 - rad))
                 insert(result.slots, {
                     id = makeData(82, i),
-                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ((info.refPos.y < 0 and arcs.center.sup or arcs.center.inf) - rad) * coor.trans(dst) * coor.transZ(info.height),
+                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ((info.refPos.y < 0 and arcs.center.sup or arcs.center.inf) - rad) * coor.trans(dst) * coor.transZ(0.1 + m.metadata.height + info.height),
                     type = "ust_radius_modifier",
                     shape = 2,
                     spacing = {0, 0, 0, 0}

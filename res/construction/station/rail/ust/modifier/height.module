@@ -34,7 +34,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rad = arcs.center.inf
     local posL, posR = arcs.left:pt(rad), arcs.right:pt(rad)
     local vec = (posR - posL):normalized()
-    local rotZ = quat.byVec(coor.xyz(1, 0, 0), vec):mRot()
+    local rotZ = quat.byVec(coor.xyz(0, -1, 0), vec):mRot()
     local textR = ("H: %d mm"):format(info.height * 1000)
     
     local addText = function(label, pos, fTrans, h)

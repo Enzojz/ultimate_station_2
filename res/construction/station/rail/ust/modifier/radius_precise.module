@@ -45,7 +45,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, pos, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * rotZ * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.transZ(-0.3 * (h or 2)) * coor.trans(fAlign(width)) * coor.rotX90N * rotZ * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height + info.height) end)) do
                 insert(result.models, m)
             end
         end
@@ -53,7 +53,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local addSlot = function(id, data, pos, shape, rot)
             insert(result.slots, {
                 id = makeData(id, data),
-                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(info.height),
+                transf = coor.scale(coor.xyz(0.75, 0.75, 0.75)) * (rot or rotZ) * coor.trans(pos) * coor.transZ(0.1 + m.metadata.height + info.height),
                 type = "ust_radius_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = shape or 0
