@@ -191,7 +191,7 @@ ust.calculateRaidus = function(x, y, z, data)
     local m = data.modules[slotId]
     
     if not m.info.width then
-        m.info.width = m.info.width or m.metadata.width
+        m.info.width = m.metadata.width
     end
     
     coroutine.yield()
@@ -226,15 +226,17 @@ ust.calculateRaidus = function(x, y, z, data)
         end
     end
     
-    if not m.info.radius then
+    if m.info.straight then
         m.info.radius = 10e8
-        -- If no radius defined
+    elseif not m.info.radius then
         if ref == m.info.octa[5] or ref == m.info.octa[1] then
             m.info.radius = data.modules[ref].info.radius
         elseif ref == m.info.octa[3] then
             m.info.radius = data.modules[m.info.octa[3]].info.radius - (data.xState.width[x + 1] + data.xState.width[x]) * 0.5
         elseif ref == m.info.octa[7] then
             m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
+        else
+            m.info.radius = 10e8
         end
     end
     
