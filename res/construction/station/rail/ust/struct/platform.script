@@ -7,8 +7,6 @@ local arc = require "ust/coorarc"
 local line = require "ust/coorline"
 
 local insert = table.insert
-local math = math
-local pi = math.pi
 
 local ustg = require "ust_gridization"
 
@@ -42,16 +40,10 @@ local preProcessAdd = function(modules, change, classedModules, info)
         local slotId = classedModules[id].slotId
         modules[slotId].name = change.module.name
     else
-        local grid = {}
-        for id, info in pairs(classedModules) do
-            local pos = modules[info.slotId].info.pos
-            local x, y, z = pos.x, pos.y, pos.z
-            if not grid[z] then grid[z] = {} end
-            if not grid[z][x] then grid[z][x] = {} end
-            grid[z][x][y] = info.slotId
-        end
+        local grid = ust.octa(modules, classedModules)
 
-        local refPos = modules[classedModules[info.id].slotId].info.pos
+        local refModule = modules[classedModules[info.id].slotId]
+        local refPos = refModule.info.pos
         
         local pos = ({
             [1] = coor.xyz(0, 1, 0),
@@ -62,7 +54,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
         
         
         local x, y, z = pos.x, pos.y, pos.z
-        
         local octa = {
             [5] = grid[z][x] and grid[z][x][y - 1] or nil,
             [1] = grid[z][x] and grid[z][x][y + 1] or nil,
@@ -115,13 +106,20 @@ local preProcessAdd = function(modules, change, classedModules, info)
         elseif isEmpty(3) and isEmpty(7) and not isEmpty(1) then
             ref = {next = true}
         end
+
+        local width = change.module.metadata.width
+        if isPlatform(5) then
+            width = modules[octa[5]].info.width
+        elseif isPlatform(1) then
+            width = modules[octa[1]].info.width
+        end        
         
         local newInfo = {
             id = maxId + 1,
             type = change.module.metadata.typeId,
             pos = pos,
             length = 20,
-            width = 5,
+            width = width,
             ref = ref
         }
         local slotId, dataIds = ust.slotIds(newInfo)
