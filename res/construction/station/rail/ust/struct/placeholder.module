@@ -1,9 +1,7 @@
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
-
-local ma = math
-local pi = ma.pi
+local ust = require "ust"
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local info = params.modules[slotId].info
@@ -21,6 +19,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
         addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        
+        ust.marking(result, slotId, params)
     end
 end
 
