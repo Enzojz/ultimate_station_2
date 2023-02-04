@@ -112,190 +112,192 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         rightLane[1] = rightLane[1] + (rightLane[2] - rightLane[1]):normalized()
     end
     
-    for i = 1, n do
-        local inf = i + 1
-        local sup = i
-        
-        local isFirst = i == 1
-        local isLast = i == 4
-        
-        local centre = {
-            lt = leftCentre[inf],
-            rt = rightCentre[inf],
-            lb = leftCentre[sup],
-            rb = rightCentre[sup],
-        }
-        
-        local width_centre = abs((centre.lt:avg(centre.lb) - centre.rt:avg(centre.rb)):length())
-        local n_center = math.floor(width_centre / 3.3 + 0.75)
-        local vect = (centre.rt - centre.lt) / n_center
-        local vecb = (centre.rb - centre.lb) / n_center
-        local centres = func.map(
-            func.seq(1, n_center or 1),
-            function(n) return {
-                lt = centre.lt + vect * (n - 1),
-                rt = centre.lt + vect * n,
-                lb = centre.lb + vecb * (n - 1),
-                rb = centre.lb + vecb * n,
-            } end)
-        
-        local left = {
-            lt = leftEdge[inf],
-            rt = leftCentre[inf],
-            lb = leftEdge[sup],
-            rb = leftCentre[sup],
-        }
-        
-        local right = {
-            lt = rightCentre[inf],
-            rt = rightEdge[inf],
-            lb = rightCentre[sup],
-            rb = rightEdge[sup],
-        }
-        
-        
-        local addBlock = function(mdl, pos)
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
-        end
-        local addLastBlock = function(mdl, pos)
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
-        end
-        
-        if isLast then
-            if isTrack[1] then
-                func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
-            elseif not info.octa[1] then
-                if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
-                    func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
-                else
-                    func.forEach(centres, function(centre)addLastBlock("ye_centre", centre) end)
-                end
-            else
-                func.forEach(centres, function(centre)addLastBlock("yi_centre", centre) end)
+    if 1 then
+        for i = 1, n do
+            local inf = i + 1
+            local sup = i
+            
+            local isFirst = i == 1
+            local isLast = i == 4
+            
+            local centre = {
+                lt = leftCentre[inf],
+                rt = rightCentre[inf],
+                lb = leftCentre[sup],
+                rb = rightCentre[sup],
+            }
+            
+            local width_centre = abs((centre.lt:avg(centre.lb) - centre.rt:avg(centre.rb)):length())
+            local n_center = math.floor(width_centre / 3.3 + 0.75)
+            local vect = (centre.rt - centre.lt) / n_center
+            local vecb = (centre.rb - centre.lb) / n_center
+            local centres = func.map(
+                func.seq(1, n_center or 1),
+                function(n) return {
+                    lt = centre.lt + vect * (n - 1),
+                    rt = centre.lt + vect * n,
+                    lb = centre.lb + vecb * (n - 1),
+                    rb = centre.lb + vecb * n,
+                } end)
+            
+            local left = {
+                lt = leftEdge[inf],
+                rt = leftCentre[inf],
+                lb = leftEdge[sup],
+                rb = leftCentre[sup],
+            }
+            
+            local right = {
+                lt = rightCentre[inf],
+                rt = rightEdge[inf],
+                lb = rightCentre[sup],
+                rb = rightEdge[sup],
+            }
+            
+            
+            local addBlock = function(mdl, pos)
+                insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
+                insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
             end
-        elseif isFirst then
-            if isTrack[5] then
-                func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
-            elseif not info.octa[5] then
-                if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
-                    func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
+            local addLastBlock = function(mdl, pos)
+                insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
+                insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+            end
+            
+            if isLast then
+                if isTrack[1] then
+                    func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
+                elseif not info.octa[1] then
+                    if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
+                        func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
+                    else
+                        func.forEach(centres, function(centre)addLastBlock("ye_centre", centre) end)
+                    end
                 else
-                    func.forEach(centres, function(centre)addBlock("ye_centre", centre) end)
+                    func.forEach(centres, function(centre)addLastBlock("yi_centre", centre) end)
+                end
+            elseif isFirst then
+                if isTrack[5] then
+                    func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
+                elseif not info.octa[5] then
+                    if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
+                        func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
+                    else
+                        func.forEach(centres, function(centre)addBlock("ye_centre", centre) end)
+                    end
+                else
+                    func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
                 end
             else
                 func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
             end
-        else
-            func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
-        end
-        
-        if leftConnected then
-            if isLast then
-                if isTrack[1] or (isPlatform[8] and not isPlatform[1]) then
-                    addLastBlock("xi_ye_right_t", left)
-                elseif not isPlatform[1] then
-                    addLastBlock("xi_ye_right", left)
-                elseif not isPlatform[8] and isPlatform[1] then
-                    addLastBlock("xi_yi_right_x", left)
-                else
-                    addLastBlock("xi_yi_right", left)
-                end
-            elseif isFirst then
-                if isTrack[5] or (isPlatform[6] and not isPlatform[5]) then
-                    addBlock("xi_ye_left_t", left)
-                elseif not isPlatform[5] then
-                    addBlock("xi_ye_left", left)
-                elseif not isPlatform[6] and isPlatform[5] then
-                    addBlock("xi_yi_left_x", left)
+            
+            if leftConnected then
+                if isLast then
+                    if isTrack[1] or (isPlatform[8] and not isPlatform[1]) then
+                        addLastBlock("xi_ye_right_t", left)
+                    elseif not isPlatform[1] then
+                        addLastBlock("xi_ye_right", left)
+                    elseif not isPlatform[8] and isPlatform[1] then
+                        addLastBlock("xi_yi_right_x", left)
+                    else
+                        addLastBlock("xi_yi_right", left)
+                    end
+                elseif isFirst then
+                    if isTrack[5] or (isPlatform[6] and not isPlatform[5]) then
+                        addBlock("xi_ye_left_t", left)
+                    elseif not isPlatform[5] then
+                        addBlock("xi_ye_left", left)
+                    elseif not isPlatform[6] and isPlatform[5] then
+                        addBlock("xi_yi_left_x", left)
+                    else
+                        addBlock("xi_yi_left", left)
+                    end
                 else
                     addBlock("xi_yi_left", left)
                 end
             else
-                addBlock("xi_yi_left", left)
-            end
-        else
-            if isLast and not isPlatform[1] then
-                addLastBlock("xe_ye_right", left)
-            elseif isFirst and not isPlatform[5] then
-                addBlock("xe_ye_left", left)
-            else
-                addBlock("xe_yi_left", left)
-            end
-        end
-        
-        if rightConnected then
-            if isLast then
-                if isTrack[1] or (isPlatform[2] and not isPlatform[1]) then
-                    addLastBlock("xi_ye_left_t", right)
-                elseif not isPlatform[1] then
-                    addLastBlock("xi_ye_left", right)
-                elseif not isPlatform[2] and isPlatform[1] then
-                    addLastBlock("xi_yi_left_x", right)
+                if isLast and not isPlatform[1] then
+                    addLastBlock("xe_ye_right", left)
+                elseif isFirst and not isPlatform[5] then
+                    addBlock("xe_ye_left", left)
                 else
-                    addLastBlock("xi_yi_left", right)
+                    addBlock("xe_yi_left", left)
                 end
-            elseif isFirst then
-                if isTrack[5] or (isPlatform[4] and not isPlatform[5]) then
-                    addBlock("xi_ye_right_t", right)
-                elseif not isPlatform[5] then
-                    addBlock("xi_ye_right", right)
-                elseif not isPlatform[4] and isPlatform[5] then
-                    addBlock("xi_yi_right_x", right)
+            end
+            
+            if rightConnected then
+                if isLast then
+                    if isTrack[1] or (isPlatform[2] and not isPlatform[1]) then
+                        addLastBlock("xi_ye_left_t", right)
+                    elseif not isPlatform[1] then
+                        addLastBlock("xi_ye_left", right)
+                    elseif not isPlatform[2] and isPlatform[1] then
+                        addLastBlock("xi_yi_left_x", right)
+                    else
+                        addLastBlock("xi_yi_left", right)
+                    end
+                elseif isFirst then
+                    if isTrack[5] or (isPlatform[4] and not isPlatform[5]) then
+                        addBlock("xi_ye_right_t", right)
+                    elseif not isPlatform[5] then
+                        addBlock("xi_ye_right", right)
+                    elseif not isPlatform[4] and isPlatform[5] then
+                        addBlock("xi_yi_right_x", right)
+                    else
+                        addBlock("xi_yi_right", right)
+                    end
                 else
                     addBlock("xi_yi_right", right)
                 end
             else
-                addBlock("xi_yi_right", right)
+                if isLast and not isPlatform[1] then
+                    addLastBlock("xe_ye_left", right)
+                elseif isFirst and not isPlatform[5] then
+                    addBlock("xe_ye_right", right)
+                else
+                    addBlock("xe_yi_right", right)
+                end
             end
-        else
-            if isLast and not isPlatform[1] then
-                addLastBlock("xe_ye_left", right)
-            elseif isFirst and not isPlatform[5] then
-                addBlock("xe_ye_right", right)
-            else
-                addBlock("xe_yi_right", right)
-            end
-        end
-        
-        
-        local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
-        local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
-        
-        if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
-            local trackGroup = octaModules[7].info.trackGroup.right
-            insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
-            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
-            insert(params.platformGroup[trackGroup].models, #result.models - 1)
-        else
-            insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag))
-            if leftConnected then
-                insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
-            end
-        end
-        
-        if (rightTrack and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
-            local trackGroup = octaModules[3].info.trackGroup.left
-            insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag, "ust/terminal_lane.mdl"))
             
-            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, right = true} end
-            insert(params.platformGroup[trackGroup].models, #result.models - 1)
-        else
-            insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag))
-            if rightConnected then
-                insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
+            
+            local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
+            local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+            
+            if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+                local trackGroup = octaModules[7].info.trackGroup.right
+                insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
+                if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
+                insert(params.platformGroup[trackGroup].models, #result.models - 1)
+            else
+                insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag))
+                if leftConnected then
+                    insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
+                end
             end
+            
+            if (rightTrack and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
+                local trackGroup = octaModules[3].info.trackGroup.left
+                insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag, "ust/terminal_lane.mdl"))
+                
+                if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, right = true} end
+                insert(params.platformGroup[trackGroup].models, #result.models - 1)
+            else
+                insert(result.models, ust.unitLane(rightLane[inf], rightLane[sup], tag))
+                if rightConnected then
+                    insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
+                end
+            end
+            
+            insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
+            insert(result.models, ust.unitLane(rightLane[inf], centerPts[inf], tag))
         end
-        
-        insert(result.models, ust.unitLane(leftLane[sup], centerPts[sup], tag))
-        insert(result.models, ust.unitLane(rightLane[inf], centerPts[inf], tag))
     end
     
     local face = pipe.new + leftEdge + func.rev(rightEdge)
     
     ust.initTerrainList(result, info.id)
-
+    
     insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(info.extraHeight or 0) end) * pipe.map(coor.vec2Tuple))
     
     local groundFace = func.map(face, coor.vec2Tuple)

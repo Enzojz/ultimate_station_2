@@ -1,5 +1,6 @@
 local ust = require "ust"
 local coor = require "ust/coor"
+local quat = require "ust/quaternion"
 
 local insert = table.insert
 
@@ -9,15 +10,35 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local slotId = makeData(40, 0)
-            local transf = info.transf * coor.transZ(params.modules[slotId] and (info.height - 1) or info.height)
+            local transZ = coor.transZ(info.height)
             
-            insert(result.slots, {
-                id = makeData(40, 0),
-                transf = transf,
-                type = "ust_component_general",
-                spacing = {0, 0, 0, 0}
-            })
+            local n = 4
+            local leftPts = ust.basePts(info.arcs.left, n)
+            local rightPts = ust.basePts(info.arcs.right, n)
+            local centerPts, vecs = ust.basePts(info.arcs.center, n)
+            
+            for i = 1, (info.octa[1] and 4 or 5) do
+                insert(result.slots, {
+                    id = makeData(40, i),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(centerPts[i]) * transZ,
+                    type = "ust_component_general",
+                    spacing = {0, 0, 0, 0}
+                })
+
+                insert(result.slots, {
+                    id = makeData(40, 10 + i),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(leftPts[i]) * transZ,
+                    type = "ust_component_general",
+                    spacing = {0, 0, 0, 0}
+                })
+                
+                insert(result.slots, {
+                    id = makeData(40, 20 + i),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(rightPts[i]) * transZ,
+                    type = "ust_component_general",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
         end
     end
 

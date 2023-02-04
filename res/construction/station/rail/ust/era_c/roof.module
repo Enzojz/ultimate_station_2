@@ -18,17 +18,14 @@ local roofFitModels = {
     fitModels.edge
 }
 
-local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local module = params.modules[params.classedModules[id].slotId]
     local info = module.info
-
+    local makeData = module.makeData
+    
     local hVec = coor.xyz(0, 0, info.height)
     local hTrans = coor.trans(hVec)
-    
-    local id = params.modules[slotId].info.id
-    local info = params.modules[params.classedModules[id].slotId].info
-    local makeData = params.modules[params.classedModules[id].slotId].makeData
     
     local n = 4
     local leftPts = ust.basePts(info.arcs.left, n)
@@ -59,12 +56,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    local refVec = (leftPts[3] - rightPts[3]):normalized()
-    local refPt = centerPts[3]
-    
-    local trans = hTrans
-        * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
-        * coor.trans(refPt)
     
     for i = 1, n do
         for k = 1, 5 do
@@ -94,8 +85,36 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pos)
             insert(result.models, ust.newModel("ust/platform/era_c/pole.mdl", tag, transf));
             insert(result.models, ust.newModel("ust/platform/era_c/arm.mdl", tag, transf));
+            
+            if i % 4 == 1 then
+                local m3 = module.info.octa[3] and params.modules[module.info.octa[3]].metadata.isTrack or false
+                local m7 = module.info.octa[7] and params.modules[module.info.octa[7]].metadata.isTrack or false
+                if m3 or m7 then
+                    local number3 = m3 and tostring(params.modules[module.info.octa[3]].info.trackGroup.left) or ""
+                    local number7 = m7 and tostring(params.modules[module.info.octa[7]].info.trackGroup.right) or ""
+                    result.labelText[#result.models] = {
+                        number7, number7,
+                        number3, number3
+                    }
+                    insert(result.models, ust.newModel("station/rail/asset/era_c_perron_number.mdl", tag, coor.transZ(2.5) * coor.rotZ90N * transf));
+                end
+            else
+                insert(result.models, ust.newModel("station/rail/asset/era_c_perron_holder.mdl", tag, coor.transZ(2.5) * coor.rotZ90N * transf));
+                insert(result.models, ust.newModel("station/rail/asset/era_c_small_clock.mdl", tag, coor.trans(coor.xyz(1.16, 0.25, 2.5)) * transf));
+                insert(result.models, ust.newModel("station/rail/asset/era_c_small_clock.mdl", tag, coor.trans(coor.xyz(-1.16, 0.25, 2.5)) * transf));
+            end
         end
+    
     end
+    insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag, coor.transZ(2.3) * coor.rotZ90P * module.info.transf * hTrans));
+    
+    -- SLot to replace itself
+    insert(result.slots, {
+        id = makeData(28, -1),
+        transf = module.info.transf * hTrans,
+        type = "ust_roof",
+        spacing = {0, 0, 0, 0}
+    })
 end
 function data()
     return {
@@ -110,7 +129,6 @@ function data()
         description = {
             name = _("MENU_MODULE_PLATFORM_ROOF"),
             description = _("MENU_MODULE_PLATFORM_ROOF_DESC"),
-            icon = "ui/construction/station/rail/modular_station/platform_passenger_roof_era_c.tga"
         },
         category = {
             categories = {"ust_cat_comp"},

@@ -118,7 +118,7 @@ function data()
         },
         type = "ust_underpass",
         order = {
-            value = 3,
+            value = 4,
         },
         metadata = {
             typeName = "ust_underpass",

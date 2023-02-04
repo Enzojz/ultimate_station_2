@@ -77,6 +77,9 @@ local createTemplateFn = function(params)
                         result[slotId] = string.format("station/rail/ust/data/%s.module", m)
                     end
                 end
+                
+                result[ust.base(info.id, 28)] = "station/rail/ust/era_c/sign.module"
+                result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_c/seats.module"
             end
         end
     end

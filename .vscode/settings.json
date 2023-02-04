@@ -8,5 +8,6 @@
         "_",
         "api",
         "game"
-    ]
+    ],
+    "Lua.runtime.version": "Lua 5.4"
 }

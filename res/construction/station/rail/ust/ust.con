@@ -39,7 +39,8 @@ local constructionTemplates = {
         },
         description = {
             name = _("MENU_NAME"),
-            description = _("MENU_DESC")
+            description = _("MENU_DESC"),
+            icon = "ui/construction/station/rail/ust/era_c.tga"
         },
         data = {
             params = {
@@ -430,8 +431,6 @@ local updateFn = function(params, closureParams)
                 end
             end
         end
-    
-    
     end
     return result
 end

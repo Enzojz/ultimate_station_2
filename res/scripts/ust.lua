@@ -531,27 +531,27 @@ local function searchTerminalGroups(params, current, ...)
             m = params.modules[m.info.octa[1]]
         end
         
-        local groupLeft = {{}}
-        local groupRight = {{}}
+        local groupsLeft = {{}}
+        local groupsRight = {{}}
         
         repeat
             if not m.info.trackGroup then
                 m.info.trackGroup = {}
             end
             if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
-                insert(groupLeft[#groupLeft], m.info.slotId)
-            elseif (#groupLeft[#groupLeft] > 0) then
-                insert(groupLeft, {})
+                insert(groupsLeft[#groupsLeft], m.info.slotId)
+            elseif (#groupsLeft[#groupsLeft] > 0) then
+                insert(groupsLeft, {})
             end
             if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
-                insert(groupRight[#groupRight], m.info.slotId)
-            elseif (#groupRight[#groupRight] > 0) then
-                insert(groupRight, {})
+                insert(groupsRight[#groupsRight], m.info.slotId)
+            elseif (#groupsRight[#groupsRight] > 0) then
+                insert(groupsRight, {})
             end
             m = params.modules[m.info.octa[5]]
         until not m or not m.metadata.isTrack
         
-        for _, groupLeft in ipairs(groupLeft) do
+        for _, groupLeft in ipairs(groupsLeft) do
             if (#groupLeft > 0) then
                 insert(params.trackGroup, groupLeft)
                 for _, slotId in ipairs(groupLeft) do
@@ -560,7 +560,7 @@ local function searchTerminalGroups(params, current, ...)
             end
         end
         
-        for _, groupRight in ipairs(groupRight) do
+        for _, groupRight in ipairs(groupsRight) do
             if (#groupRight > 0) then
                 insert(params.trackGroup, groupRight)
                 for _, slotId in ipairs(groupRight) do

@@ -501,6 +501,7 @@ function coor.xXY()
     }
 end
 
+
 ---@return matrix
 function coor.xXZ()
     return init * {
@@ -653,6 +654,7 @@ coor.rotX90P = coor.rotX(0.5 * math.pi)
 coor.rotX90N = coor.rotX(-0.5 * math.pi)
 coor.rotY90P = coor.rotY(0.5 * math.pi)
 coor.rotY90N = coor.rotY(-0.5 * math.pi)
+coor.rotZ180 = coor.rotZ(math.pi)
 
 ---@param ...matrix
 ---@return matrix
