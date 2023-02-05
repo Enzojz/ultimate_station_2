@@ -86,7 +86,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             if trackEdges then
                 trackEdges.edgeType = "BRIDGE"
                 trackEdges.edgeTypeName = bridgeName
-                alignTerrain = nil
+                trackEdges.alignTerrain = nil
             end
         end)
     elseif module.metadata.isPlatform then
