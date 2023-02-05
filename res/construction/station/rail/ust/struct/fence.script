@@ -138,25 +138,25 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
             insert(result.models, ust.newModel(config.pole:format(color), tag, transf));
         end
     elseif data == 1 or data == 5 then
-        local rank = data == 5 and 1 or 3
-        local n = 2
-        local ptsL = ust.basePts(info.arcs.left, n)
-        local ptsR = ust.basePts(info.arcs.right, n)
+        local n = math.ceil(m.info.width / config.width + 0.5)
+        local baseLength = m.info.width / n
+        local ptL = info.arcs.left:pt(data == 1 and info.arcs.left.sup or info.arcs.left.inf)
+        local ptR = info.arcs.right:pt(data == 1 and info.arcs.right.sup or info.arcs.right.inf)
         
-        local vec = (ptsR[rank] - ptsL[rank]):normalized()
+        local vec = (ptR - ptL):normalized()
         
-        for i = 1, 2 do
-            local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i * 2 - 1) / 4
+        for i = 1, n do
+            local refPt = ptL + vec * ((i - 0.5) * baseLength)
             local transf = hTrans
-                * coor.scaleX(2.5 / config.width)
+                * coor.scaleX(baseLength / config.width)
                 * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
             
             insert(result.models, ust.newModel(config.fence:format(color), tag, transf));
         end
         
-        for i = 1, 3 do
-            local refPt = ptsL[rank] + (ptsR[rank] - ptsL[rank]) * (i - 1) / 2
+        for i = 0, n do
+            local refPt = ptL + vec * (i * baseLength)
             local transf = hTrans
                 * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
