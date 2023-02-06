@@ -5,10 +5,10 @@
 There are three kinds of module which are uses as layout modules: tracks, platforms and placeholders.
 
 ### 1.2 Dependency
-Same as vanilla station, the ultimate station uses grid system as modular framework, but different to the vanilla grid system, there exists dependences between modules, the dependencies are principally uses to infer radius of each module, it also uses dependency to guide platform rendering. A module dependes on its reference module.
+Same as vanilla station, the ultimate station uses grid system as modular framework, but different to the vanilla grid system, there exists dependencies between modules, the dependencies are principally uses to infer radius of each module, it also uses dependency to guide platform rendering. A module depends on its reference module.
 
-### 1.3 Id
-Every layout modules are given an Id, which is unique in a station
+### 1.3 ID
+Every layout modules are given an ID, which is unique in a station.
 
 ### 1.4 Origin Point and origin module
 There's only one layout module in ultimate station without dependency, it's called origin module. It's always the module at (0, 0) and its Id is 1 always, it's always a track. The origin point can never be removed.
@@ -18,7 +18,7 @@ Check on "Yes" to show the layout information of a station, when you build or mo
 
 ![image](./image/1_5_1.jpg)
 
-A station with layout information on, for each module, three types of layout information are show here: The big number is the Id, the small numbers below the Id are grid positions in (x, y) format, the arrows show the reference module of each module. There are 4 possible references: (-x), (+x), (-y), (+y). For example in the picture below, the reference of module 2 is the module 1 in its (-y) position, while the reference of module 17 is the module 1 in its (+x) position.
+A station with layout information on, for each module, three types of layout information are show here: The big number is the ID, the small numbers below the ID are grid positions in (x, y) format, the arrows show the reference module of each module. There are 4 possible references: (-x), (+x), (-y), (+y). For example in the picture below, the reference of module 2 is the module 1 in its (-y) position, while the reference of module 17 is the module 1 in its (+x) position.
 * Each track can and only can has one reference: (-x) or (+x) or (-y) or (+y)
 * Each platform, it can also have both reference on (-x) and (+x) position: (-x, +x)
 
@@ -46,11 +46,11 @@ Radius modifier works only for tracks, all radii of platforms and placeholders a
 ![image](./image/2_1.jpg)
 
 ### 2.2 Numeric radius modifier
-A numeric radius modifier changes the radius of its parent layout module in numeric way. When the modifier is activated, the player see two columns of button, with increment of each click show in the middle. On the left is the positive change, and the right side is the negative change. The buttons are in triangles, the direction of the triangle indicats the direction of change. 
+A numeric radius modifier changes the radius of its parent layout module in numeric way. When the modifier is activated, the player see two columns of button, with increment of each click show in the middle. On the left is the positive change, and the right side is the negative change. The buttons are in triangles, the direction of the triangle indicates the direction of change. 
 
 ![image](./image/2_2.jpg)
 
-To remove the radius paramter from the layout module, click on the "⊘" button, then the radius of the track will be infered.
+To remove the radius paramter from the layout module, click on the "⊘" button, then the radius of the track will be inferred.
 
 ![image](./image/2_2_2.jpg)
 
@@ -61,7 +61,7 @@ To force the track straight, click on the "∞", the following tracks will be st
 ### 2.3 Directional radius modifier
 A direction radius modifier is intuitive but with much less precision. A line of button with different direction are show when the modifier is activated, just click on the direction button and the radius is defined.
 
-The "⊘" and "∞" button do the same work like in numeric radius modifier.
+The "⊘" and "∞" button do the same work, just like in the numeric radius modifier.
 
 ![image](./image/2_3.jpg)
 
@@ -74,7 +74,7 @@ If the button you are expecting is not visible, that means you can't do in that 
 
 ![image](./image/2_4_1.jpg)
 
-Change the refernce of module 12 to module 11 (+y) will make it possible to make the reference of module 8 to module 12.
+Change the reference of module 12 to module 11 (+y) will make it possible to make the reference of module 8 to module 12.
 
 ![image](./image/2_4_2.jpg)
 
@@ -89,6 +89,6 @@ Change the refernce of module 12 to module 11 (+y) will make it possible to make
 ### 3.4 Color modifiers
 
 ## Recommandations
-* As in February 2023, it's recommanded to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's a vertical offset between defined slot position and rendered slot, this offset may make trouble using modifiers.
+* As in February 2023, it's recommended to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's a vertical offset between defined slot position and rendered slot, this offset may cause trouble when using modifiers.
 
-* If you are building complicated station, it's recommanded to start to build from origin, rather than use parameters, since some modifications on parts of station, especially radius, may make colission with untouched parts of the station, but this problem doesn't exist if you build the station from a minimal state.
+* If you are building a complicated station, it's recommended to start to build from origin, rather than use parameters. This is because some modifications on parts of station, especially radius, may cause collisions with untouched parts of the station, but this problem doesn't exist if you build the station from a minimal state.
