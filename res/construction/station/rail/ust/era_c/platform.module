@@ -266,7 +266,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
                 local trackGroup = octaModules[7].info.trackGroup.right
-                insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
+                insert(result.models, ust.unitLane(leftLane[sup], leftLane[inf], tag, "ust/terminal_lane.mdl"))
                 if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
                 insert(params.platformGroup[trackGroup].models, #result.models - 1)
             else
