@@ -27,7 +27,8 @@ Evoltion to come
 
 The main disadvtange of this mod is that it is not compatible with none of module which is designed for vanilla modular construction, since they work differently. If you are an modder, you are welcomed to ask about implemention details.
 
-Before the first use of this mod, I suggest to watch the tutorial video, because this mod may work differently to what you think.
+This mod may work differently to what you think, a [b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]tutorial[/url][/b] is on the way
+
 
 Hope you like it.]]
 
@@ -60,7 +61,7 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 
 该模组的主要缺点是无法直接使用为现有原生模块化车站开发的模组，因为本模组在技术实现上与之不同。如果你对于将其他模组内容进行适配的工作感兴趣的话，可以和我联系，我会提供一些实现细节上的帮助。
 
-在使用本模组之前，推荐先阅读使用教程，因为它也许和你认为的用法不同。
+本模组也许会和你认为的用法不同，[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]正在编写中
 
 祝使用愉快！]]
 
@@ -93,7 +94,7 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 
 該模組的主要缺點是無法直接使用為現有原生模組化車站開發的模組，因為本模組在技術實現上與之不同。如果你對於將其他模組內容進行適配的工作感興趣的話，可以和我聯繫，我會提供一些實現細節上的幫助。
 
-在使用本模組之前，推薦先閱讀使用教程，因為它也许和你認為的用法不同。
+本模組也許會和你認為的用法不同，[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]正在編寫中
 
 祝使用愉快！]]
 
