@@ -82,13 +82,13 @@ Change the refernce of module 12 to module 11 (+y) will make it possible to make
 
 ### 2.6 Width modifier
 
-### 3 Functional modules
-## 3.1 Remove helper
-## Catenary switch
-## Bridge & Tunnel
-## Color modifiers
+## 3 Functional modules
+### 3.1 Remove helper
+### 3.2 Catenary switch
+### 3.3 Bridge & Tunnel
+### 3.4 Color modifiers
 
 ## Recommandations
-* As in February 2023, it's recommanded to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's an vertical offset between defined slot position and render slot, this offset may make trouble using modifiers.
+* As in February 2023, it's recommanded to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's a vertical offset between defined slot position and rendered slot, this offset may make trouble using modifiers.
 
 * If you are building complicated station, it's recommanded to start to build from origin, rather than use parameters, since some modifications on parts of station, especially radius, may make colission with untouched parts of the station, but this problem doesn't exist if you build the station from a minimal state.
