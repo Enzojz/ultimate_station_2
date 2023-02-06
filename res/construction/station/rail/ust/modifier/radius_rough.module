@@ -44,21 +44,21 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
 
     insert(result.slots, {
         id = makeData(80, 2),
-        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[4]):mRot() * coor.trans(centerPts[4]) * coor.transZ(0.1 + m.metadata.height + info.height),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[info.refPos.y < 0 and 4 or 2]):mRot() * coor.trans(centerPts[info.refPos.y < 0 and 4 or 2]) * coor.transZ(0.1 + m.metadata.height + info.height),
         type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
     
     insert(result.slots, {
         id = makeData(80, 3),
-        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[5]):mRot() * coor.trans(centerPts[5]) * coor.transZ(0.1 + m.metadata.height + info.height),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[info.refPos.y < 0 and 5 or 1]):mRot() * coor.trans(centerPts[info.refPos.y < 0 and 5 or 1]) * coor.transZ(0.1 + m.metadata.height + info.height),
         type = "ust_radius_modifier",
         spacing = {0, 0, 0, 0}
     })
 
-    addText(info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+"), 2)
-    addText("∞", 4)
-    addText("⊘", 5)
+    addText(info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+"), info.refPos.y < 0 and 2 or 4)
+    addText("∞", info.refPos.y < 0 and 4 or 2)
+    addText("⊘", info.refPos.y < 0 and 5 or 1)
     
     local ptS, vecS = unpack(info.pts[info.refPos.y < 0 and 2 or 1])
     vecS = vecS:normalized()
