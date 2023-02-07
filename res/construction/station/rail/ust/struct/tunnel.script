@@ -27,6 +27,19 @@ local preProcessAdd = function(modules, change, classedModules, info)
     end
 end
 
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_tunnel",
+        spacing = {0, 0, 0, 0}
+    })
+end
+
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -112,6 +125,7 @@ function data()
     return {
         preProcessAdd = preProcessAdd,
         addSlot = addSlot,
+        slotSetup = slotSetup,
         updateFn = updateFn,
         classify = ust.classifyComp,
         getModelsFn = function(params)

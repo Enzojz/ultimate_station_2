@@ -1,0 +1,118 @@
+local insert = table.insert
+local coor = require "ust/coor"
+local ust = require "ust"
+local func = require "ust/func"
+local pipe = require "ust/pipe"
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    
+    local trackSlotId = params.classedModules[id].slotId
+    local module = params.modules[trackSlotId]
+    local makeData = module.makeData
+    
+    local info = params.modules[trackSlotId].info
+    local transZ = coor.transZ(info.height)
+    
+    insert(result.slots, {
+        id = makeData(25, -1),
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transform * transZ,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+    insert(result.slots, {
+        id = makeData(25, -1),
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transform * transZ,
+        type = "ust_bridge",
+        spacing = {0, 0, 0, 0}
+    })
+
+    
+    if module.metadata.isPlatform then
+        insert(result.invokeLater, function()
+            result.terrainLists[info.id].equal = nil
+            result.terrainLists[info.id].equalOpt = nil
+
+            if result.groundFaceLists[info.id] then
+                result.groundFaceLists[info.id].modes = {
+                    {
+                        type = "FILL",
+                        key = "hole.lua"
+                    },
+                    {
+                        type = "STROKE_OUTER",
+                        key = "street_border.lua"
+                    },
+                }
+
+            end
+        end)
+    elseif module.metadata.isTrack then
+        local n = 4
+        local leftPts = ust.basePts(info.arcs.left, n)
+        local rightPts = ust.basePts(info.arcs.right, n)
+        
+        local face = pipe.new + leftPts + func.rev(rightPts)
+    
+        insert(result.groundFaces, {
+            face = func.map(face, coor.vec2Tuple),
+            modes = {
+                {
+                    type = "FILL",
+                    key = "hole.lua"
+                },
+                {
+                    type = "STROKE_OUTER",
+                    key = "street_border.lua"
+                },
+            },
+        })
+        
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.alignTerrain = false
+            end
+        end)
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_OPEN_CUT"),
+            description = _("MENU_MODULE_OPEN_CUT_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_tunnel"},
+        },
+        type = "ust_tunnel",
+        order = {
+            value = 0,
+        },
+        metadata = {
+            typeName = "ust_tunnel",
+            typeId = 26,
+            scriptName = "construction/station/rail/ust/struct/tunnel",
+            preProcessAdd = "preProcessAdd",
+            slotSetup = "slotSetup",
+            addSlot = "addSlot",
+            classify = "classify"
+        },
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

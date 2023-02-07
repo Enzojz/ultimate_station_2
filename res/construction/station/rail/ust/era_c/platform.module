@@ -299,11 +299,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     ust.initTerrainList(result, info.id)
     
     insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(info.extraHeight or 0) end) * pipe.map(coor.vec2Tuple))
-    
-    local groundFace = func.map(face, coor.vec2Tuple)
-    
-    insert(result.groundFaces, {
-        face = groundFace,
+    result.groundFaceLists[info.id] = {
+        face = func.map(face, coor.vec2Tuple),
         modes = {
             {
                 type = "FILL",
@@ -314,7 +311,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 key = "street_border.lua"
             },
         },
-    })
+    }
     
     if params.debug == 1 then
         local text = tostring(info.id)

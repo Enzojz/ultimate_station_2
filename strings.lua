@@ -186,7 +186,9 @@ function data()
             MENU_MODULE_PLATFORM_TRASHBIN = "Trash bin",
             MENU_MODULE_PLATFORM_TRASHBIN_DESC = "Put some trash bin on platforms.",
             MENU_MODULE_PLATFORM_SIGN = "Signs & Clocks",
-            MENU_MODULE_PLATFORM_SIGN_DESC = "Put platform number, station name and clocks on platforms."
+            MENU_MODULE_PLATFORM_SIGN_DESC = "Put platform number, station name and clocks on platforms.",
+            MENU_MODULE_OPEN_CUT = "Open-cut",
+            MENU_MODULE_OPEN_CUT_DESC = "Make an open cut over platforms or tracks."
         },
         zh_CN = {
             MOD_NAME = "终极车站",
