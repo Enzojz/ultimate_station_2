@@ -1,4 +1,4 @@
-# Ultimate Station Tutorial (work in progress)
+# Ultimate Station Tutorial
 
 ## 1. Layout
 ### 1.1 Layout modules
