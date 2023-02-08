@@ -126,8 +126,6 @@ The void bridge just make tracks and platforms floating on the air, it is useful
 The tunnel with portal just make the terrain above platform and track, you need to complete the portal by yourself
 The open-cut make a hole above platform and track, it's useful when there are retaining walls on side.
 
-Attention: there is currently a bug that may lead the station in a unmodifiable & irremovable state with bridge and tunnel, I'm trying to resolve this issue with Urban Games. 
-
 ### 3.4 Color modifiers
 
 ![image](./image/3_4_1.jpg)

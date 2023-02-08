@@ -98,25 +98,42 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             },
         }
         
+        insert(result.edgeLists, {
+            type = "TRACK",
+            alignTerrain = false,
+            params = {
+                type = "ust_mock.lua",
+                catenary = false,
+            },
+            edgeType = "TUNNEL",
+            edgeTypeName = tunnelName,
+            edges = func.map(baseEdge, pipe.map(coor.vec2Tuple)),
+            snapNodes = {},
+            freeNodes = {},
+            tag2nodes = {},
+            slot = slotId
+        })
+        
+        params.edgeIndex[module.info.slotId] = #result.edgeLists
+        if (module.info.octa[1] and params.modules[module.info.octa[1]].metadata.isPlatform) then
+            insert(result.invokeLater, function()
+                
+                local indexL = params.edgeIndex[module.info.slotId]
+                local indexR = params.edgeIndex[module.info.octa[1]]
+                if indexL and indexR then
+                    local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
+                    local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[1][1])
+                    local pt = ptL:avg(ptR):toTuple()
+                    result.edgeLists[indexL].edges[2][1] = pt
+                    result.edgeLists[indexR].edges[1][1] = pt
+                end
+            end)
+        end
+
         insert(result.invokeLater, function()
             result.terrainLists[info.id].equal = nil
             result.terrainLists[info.id].equalOpt = nil
-
-            insert(result.edgeLists, {
-                type = "TRACK",
-                alignTerrain = false,
-                params = {
-                    type = "ust_mock.lua",
-                    catenary = false,
-                },
-                edgeType = "TUNNEL",
-                edgeTypeName = tunnelName,
-                edges = func.map(baseEdge, pipe.map(coor.vec2Tuple)),
-                snapNodes = {},
-                freeNodes = {},
-                tag2nodes = {},
-                slot = slotId
-            })
+        
         end)
     end
 end
