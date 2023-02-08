@@ -19,7 +19,7 @@ local createTemplateFn = function(params)
     
     local nSeg = baseLength / 20
     
-    local posList = pipe.new * func.rev(ust.posGen(nbTracks, params.platformRight == 0, params.platformLeft == 0))
+    local posList = pipe.new * func.rev(ust.posGen(nbTracks, params.platformRight == 0, params.platformLeft == 1))
     
     local indexRefTrack = posList * pipe.map(function(t, i) return {t, i} end) * pipe.filter(function(t) return t[1] end)
     local xOffset = -indexRefTrack[math.ceil(nbTracks / 2)][2] + 1
