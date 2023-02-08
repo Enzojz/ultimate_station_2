@@ -75,8 +75,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if m7 and not (
             (m7.metadata.isPlatform and m7.info.ref.right) 
             or (m7.metadata.isTrack and m7.info.ref.right and not info.ref.right)
-            or (m7.metadata.isTrack and m3.info.ref.left and m7.info.ref.right)
-            or (m7.metadata.isTrack and m3.info.ref.left and info.ref.left and info.ref.right)
+            or (m7.metadata.isTrack and m3 and m3.info.ref.left and m7.info.ref.right)
+            or (m7.metadata.isTrack and m3 and m3.info.ref.left and info.ref.left and info.ref.right)
         ) then
             local sum = (info.ref.right and 2 or 0) + (info.ref.left and 0 or 1)
             if (sum ~= 0) then
@@ -91,8 +91,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if m3 and not (
             (m3.metadata.isPlatform and m3.info.ref.left) 
             or (m3.metadata.isTrack and m3.info.ref.left and not info.ref.left)
-            or (m3.metadata.isTrack and m7.info.ref.right and m3.info.ref.left)
-            or (m3.metadata.isTrack and m7.info.ref.right and info.ref.left and info.ref.right)
+            or (m3.metadata.isTrack and m7 and m7.info.ref.right and m3.info.ref.left)
+            or (m3.metadata.isTrack and m7 and m7.info.ref.right and info.ref.left and info.ref.right)
         ) then
             local sum = (info.ref.left and 1 or 0) + (info.ref.right and 0 or 2)
             if sum ~= 0 then
