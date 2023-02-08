@@ -65,7 +65,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
-    local centerPts = ust.basePts(info.arcs.center, n)
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, n)
     
     local leftEdge = {}
     local rightEdge = {}
@@ -317,15 +317,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
         
-        local addText = function(label, pos, fAlign, h)
+        local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * hTrans * coor.transZ(0.1) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * quat.byVec(coor.xyz(0, 1, 0), centerVecs[4]):mRot() * coor.trans(centerPts[4]) * coor.transZ(0.1) end)) do
                 table.insert(result.models, m)
             end
         end
         
-        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
-        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        addText(text, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
         
         ust.marking(result, slotId, params)
     end
