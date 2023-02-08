@@ -80,13 +80,62 @@ Change the refernce of module 12 to module 11 (+y) will make it possible to make
 
 ### 2.5 Height modifier
 
+The height modifier can be used to adjust the height of each platform or track independently.
+
+![image](./image/2_5_1.jpg)
+
+Once the modifier is activated, you will a row of buttons which stay at the corresponding height, click any of them to raise/lower the platform or track.
+
+![image](./image/2_5_2.jpg)
+
+There are some button on the top face. The four triangles are used to copy the height from neighborhood section to the current targe.
+The "⊘" button is used the same as radius modifier, to erease the height.
+The expansion button is to expand the current target height to the whole platform/track
+
 ### 2.6 Width modifier
+
+The width modifier works almost in the same way as height modifier, but the width always expands to the whole platform.
+
+![image](./image/2_6.jpg)
 
 ## 3 Functional modules
 ### 3.1 Remove helper
+
+For reason of dependecy, not all layout modules are removable. If a layout module is dependent by another, it can not be removed until the depending module is removed.
+
+Use the remove helper you can see all removable layout modules and click on the button to remove the module.
+
+Tracks can only be removed by the helper.
+
+![image](./image/3_1.jpg)
+
 ### 3.2 Catenary switch
+
+You can use the game's own electrification tool to make catenary over tracks, but for technical reason you can't remove with it.
+
+Use Catenary switch in components to add or remove them.
+
+![image](./image/3_2.jpg)
+
 ### 3.3 Bridge & Tunnel
+
+You can add bridge or tunnel under/over the layout modules, so that could become possible to build split level station or partial underground station.
+
+There are two particular bridge/tunnel components: the void bridge, tunnel with portal and open-cut.
+The void bridge just make tracks and platforms floating on the air, it is useful when there's retaining wall on sides.
+The tunnel with portal just make the terrain above platform and track, you need to complete the portal by yourself
+The open-cut make a hole above platform and track, it's useful when there are retaining walls on side.
+
+Attention: there is currently a bug that may lead the station in a unmodifiable & irremovable state with bridge and tunnel, I'm trying to resolve this issue with Urban Games. 
+
 ### 3.4 Color modifiers
+
+![image](./image/3_4_1.jpg)
+You can change color of some components, for example fences, by color modifiers.
+These modifiers are only visible after applicable module are added to the station.
+Drop the color to the slot to change the color.
+
+![image](./image/3_4_2.jpg)
 
 ## Recommandations
 * As in February 2023, it's recommanded to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's a vertical offset between defined slot position and rendered slot, this offset may make trouble using modifiers.
