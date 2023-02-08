@@ -27,10 +27,44 @@ Evoltion to come
 
 The main disadvtange of this mod is that it is not compatible with none of module which is designed for vanilla modular construction, since they work differently. If you are an modder, you are welcomed to ask about implemention details.
 
-This mod may work differently to what you think, a [b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]tutorial[/url][/b] is on the way
+This mod may work differently to what you think, read the tutorial [b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]tutorial[/url][/b] is recommanded.
 
 
 Hope you like it.]]
+
+local fr = [[Ce mod vous donne la possibilité de créer une gare avec moins de contraintes possible. Peu de temps après la sortie de Transport Fever 2, j'ai commencé à réfléchir à ce mod, qui devrait tirer parti de sa construction modulaire, combinée avec la technique que j'ai utilisée en premier pour mettre en œuvre le mod "Utimate Station" pour la première édition du jeu. Le voyage n'a pas été facile, j'ai créé quelques mods en 2020 pour me familiariser avec Transport Fever 2 et découvrir toutes les techniques possibles, ainsi que pour faire des commentaires à Urban Games pour rendre le mécanisme de construction modulaire plus complet.
+
+Seulement au printemps 2021, après certaines mises à jour importantes du jeu, avec l'expérience de l'entrée de tunnel compact et de l'aperçu de la jonction en vol, "l'idée" est finalement venue à mon esprit. À ce moment-là, je pensais que le travail pourrait être fait en 3 mois, comme j'ai travaillé sur le "Ultimate Station" pour Transport Fever 1 en 3 mois, mais je me suis trompé, cela m'a pris presque deux ans pour le compléter. Peut-être est-ce tard pour le jeu, mais j'espère que vous l'apprécierez également.
+
+La raison principale qui m'a pris autant de temps pour le finir, c'est tous les détails de programmation. Ce mod ajoute un cadre évolutif à la construction modulaire de base, qui est la base de toutes les améliorations qui seraient possibles avec ce mod, tout en conservant une interface utilisateur amicale.
+
+Fonctionnalités :
+
+Rayons ajustables pour chaque segment de voie
+Hauteur ajustable pour chaque voie et plateforme
+Largeur ajustable pour chaque plateforme
+Voie ou plateforme sur pont
+Voie ou plateforme dans tunnel
+Passage surélevé flexible
+Passage souterrain flexible
+Mur de soutènement et clôtures
+
+Le mod n'est pas encore complet, mais je le publie car il est dans un état minimal utilisable et l'évolution future ne dérangera pas les constructions existantes.
+
+Évolution à venir :
+
+Hauteur ajustable pour les murs de soutènement
+Pente ajustable pour chaque voie et plateforme
+Quelques composants supplémentaires pour la construction de gare de tunnel
+Quelques composants supplémentaires tels que l'entrée de passage inférieur
+Composants de l'ère 1850 et 1920
+Voies de tramway et d'autobus
+
+Inconvénient majeur de ce mod : il n'est pas compatible avec aucun mod conçu pour la construction modulaire original, car ils fonctionnent différemment. Si vous êtes un moddeur, vous êtes invité à demander des détails sur l'adaptation.
+
+Ce mod peut fonctionner différemment de ce à quoi vous vous attendez, c'est recommandé a lire tout à bord [b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]tutorial[/url][/b] le tutoriel.
+
+Espère que vous l'aimez bien.]]
 
 local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自己的车站。
 
@@ -61,7 +95,7 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 
 该模组的主要缺点是无法直接使用为现有原生模块化车站开发的模组，因为本模组在技术实现上与之不同。如果你对于将其他模组内容进行适配的工作感兴趣的话，可以和我联系，我会提供一些实现细节上的帮助。
 
-本模组也许会和你认为的用法不同，[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]正在编写中
+本模组也许会和你认为的用法不同，建议阅读[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]。
 
 祝使用愉快！]]
 
@@ -94,7 +128,7 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 
 該模組的主要缺點是無法直接使用為現有原生模組化車站開發的模組，因為本模組在技術實現上與之不同。如果你對於將其他模組內容進行適配的工作感興趣的話，可以和我聯繫，我會提供一些實現細節上的幫助。
 
-本模組也許會和你認為的用法不同，[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]正在編寫中
+本模組也許會和你認為的用法不同，建議閱讀[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]。
 
 祝使用愉快！]]
 
@@ -188,7 +222,8 @@ function data()
             MENU_MODULE_PLATFORM_SIGN = "Signs & Clocks",
             MENU_MODULE_PLATFORM_SIGN_DESC = "Put platform number, station name and clocks on platforms.",
             MENU_MODULE_OPEN_CUT = "Open-cut",
-            MENU_MODULE_OPEN_CUT_DESC = "Make an open cut over platforms or tracks."
+            MENU_MODULE_OPEN_CUT_DESC = "Make an open cut over platforms or tracks.",
+            MENU_MODULE_VOID_TUNNEL = "Tunnel without portal"
         },
         zh_CN = {
             MOD_NAME = "终极车站",
@@ -276,7 +311,10 @@ function data()
             MENU_MODULE_PLATFORM_TRASHBIN = "垃圾桶",
             MENU_MODULE_PLATFORM_TRASHBIN_DESC = "在站台上放置一些垃圾桶。",
             MENU_MODULE_PLATFORM_SIGN = "时钟与标识",
-            MENU_MODULE_PLATFORM_SIGN_DESC = "在站台上布置站台号、车站站牌名与时钟。"
+            MENU_MODULE_PLATFORM_SIGN_DESC = "在站台上布置站台号、车站站牌名与时钟。",
+            MENU_MODULE_OPEN_CUT = "开洞",
+            MENU_MODULE_OPEN_CUT_DESC = "在站台和轨道上方的地面开洞",
+            MENU_MODULE_VOID_TUNNEL = "无入口隧道"
         },
         zh_TW = {MOD_NAME = "終極車站",
             MOD_DESC = zhhkmotw,
@@ -363,8 +401,102 @@ function data()
             MENU_MODULE_PLATFORM_TRASHBIN = "垃圾桶",
             MENU_MODULE_PLATFORM_TRASHBIN_DESC = "在月臺上放置一些垃圾桶。",
             MENU_MODULE_PLATFORM_SIGN = "時鐘與標識",
-            MENU_MODULE_PLATFORM_SIGN_DESC = "在月臺上佈置月臺號、車站站牌名與時鐘。"
-        }
+            MENU_MODULE_PLATFORM_SIGN_DESC = "在月臺上佈置月臺號、車站站牌名與時鐘。",
+            MENU_MODULE_OPEN_CUT = "開洞",
+            MENU_MODULE_OPEN_CUT_DESC = "在月臺和軌道上方的地面開洞",
+            MENU_MODULE_VOID_TUNNEL = "無入口隧道"
+        },
+        fr = {
+            MOD_NAME = "Gare ultime",
+            MOD_DESC = fr,
+            MENU_NAME = "Gare ultime",
+            MENU_DESC = "Une gare entièrement personnalisable avec possibilités infinies.",
+            UST_CAT_TRACK = "Voies",
+            UST_CAT_PLATFORM = "Plateformes",
+            UST_CAT_MODIFIER = "Géométrie",
+            UST_CAT_ENTRY = "Entrées",
+            UST_CAT_COMP = "Composants",
+            UST_CAT_BRIDGE = "Ponts",
+            UST_CAT_TUNNEL = "Tunnels",
+            UST_CAT_WALL = "Murs & Clôtures",
+            UST_CAT_COLOR = "Couleur & Textures",
+            MENU_DEBUG = "Information de disposition",
+            MENU_RADIUS_PRECISE_MODIFIER = "Modificateur de rayon numérique",
+            MENU_RADIUS_PRECISE_MODIFIER_DESC = "Pour changer le rayon des voies de manière précise.",
+            MENU_RADIUS_ROUGH_MODIFIER = "Modificateur de rayon directionnel",
+            MENU_RADIUS_ROUGH_MODIFIER_DESC = "Pour changer le rayon des voies de manière intuitive.",
+            MENU_REF_MODIFIER = "Modificateur de référence",
+            MENU_REF_MODIFIER_DESC = "Pour changer la relation de dépendance entre les blocs de plateforme/track.",
+            MENU_HEIGHT_MODIFIER = "Modificateur de hauteur de plateforme",
+            MENU_HEIGHT_MODIFIER_DESC = "Pour ajuster la hauteur des plateformes individuellement.",
+            MENU_WIDTH_MODIFIER = "Modificateur de largeur de plateforme",
+            MENU_WIDTH_MODIFIER_DESC = "Pour ajuster la largeur des plateformes.",
+            MENU_TRACK_NR = "Nombre de voie",
+            MENU_TRACK_TYPE = "Type de voie",
+            MENU_TRACK_CAT = "Caténaire",
+            YES = "Oui",
+            NO = "Non",
+            MENU_RADIUS = "Rayon(m)",
+            MENU_PLATFORM_LENGTH = "Longueur de la plateforme(m)",
+            MENU_PLATFORM_HEIGHT = "Hauteur de la plateforme(m)",
+            MENU_PLATFORM_WIDTH = "Largeur de la plateforme(m)",
+            MENU_PLATFORM_LEFT = "Plateforme gauche",
+            MENU_PLATFORM_RIGHT = "Plateforme droite",
+            AUTO = "Auto",
+            MENU_MODULE_FENCE = "Clôtures de plateforme verte",
+            MENU_MODULE_FENCE_DESC = "Certaines clôtures de plateforme verte",
+            MENU_MODULE_MAIN_ENTRY_10 = "Petite entrée principale de la station",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Entrée principale de la station de 10m de large.",
+            MENU_MODULE_MAIN_ENTRY_20 = "Entrée principale de la station moyenne",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "Entrée principale de la station de 20m de large.",
+            MENU_MODULE_MAIN_ENTRY_40 = "Entrée principale de la grande station",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "Entrée principale de la station de 40m de large.",
+            MENU_MODULE_PLATFORM_OVERPASS_COL = "Passerelle de plateforme",
+            MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Placez un nœud de passerelle de plateforme.",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP = "Accès par escalier à la passerelle de plateforme",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP_DESC = "Placez un accès à l'escalier à la passerelle.",
+            MENU_MODULE_PLATFORM_PLACEHOLDER = "Espace réservé pour la disposition",
+            MENU_MODULE_PLATFORM_PLACEHOLDER_DESC = " Pour faire un espace vide entre les plateformes ou les voies.",
+            MENU_MODULE_PLATFORM = "Plateforme",
+            MENU_MODULE_PLATFORM_DESC = " Une section de plateforme d'environ 20m de long.",
+            MENU_MODULE_PLATFORM_ROOF = "Toit de plateforme",
+            MENU_MODULE_PLATFORM_ROOF_DESC = " Toit simple sur la plateforme",
+            MENU_MODULE_STAIRS_ENTRY = "Entrée en escalier simple",
+            MENU_MODULE_STAIRS_ENTRY_DESC = "",
+            MENU_MODULE_PLATFORM_UNDERPASS = "Entrée de passage inférieur sur la plateforme",
+            MENU_MODULE_PLATFORM_UNDERPASS_DESC = "Placez une entrée de passage inférieur sur la plateforme.",
+            MENU_MODULE_WALL_CONCRETE = "Murs en béton",
+            MENU_MODULE_WALL_CONCRETE_DESC = "Murs de soutènement en béton",
+            MENU_MODULE_WALL_BRICK = "Murs en briques",
+            MENU_MODULE_WALL_BRICK_DESC = "Murs de soutènement en briques",
+            MENU_MODULE_WALL_ARCH = "Murs en briques en arc",
+            MENU_MODULE_WALL_ARCH_DESC = "Murs de soutènement de style arc",
+            MENU_MODULE_SOUND_INSULATION_DESC = "Murs d'isolation acoustique",
+            MENU_MODULE_BRIDGE_VOID = "Structure flottante",
+            MENU_MODULE_BRIDGE_VOID_DESC = "Placez ceci pour faire flotter des voies ou des plateformes dans les airs.",
+            MODULE_REMOVE_HELPER = "Assistant de suppression de plateforme/voie",
+            MODULE_REMOVE_HELPER_DESC = "Aidez à supprimer des plateformes ou des voies.",
+            MENU_MODULE_COLOR_GREEN = "Vert",
+            MENU_MODULE_COLOR_GREEN_DESC = "Vert pour certains composants applicables",
+            MENU_MODULE_COLOR_RED = "Rouge",
+            MENU_MODULE_COLOR_RED_DESC = "Rouge pour certains composants applicables",
+            MENU_MODULE_COLOR_WHITE = "Blanc",
+            MENU_MODULE_COLOR_WHITE_DESC = "Blanc pour certains composants applicables",
+            MENU_MODULE_COLOR_YELLOW = "Jaune",
+            MENU_MODULE_COLOR_YELLOW_DESC = "Jaune pour certains composants applicables",
+            MENU_MODULE_CATENARY = "Commutateur de caténaire",
+            MENU_MODULE_CATENARY_DESC = "Electrification ou délectrification les voies",
+            MENU_MODULE_PLATFORM_SEATS = "Place assise",
+            MENU_MODULE_PLATFORM_SEATS_DESC = "Mettez des places assises pour les passagers.",
+            MENU_MODULE_PLATFORM_TRASHBIN = "Poubelle",
+            MENU_MODULE_PLATFORM_TRASHBIN_DESC = "Mettez des poubelles sur les plateformes.",
+            MENU_MODULE_PLATFORM_SIGN = "Signes & Horloges",
+            MENU_MODULE_PLATFORM_SIGN_DESC = "Mettez le numéro de la plateforme, le nom de la gare et les horloges sur les plateformes.",
+            MENU_MODULE_OPEN_CUT = "Tranche ouverte",
+            MENU_MODULE_OPEN_CUT_DESC = "Faites une tranche ouverte sur les plateformes ou les voies.",
+            MENU_MODULE_VOID_TUNNEL = "Tunnel sans portail"
+        
+        },
     }
     return profile
 end
