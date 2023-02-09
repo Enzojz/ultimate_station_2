@@ -119,7 +119,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     for i = 1, n + 1 do
         local interLength = (leftLane[i] - rightLane[i]):length() / 2
-        local interSegs = interLength < 5 and 1 or math.floor(interLength / 5)
+        local interSegs = interLength < 3 and 1 or (math.floor((interLength - 3) / 5) + 1)
         local leftInterVec = (centerLane[i] - leftLane[i]) / interSegs
         local rightInterVec = (centerLane[i] - rightLane[i]) / interSegs
         leftInterPts[i] = func.seqMap({0, interSegs}, function(n) return leftLane[i] + leftInterVec * n end)
