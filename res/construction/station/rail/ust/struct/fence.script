@@ -138,11 +138,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
             insert(result.models, ust.newModel(config.pole:format(color), tag, transf));
         end
     elseif data == 1 or data == 5 then
-        local n = math.ceil(m.info.width / config.width + 0.5)
-        local baseLength = m.info.width / n
         local ptL = info.arcs.left:pt(data == 1 and info.arcs.left.sup or info.arcs.left.inf)
         local ptR = info.arcs.right:pt(data == 1 and info.arcs.right.sup or info.arcs.right.inf)
         
+        local width = (ptL - ptR):length()
+        local n = math.ceil(width / config.width + 0.5)
+        local baseLength = width / n
         local vec = (ptR - ptL):normalized()
         
         for i = 1, n do
