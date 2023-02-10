@@ -346,12 +346,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         if isFirst and not isPlatform[5] then
             insert(result.models, ust.unitLane(centerLane[sup], centerLane[inf], tag))
-            insert(result.models, ust.unitLane(centerLane[inf], centerPts[inf] + hVec, tag))
+            
+            local vecLeft = (centerPts[inf] - leftPts[inf]) / (#leftInterPts[inf] - 1)
+            for n = 1, #leftInterPts[inf] do
+                insert(result.models, ust.unitLane(leftPts[inf] + vecLeft * (n - 1) + hVec, leftInterPts[inf][n], tag))
+            end
+            
+            local vecRight = (centerPts[inf] - rightPts[inf]) / (#rightInterPts[inf] - 1)
+            for n = 1, #rightInterPts[inf] - 1 do
+                insert(result.models, ust.unitLane(rightPts[inf] + vecRight * (n - 1) + hVec, rightInterPts[inf][n], tag))
+            end
         end
         if isLast and not isPlatform[1] then
             insert(result.models, ust.unitLane(centerLane[sup], centerLane[inf], tag))
-            insert(result.models, ust.unitLane(centerLane[sup], centerPts[sup] + hVec, tag))
             
+            local vecLeft = (centerPts[sup] - leftPts[sup]) / (#leftInterPts[sup] - 1)
+            for n = 1, #leftInterPts[sup] do
+                insert(result.models, ust.unitLane(leftPts[sup] + vecLeft * (n - 1) + hVec, leftInterPts[sup][n], tag))
+            end
+            
+            local vecRight = (centerPts[sup] - rightPts[sup]) / (#rightInterPts[sup] - 1)
+            for n = 1, #rightInterPts[sup] - 1 do
+                insert(result.models, ust.unitLane(rightPts[sup] + vecRight * (n - 1) + hVec, rightInterPts[sup][n], tag))
+            end
+
             for n = 1, #leftInterPts[sup] - 1 do
                 insert(result.models, ust.unitLane(leftInterPts[sup][n], leftInterPts[sup][n + 1], tag))
             end
