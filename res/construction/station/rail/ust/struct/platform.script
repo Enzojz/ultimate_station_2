@@ -108,10 +108,16 @@ local preProcessAdd = function(modules, change, classedModules, info)
         end
 
         local width = change.module.metadata.width
+        local leftOverlap = 0
+        local rightOverlap = 0
         if isPlatform(5) then
             width = modules[octa[5]].info.width
+            leftOverlap = modules[octa[5]].info.leftOverlap
+            rightOverlap = modules[octa[5]].info.rightOverlap
         elseif isPlatform(1) then
             width = modules[octa[1]].info.width
+            leftOverlap = modules[octa[1]].info.leftOverlap
+            rightOverlap = modules[octa[1]].info.rightOverlap
         end        
         
         local newInfo = {
@@ -120,6 +126,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
             pos = pos,
             length = 20,
             width = width,
+            leftOverlap = leftOverlap,
+            rightOverlap = rightOverlap,
             ref = ref
         }
         local slotId, dataIds = ust.slotIds(newInfo)

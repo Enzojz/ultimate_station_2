@@ -1,0 +1,129 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+
+local unpack = table.unpack
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+
+---comment
+---@param result result
+---@param tag string
+---@param slotId number
+---@param params params
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local sId = params.classedModules[id].slotId
+    local info = params.modules[sId].info
+    local transZ = coor.transZ(info.height)
+    local makeData = params.modules[sId].makeData
+    
+    -- Entry for radius system
+    local arcs = info.arcs
+    local transf = info.transf * transZ
+    
+    insert(result.slots, {
+        id = makeData(93, -1),
+        transf = transf,
+        type = "ust_overlap_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    local textR = ("%.1fm | %.1fm"):format(info.leftOverlap or 0, info.rightOverlap or 0)
+    
+    local centerPts, vecs = ust.basePts(info.arcs.center, 12)
+    local rightPts = ust.basePts(info.arcs.right, 12)
+    local leftPts = ust.basePts(info.arcs.left, 12)
+    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[7]):mRot()
+    
+    local addText = function(label, pos, fTrans, h)
+        local nameModelsF, width = livetext(h or 2)(label)
+        for _, m in ipairs(nameModelsF(function() return fTrans(width) * coor.rotX90N * rotZ * coor.trans(pos) * transZ end)) do
+            insert(result.models, m)
+        end
+    end
+    
+    addText(textR, centerPts[7], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) end, 0.5)
+    
+    insert(result.slots, {
+        id = makeData(93, -2),
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[4]):mRot() * coor.trans(centerPts[4]) * transZ,
+        type = "ust_overlap_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    addText("⊘", centerPts[4], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) end, 1)
+    
+    for i = -10, 10, 1 do
+        if i ~= 0 then
+            local dw = coor.xyz(i * 0.1, 0, 0)
+            insert(result.slots, {
+                id = makeData(94, ((info.leftOverlap or 0) * 10 + i)),
+                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(-dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(leftPts[7]) * transZ,
+                type = "ust_overlap_modifier",
+                shape = 0,
+                spacing = {0, 0, 0, 0}
+            })
+            
+            insert(result.slots, {
+                id = makeData(94, (info.rightOverlap or 0) * 10 + i + 40),
+                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(rightPts[7]) * transZ,
+                type = "ust_overlap_modifier",
+                shape = 0,
+                spacing = {0, 0, 0, 0}
+            })
+            
+            if i % 2 == 1 then
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[6] - (dw .. rotZ), function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY90N * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[6] + (dw .. rotZ), function(w) return coor.transZ(-0.075) * coor.rotY90P * coor.transX(0.1) end, 0.25)
+            else
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[8] - (dw .. rotZ), function(w) return coor.transZ(-0.075) * coor.rotY90N * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[8] + (dw .. rotZ), function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY90P * coor.transX(0.1) end, 0.25)
+            end
+        end
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_OVERLAP_MODIFIER"),
+            description = _("MENU_OVERLAP_MODIFIER_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_modifier"},
+        },
+        type = "ust_overlap_modifier",
+        order = {
+            value = 6,
+        },
+        metadata = {
+            typeName = "ust_overlap_modifier",
+            isData = true,
+            type = 93,
+            scriptName = "construction/station/rail/ust/modifier/overlap",
+            preProcessAdd = "preProcessAdd",
+            preProcessPostAdd = "preProcessPostAdd",
+            classify = "classify",
+            slotSetup = "slotSetup"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -1,4 +1,5 @@
 local func = require "ust/func"
+local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local arc = require "ust/coorarc"
 local quat = require "ust/quaternion"
@@ -95,14 +96,13 @@ ust.slotIds = function(info)
         } or info.straight and {
             ust.mixData(ust.base(info.id, 56), 0)
         } or {},
-        geometry = info.width and {
+        geometry = func.filter({
             ust.mixData(ust.base(info.id, 57), info.length),
-            ust.mixData(ust.base(info.id, 58), info.width * 10),
-            ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
-        } or {
-            ust.mixData(ust.base(info.id, 57), info.length),
-            ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10))
-        },
+            ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10)),
+            info.width and ust.mixData(ust.base(info.id, 58), info.width * 10) or false,
+            info.leftOverlap and ust.mixData(ust.base(info.id, 67), info.leftOverlap * 10) or false,
+            info.rightOverlap and ust.mixData(ust.base(info.id, 68), info.rightOverlap * 10) or false,
+        }, pipe.noop()),
         ref = {
             info.ref and
             ust.mixData(ust.base(info.id, 60),
@@ -131,11 +131,11 @@ ust.slotInfo = function(slotId)
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
         --       : 61 gradient inf 62 gradient sup 63 wall gradient [7] 64 wall gradient [3]
-        --       : 65 fence color 66 overpass color
+        --       : 65 fence color 66 overpass color 67 overlap lef 68 overlap right
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall gradient 91 92 ref
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall gradient 91 92 ref 93 94 overlap
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
@@ -393,7 +393,6 @@ ust.classifyData = function(modules, classified, slotId)
     local type, id, data = ust.slotInfo(slotId)
     
     classified[id].slot[type] = slotId
-    classified[id].info[type] = data
     classified[id].metadata[type] = modules[slotId].metadata
     
     modules[slotId].info = {

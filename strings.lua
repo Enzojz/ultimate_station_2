@@ -223,7 +223,9 @@ function data()
             MENU_MODULE_PLATFORM_SIGN_DESC = "Put platform number, station name and clocks on platforms.",
             MENU_MODULE_OPEN_CUT = "Open-cut",
             MENU_MODULE_OPEN_CUT_DESC = "Make an open cut over platforms or tracks.",
-            MENU_MODULE_VOID_TUNNEL = "Tunnel without portal"
+            MENU_MODULE_VOID_TUNNEL = "Tunnel without portal",
+            MENU_OVERLAP_MODIFIER = "Overlapping modifier",
+            MENU_OVERLAP_MODIFIER_DESC = "Makes platform and track closer"
         },
         zh_CN = {
             MOD_NAME = "终极车站",
@@ -314,7 +316,9 @@ function data()
             MENU_MODULE_PLATFORM_SIGN_DESC = "在站台上布置站台号、车站站牌名与时钟。",
             MENU_MODULE_OPEN_CUT = "开洞",
             MENU_MODULE_OPEN_CUT_DESC = "在站台和轨道上方的地面开洞",
-            MENU_MODULE_VOID_TUNNEL = "无入口隧道"
+            MENU_MODULE_VOID_TUNNEL = "无入口隧道",
+            MENU_OVERLAP_MODIFIER = "交叠修改器",
+            MENU_OVERLAP_MODIFIER_DESC = "让站台离轨道更近一些."
         },
         zh_TW = {MOD_NAME = "終極車站",
             MOD_DESC = zhhkmotw,
@@ -404,7 +408,9 @@ function data()
             MENU_MODULE_PLATFORM_SIGN_DESC = "在月臺上佈置月臺號、車站站牌名與時鐘。",
             MENU_MODULE_OPEN_CUT = "開洞",
             MENU_MODULE_OPEN_CUT_DESC = "在月臺和軌道上方的地面開洞",
-            MENU_MODULE_VOID_TUNNEL = "無入口隧道"
+            MENU_MODULE_VOID_TUNNEL = "無入口隧道",
+            MENU_OVERLAP_MODIFIER = "交疊修改器",
+            MENU_OVERLAP_MODIFIER_DESC = "讓月臺離軌道更近一些."
         },
         fr = {
             MOD_NAME = "Gare ultime",
@@ -494,7 +500,9 @@ function data()
             MENU_MODULE_PLATFORM_SIGN_DESC = "Mettez le numéro de la plateforme, le nom de la gare et les horloges sur les plateformes.",
             MENU_MODULE_OPEN_CUT = "Tranche ouverte",
             MENU_MODULE_OPEN_CUT_DESC = "Faites une tranche ouverte sur les plateformes ou les voies.",
-            MENU_MODULE_VOID_TUNNEL = "Tunnel sans portail"
+            MENU_MODULE_VOID_TUNNEL = "Tunnel sans portail",
+            MENU_OVERLAP_MODIFIER = "Modificateur de chevauchement",
+            MENU_OVERLAP_MODIFIER_DESC = "Rend la plateforme et la voie plus proche."
         
         },
     }

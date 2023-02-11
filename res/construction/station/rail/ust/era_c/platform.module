@@ -61,6 +61,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left)
     local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right)
     
+    local leftOverlap = isPlatform[7] and 0 or (info.leftOverlap or 0)
+    local rightOverlap = isPlatform[3] and 0 or (info.rightOverlap or 0)
+
     local n = 4
     
     local leftPts = ust.basePts(info.arcs.left, n)
@@ -78,13 +81,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftInterPts = {}
     local rightInterPts = {}
     local centerLane = {}
-    
+
     for i = 1, n + 1 do
         local vec = (leftPts[i] - rightPts[i]):normalized()
-        leftEdge[i] = leftPts[i]
-        rightEdge[i] = rightPts[i]
-        leftCentre[i] = leftPts[i] - vec * 0.85
-        rightCentre[i] = rightPts[i] + vec * 0.85
+        leftEdge[i] = leftPts[i] + vec * leftOverlap
+        rightEdge[i] = rightPts[i] - vec * rightOverlap
+        leftCentre[i] = leftPts[i] + vec * leftOverlap - vec * 0.85
+        rightCentre[i] = rightPts[i] - vec * rightOverlap + vec * 0.85
         
         leftLaneBorder[i] = leftPts[i] + hVec
         rightLaneBorder[i] = rightPts[i] + hVec
