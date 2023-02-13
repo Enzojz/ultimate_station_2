@@ -1,0 +1,161 @@
+local ust = require "ust"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local insert = table.insert
+
+local setHeight = function(modules, classedModules, slotId, cid, height)
+    local m = modules[slotId]
+    local info = m.info
+    local id = info.id
+    
+    if classedModules[id].slot[cid] then
+        modules[classedModules[id].slot[cid]] = nil
+    end
+    
+    if height then
+        local addSlot = ust.mixData(ust.base(id, cid), height)
+        modules[addSlot] = {
+            metadata = {isData = true},
+            name = "station/rail/ust/data/geometry.module",
+            updateScript = {
+                fileName = "",
+                params = {}
+            },
+            variant = 0
+        }
+    end
+end
+
+local default = 3
+local preProcessAdd = function(modules, change, classedModules, info)
+    if info.type == 89 and info.data == -1 then -- Remove modifer
+        modules[ust.base(info.id, 89)] = nil
+    elseif info.type == 89 and info.data == -2 then
+    elseif info.type == 89 and info.data > 0 then
+        modules[change.slotId] = change.module
+    else
+        ust.octa(modules, classedModules)
+        local id = info.id
+        local m = modules[classedModules[id].slotId]
+        if info.type == 89 and info.data == -3 then
+        
+        elseif info.type == 90 then
+            if info.data > 0 then
+                local data = info.data
+                if data < 35 then
+                    local delta = data - 20
+                    local wallHeight = m.info.rightWallHeightInf or default
+                    local newHeight = wallHeight * 10 + delta
+                    setHeight(modules, classedModules, classedModules[id].slotId, 63, newHeight)
+                elseif data < 65 then
+                    local delta = data - 50
+                    local wallHeight =(((m.info.rightWallHeightSup or default) + (m.info.rightWallHeightInf or default)) * 0.5)
+                    local newHeight = math.floor(wallHeight * 10 + delta)
+                    setHeight(modules, classedModules, classedModules[id].slotId, 63, newHeight)
+                    setHeight(modules, classedModules, classedModules[id].slotId, 64, newHeight)
+                else
+                    local delta = data - 80
+                    local wallHeight = m.info.rightWallHeightSup or default
+                    local newHeight = wallHeight * 10 + delta
+                    setHeight(modules, classedModules, classedModules[id].slotId, 64, newHeight)
+                end
+            else
+                local data = -info.data
+                if data < 35 then
+                    local delta = data - 20
+                    local wallHeight = m.info.leftWallHeightInf or default
+                    local newHeight = wallHeight * 10 + delta
+                    setHeight(modules, classedModules, classedModules[id].slotId, 61, newHeight)
+                elseif data < 65 then
+                    local delta = data - 50
+                    local wallHeight = ((m.info.leftWallHeightSup or default) + (m.info.leftWallHeightInf or default)) * 0.5
+                    local newHeight = math.floor(wallHeight * 10 + delta)
+                    setHeight(modules, classedModules, classedModules[id].slotId, 61, newHeight)
+                    setHeight(modules, classedModules, classedModules[id].slotId, 62, newHeight)
+                else
+                    local delta = data - 80
+                    local wallHeight = m.info.leftWallHeightSup or default
+                    local newHeight = wallHeight * 10 + delta
+                    setHeight(modules, classedModules, classedModules[id].slotId, 62, newHeight)
+                end
+            end
+        end
+    end
+end
+
+local preProcessPostAdd = function(modules, change, slotId, classedModules, info)
+    if info.type < 50 or (info.type > 79 and info.type ~= 89 and info.type ~= 90) then
+        modules[slotId] = nil
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local info = params.modules[slotId].info
+    local id = info.id
+    local parent = params.classedModules[id].slotId
+    local m = params.modules[parent]
+    
+    insert(result.slots, {
+        id = slotId,
+        transf = m.info.transf,
+        type = "ust_wall_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+end
+
+local classifyData = function(modules, classified, slotId)
+    local type, id, data = ust.classifyData(modules, classified, slotId)
+    local slotId = classified[id].slotId
+    modules[slotId].info.canModifyWallHeight = true
+end
+
+local addSlot = function(params, result)
+    local anyWallHeightModifiable = false
+    for _, module in pairs(params.modules) do
+        anyWallHeightModifiable = anyWallHeightModifiable or module.info.canModifyWallHeight
+    end
+    
+    for slotId, module in pairs(params.modules) do
+        if (module.metadata and module.metadata.isWall) then
+            local data = module.info.data
+            local parentSlotId = params.classedModules[module.info.id].slotId
+            local m = params.modules[parentSlotId]
+            local info = m.info
+            local makeData = m.makeData
+            local refH = info.height
+            
+            local rightPts, rightVecs = ust.basePts(info.arcs.right, 4)
+            local leftPts, leftVecs = ust.basePts(info.arcs.left, 4)
+            
+            if not anyWallHeightModifiable then
+                if data == 3 then
+                    table.insert(result.slots, {
+                        id = makeData(89, 3),
+                        transf = coor.scale(coor.xyz(0.2, 1, 1)) * quat.byVec(coor.xyz(0, 1, 0), rightVecs[3]):mRot() * coor.trans(rightPts[3]) * coor.transZ(refH),
+                        type = "ust_wall_height_modifier",
+                        spacing = {0, 0, 0, 0}
+                    })
+                elseif data == 7 then
+                    table.insert(result.slots, {
+                        id = makeData(89, 7),
+                        transf = coor.scale(coor.xyz(0.2, 1, 1)) * quat.byVec(coor.xyz(0, 1, 0), leftVecs[3]):mRot() * coor.trans(leftPts[3]) * coor.transZ(refH),
+                        type = "ust_wall_height_modifier",
+                        spacing = {0, 0, 0, 0}
+                    })
+                end
+            end
+        end
+    end
+end
+
+function data()
+    return {
+        classify = classifyData,
+        preProcessAdd = preProcessAdd,
+        preProcessPostAdd = preProcessPostAdd,
+        slotSetup = slotSetup,
+        addSlot = addSlot
+    }
+
+end

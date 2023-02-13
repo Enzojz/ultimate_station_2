@@ -175,11 +175,19 @@ local preProcessRemove = function(modules, change, classedModules, info)
     end
 end
 
+local preProcessRemoveWall = function(modules, change, classedModules, info)
+    modules[change.slotId] = nil
+    if modules[change.slotId + ust.mixData(0, 20)] then
+        modules[change.slotId + ust.mixData(0, 20)] = nil
+    end
+end
+
 function data()
     return {
         classify = ust.classifyComp,
         addSlot = addSlot,
         updateFn = updateFn,
-        preProcessRemove = preProcessRemove
+        preProcessRemove = preProcessRemove,
+        preProcessRemoveWall = preProcessRemoveWall
     }
 end

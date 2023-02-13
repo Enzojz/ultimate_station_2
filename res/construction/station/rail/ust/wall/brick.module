@@ -95,6 +95,7 @@ function data()
             typeName = "ust_component_fence",
             isComponent = true,
             isFence = true,
+            isWall = true,
             typeId = 24,
             width = 5
         },

@@ -1,0 +1,196 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+local ust = require "ust"
+
+local unpack = table.unpack
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+
+---comment
+---@param result result
+---@param tag string
+---@param slotId number
+---@param params params
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local m = params.modules[params.classedModules[id].slotId]
+    local info = m.info
+    local makeData = m.makeData
+    local pos = params.modules[slotId].info.data
+    
+    
+    local transZ = coor.transZ(info.height)
+    local transf = info.transf * transZ
+    
+    insert(result.slots, {
+        id = makeData(89, -1),
+        transf = transf,
+        type = "ust_wall_height_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    local centerPts, vecs = ust.basePts(info.arcs.center, 4)
+    local rightPts = ust.basePts(info.arcs.right, 4)
+    local leftPts = ust.basePts(info.arcs.left, 4)
+    
+    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[3]):mRot()
+    local textR = ("H: %d mm"):format(info.height * 1000)
+    
+    local addText = function(label, pos, fTrans, h)
+        local nameModelsF, width = livetext(h or 2)(label)
+        for _, m in ipairs(nameModelsF(function() return fTrans(width) * rotZ * coor.trans(pos) * transZ end)) do
+            insert(result.models, m)
+        end
+    end
+    
+    addText(textR, centerPts[3], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX90N end, 0.5)
+    
+    -- insert(result.slots, {
+    --     id = makeData(89, -2),
+    --     transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[9]):mRot() * coor.trans(centerPts[9]) * transZ,
+    --     type = "ust_wall_height_modifier",
+    --     spacing = {0, 0, 0, 0}
+    -- })
+    -- addText("⊘", centerPts[9], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    -- if info.octa[1] and params.modules[info.octa[1]] then
+    --     insert(result.slots, {
+    --         id = makeData(89, 1),
+    --         transf = coor.rotZ90P * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[21]):mRot() * coor.trans(centerPts[21]) * transZ,
+    --         type = "ust_wall_height_modifier",
+    --         spacing = {0, 0, 0, 0},
+    --         shape = 1
+    --     })
+    -- end
+    -- if info.octa[5] and params.modules[info.octa[5]] then
+    --     insert(result.slots, {
+    --         id = makeData(89, 5),
+    --         transf = coor.rotZ90N * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[1]):mRot() * coor.trans(centerPts[1]) * transZ,
+    --         type = "ust_wall_height_modifier",
+    --         spacing = {0, 0, 0, 0},
+    --         shape = 1
+    --     })
+    -- end
+    -- if info.octa[3] and params.modules[info.octa[3]] then
+    --     insert(result.slots, {
+    --         id = makeData(89, 3),
+    --         transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(rightPts[11]) * transZ,
+    --         type = "ust_wall_height_modifier",
+    --         spacing = {0, 0, 0, 0},
+    --         shape = 1
+    --     })
+    -- end
+    -- if info.octa[7] and params.modules[info.octa[7]] then
+    --     insert(result.slots, {
+    --         id = makeData(89, 7),
+    --         transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(leftPts[11]) * transZ,
+    --         type = "ust_wall_height_modifier",
+    --         spacing = {0, 0, 0, 0},
+    --         shape = 1
+    --     })
+    -- end
+    -- insert(result.slots, {
+    --     id = makeData(89, -3),
+    --     transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[13]):mRot() * coor.trans(centerPts[13]) * transZ,
+    --     type = "ust_wall_height_modifier",
+    --     spacing = {0, 0, 0, 0}
+    -- })
+    -- addText("⤨", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    -- addText("⤪", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    local rotZ1 = quat.byVec(coor.xyz(0, -1, 0), vecs[1]):mRot()
+    local rotZ3 = quat.byVec(coor.xyz(0, -1, 0), vecs[3]):mRot()
+    local rotZ5 = quat.byVec(coor.xyz(0, -1, 0), vecs[5]):mRot()
+    for i = -10, 10, 1 do
+        if (i ~= 0) then
+            local dz = coor.xyz(0, 0, i * 0.1)
+            if pos == 7 then
+                local hSup = info.leftWallHeightSup or 3
+                local hInf = info.leftWallHeightInf or 3
+                local loopvars = {
+                    {20, 1, rotZ1, vecs[1], hInf},
+                    {80, 5, rotZ5, vecs[5], hSup},
+                    {50, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5}
+                }
+                for _, z in ipairs(loopvars) do
+                    local diff, ref, rotZ, vec, h = unpack(z)
+                    insert(result.slots, {
+                        id = makeData(90, -i - diff),
+                        transf = coor.rotY90P * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ * coor.trans(leftPts[ref] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + h),
+                        type = "ust_wall_height_modifier",
+                        shape = 0,
+                        spacing = {0, 0, 0, 0}
+                    })
+                end
+            elseif pos == 3 then
+                local hSup = info.rightWallHeightSup or 3
+                local hInf = info.rightWallHeightInf or 3
+                local loopvars = {
+                    {20, 1, rotZ1, vecs[1], hInf},
+                    {80, 5, rotZ5, vecs[5], hSup},
+                    {50, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5}
+                }
+                for _, z in ipairs(loopvars) do
+                    local diff, ref, rotZ, vec, h = unpack(z)
+                    insert(result.slots, {
+                        id = makeData(90, i + diff),
+                        transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ * coor.trans(rightPts[ref] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + h),
+                        type = "ust_wall_height_modifier",
+                        shape = 0,
+                        spacing = {0, 0, 0, 0}
+                    })
+                end
+            end
+        
+        -- if i % 2 == 1 then
+        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+        -- else
+        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+        -- end
+        end
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_HEIGHT_MODIFIER"),
+            description = _("MENU_HEIGHT_MODIFIER_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_modifier"},
+        },
+        type = "ust_wall_height_modifier",
+        order = {
+            value = 7,
+        },
+        metadata = {
+            typeName = "ust_wall_height_modifier",
+            isData = true,
+            type = 89,
+            scriptName = "construction/station/rail/ust/modifier/wall_height",
+            preProcessAdd = "preProcessAdd",
+            preProcessPostAdd = "preProcessPostAdd",
+            classify = "classify",
+            slotSetup = "slotSetup"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

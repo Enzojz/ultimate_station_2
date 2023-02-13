@@ -1,5 +1,6 @@
 local coor = require "ust/coor"
 local ust = require "ust"
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -14,37 +15,44 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local hTrans = coor.transZ(baseHeight)
     
-    local h = 3
     if data == 3 or data == 7 then
-        local sideModule = info.octa[data] and params.modules[info.octa[data]]
-        if sideModule then
-            local info = sideModule.info
-            local sideHeight = info.height
-            if sideHeight - baseHeight > 3 then
-                h = sideHeight - baseHeight
-            end
-        end
+        local hInf = (data == 7 and info.leftWallHeightInf or info.rightWallHeightInf) or 3
+        local hSup = (data == 7 and info.leftWallHeightSup or info.rightWallHeightSup) or 3
+        local delta = hSup - hInf
+        -- local sideModule = info.octa[data] and params.modules[info.octa[data]]
+        -- if sideModule then
+        --     local info = sideModule.info
+        --     local sideHeight = info.height
+        --     if sideHeight - baseHeight > 3 then
+        --         h = sideHeight - baseHeight
+        --     end
+        -- end
         local n = 4
         local cpts = ust.basePts(info.arcs.center, n)
         local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
         
         for i = 1, n do
+            local hInf, hSup =  hInf + (delta / n) * (i - 1), hInf + delta * i / n
+            local hRef = hInf > hSup and hInf or hSup
+            local zInf = coor.xyz(0, 0, hInf - hRef)
+            local zSup = coor.xyz(0, 0, hSup - hRef)
             local coords = data == 7 and {
-                rt = pts[i],
-                rb = pts[i + 1],
-                lt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i],
-                lb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
+                rt = pts[i] + zInf,
+                rb = pts[i + 1] + zSup,
+                lt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i] + zInf,
+                lb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1] + zSup
             } or {
-                lt = pts[i],
-                lb = pts[i + 1],
-                rt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i],
-                rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
+                lt = pts[i] + zInf,
+                lb = pts[i + 1] + zSup,
+                rt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i] + zInf,
+                rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1] + zSup
             }
             
-            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, true)))
-            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(h) * hTrans * fitModels(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, false)))
         end
     elseif data == 1 or data == 5 then
+        local h = 3
         local rank = data == 5 and 1 or 3
         local n = 2
         local ptsL = ust.basePts(info.arcs.left, n)
@@ -95,6 +103,7 @@ function data()
             typeName = "ust_component_fence",
             isComponent = true,
             isFence = true,
+            isWall = true,
             typeId = 24,
             width = 5
         },

@@ -130,12 +130,13 @@ ust.slotInfo = function(slotId)
         -- 3 ~ 6 : id
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
-        --       : 61 gradient inf 62 gradient sup 63 wall gradient [7] 64 wall gradient [3]
-        --       : 65 fence color 66 overpass color 67 overlap lef 68 overlap right
+        --       : 61 wall height inf left 62 wall height sup left 63 wall height inf right 61 wall height sup right
+        --       : 65 fence color 66 overpass color 67 overlap left 68 overlap right
+        --       : 
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall gradient 91 92 ref 93 94 overlap
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall height 91 92 ref 93 94 overlap
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000

@@ -43,6 +43,14 @@ local classifyGeometry = function(modules, classified, slotId)
         modules[slotId].info.leftOverlap = data * 0.1
     elseif (type == 68) then
         modules[slotId].info.rightOverlap = data * 0.1
+    elseif (type == 61) then
+        modules[slotId].info.leftWallHeightInf = data * 0.1
+    elseif (type == 62) then
+        modules[slotId].info.leftWallHeightSup = data * 0.1
+    elseif (type == 63) then
+        modules[slotId].info.rightWallHeightInf = data * 0.1
+    elseif (type == 64) then
+        modules[slotId].info.rightWallHeightSup = data * 0.1
     end
 end
 
