@@ -28,17 +28,6 @@ function data()
                 wrapT = "REPEAT",
             
             },
-            map_normal = {
-                compressionAllowed = true,
-                fileName = "default_normal_map.dds",
-                magFilter = "LINEAR",
-                minFilter = "LINEAR_MIPMAP_LINEAR",
-                mipmapAlphaScale = 0,
-                type = "TWOD",
-                wrapS = "REPEAT",
-                wrapT = "REPEAT",
-            
-            },
             polygon_offset = {
                 factor = 0,
                 units = 0,
@@ -46,11 +35,21 @@ function data()
             },
             two_sided = {
                 twoSided = false,
-            
             },
+			map_op_1 = {
+				fileName = "models/ust/op/xy.dds",
+				magFilter = "LINEAR",
+				minFilter = "LINEAR_MIPMAP_LINEAR",
+			},
+			operation_1 = {
+				op = "MULTIPLICATION",
+				mode = "NORMAL",
+				scale = { 1.0, 1.0 },
+				opacity = -128
+			}, 
         
         },
-        type = "PHYSICAL_NRML_MAP",
+        type = "PHYSICAL_OP",
     
     }
 end

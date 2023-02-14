@@ -30,7 +30,7 @@ function data()
                         size = { 0, 2 },
                         type = "CUSTOM",
                         alphaMode = "BLEND",
-                        renderMode = "EMISSIVE",
+                        renderMode = "STD",
                         alignment = "CENTER",
                         verticalAlignment = "CENTER",
                         fitting = "NONE",
