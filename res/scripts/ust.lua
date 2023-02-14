@@ -130,8 +130,7 @@ ust.slotInfo = function(slotId)
         -- 3 ~ 6 : id
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
-        --       : 61 wall height inf left 62 wall height sup left 63 wall height inf right 61 wall height sup right
-        --       : 65 fence color 66 overpass color 67 overlap left 68 overlap right
+        --       : 67 overlap left 68 overlap right
         --       : 
         -- 3 ~ 6 : id
         -- > 6: data

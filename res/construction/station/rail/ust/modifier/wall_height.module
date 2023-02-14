@@ -8,6 +8,7 @@ local insert = table.insert
 local ma = math
 local pi = ma.pi
 
+local default = 3
 ---comment
 ---@param result result
 ---@param tag string
@@ -101,35 +102,44 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rotZ1 = quat.byVec(coor.xyz(0, -1, 0), vecs[1]):mRot()
     local rotZ3 = quat.byVec(coor.xyz(0, -1, 0), vecs[3]):mRot()
     local rotZ5 = quat.byVec(coor.xyz(0, -1, 0), vecs[5]):mRot()
-    for i = -10, 10, 1 do
-        if (i ~= 0) then
-            local dz = coor.xyz(0, 0, i * 0.1)
-            if pos == 7 then
-                local hSup = info.leftWallHeightSup or 3
-                local hInf = info.leftWallHeightInf or 3
-                local loopvars = {
-                    {20, 1, rotZ1, vecs[1], hInf},
-                    {80, 5, rotZ5, vecs[5], hSup},
-                    {50, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5}
-                }
+    if pos == 7 then
+        local hSlotIdSup = makeData(24, 28)
+        local hSlotIdInf = makeData(24, 26)
+        local hSup = params.modules[hSlotIdSup] and params.modules[hSlotIdSup].variant * 0.1 or default
+        local hInf = params.modules[hSlotIdInf] and params.modules[hSlotIdInf].variant * 0.1 or default
+        local loopvars = {
+            {30, 1, rotZ1, vecs[1], hInf},
+            {60, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5},
+            {90, 5, rotZ5, vecs[5], hSup}
+        }
+        for i = -10, 10, 1 do
+            if (i ~= 0) then
+                local dz = coor.xyz(0, 0, i * 0.1)
                 for _, z in ipairs(loopvars) do
                     local diff, ref, rotZ, vec, h = unpack(z)
                     insert(result.slots, {
-                        id = makeData(90, -i - diff),
+                        id = makeData(90, i - diff),
                         transf = coor.rotY90P * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ * coor.trans(leftPts[ref] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + h),
                         type = "ust_wall_height_modifier",
                         shape = 0,
                         spacing = {0, 0, 0, 0}
                     })
                 end
-            elseif pos == 3 then
-                local hSup = info.rightWallHeightSup or 3
-                local hInf = info.rightWallHeightInf or 3
-                local loopvars = {
-                    {20, 1, rotZ1, vecs[1], hInf},
-                    {80, 5, rotZ5, vecs[5], hSup},
-                    {50, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5}
-                }
+            end
+        end
+    elseif pos == 3 then
+        local hSlotIdSup = makeData(24, 22)
+        local hSlotIdInf = makeData(24, 24)
+        local hSup = params.modules[hSlotIdSup] and params.modules[hSlotIdSup].variant * 0.1 or default
+        local hInf = params.modules[hSlotIdInf] and params.modules[hSlotIdInf].variant * 0.1 or default
+        local loopvars = {
+            {30, 1, rotZ1, vecs[1], hInf},
+            {60, 3, rotZ3, vecs[3], (hSup + hInf) * 0.5},
+            {90, 5, rotZ5, vecs[5], hSup}
+        }
+        for i = -10, 10, 1 do
+            if (i ~= 0) then
+                local dz = coor.xyz(0, 0, i * 0.1)
                 for _, z in ipairs(loopvars) do
                     local diff, ref, rotZ, vec, h = unpack(z)
                     insert(result.slots, {
@@ -141,15 +151,84 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                     })
                 end
             end
-        
-        -- if i % 2 == 1 then
-        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
-        -- else
-        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-        --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
-        -- end
         end
+    elseif pos == 1 then
+        local hSlotIdLeft = makeData(24, 28)
+        local hSlotIdRight = makeData(24, 22)
+        local hLeft = params.modules[hSlotIdLeft] and params.modules[hSlotIdLeft].variant * 0.1 or default
+        local hRight = params.modules[hSlotIdRight] and params.modules[hSlotIdRight].variant * 0.1 or default
+        local vec = vecs[5] .. coor.rotZ90P
+        for i = -10, 10, 1 do
+            if (i ~= 0) then
+                local dz = coor.xyz(0, 0, i * 0.1)
+                insert(result.slots, {
+                    id = makeData(90, i - 90),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ5 * coor.rotZ90P * coor.trans(leftPts[5] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + hLeft),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+                
+                insert(result.slots, {
+                    id = makeData(90, i + 90),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ5 * coor.rotZ90P * coor.trans(rightPts[5] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + hRight),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+                
+                insert(result.slots, {
+                    id = makeData(90, 120 + i),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ5 * coor.rotZ90P * coor.trans(centerPts[5] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + (hRight + hLeft) * 0.5),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    elseif pos == 5 then
+        local hSlotIdLeft = makeData(24, 26)
+        local hSlotIdRight = makeData(24, 24)
+        local hLeft = params.modules[hSlotIdLeft] and params.modules[hSlotIdLeft].variant * 0.1 or default
+        local hRight = params.modules[hSlotIdRight] and params.modules[hSlotIdRight].variant * 0.1 or default
+        local vec = vecs[1] .. coor.rotZ90N
+        for i = -10, 10, 1 do
+            if (i ~= 0) then
+                local dz = coor.xyz(0, 0, i * 0.1)
+                insert(result.slots, {
+                    id = makeData(90, i - 30),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ1 * coor.rotZ90N * coor.trans(leftPts[1] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + hLeft),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+                
+                insert(result.slots, {
+                    id = makeData(90, i + 30),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ1 * coor.rotZ90N * coor.trans(rightPts[1] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + hRight),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+                
+                insert(result.slots, {
+                    id = makeData(90, i),
+                    transf = coor.rotY90N * coor.scale(coor.xyz(1, 0.2, 0.05)) * rotZ1 * coor.rotZ90N * coor.trans(centerPts[1] + dz + (i % 2 == 1 and vec or -vec) * 0.2) * coor.transZ(info.height + (hRight + hLeft) * 0.5),
+                    type = "ust_wall_height_modifier",
+                    shape = 0,
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    
+    -- -- if i % 2 == 1 then
+    -- --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+    -- --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref - 1] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+    -- -- else
+    -- --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+    -- --     addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[ref + 1] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+    -- -- end
+    -- end
     end
 end
 

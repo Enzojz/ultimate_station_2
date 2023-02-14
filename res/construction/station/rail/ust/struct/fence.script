@@ -177,8 +177,17 @@ end
 
 local preProcessRemoveWall = function(modules, change, classedModules, info)
     modules[change.slotId] = nil
-    if modules[change.slotId + ust.mixData(0, 20)] then
-        modules[change.slotId + ust.mixData(0, 20)] = nil
+    if modules[change.slotId + ust.mixData(0, 22)] then
+        modules[change.slotId + ust.mixData(0, 22)] = nil
+    end
+    if modules[change.slotId + ust.mixData(0, 24)] then
+        modules[change.slotId + ust.mixData(0, 24)] = nil
+    end
+    if modules[change.slotId + ust.mixData(0, 26)] then
+        modules[change.slotId + ust.mixData(0, 26)] = nil
+    end
+    if modules[change.slotId + ust.mixData(0, 28)] then
+        modules[change.slotId + ust.mixData(0, 28)] = nil
     end
 end
 
