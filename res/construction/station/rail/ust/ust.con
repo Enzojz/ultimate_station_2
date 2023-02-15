@@ -351,7 +351,7 @@ local updateFn = function(params, closureParams)
             game.res.script[module.metadata.scriptName][module.metadata.slotSetup](params, result, slotId)
         end
     end
-    
+
     -- addSlot adds slots for
     for k, s in pairs(game.res.script) do
         if s.addSlot and k:match("construction/station/rail/ust/") then

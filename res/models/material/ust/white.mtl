@@ -29,8 +29,9 @@ function data()
             
             },
             polygon_offset = {
-                factor = 0,
-                units = 0,
+                factor = -1000,
+                units = 1,
+                forceDepthWrite = true,
             
             },
             two_sided = {

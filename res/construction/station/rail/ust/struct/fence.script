@@ -30,7 +30,7 @@ local addSlot = function(params, result)
                 insert(
                     result.slots, {
                         id = makeData(24, 7),
-                        transf = coor.scale(coor.xyz(5, 0.2, 0)) * transfL,
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfL,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
@@ -47,7 +47,7 @@ local addSlot = function(params, result)
                 insert(
                     result.slots, {
                         id = makeData(24, 3),
-                        transf = coor.scale(coor.xyz(5, 0.2, 0)) * transfR,
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfR,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
@@ -65,7 +65,7 @@ local addSlot = function(params, result)
                 insert(
                     result.slots, {
                         id = makeData(24, 1),
-                        transf = coor.scale(coor.xyz(2, 0.2, 0)) * transf,
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })
@@ -82,7 +82,7 @@ local addSlot = function(params, result)
                 insert(
                     result.slots, {
                         id = makeData(24, 5),
-                        transf = coor.scale(coor.xyz(2, 0.2, 0)) * transf,
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * transf,
                         type = "ust_component_fence",
                         spacing = {0, 0, 0, 0}
                     })

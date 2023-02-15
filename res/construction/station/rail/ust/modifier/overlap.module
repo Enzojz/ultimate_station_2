@@ -3,7 +3,6 @@ local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
 local ust = require "ust"
 
-local unpack = table.unpack
 local insert = table.insert
 local ma = math
 local pi = ma.pi
