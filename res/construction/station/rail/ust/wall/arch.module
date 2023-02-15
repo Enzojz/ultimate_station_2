@@ -6,22 +6,30 @@ local insert = table.insert
 local fitModels = ust.fitModel(0.5, 5, 5, true, true)
 
 
+local default = 3
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
-    local info = params.modules[params.classedModules[id].slotId].info
+    local m = params.modules[params.classedModules[id].slotId]
+    local info = m.info
     local baseHeight = info.height
     local data = params.modules[slotId].info.data
     
     local hTrans = coor.transZ(baseHeight)
     
-    local h = 4
     if data == 3 or data == 7 then
+        local mInf = params.modules[m.makeData(24, data == 7 and 26 or 24)]
+        local mSup = params.modules[m.makeData(24, data == 7 and 28 or 22)]
+        local hInf = mInf and (mInf.variant * 0.1) or default
+        local hSup = mSup and (mSup.variant * 0.1) or default
+        local delta = hSup - hInf
         local sideModule = info.octa[data] and params.modules[info.octa[data]]
         if sideModule then
             local info = sideModule.info
             local sideHeight = info.height
-            if sideHeight - baseHeight > 3 then
-                h = sideHeight - baseHeight
+            if sideHeight - baseHeight > default then
+                hSup = sideHeight - baseHeight
+                hInf = sideHeight - baseHeight
             end
         end
         local n = 4
@@ -29,6 +37,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
         
         for i = 1, n do
+            local hInf, hSup = hInf + (delta / n) * (i - 1), hInf + delta * i / n
+            local hRef = hInf < hSup and hInf or hSup
             local coords = data == 7 and {
                 rt = pts[i],
                 rb = pts[i + 1],
@@ -42,58 +52,76 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             }
             
             if data == 7 then
-                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(hRef - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(hRef - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, false)))
             else
-                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.rotZ(math.pi) * coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
-                end
+                insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.rotZ(math.pi) * coor.transZ(hRef - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.rotZ(math.pi) * coor.transZ(hRef - 3) * hTrans * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.rotZ(math.pi) * coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, false)))
+            end
+            
+            if hInf > hSup then
+                insert(result.models, ust.newModel("ust/walls/brick_inf_tl.mdl", tag, coor.scaleZ(hInf - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_inf_br.mdl", tag, coor.scaleZ(hInf - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+            elseif hSup > hInf then
+                insert(result.models, ust.newModel("ust/walls/brick_sup_tl.mdl", tag, coor.scaleZ(hSup - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_sup_br.mdl", tag, coor.scaleZ(hSup - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+            end
         end
     elseif data == 1 or data == 5 then
-        local rank = data == 5 and 1 or 3
+        local mLeft = params.modules[m.makeData(24, data == 1 and 28 or 26)]
+        local mRight = params.modules[m.makeData(24, data == 1 and 22 or 24)]
+        local hLeft = mLeft and (mLeft.variant * 0.1) or default
+        local hRight = mRight and (mRight.variant * 0.1) or default
+        local delta = hRight - hLeft
         
         local ptL = info.arcs.left:pt(data == 1 and info.arcs.left.sup or info.arcs.left.inf)
         local ptR = info.arcs.right:pt(data == 1 and info.arcs.right.sup or info.arcs.right.inf)
-        local width = (ptL - ptR):length()
         
-        local n = width < 5 and 1 or math.ceil(width / 5)
-        local baseLength = width / n
-        local vec = (ptR - ptL):normalized()
+        local width = (ptL - ptR):length()
+        local n = math.ceil((width - 2.5) / 5)
+        if n < 1 then n = 1 end
+        
+        local vec = (ptR - ptL) / n
+        local vecP = (vec .. coor.rotZ90P):normalized() * 0.25
+        local vecN = (vec .. coor.rotZ90N):normalized() * 0.25
         
         for i = 1, n do
-            local refPt = ptL + vec * ((i - 0.5) * baseLength)
-            local transf = hTrans
-                * coor.scaleX(baseLength / config.width)
-                * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
-                * coor.trans(refPt)
+            local hLeft, hRight = hLeft + (delta / n) * (i - 1), hLeft + delta * i / n
+            local hRef = hLeft < hRight and hLeft or hRight
             
-            insert(result.models, ust.newModel(config.fence:format(color), tag, transf));
+            local ptL, ptR = ptL + vec * (i - 1), ptL + vec * i
+            local coords = data == 1 and {
+                lt = ptR,
+                lb = ptL,
+                rt = vecN + ptR,
+                rb = vecN + ptL
+            } or {
+                rt = ptR,
+                rb = ptL,
+                lt = vecP + ptR,
+                lb = vecP + ptL
+            }
+            
+            insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(hRef - 3) * hTrans * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(hRef - 3) * hTrans * fitModels(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/brick_tl.mdl", tag, coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/brick_br.mdl", tag, coor.scaleZ(hRef - 3) * hTrans * fitModels(coords, false)))
+            
+            if hLeft > hRight then
+                insert(result.models, ust.newModel("ust/walls/brick_sup_tl.mdl", tag, coor.scaleZ(hLeft - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_sup_br.mdl", tag, coor.scaleZ(hLeft - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+            elseif hRight > hLeft then
+                insert(result.models, ust.newModel("ust/walls/brick_inf_tl.mdl", tag, coor.scaleZ(hRight - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_inf_br.mdl", tag, coor.scaleZ(hRight - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+            end
         end
-        
-        
-        local coords = data == 1 and {
-            lt = ptsR[rank],
-            lb = ptsL[rank],
-            rt = (ptsR[2] - ptsR[rank]):normalized() * 0.25 + ptsR[rank],
-            rb = (ptsL[2] - ptsL[rank]):normalized() * 0.25 + ptsL[rank]
-        } or {
-            rt = ptsR[rank],
-            rb = ptsL[rank],
-            lt = (ptsR[2] - ptsR[rank]):normalized() * 0.25 + ptsR[rank],
-            lb = (ptsL[2] - ptsL[rank]):normalized() * 0.25 + ptsL[rank]
-        }
-        
-        insert(result.models, ust.newModel("ust/walls/arch_top_tl.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, true)))
-        insert(result.models, ust.newModel("ust/walls/arch_top_br.mdl", tag, coor.transZ(h - 3) * hTrans * fitModels(coords, false)))
-        insert(result.models, ust.newModel("ust/walls/arch_tl.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, true)))
-        insert(result.models, ust.newModel("ust/walls/arch_br.mdl", tag, coor.scaleZ(h - 3) * hTrans * fitModels(coords, false)))
     end
-
 end
+
 
 function data()
     return {
@@ -106,15 +134,15 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_WALL_ARCH"),
-            description = _("MENU_MODULE_WALL_ARCH_DESC"),
+            name = _("MENU_MODULE_WALL_BRICK"),
+            description = _("MENU_MODULE_WALL_BRICK_DESC"),
         },
         category = {
             categories = {"ust_cat_wall"},
         },
         type = "ust_component_fence",
         order = {
-            value = 204,
+            value = 202,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/fence",

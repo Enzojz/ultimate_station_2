@@ -22,14 +22,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local hInf = mInf and (mInf.variant * 0.1) or default
         local hSup = mSup and (mSup.variant * 0.1) or default
         local delta = hSup - hInf
-        -- local sideModule = info.octa[data] and params.modules[info.octa[data]]
-        -- if sideModule then
-        --     local info = sideModule.info
-        --     local sideHeight = info.height
-        --     if sideHeight - baseHeight > 3 then
-        --         h = sideHeight - baseHeight
-        --     end
-        -- end
+        local sideModule = info.octa[data] and params.modules[info.octa[data]]
+        if sideModule then
+            local info = sideModule.info
+            local sideHeight = info.height
+            if sideHeight - baseHeight > default then
+                hSup = sideHeight - baseHeight
+                hInf = sideHeight - baseHeight
+            end
+        end
         local n = 4
         local cpts = ust.basePts(info.arcs.center, n)
         local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
