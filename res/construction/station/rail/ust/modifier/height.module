@@ -20,7 +20,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local makeData = m.makeData
     
    
-    local transZ = coor.transZ(m.metadata.isTrack and (info.height + m.metadata.height + 0.1) or info.height)
+    local transZ = coor.transZ(m.metadata.isTrack and (info.height + m.metadata.height) or info.height)
    
     local transf = info.transf * transZ
     
