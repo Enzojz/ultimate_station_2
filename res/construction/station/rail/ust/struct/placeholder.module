@@ -5,7 +5,34 @@ local ust = require "ust"
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
     local info = params.modules[slotId].info
+    local n = 4
+    
+    local hVec = coor.xyz(0, 0, info.height)
 
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    
+    local leftLaneBorder = {}
+    local rightLaneBorder = {}
+    local leftLane = {}
+    local rightLane = {}
+
+    for i = 1, n + 1 do
+        leftLaneBorder[i] = leftPts[i] + hVec
+        rightLaneBorder[i] = rightPts[i] + hVec
+        
+        local vec = (leftLaneBorder[i] - rightLaneBorder[i]):normalized()
+        
+        leftLane[i] = leftLaneBorder[i] - vec * 1.2
+        rightLane[i] = rightLaneBorder[i] + vec * 1.2
+    end
+    
+    params.extra[slotId] = {
+        leftLane = leftLane,
+        rightLane = rightLane
+    }
+    
+    
     if params.debug == 1 then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)

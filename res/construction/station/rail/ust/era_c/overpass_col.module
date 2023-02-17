@@ -3,6 +3,7 @@ local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
+
 local insert = table.insert
 
 local fitModels = {
@@ -42,28 +43,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end)
         * pipe.filter(function(m) return m end)
         * pipe.sort(function(l, r) return l.x < r.x end)
-        * pipe.map(function(m) 
+        * pipe.map(function(m)
             local id = params.modules[m.slotId].info.id
             return {
                 slotId = m.slotId,
                 info = params.modules[params.classedModules[id].slotId].info
             }
         end)
-
+    
     local highest = allOverpass * pipe.map(function(m) return m.info.height end) * pipe.max()
-
+    
     
     local hOverpass = highest > 8 and highest or 8
     local tPlatform = coor.transZ(hPlatform)
     local tOverpass = coor.transZ(hOverpass)
-
+    
     params.modules[slotId].info.height = hOverpass
     
     local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
     
     local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), centerVecs[3]):mRot()) * coor.trans(centerPts[3])
     local centerTransf = tOverpass * centerTransfZ0
-    local interPts = func.map(interCoords, function(pt) return pt .. centerTransf end)
     
     local currentIndex = false
     for index, slot in ipairs(allOverpass) do
@@ -78,7 +78,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local rightPts = ust.basePts(info.arcs.right, 4)
         local leftLane = params.extra[moduleSlotId].leftLane
         local rightLane = params.extra[moduleSlotId].rightLane
-
+        
+        local rect = func.map(interCoords, function(pt) return pt .. coor.scaleX(info.width / 2) * tPlatform * centerTransfZ0 end)
+        params.modules[slotId].info.rect = rect
+        
         local isLeftEdge = not info.octa[7] or (params.modules[info.octa[7]].info.height < 7.5)
         local isRightEdge = not info.octa[3] or (params.modules[info.octa[3]].info.height < 7.5)
         local isBuilt = false
@@ -86,48 +89,52 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             if currentIndex ~= 1 and isLeftEdge then
                 isBuilt = true
                 local info = allOverpass[currentIndex - 1].info
-
+                local prevSlotId = allOverpass[currentIndex - 1].slotId
                 if info.height ~= hPlatform then
-                    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-                    
-                    local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVecs[3]):mRot()) * coor.trans(centerPts[3])
-                    local prevRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
-
-                    local edgePts = func.map(interCoords, function(pt) return pt .. coor.scaleX(info.width / 2) * tPlatform * centerTransfZ0 end)
-
-                    local overpassCoords = {
-                        lt = prevRect[3]:avg(interPts[4]),
-                        lb = prevRect[2]:avg(interPts[1]),
-                        rt = edgePts[4],
-                        rb = edgePts[1]
-                    }
-                    
-                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
-                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
-                    insert(result.models, ust.unitLane(leftPts[3] .. tPlatform, leftLane[3], tag))
+                    insert(result.invokeLater, function()
+                        local prevRect = params.modules[prevSlotId].info.rect
+                        
+                        local overpassCoords = {
+                            lt = prevRect[3]:avg(rect[4]),
+                            lb = prevRect[2]:avg(rect[1]),
+                            rt = rect[4],
+                            rb = rect[1]
+                        }
+                        
+                        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+                        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                    end)
+                    if module.metadata.isPlaceholder then
+                        insert(result.models, ust.unitLane(leftPts[3] .. tPlatform, leftLane[3], tag, "ust/linking_lane.mdl"))
+                    else
+                        insert(result.models, ust.unitLane(leftPts[3] .. tPlatform, leftLane[3], tag))
+                    end
+                
                 end
             end
             if currentIndex ~= #allOverpass and isRightEdge then
                 isBuilt = true
                 local info = allOverpass[currentIndex + 1].info
-                
+                local nextSlotId = allOverpass[currentIndex + 1].slotId
                 if info.height ~= hPlatform then
-                    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-                    
-                    local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVecs[3]):mRot()) * coor.trans(centerPts[3])
-                    local nextRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
-                    local edgePts = func.map(interCoords, function(pt) return pt .. coor.scaleX(info.width / 2) * tPlatform * centerTransfZ0 end)
-
-                    local overpassCoords = {
-                        rt = nextRect[4]:avg(interPts[3]),
-                        rb = nextRect[1]:avg(interPts[2]),
-                        lt = edgePts[3],
-                        lb = edgePts[2]
-                    }
-                    
-                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
-                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
-                    insert(result.models, ust.unitLane(rightPts[3] .. tPlatform, rightLane[3], tag))
+                    insert(result.invokeLater, function()
+                        local nextRect = params.modules[nextSlotId].info.rect
+                        
+                        local overpassCoords = {
+                            rt = nextRect[4]:avg(rect[3]),
+                            rb = nextRect[1]:avg(rect[2]),
+                            lt = rect[3],
+                            lb = rect[2]
+                        }
+                        
+                        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+                        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                    end)
+                    if module.metadata.isPlaceholder then
+                        insert(result.models, ust.unitLane(rightPts[3] .. tPlatform, rightLane[3], tag, "ust/linking_lane.mdl"))
+                    else
+                        insert(result.models, ust.unitLane(rightPts[3] .. tPlatform, rightLane[3], tag))
+                    end
                 end
             end
         end
@@ -135,43 +142,42 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(3) * tPlatform * centerTransfZ0))
         end
     else
+        local rect = func.map(interCoords, function(pt) return pt .. centerTransf end)
+        params.modules[slotId].info.rect = rect
+        
         insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(hOverpass - hPlatform - 0.4) * tPlatform * centerTransfZ0))
         if currentIndex and #allOverpass > 1 then
             if currentIndex ~= 1 then
-                local info = allOverpass[currentIndex - 1].info
-                
-                local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-                
-                local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVecs[3]):mRot()) * coor.trans(centerPts[3])
-                local prevRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
-                
-                local overpassCoords = {
-                    lt = prevRect[3]:avg(interPts[4]),
-                    lb = prevRect[2]:avg(interPts[1]),
-                    rt = interPts[4],
-                    rb = interPts[1]
-                }
-                
-                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
-                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                local prevSlotId = allOverpass[currentIndex - 1].slotId
+                insert(result.invokeLater, function()
+                    local prevRect = params.modules[prevSlotId].info.rect
+                    
+                    local overpassCoords = {
+                        lt = prevRect[3]:avg(rect[4]),
+                        lb = prevRect[2]:avg(rect[1]),
+                        rt = rect[4],
+                        rb = rect[1]
+                    }
+                    
+                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                end)
             end
             if currentIndex ~= #allOverpass then
-                local info = allOverpass[currentIndex + 1].info
-                
-                local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
-                
-                local centerTransf = tOverpass * (quat.byVec(coor.xyz(0, 1, 0), centerVecs[3]):mRot()) * coor.trans(centerPts[3])
-                local nextRect = func.map(interCoords, function(pt) return pt .. centerTransf end)
-                
-                local overpassCoords = {
-                    rt = nextRect[4]:avg(interPts[3]),
-                    rb = nextRect[1]:avg(interPts[2]),
-                    lt = interPts[3],
-                    lb = interPts[2]
-                }
-                
-                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
-                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                local nextSlotId = allOverpass[currentIndex + 1].slotId
+                insert(result.invokeLater, function()
+                    local nextRect = params.modules[nextSlotId].info.rect
+                    
+                    local overpassCoords = {
+                        rt = nextRect[4]:avg(rect[3]),
+                        rb = nextRect[1]:avg(rect[2]),
+                        lt = rect[3],
+                        lb = rect[2]
+                    }
+                    
+                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_tl.mdl", tag, fitModels.overpass(overpassCoords, true)))
+                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
+                end)
             end
         end
         
@@ -279,7 +285,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end
     
     end
-
 end
 
 local function getModelsFn(result, transform, tag, slotId, addModelFn, params)

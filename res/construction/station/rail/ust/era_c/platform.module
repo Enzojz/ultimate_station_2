@@ -58,8 +58,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hVec = coor.xyz(0, 0, info.height)
     local hTrans = coor.transZ(info.height)
     
-    local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left)
-    local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right)
+    local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left) and octaModules[7].info.height == info.height
+    local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right) and octaModules[3].info.height == info.height
     
     local leftOverlap = isPlatform[7] and 0 or (info.leftOverlap or 0)
     local rightOverlap = isPlatform[3] and 0 or (info.rightOverlap or 0)
