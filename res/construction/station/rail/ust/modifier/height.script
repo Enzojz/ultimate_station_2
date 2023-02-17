@@ -70,6 +70,30 @@ local setTrackHeight = function(modules, classedModules, slotId, height)
     end
 end
 
+
+local setPlaceholderHeight = function(modules, classedModules, slotId, height)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and modules[octa].metadata.isPlaceholder then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
+        end
+    end
+    
+    searchModules(slotId)
+    
+    for slotId, _ in pairs(lut) do
+        setHeight(modules, classedModules, slotId, height)
+    end
+end
+
+
 local preProcessAdd = function(modules, change, classedModules, info)
     if info.type == 83 and info.data == -1 then -- Remove modifer
         modules[ust.base(info.id, 83)] = nil
@@ -111,7 +135,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
             elseif m.metadata.isPlatform then
                 setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlaceholder then
-                setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+                setPlaceholderHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             end
         elseif info.type == 84 then
             local delta = info.data
