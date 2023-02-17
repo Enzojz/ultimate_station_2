@@ -96,6 +96,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
                     setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
                 elseif m.metadata.isPlatform then
                     setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+                elseif m.metadata.isPlaceholder then
+                    setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
                 end
             end
         elseif info.type == 83 and info.data == -3 then
@@ -108,6 +110,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlatform then
                 setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isPlaceholder then
+                setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             end
         elseif info.type == 84 then
             local delta = info.data
@@ -117,6 +121,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
             if m.metadata.isTrack then
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlatform then
+                setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isPlaceholder then
                 setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             end
         end
@@ -158,7 +164,7 @@ local addSlot = function(params, result)
     
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder)) then
             local info = module.info
             local makeData = module.makeData
             local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)

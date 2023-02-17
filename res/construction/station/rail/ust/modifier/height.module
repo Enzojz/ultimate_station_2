@@ -31,11 +31,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         spacing = {0, 0, 0, 0}
     })
     
-    local centerPts, vecs = ust.basePts(info.arcs.center, 20)
-    local rightPts = ust.basePts(info.arcs.right, 20)
-    local leftPts = ust.basePts(info.arcs.left, 20)
+    local n = 12
+    local centerPts, vecs = ust.basePts(info.arcs.center, n)
+    local rightPts, rightVecs = ust.basePts(info.arcs.right, n)
+    local leftPts, leftVecs = ust.basePts(info.arcs.left, n)
 
-    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot()
+    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[7]):mRot()
     local textR = ("H: %d mm"):format(info.height * 1000)
     
     local addText = function(label, pos, fTrans, h)
@@ -45,22 +46,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    addText(textR, centerPts[11], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX90N end, 0.5)
+    addText(textR, centerPts[7], function(w) return coor.trans(coor.xyz(-0.5 * w, 0, 0)) * coor.rotX90N end, 0.5)
     
     insert(result.slots, {
         id = makeData(83, -2),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[9]):mRot() * coor.trans(centerPts[9]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[6]):mRot() * coor.trans(centerPts[3]) * transZ,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
     
-    addText("⊘", centerPts[9], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    addText("⊘", centerPts[3], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
     
 
     if info.octa[1] and params.modules[info.octa[1]] then
         insert(result.slots, {
             id = makeData(83, 1),
-            transf = coor.rotZ90P * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[21]):mRot() * coor.trans(centerPts[21]) * transZ,
+            transf = coor.rotZ90P * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[12]):mRot() * coor.trans(centerPts[12]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -80,7 +81,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if info.octa[3] and params.modules[info.octa[3]] then
         insert(result.slots, {
             id = makeData(83, 3),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(rightPts[11]) * transZ,
+            transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[7]):mRot() * coor.trans(rightPts[7]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -90,7 +91,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     if info.octa[7] and params.modules[info.octa[7]] then
         insert(result.slots, {
             id = makeData(83, 7),
-            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot() * coor.trans(leftPts[11]) * transZ,
+            transf = coor.rotZ(pi) * coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[7]):mRot() * coor.trans(leftPts[7]) * transZ,
             type = "ust_height_modifier",
             spacing = {0, 0, 0, 0},
             shape = 1
@@ -99,22 +100,23 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     insert(result.slots, {
         id = makeData(83, -3),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[13]):mRot() * coor.trans(centerPts[13]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[8]):mRot() * coor.trans(centerPts[11]) * transZ,
         type = "ust_height_modifier",
         spacing = {0, 0, 0, 0}
     })
     
-    addText("⤨", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
-    addText("⤪", centerPts[13], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    addText("⤨", centerPts[11], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
+    addText("⤪", centerPts[11], function(w) return coor.trans(coor.xyz(-w, 0, -0.35)) * coor.rotX90N end, 1)
     
     
-    local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[11]):mRot()
+    local rotLeft = quat.byVec(coor.xyz(0, 1, 0), vecs[9]):mRot()
+    local rotRight = quat.byVec(coor.xyz(0, 1, 0), vecs[5]):mRot()
     for i = -10, 10, 1 do
         if (i ~= 0) then
             local dz = coor.xyz(0, 0, i * 0.1)
             insert(result.slots, {
                 id = makeData(84, i),
-                transf = coor.rotY90P * coor.scale(coor.xyz(1, 1, 0.05)) * rotZ * coor.trans(leftPts[i % 2 == 1 and 14 or 13] + dz) * transZ,
+                transf = coor.scale(coor.xyz(0.05, 0.25, 1)) * coor.transY(i % 2 == 0 and 0.5 or -0.5) * coor.rotY90P * rotLeft * coor.trans(leftPts[9] + dz) * transZ,
                 type = "ust_height_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
@@ -122,18 +124,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             insert(result.slots, {
                 id = makeData(84, i),
-                transf = coor.rotY90N * coor.scale(coor.xyz(1, 1, 0.05)) * rotZ * coor.trans(rightPts[i % 2 == 1 and 8 or 9] + dz) * transZ,
+                transf = coor.scale(coor.xyz(0.05, 0.25, 1)) * coor.transY(i % 2 == 0 and 0.5 or -0.5) * coor.rotY90N * rotRight * coor.trans(rightPts[5] + dz) * transZ,
                 type = "ust_height_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
             })
             
             if i % 2 == 1 then
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[15] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[7] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1)  * coor.rotZ90P * coor.transX(0.1) end, 0.25)
             else
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[12] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[10] + dz, function(w) return coor.transZ(-0.075) * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90P * coor.transX(0.1) end, 0.25)
             end
         end
     end
