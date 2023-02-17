@@ -3,7 +3,6 @@ local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 local insert = table.insert
 
 local fitModels = {
@@ -26,9 +25,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local makeData = module.makeData
     
     local hPlatform = info.height
-    local hOverpass = 8
-    local tPlatform = coor.transZ(hPlatform)
-    local tOverpass = coor.transZ(hOverpass)
     
     local allOverpass = pipe.new * func.values(params.modules)
         * pipe.filter(function(m) return m.metadata.isOverpass end)
@@ -46,7 +42,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end)
         * pipe.filter(function(m) return m end)
         * pipe.sort(function(l, r) return l.x < r.x end)
-        * pipe.map(pipe.select("slotId"))
+        * pipe.map(function(m) 
+            local id = params.modules[m.slotId].info.id
+            return {
+                slotId = m.slotId,
+                info = params.modules[params.classedModules[id].slotId].info
+            }
+        end)
+
+    local highest = allOverpass * pipe.map(function(m) return m.info.height end) * pipe.max()
+
+    
+    local hOverpass = highest > 8 and highest or 8
+    local tPlatform = coor.transZ(hPlatform)
+    local tOverpass = coor.transZ(hOverpass)
+
+    params.modules[slotId].info.height = hOverpass
     
     local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
     
@@ -56,13 +67,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     local currentIndex = false
     for index, slot in ipairs(allOverpass) do
-        if slot == slotId then
+        if slot.slotId == slotId then
             currentIndex = index
             break
         end
     end
     
-    if hPlatform > 7.5 then
+    if hOverpass - hPlatform < 0.5 then
         local leftPts = ust.basePts(info.arcs.left, 4)
         local rightPts = ust.basePts(info.arcs.right, 4)
         local leftLane = params.extra[moduleSlotId].leftLane
@@ -74,10 +85,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         if currentIndex and #allOverpass > 1 then
             if currentIndex ~= 1 and isLeftEdge then
                 isBuilt = true
-                local prevSlotId = allOverpass[currentIndex - 1]
-                
-                local id = params.modules[prevSlotId].info.id
-                local info = params.modules[params.classedModules[id].slotId].info
+                local info = allOverpass[currentIndex - 1].info
 
                 if info.height ~= hPlatform then
                     local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
@@ -101,10 +109,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             end
             if currentIndex ~= #allOverpass and isRightEdge then
                 isBuilt = true
-                local nextSlotId = allOverpass[currentIndex + 1]
-                
-                local id = params.modules[nextSlotId].info.id
-                local info = params.modules[params.classedModules[id].slotId].info
+                local info = allOverpass[currentIndex + 1].info
                 
                 if info.height ~= hPlatform then
                     local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
@@ -130,13 +135,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(3) * tPlatform * centerTransfZ0))
         end
     else
-        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * centerTransfZ0))
+        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(hOverpass - hPlatform - 0.4) * tPlatform * centerTransfZ0))
         if currentIndex and #allOverpass > 1 then
             if currentIndex ~= 1 then
-                local prevSlotId = allOverpass[currentIndex - 1]
-                
-                local id = params.modules[prevSlotId].info.id
-                local info = params.modules[params.classedModules[id].slotId].info
+                local info = allOverpass[currentIndex - 1].info
                 
                 local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
                 
@@ -154,10 +156,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 insert(result.models, ust.newModel("ust/stairs/era_c/stairs_overpass_br.mdl", tag, fitModels.overpass(overpassCoords, false)))
             end
             if currentIndex ~= #allOverpass then
-                local nextSlotId = allOverpass[currentIndex + 1]
-                
-                local id = params.modules[nextSlotId].info.id
-                local info = params.modules[params.classedModules[id].slotId].info
+                local info = allOverpass[currentIndex + 1].info
                 
                 local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
                 
@@ -187,7 +186,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 insert(
                     result.slots,
                     {
-                        id = makeData(25, 10 + i),
+                        id = makeData(22, 10 + i),
                         transf = coor.transX(-1) * centerTransfZ0,
                         type = "ust_overpass_step",
                         spacing = {0, 0, 0, 0},
@@ -208,7 +207,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 insert(
                     result.slots,
                     {
-                        id = makeData(25, 50 + i),
+                        id = makeData(22, 50 + i),
                         transf = coor.transX(-1) * centerTransfZ0,
                         type = "ust_overpass_step",
                         spacing = {0, 0, 0, 0},
@@ -225,7 +224,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             insert(
                 result.slots,
                 {
-                    id = makeData(25, 30 + (6 - i)),
+                    id = makeData(22, 30 + (6 - i)),
                     transf = coor.transX(-1) * centerTransfZ0,
                     type = "ust_overpass_step",
                     spacing = {0, 0, 0, 0},
@@ -235,13 +234,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         end
         
         local stepIdPos = pipe.new * {32, 31, 12, 13, 14}
-            * pipe.map(function(i) return makeData(25, i) end)
+            * pipe.map(function(i) return makeData(22, i) end)
             * pipe.filter(function(slotId) return params.modules[slotId] or false end)
         local stepIdNeg = pipe.new * {52, 53, 54, 35, 34}
-            * pipe.map(function(i) return makeData(25, i) end)
+            * pipe.map(function(i) return makeData(22, i) end)
             * pipe.filter(function(slotId) return params.modules[slotId] or false end)
         
-        if slotId == allOverpass[#allOverpass] then
+        if slotId == allOverpass[#allOverpass].slotId then
             insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_1.mdl", tag, centerTransf))
             if #stepIdNeg > 0 then
                 insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_0.mdl", tag, centerTransf))
@@ -253,7 +252,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             else
                 insert(result.models, ust.newModel("ust/stairs/era_c/stairs_left_2.mdl", tag, centerTransf))
             end
-        elseif slotId == allOverpass[1] then
+        elseif slotId == allOverpass[1].slotId then
             insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_1.mdl", tag, centerTransf))
             if #stepIdNeg > 0 then
                 insert(result.models, ust.newModel("ust/stairs/era_c/stairs_right_0.mdl", tag, centerTransf))

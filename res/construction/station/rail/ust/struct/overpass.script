@@ -21,7 +21,7 @@ local addSlot = function(params, result)
             local centerTransf = tPlatform * centerTransfZ0
             
             insert(result.slots, {
-                id = makeData(24, 0),
+                id = makeData(22, 0),
                 transf = centerTransf,
                 type = "ust_overpass",
                 spacing = {0, 0, 0, 0},
