@@ -125,7 +125,7 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
         -- 3 ~ 6 : id
         -- Component
-        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 23 overpass steps 24 fences 25 bridge 26 tunnel 27 catenary 28 roof 29 type 31 5m Entry 32 10m Entry 33 20m Entry
+        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 24 fences/walls 25 bridge 26 tunnel 27 catenary 28 roof 29 type 31 5m Entry 32 10m Entry 33 20m Entry
         --         40 general comp
         -- 3 ~ 6 : id
         -- Information
@@ -135,7 +135,7 @@ ust.slotInfo = function(slotId)
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
-        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall height 91 92 ref 93 94 overlap
+        -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall height 91 92 ref 93 94 overlap 95 96 slope
         local slotIdAbs = math.abs(slotId)
         local type = slotIdAbs % 100
         local id = (slotIdAbs - type) / 100 % 1000
@@ -256,7 +256,7 @@ end
 ---@param f coor3
 ---@param t coor3
 ---@param tag string
----@param mdl string
+---@param mdl? string
 ---@return mdl|nil
 ust.unitLane = function(f, t, tag, mdl) return
     ((t - f):length2() > 1e-2 and (t - f):length2() < 562500)

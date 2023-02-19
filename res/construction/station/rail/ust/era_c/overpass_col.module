@@ -185,7 +185,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local info = params.modules[info.octa[1]].info
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             local tPlatform = coor.transZ(info.height)
-            for i = 2, 4 do
+            for i = 2, 5 do
                 local pt = centerPts[i]
                 local vec = centerVecs[i]
                 local centerTransfZ0 = (quat.byVec(coor.xyz(1, 0, 0), vec):mRot()) * coor.trans(pt) * tPlatform
@@ -206,7 +206,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local info = params.modules[info.octa[5]].info
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             local tPlatform = coor.transZ(info.height)
-            for i = 2, 4 do
+            for i = 1, 4 do
                 local pt = centerPts[i]
                 local vec = centerVecs[i]
                 local centerTransfZ0 = (quat.byVec(coor.xyz(-1, 0, 0), vec):mRot()) * coor.trans(pt) * tPlatform
@@ -239,10 +239,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         )
         end
         
-        local stepIdPos = pipe.new * {32, 31, 12, 13, 14}
+        local stepIdPos = pipe.new * {32, 31, 12, 13, 14, 15}
             * pipe.map(function(i) return makeData(22, i) end)
             * pipe.filter(function(slotId) return params.modules[slotId] or false end)
-        local stepIdNeg = pipe.new * {52, 53, 54, 35, 34}
+        local stepIdNeg = pipe.new * {51, 52, 53, 54, 35, 34}
             * pipe.map(function(i) return makeData(22, i) end)
             * pipe.filter(function(slotId) return params.modules[slotId] or false end)
         

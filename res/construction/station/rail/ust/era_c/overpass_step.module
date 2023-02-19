@@ -1,26 +1,19 @@
-local config = {
-    color = "red"
-}
-
 local func = require "ust/func"
-local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 
-
 local insert = table.insert
 
 local fitModels = {
-    inter = ust.fitModel(2, 1, 7, true, true),
-    overpass = ust.fitModel(1, 2.9, 7, true, true)
+    inter = ust.fitModel(1.9, 1, 7, true, true),
 }
 
 local interCoords = {
-    coor.xyz(-1, -1.45, 0),
-    coor.xyz(1, -1.45, 0),
-    coor.xyz(1, 1.45, 0),
-    coor.xyz(-1, 1.45, 0),
+    coor.xyz(-0.95, -1.45, 0),
+    coor.xyz(0.95, -1.45, 0),
+    coor.xyz(0.95, 1.45, 0),
+    coor.xyz(-0.95, 1.45, 0),
     coor.xyz(0, 1.45, 0),
     coor.xyz(0, -1.45, 0),
 }
@@ -30,7 +23,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local pos = params.modules[slotId].info.data
     local module = params.modules[params.classedModules[id].slotId]
     local info = module.info
-
+    
     local col = params.modules[module.makeData(22, 0)]
     local colHeight = col.info.height
     
@@ -54,27 +47,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local info = params.modules[info.octa[5]].info
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             return centerPts[relPos],
-            centerVecs[relPos]
+                centerVecs[relPos]
         elseif pos < 30 then
             local relPos = pos % 10
             local info = params.modules[info.octa[1]].info
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             return centerPts[relPos],
-            -centerVecs[relPos]
+                -centerVecs[relPos]
         else
             local relPos = 6 - pos % 10
             return centerPts[relPos],
-            relPos > 3 and -centerVecs[relPos] or centerVecs[relPos]
+                relPos > 3 and -centerVecs[relPos] or centerVecs[relPos]
         end
     end
     
     local baseRef, baseVec = ref()
-
+    
     if baseRef and baseVec then
         local existsBase = hOverpass - hPlatform > 4
         local baseLength = existsBase and 6 or 0
-        local ncomp = existsBase and math.ceil((hOverpass - 4 - hPlatform) / 0.2) or math.ceil((hOverpass - hPlatform) / 0.2)
-        local hBase = existsBase and hOverpass - ncomp * 0.2 or hPlatform
+        local nComp = existsBase and math.ceil((hOverpass - 4 - hPlatform) / 0.2) or math.ceil((hOverpass - hPlatform) / 0.2)
+        local nPart = math.floor(nComp / 30 + 0.3)
+        if nPart < 1 then nPart = 1 end
+        local nCompPerPart = math.floor(nComp / nPart)
+        local hBase = existsBase and hOverpass - nComp * 0.2 or hPlatform
         
         local baseVecTransf = quat.byVec(coor.xyz(0, 1, 0), baseVec):mRot()
         if existsBase then
@@ -82,75 +78,99 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             insert(result.models, ust.newModel("ust/stairs/era_c/stairs_base.mdl", tag, tBase * baseVecTransf * coor.trans(baseRef)))
         end
         
-        for i = 0, ncomp - 1 do
-            local h = hBase + 0.2 * i
-            local pos = baseRef + baseVec * (baseLength + i * 0.25)
-            local transf = baseVecTransf * coor.trans(pos) * coor.transZ(h)
-            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+        for i = 0, nPart - 1 do
+            local nComp = i == nPart - 1 and (nComp - i * nCompPerPart) or nCompPerPart
+            local rel = coor.xyz(0, i * (nCompPerPart * 0.25 + 1.5), nCompPerPart * 0.2 * i)
+            local acc = coor.xyz(0, nComp * 0.25, nComp * 0.2)
+            for j = 0, nComp - 1 do
+                local h = hBase + 0.2 * j + rel.z
+                local pos = baseRef + baseVec * (baseLength + j * 0.25 + rel.y)
+                local transf = baseVecTransf * coor.trans(pos) * coor.transZ(h)
+                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_20.mdl", tag, transf))
+            end
+            
+            if i == nPart - 1 then
+                local rectBase = {
+                    coor.xyz(0.95, baseLength + acc.y + rel.y, 0),
+                    coor.xyz(-0.95, baseLength + acc.y + rel.y, 0),
+                }
+                local baseTransf = baseVecTransf * coor.trans(baseRef) * coor.transZ(hBase + acc.z + rel.z)
+                local basePts = func.map(rectBase, function(pt) return pt .. baseTransf end)
+                
+                local interCoords = pos < 33 and {
+                    lt = basePts[1],
+                    rt = basePts[2],
+                    lb = interPts[4],
+                    rb = interPts[3]
+                } or {
+                    lt = interPts[1],
+                    rt = interPts[2],
+                    lb = basePts[2],
+                    rb = basePts[1],
+                }
+                
+                local inter0 = interCoords.lt:avg(interCoords.rt)
+                local inter1 = interCoords.lb:avg(interCoords.rb)
+                insert(result.models, ust.unitLane(inter0, inter1, tag))
+                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
+                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
+
+                if (inter0 - inter1):length() > 8.5 then
+                    local pt = ((inter0 - inter1) * 0.35 + inter1):withZ(0)
+                    local vec = inter0 - inter1
+                    local vecTransf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot()
+                    insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(inter1.z - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
+                end
+                
+                local h = hBase + acc.z + rel.z
+                local pos = baseRef + baseVec * (baseLength + acc.y + rel.y)
+                
+                insert(result.models, ust.unitLane(
+                    pos + coor.xyz(0, 0, h),
+                    baseRef + baseVec * (baseLength + rel.y) + coor.xyz(0, 0, hBase + rel.z),
+                    tag))
+            else
+                local h = hBase + acc.z + rel.z
+                local pos = baseRef + baseVec * (baseLength + acc.y + rel.y)
+                local transf = baseVecTransf * coor.trans(pos) * coor.transZ(h)
+                
+                insert(result.models, ust.unitLane(
+                    pos + coor.xyz(0, 0, h),
+                    baseRef + baseVec * (baseLength + rel.y) + coor.xyz(0, 0, hBase + rel.z),
+                    tag))
+                
+                insert(result.models, ust.unitLane(
+                    pos + coor.xyz(0, 0, h),
+                    pos + coor.xyz(0, 0, h) + baseVec * 1.5,
+                    tag))
+                
+                
+                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter.mdl", tag, coor.scaleY(1.5) * transf))
+                insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(h - hPlatform) * baseVecTransf * coor.trans(pos + coor.xyz(0, 0.75, 0)) * tPlatform))
+            end
         end
         
-        local rectBase = {
-            coor.xyz(1, baseLength + ncomp * 0.25, 0),
-            coor.xyz(-1, baseLength + ncomp * 0.25, 0),
-        }
         
-        local baseTransf = baseVecTransf * coor.trans(baseRef) * coor.transZ(hBase + 0.2 * ncomp)
-        local basePts = func.map(rectBase, function(pt) return pt .. baseTransf end)
-        
-        local interCoords = pos < 33 and {
-            lt = basePts[1],
-            rt = basePts[2],
-            lb = interPts[4],
-            rb = interPts[3]
-        } or {
-            lt = interPts[1],
-            rt = interPts[2],
-            lb = basePts[2],
-            rb = basePts[1],
-        }
+        local baseTransf = baseVecTransf * coor.trans(baseRef) * coor.transZ(hBase + 0.2 * nComp)
         
         local stairsPts = func.map({
-            coor.xyz(0, baseLength + ncomp * 0.25, 0),
-            coor.xyz(0, baseLength, -ncomp * 0.2),
-            coor.xyz(0, 5, -ncomp * 0.2),
+            coor.xyz(0, baseLength + nComp * 0.25, 0),
+            coor.xyz(0, baseLength, -nComp * 0.2),
+            coor.xyz(0, 5, -nComp * 0.2),
         },
         function(pt) return pt .. baseTransf end)
         
         if module.metadata.isPlatform then
-            insert(result.models, ust.unitLane(stairsPts[1], stairsPts[2], tag))
-            
             if existsBase then
                 insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
                 insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
             end
         else
             if existsBase then
-                insert(result.models, ust.unitLane(stairsPts[1], stairsPts[2], tag))
                 insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
                 insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
-            else
-                insert(result.models, ust.unitLane(stairsPts[1], stairsPts[2], tag))
             end
-            if module.metadata.isPlaceholder then
-                insert(result.models, ust.unitLane(baseRef .. tPlatform, (baseRef .. tPlatform) - (baseVec * 0.5), tag, "ust/linking_lane.mdl"))
-            end
-        end
-        
-        insert(result.models, ust.unitLane(interCoords.lt:avg(interCoords.rt), interCoords.lb:avg(interCoords.rb), tag))
-        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_tl.mdl", tag, fitModels.inter(interCoords, true)))
-        insert(result.models, ust.newModel("ust/stairs/era_c/stairs_inter_br.mdl", tag, fitModels.inter(interCoords, false)))
-        
-        if pos == 13 or pos == 14 then
-            local pt = (baseRef - centerPt) * 0.4 + centerPt
-            local vec = baseRef - centerPt
-            local vecTransf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot()
-            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
-        end
-        if pos == 52 or pos == 53 then
-            local pt = (baseRef - centerPt) * 0.4 + centerPt
-            local vec = baseRef - centerPt
-            local vecTransf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot()
-            insert(result.models, ust.newModel("ust/stairs/era_c/stairs_col.mdl", tag, coor.scaleZ(7.6 - hPlatform) * tPlatform * vecTransf * coor.trans(pt)))
+            insert(result.models, ust.unitLane(baseRef .. tPlatform, (baseRef .. tPlatform) - (baseVec * 0.5), tag, "ust/linking_lane.mdl"))
         end
     end
 end

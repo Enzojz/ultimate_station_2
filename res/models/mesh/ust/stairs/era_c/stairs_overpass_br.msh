@@ -43,40 +43,40 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 96,
-               offset = 10840
+               count = 48,
+               offset = 10792
             },
             position = {
-               count = 96,
+               count = 48,
                offset = 10744
             },
             tangent = {
-               count = 96,
-               offset = 10936
+               count = 48,
+               offset = 10840
             },
             uv0 = {
-               count = 96,
-               offset = 11032
+               count = 48,
+               offset = 10888
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 48,
-               offset = 11176
+               count = 96,
+               offset = 11032
             },
             position = {
-               count = 48,
-               offset = 11128
+               count = 96,
+               offset = 10936
             },
             tangent = {
-               count = 48,
-               offset = 11224
+               count = 96,
+               offset = 11128
             },
             uv0 = {
-               count = 48,
-               offset = 11272
+               count = 96,
+               offset = 11224
             }
          }
       },

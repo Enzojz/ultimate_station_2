@@ -3,40 +3,20 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 192,
-               offset = 8800
+               count = 96,
+               offset = 8656
             },
             position = {
-               count = 192,
-               offset = 8608
+               count = 96,
+               offset = 8560
             },
             tangent = {
-               count = 192,
-               offset = 8992
+               count = 96,
+               offset = 8752
             },
             uv0 = {
-               count = 192,
-               offset = 9184
-            }
-         }
-      },
-      {
-         indices = {
-            normal = {
-               count = 576,
-               offset = 9952
-            },
-            position = {
-               count = 576,
-               offset = 9376
-            },
-            tangent = {
-               count = 576,
-               offset = 10528
-            },
-            uv0 = {
-               count = 576,
-               offset = 11104
+               count = 96,
+               offset = 8848
             }
          }
       },
@@ -44,39 +24,79 @@ function data() return {
          indices = {
             normal = {
                count = 96,
-               offset = 11776
+               offset = 9040
             },
             position = {
                count = 96,
-               offset = 11680
+               offset = 8944
             },
             tangent = {
                count = 96,
-               offset = 11872
+               offset = 9136
             },
             uv0 = {
                count = 96,
-               offset = 11968
+               offset = 9232
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 48,
-               offset = 12112
+               count = 576,
+               offset = 9904
             },
             position = {
+               count = 576,
+               offset = 9328
+            },
+            tangent = {
+               count = 576,
+               offset = 10480
+            },
+            uv0 = {
+               count = 576,
+               offset = 11056
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
+               count = 96,
+               offset = 11728
+            },
+            position = {
+               count = 96,
+               offset = 11632
+            },
+            tangent = {
+               count = 96,
+               offset = 11824
+            },
+            uv0 = {
+               count = 96,
+               offset = 11920
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
                count = 48,
                offset = 12064
             },
+            position = {
+               count = 48,
+               offset = 12016
+            },
             tangent = {
                count = 48,
-               offset = 12160
+               offset = 12112
             },
             uv0 = {
                count = 48,
-               offset = 12208
+               offset = 12160
             }
          }
       }
@@ -85,22 +105,22 @@ function data() return {
       normal = {
          count = 2736,
          numComp = 3,
-         offset = 1008
+         offset = 960
       },
       position = {
-         count = 1008,
+         count = 960,
          numComp = 3,
          offset = 0
       },
       tangent = {
          count = 3648,
          numComp = 4,
-         offset = 3744
+         offset = 3696
       },
       uv0 = {
          count = 1216,
          numComp = 2,
-         offset = 7392
+         offset = 7344
       }
    }
 } end

@@ -4,7 +4,9 @@ function data() return {
       bbMin = { -0.500003, -1.450004, -0.399995 }
    },
    collider = {
-      params = {  },
+      params = {
+
+      },
       type = "MESH"
    },
    lods = {

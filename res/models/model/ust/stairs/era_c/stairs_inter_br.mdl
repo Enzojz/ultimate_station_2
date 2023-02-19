@@ -1,16 +1,24 @@
 function data() return {
    boundingInfo = {
-      bbMax = { -0.049995, 0.999999, 1.250000 },
-      bbMin = { -1.949995, -0.000002, -0.400001 }
+      bbMax = { 0.000001, 1.000001, 1.250000 },
+      bbMin = { -1.899999, 0, -0.400001 }
    },
    collider = {
-      params = {  },
+      params = {
+
+      },
       type = "MESH"
    },
    lods = {
       {
          node = {
-            materials = { "ust/uv/concrete.mtl", "ust/stairs/fence_red.mtl", "ust/stairs/fence_red_masked_2.mtl", "ust/stairs/fence_red_masked.mtl" },
+            materials = {
+               "ust/nz/concrete.mtl",
+               "ust/xy/concrete.mtl",
+               "ust/stairs/fence_red.mtl",
+               "ust/stairs/fence_red_masked_2.mtl",
+               "ust/stairs/fence_red_masked.mtl"
+            },
             mesh = "ust/stairs/era_c/stairs_inter_br.msh",
             name = "stairs_inter_br",
             transf = {

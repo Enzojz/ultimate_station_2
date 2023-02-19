@@ -5,7 +5,9 @@ function data() return {
       bbMin = { -0.000003, -2.900005, -0.399995 }
    },
    collider = {
-      params = {  },
+      params = {
+
+      },
       type = "MESH"
    },
    lods = {
@@ -13,10 +15,10 @@ function data() return {
          node = {
             materials = {
                "ust/xy/concrete.mtl",
-               "ust/nz/concrete.mtl",
                "ust/stairs/fence_red.mtl",
                "ust/stairs/fence_red_masked_2.mtl",
-               "ust/stairs/fence_red_masked.mtl"
+               "ust/stairs/fence_red_masked.mtl",
+               "ust/nz/concrete.mtl"
             },
             mesh = "ust/stairs/era_c/stairs_overpass_tl.msh",
             name = "stairs_overpass_tl",

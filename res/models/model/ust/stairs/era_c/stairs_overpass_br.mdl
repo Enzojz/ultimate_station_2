@@ -2,10 +2,12 @@ local laneutil = require "laneutil"
 function data() return {
    boundingInfo = {
       bbMax = { 0.000003, 2.900004, 1.250015 },
-      bbMin = { -1.000001, -0.000000, -0.399995 }
+      bbMin = { -1.000001, 0, -0.399995 }
    },
    collider = {
-      params = {  },
+      params = {
+
+      },
       type = "MESH"
    },
    lods = {
@@ -14,8 +16,8 @@ function data() return {
             materials = {
                "ust/nz/concrete.mtl",
                "ust/stairs/fence_red.mtl",
-               "ust/stairs/fence_red_masked_2.mtl",
                "ust/stairs/fence_red_masked.mtl",
+               "ust/stairs/fence_red_masked_2.mtl",
                "ust/xy/concrete.mtl"
             },
             mesh = "ust/stairs/era_c/stairs_overpass_br.msh",
