@@ -90,6 +90,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 isBuilt = true
                 local info = allOverpass[currentIndex - 1].info
                 local prevSlotId = allOverpass[currentIndex - 1].slotId
+                
+                local open = {info.arcs.left:rad(rect[1]), info.arcs.left:rad(rect[4])}
+                
+                if not params.extra[moduleSlotId].open then
+                    params.extra[moduleSlotId].open = {}
+                end
+                params.extra[moduleSlotId].open[7] = open
+                
                 if info.height ~= hPlatform then
                     insert(result.invokeLater, function()
                         local prevRect = params.modules[prevSlotId].info.rect
@@ -116,6 +124,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 isBuilt = true
                 local info = allOverpass[currentIndex + 1].info
                 local nextSlotId = allOverpass[currentIndex + 1].slotId
+                
+                local open = {info.arcs.right:rad(rect[2]), info.arcs.right:rad(rect[3])}
+                
+                if not params.extra[moduleSlotId].open then
+                    params.extra[moduleSlotId].open = {}
+                end
+                params.extra[moduleSlotId].open[3] = open
+                
                 if info.height ~= hPlatform then
                     insert(result.invokeLater, function()
                         local nextRect = params.modules[nextSlotId].info.rect

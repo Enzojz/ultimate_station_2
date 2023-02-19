@@ -1,6 +1,7 @@
 local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -113,30 +114,45 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
     
     -- if n == 0 then n = 1 end
     if data == 3 or data == 7 then
-        local n = 20 / config.width
-        local pts, vec = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
-        
-        for i = 1, n do
-            local refPt = pts[i]:avg(pts[i + 1])
-            local refVec = pts[i] - pts[i + 1]
-            local lengthScale = refVec:length() / config.width
-            local transf = hTrans
-                * coor.scaleX(lengthScale)
-                * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
-                * coor.trans(refPt)
+        local function setFences(arc)
+            local length = arc:length()
+            local n = math.floor(length / config.width - 0.5)
+            local pts, vec = ust.basePts(arc, n)
+            for i = 1, n do
+                local refPt = pts[i]:avg(pts[i + 1])
+                local refVec = pts[i] - pts[i + 1]
+                local lengthScale = refVec:length() / config.width
+                local transf = hTrans
+                    * coor.scaleX(lengthScale)
+                    * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+                
+                insert(result.models, ust.newModel(config.fence:format(color), tag, transf));
+            end
             
-            insert(result.models, ust.newModel(config.fence:format(color), tag, transf));
+            for i = 1, n + 1 do
+                local refPt = pts[i]
+                local refVec = vec[i]
+                local transf = hTrans
+                    * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+                
+                insert(result.models, ust.newModel(config.pole:format(color), tag, transf));
+            end
         end
-        
-        for i = 1, n + 1 do
-            local refPt = pts[i]
-            local refVec = vec[i]
-            local transf = hTrans
-                * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
-                * coor.trans(refPt)
-            
-            insert(result.models, ust.newModel(config.pole:format(color), tag, transf));
+        local fn = function()
+            local open = params.extra[m.info.slotId] and params.extra[m.info.slotId].open and params.extra[m.info.slotId].open[data] or nil
+            if open then
+                local refArc = data == 3 and info.arcs.right or info.arcs.left
+                
+                for _, newArc in ipairs({refArc:withLimits({sup = open[1], basePts = {}}), refArc:withLimits({inf = open[2], basePts = {}})}) do
+                    setFences(newArc)
+                end
+            else
+                setFences(data == 3 and info.arcs.right or info.arcs.left)
+            end
         end
+        insert(result.invokeLater, fn)
     elseif data == 1 or data == 5 then
         local ptL = info.arcs.left:pt(data == 1 and info.arcs.left.sup or info.arcs.left.inf)
         local ptR = info.arcs.right:pt(data == 1 and info.arcs.right.sup or info.arcs.right.inf)
