@@ -47,14 +47,31 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local id = params.modules[m.slotId].info.id
             return {
                 slotId = m.slotId,
-                info = params.modules[params.classedModules[id].slotId].info
+                info = params.modules[params.classedModules[id].slotId].info,
             }
         end)
     
+    
     local highest = allOverpass * pipe.map(function(m) return m.info.height end) * pipe.max()
     
+    local nearest = allOverpass * pipe.map(function(m) return m.info.pos.x end) * pipe.min()
+    local furthest = allOverpass * pipe.map(function(m) return m.info.pos.x end) * pipe.max()
     
-    local hOverpass = highest > 8 and highest or 8
+    local highestRail = pipe.new * func.values(params.modules)
+        * pipe.filter(function(m) return m.metadata.isTrack end)
+        * pipe.map(function(m)
+            local id = m.info.id
+            local pos = params.modules[params.classedModules[id].slotId].info.pos
+            if pos.y == info.pos.y and pos.x <= furthest and pos.x >= nearest then
+                return m.info.comp[27] and m.info.height + 1.5 or m.info.height
+            else
+                return false
+            end
+        end)
+        * pipe.filter(function(m) return m end)
+        * function(ls) return #ls > 0 and math.max(table.unpack(ls)) or nil end 
+    
+    local hOverpass = highestRail and (highestRail + 6.5 > highest and highestRail + 6.5 or highest) or highest
     local tPlatform = coor.transZ(hPlatform)
     local tOverpass = coor.transZ(hOverpass)
     
