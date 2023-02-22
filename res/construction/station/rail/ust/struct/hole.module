@@ -15,15 +15,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local transZ = coor.transZ(info.height)
     
     insert(result.slots, {
-        id = makeData(25, -1),
+        id = makeData(26, -1),
         transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transform * transZ,
-        type = "ust_bridge",
+        type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })
     insert(result.slots, {
-        id = makeData(25, -1),
+        id = makeData(26, -1),
         transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transform * transZ,
-        type = "ust_bridge",
+        type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })
 
