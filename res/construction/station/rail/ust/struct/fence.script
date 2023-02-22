@@ -1,7 +1,6 @@
 local coor = require "ust/coor"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 
 local insert = table.insert
 
@@ -14,6 +13,8 @@ local addSlot = function(params, result)
             
             local octa7 = params.modules[info.octa[7]]
             local octa3 = params.modules[info.octa[3]]
+            local octa1 = params.modules[info.octa[1]]
+            local octa5 = params.modules[info.octa[5]]
             
             local n = 2
             
@@ -55,7 +56,7 @@ local addSlot = function(params, result)
             end
             
             
-            if not info.octa[1] then
+            if not info.octa[1] or (info.octa[1] and octa1.info.height ~= info.height) then
                 local refPt = ptsR[3]:avg(ptsL[3]) + coor.xyz(0, 0, info.height)
                 local refVec = (ptsR[3] - ptsL[3]):normalized()
                 
@@ -72,7 +73,7 @@ local addSlot = function(params, result)
                     })
             end
             
-            if not info.octa[5] then
+            if not info.octa[5] or  (info.octa[5] and octa5.info.height ~= info.height) then
                 local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, info.height)
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
                 
