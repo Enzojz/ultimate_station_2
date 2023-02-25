@@ -131,7 +131,7 @@ ust.slotInfo = function(slotId)
         -- Information
         -- 1 ~ 2 : 50 reserved 51 x 52 y 53 z 54 55 radius 56 is_straight 57 length 58 width 59 extraHeight 60 ref
         --       : 67 overlap left 68 overlap right
-        --       : 
+        --       :
         -- 3 ~ 6 : id
         -- > 6: data
         -- Modifier
@@ -519,56 +519,62 @@ ust.initTerrainList = function(result, id)
     end
 end
 
-local function searchTerminalGroups(params, current, ...)
-    if current == nil then
-        return
-    end
+local function searchTerminalGroups(params, result)
+    local modules = pipe.new
+        * func.keys(params.classedModules)
+        * pipe.map(function(id) return params.classedModules[id].slotId end)
+        * pipe.map(function(slotId) return params.modules[slotId] end)
+        * pipe.filter(function(m) return m.metadata.isTrack end)
+
+    local sortedModules = modules 
+        * pipe.sort(function(lhs, rhs) return (lhs.info.pos.x == rhs.info.pos.x) and (lhs.info.pos.y < rhs.info.pos.y) or (lhs.info.pos.x < rhs.info.pos.x) end)
     
-    local m = params.modules[current]
-    if m.metadata.isTrack and not m.info.trackGroup then
-        while m.info.octa[1] and params.modules[m.info.octa[1]].metadata.isTrack do
-            m = params.modules[m.info.octa[1]]
-        end
-        
-        local groupsLeft = {{}}
-        local groupsRight = {{}}
-        
-        repeat
-            if not m.info.trackGroup then
-                m.info.trackGroup = {}
-            end
-            if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
-                insert(groupsLeft[#groupsLeft], m.info.slotId)
-            elseif (#groupsLeft[#groupsLeft] > 0) then
-                insert(groupsLeft, {})
-            end
-            if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
-                insert(groupsRight[#groupsRight], m.info.slotId)
-            elseif (#groupsRight[#groupsRight] > 0) then
-                insert(groupsRight, {})
-            end
-            m = params.modules[m.info.octa[5]]
-        until not m or not m.metadata.isTrack
-        
-        for _, groupLeft in ipairs(groupsLeft) do
-            if (#groupLeft > 0) then
-                insert(params.trackGroup, groupLeft)
-                for _, slotId in ipairs(groupLeft) do
-                    params.modules[slotId].info.trackGroup.left = #params.trackGroup
+    for _, m in ipairs(sortedModules) do
+        if not m.info.trackGroup then
+            local groupsLeft = {{}}
+            local groupsRight = {{}}
+            
+            repeat
+                if not m.info.trackGroup then
+                    m.info.trackGroup = {}
+                end
+                if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
+                    insert(groupsLeft[#groupsLeft], m.info.slotId)
+                elseif #groupsLeft[#groupsLeft] > 0 then
+                    insert(groupsLeft, {})
+                end
+                
+                if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
+                    insert(groupsRight[#groupsRight], m.info.slotId)
+                elseif #groupsRight[#groupsRight] > 0 then
+                    insert(groupsRight, {})
+                end
+                m = params.modules[m.info.octa[1]]
+            until not m or not m.metadata.isTrack
+            
+            for _, groupLeft in ipairs(groupsLeft) do
+                if (#groupLeft > 0) then
+                    insert(params.trackGroup, groupLeft)
+                    for pos, slotId in ipairs(groupLeft) do
+                        params.modules[slotId].info.trackGroup.left = #params.trackGroup
+                        params.modules[slotId].info.trackGroup.leftPos = pos
+                    end
                 end
             end
-        end
-        
-        for _, groupRight in ipairs(groupsRight) do
-            if (#groupRight > 0) then
-                insert(params.trackGroup, groupRight)
-                for _, slotId in ipairs(groupRight) do
-                    params.modules[slotId].info.trackGroup.right = #params.trackGroup
+            
+            for _, groupRight in ipairs(groupsRight) do
+                if (#groupRight > 0) then
+                    insert(params.trackGroup, groupRight)
+                    for pos, slotId in ipairs(groupRight) do
+                        params.modules[slotId].info.trackGroup.right = #params.trackGroup
+                        params.modules[slotId].info.trackGroup.rightPos = pos
+                    end
                 end
             end
         end
     end
-    searchTerminalGroups(params, ...)
+
+    result.terminalGroups = func.map(params.trackGroup, function() return {} end)
 end
 
 ust.searchTerminalGroups = searchTerminalGroups

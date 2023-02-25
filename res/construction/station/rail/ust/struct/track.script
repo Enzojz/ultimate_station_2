@@ -214,14 +214,74 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     local info = params.modules[slotId].info
     
-    local pos = {0, 0.1, 0.4, 0.5, 0.6, 0.9, 1}
-    local e = pipe.new
-        * {{2, 1}, {3, 2}, {4, 3}, {4, 5}, {5, 6}, {6, 7}}
-        * pipe.rev()
+    local hasCenterNodeLeft, hasCenterNodeRight, hasInfNode, hasSupNode = false, false, false, false
+
+    if info.trackGroup.left then
+        local trackGroup = params.trackGroup[info.trackGroup.left]
+        local n = #trackGroup
+        hasCenterNodeLeft = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+        hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+    end 
+
+    if info.trackGroup.right then
+        local trackGroup = params.trackGroup[info.trackGroup.right]
+        local n = #trackGroup
+        hasCenterNodeRight = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+        hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
+    end
+
+    local function setPos()
+        if hasCenterNodeLeft and hasCenterNodeRight then
+            return {0, 0.45, 0.55, 1}, 3, 2
+        elseif hasCenterNodeLeft and hasInfNode then
+            return {0, 0.5, 1}, 1, 0
+        elseif hasCenterNodeLeft then
+            return {0, 0.5, 1}, 1, nil
+        elseif hasCenterNodeRight and hasSupNode then
+            return {0, 0.5, 1}, 3, 2
+        elseif hasCenterNodeRight then
+            return {0, 0.5, 1}, nil, 2
+        elseif hasSupNode and not info.trackGroup.right then
+            return {0, 1}, 1, nil
+        elseif hasSupNode then
+            local nRight = #params.trackGroup[info.trackGroup.right]
+            if nRight % 2 == 0 and nRight / 2 == info.trackGroup.rightPos then
+                return {0, 0.95, 1}, 1, nil
+            else
+                return {0, 1}, 1, nil
+            end
+        elseif hasInfNode and not info.trackGroup.left then
+            return {0, 1}, nil, 0
+        elseif hasInfNode then
+            local nLeft = #params.trackGroup[info.trackGroup.left]
+            if nLeft % 2 == 0 and nLeft / 2 == info.trackGroup.leftPos - 1 then
+                return {0, 0.05, 1}, nil, 2
+            else
+                return {0, 1}, nil, 0
+            end
+        else
+            return {0, 1}, nil, nil
+        end
+    end
+
+    local pos, nodeLeft, nodeRight = setPos()
+    
+    if info.trackGroup.left or info.trackGroup.right then
+        local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+        if nodeLeft then
+            result.terminalGroups[info.trackGroup.left].vehicleNodeOverride = #nodes + nodeLeft
+        end
+        if nodeRight then
+            result.terminalGroups[info.trackGroup.right].vehicleNodeOverride = #nodes + nodeRight
+        end
+    end
+
+    local e = pipe.new * pos
+        * pipe.interlace()
         * pipe.map(function(idx)
-            local inf = info.arcs.center.inf * (1 - pos[idx[1]]) + info.arcs.center.sup * pos[idx[1]]
-            local sup = info.arcs.center.inf * (1 - pos[idx[2]]) + info.arcs.center.sup * pos[idx[2]]
-            local length = (pos[idx[2]] - pos[idx[1]]) * info.length
+            local inf = info.arcs.center.inf * (1 - idx[1]) + info.arcs.center.sup * idx[1]
+            local sup = info.arcs.center.inf * (1 - idx[2]) + info.arcs.center.sup * idx[2]
+            local length = (idx[2] - idx[1]) * info.length
             return {
                 {
                     info.arcs.center:pt(inf) + coor.xyz(0, 0, info.height),
@@ -243,32 +303,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             catenary = false,
         },
         edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
-        snapNodes = func.filter({(not info.octa[1]) and 1, (not info.octa[5]) and 11}, pipe.noop()),
+        snapNodes = func.filter({(not info.octa[1]) and (#pos * 2 - 3), (not info.octa[5]) and 0}, pipe.noop()),
         freeNodes = {},
         tag2nodes = {
-            [tag] = func.seq(0, 11)
+            [tag] = func.seq(0, #pos * 2 - 3)
         },
         slot = slotId
     }
     
-    insert(result.edgeLists, edges)
-    params.edgeIndex[slotId] = #result.edgeLists
-    if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
-        insert(result.invokeLater, function()
-            local indexL = params.edgeIndex[slotId]
-            local indexR = params.edgeIndex[info.octa[1]]
-            local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
-            local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[12][1])
-            local pt = ptL:avg(ptR):toTuple()
-            result.edgeLists[indexL].edges[2][1] = pt
-            result.edgeLists[indexR].edges[12][1] = pt
-        end)
-    end
     
-    if info.trackGroup then
-        local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
-        params.edgeGroup[slotId] = func.seq(#nodes - 12, #nodes - 1)
-    end
+
+    insert(result.edgeLists, edges)
+
+    params.edgeIndex[slotId] = #result.edgeLists
+    -- if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
+    --     insert(result.invokeLater, function()
+    --         local indexL = params.edgeIndex[slotId]
+    --         local indexR = params.edgeIndex[info.octa[1]]
+    --         local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[#result.edgeLists[indexL].edges - 1][0])
+    --         local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[0][1])
+    --         local pt = ptL:avg(ptR):toTuple()
+    --         result.edgeLists[indexL].edges[#result.edgeLists[indexL].edges - 1][0] = pt
+    --         result.edgeLists[indexR].edges[0][1] = pt
+    --     end)
+    -- end
     
     if params.debug == 1 then
         local text = tostring(info.id)

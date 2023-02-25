@@ -117,6 +117,24 @@ end
 ---@param modules modules
 ---@return modules
 local preProcessFn = function(modules, change)
+    for k, m in pairs(modules) do
+        if m.metadata and m.metadata.isStreet then
+            local __, id = ust.slotInfo(k)
+            for slotId, m in pairs(modules) do
+                local __, moduleId = ust.slotInfo(slotId)
+                if moduleId == id then
+                    modules[slotId] = nil
+                end
+            end
+        end
+    end
+    
+    for k, m in pairs(modules) do
+        if m.metadata and m.metadata.isStreet then
+            modules[k] = nil
+        end
+    end
+
     local classedModules = classifyModules(modules)
     
     local type, id, data = ust.slotInfo(change.slotId)
@@ -126,7 +144,7 @@ local preProcessFn = function(modules, change)
         id = id,
         data = data
     }
-    
+
     if change.added then
         if change.module.metadata.preProcessAdd then
             game.res.script[change.module.metadata.scriptName][change.module.metadata.preProcessAdd](modules, change, classedModules, info)
@@ -310,7 +328,12 @@ local updateFn = function(params, closureParams)
         terminalGroups = {},
         stations = {},
         edgeLists = {},
-        slotConfig = {},
+        slotConfig = {
+			ust_track = {
+				skipCollisionCheck  = true,
+			}
+
+        },
         cost = 0,
         models = pipe.new * {},
         slots = {},
@@ -342,8 +365,7 @@ local updateFn = function(params, closureParams)
     params.edgeIndex = {}
     params.extra = {}
     
-    ust.searchTerminalGroups(params, unpack(func.map(func.sort(func.keys(params.classedModules)), function(id) return params.classedModules[id].slotId end)))
-    params.edgeGroup = {}
+    ust.searchTerminalGroups(params, result)
     
     -- slotSetup adds slots for modules itself
     for slotId, module in pairs(params.modules) do
@@ -363,25 +385,12 @@ local updateFn = function(params, closureParams)
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then
-                local edge = func.map(track, function(t) return params.edgeGroup[t] end)
                 if (platform.right) then
-                    insert(
-                        result.terminalGroups,
-                        {
-                            terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2][11] or edge[(#edge + 1) / 2][8]
-                        }
-                )
+                    result.terminalGroups[i].terminals = func.map(platform.models, function(p) return {p, 0} end)
                 end
                 
                 if (platform.left) then
-                    insert(
-                        result.terminalGroups,
-                        {
-                            terminals = func.map(platform.models, function(p) return {p, 0} end),
-                            vehicleNodeOverride = #edge % 2 == 0 and edge[#edge / 2 + 1][1] or edge[(#edge + 1) / 2][6]
-                        }
-                )
+                    result.terminalGroups[i].terminals = func.map(platform.models, function(p) return {p, 0} end)
                 end
             end
         end
