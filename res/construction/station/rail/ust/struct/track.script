@@ -4,6 +4,7 @@ local pipe = require "ust/pipe"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
+local dump = require "luadump"
 
 local ustg = require "ust_gridization"
 
@@ -290,7 +291,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             catenary = false,
         },
         edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
-        snapNodes = func.filter({(not info.octa[1]) and (seqNodes[11]), (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
+        snapNodes = func.filter({(not info.octa[1]) and (seqNodes[12]), (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
         freeNodes = {},
         seqNodes = seqNodes,
         tag2nodes = {
