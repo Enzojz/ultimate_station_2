@@ -1,4 +1,6 @@
-﻿function data()
+﻿local func = require "ust/func"
+
+function data()
     return {
         info = {
             severityAdd = "NONE",
@@ -24,7 +26,7 @@
             for i, trackName in pairs(tracks) do
                 local track = api.res.trackTypeRep.get(api.res.trackTypeRep.find(trackName))
                 local trackName = trackName:match("(.+).lua")
-
+                
                 local mod = api.type.ModuleDesc.new()
                 mod.fileName = ("station/rail/ust/tracks/%s.module"):format(trackName)
                 
@@ -68,6 +70,57 @@
                 table.insert(trackIconList, track.icon)
                 table.insert(trackNames, track.name)
             end
+            
+            
+            -- local streets = api.res.streetTypeRep.getAll()
+            -- for i, streetName in pairs(streets) do
+            --     local street = api.res.streetTypeRep.get(api.res.streetTypeRep.find(streetName))
+            --     if (#street.categories > 0 and not streetName:match("street_depot/") and not streetName:match("street_station/")) then
+            --         local nBackward = #func.filter(street.laneConfigs, function(l) return (l.forward == false) end)
+            --         local mod = api.type.ModuleDesc.new()
+                    
+            --         mod.fileName = ("station/rail/ust/streets/%s.module"):format(streetName)
+                    
+            --         mod.availability.yearFrom = street.yearFrom
+            --         mod.availability.yearTo = street.yearTo
+            --         mod.cost.price = 0
+                    
+            --         mod.description.name = street.name
+            --         mod.description.description = street.desc
+            --         mod.description.icon = street.icon
+                    
+            --         mod.type = "ust_street"
+            --         mod.order.value = i + 1
+            --         mod.metadata = {
+            --             typeName = "ust_street",
+            --             isStreet = true,
+            --             nBackward = nBackward,
+            --             isOneWay = nBackward == 0,
+            --             width = street.streetWidth + street.sidewalkWidth * 2,
+            --             height = 0,
+            --             typeId = 4,
+            --             scriptName = "construction/station/rail/ust/struct/street",
+            --             preProcessAdd = "preProcessAdd",
+            --             preProcessRemove = "preProcessRemove",
+            --             slotSetup = "slotSetup",
+            --             preClassify = "preClassify",
+            --             postClassify = "postClassify",
+            --             gridization = "gridization"
+            --         }
+                    
+            --         mod.category.categories = {"ust_cat_street"}
+                        
+            --         mod.updateScript.fileName = "construction/station/rail/ust/struct/street.updateFn"
+            --         mod.updateScript.params = {
+            --             trackType = streetName,
+            --             trackWidth = street.streetWidth + street.sidewalkWidth * 2
+            --         }
+            --         mod.getModelsScript.fileName = "construction/station/rail/ust/struct/street.getModelsFn"
+            --         mod.getModelsScript.params = {}
+                    
+            --         api.res.moduleRep.add(mod.fileName, mod, true)
+            --     end
+            -- end
             
             local bridges = api.res.bridgeTypeRep.getAll()
             for index, bridgeName in pairs(bridges) do
@@ -158,7 +211,7 @@
             
             local con = api.res.constructionRep.get(api.res.constructionRep.find("station/rail/ust/ust.con"))
             con.createTemplateScript.fileName = "construction/station/rail/ust/ust.createTemplateFn"
-            con.createTemplateScript.params = { trackModuleList = trackModuleList }
+            con.createTemplateScript.params = {trackModuleList = trackModuleList}
             
             local data = api.type.DynamicConstructionTemplate.new()
             for i = 1, #con.constructionTemplates[1].data.params do

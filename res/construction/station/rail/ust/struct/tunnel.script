@@ -43,7 +43,7 @@ end
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform)) then
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
             local transf = info.transf * coor.transZ(info.height)
@@ -74,7 +74,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         spacing = {0, 0, 0, 0}
     })
     
-    if module.metadata.isTrack then
+    if module.metadata.isTrack or module.metadata.isStreet then
         insert(result.invokeLater, function()
             local trackEdgeIndex = params.edgeIndex[trackSlotId]
             local trackEdges = result.edgeLists[trackEdgeIndex]

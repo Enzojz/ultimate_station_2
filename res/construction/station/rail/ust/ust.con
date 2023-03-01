@@ -1,6 +1,7 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local ust = require "ust"
+local dump = require "luadump"
 
 local unpack = table.unpack
 local insert = table.insert
@@ -117,24 +118,6 @@ end
 ---@param modules modules
 ---@return modules
 local preProcessFn = function(modules, change)
-    for k, m in pairs(modules) do
-        if m.metadata and m.metadata.isStreet then
-            local __, id = ust.slotInfo(k)
-            for slotId, m in pairs(modules) do
-                local __, moduleId = ust.slotInfo(slotId)
-                if moduleId == id then
-                    modules[slotId] = nil
-                end
-            end
-        end
-    end
-    
-    for k, m in pairs(modules) do
-        if m.metadata and m.metadata.isStreet then
-            modules[k] = nil
-        end
-    end
-
     local classedModules = classifyModules(modules)
     
     local type, id, data = ust.slotInfo(change.slotId)
@@ -329,10 +312,12 @@ local updateFn = function(params, closureParams)
         stations = {},
         edgeLists = {},
         slotConfig = {
-			ust_track = {
+			ust_street = {
+				skipCollisionCheck  = true,
+			},
+			ust_remove = {
 				skipCollisionCheck  = true,
 			}
-
         },
         cost = 0,
         models = pipe.new * {},
@@ -359,7 +344,6 @@ local updateFn = function(params, closureParams)
     params.grid = ust.gridization(params.modules, params.classedModules)
     
     params.slotGrid = {}
-    
     params.trackGroup = {}
     params.platformGroup = {}
     params.edgeIndex = {}
@@ -380,7 +364,7 @@ local updateFn = function(params, closureParams)
             s.addSlot(params, result)
         end
     end
-    
+
     result.terminateConstructionHook = function()
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]

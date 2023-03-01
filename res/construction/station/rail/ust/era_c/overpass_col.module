@@ -58,7 +58,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local furthest = allOverpass * pipe.map(function(m) return m.info.pos.x end) * pipe.max()
     
     local highestRail = pipe.new * func.values(params.modules)
-        * pipe.filter(function(m) return m.metadata.isTrack end)
+        * pipe.filter(function(m) return m.metadata.isTrack or m.metadata.isStreet end)
         * pipe.map(function(m)
             local id = m.info.id
             local pos = params.modules[params.classedModules[id].slotId].info.pos

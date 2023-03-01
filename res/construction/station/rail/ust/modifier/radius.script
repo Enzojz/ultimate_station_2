@@ -128,7 +128,7 @@ local addSlot = function(params, result)
     
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and module.metadata.isTrack) then
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet)) then
             local info = module.info
             local makeData = module.makeData
             local transfPosC = info.transf * coor.transZ(info.height)

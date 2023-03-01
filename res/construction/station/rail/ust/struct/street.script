@@ -11,7 +11,6 @@ local insert = table.insert
 
 local preProcessAdd = function(modules, change, classedModules, info)
     local maxId = func.max(func.keys(classedModules))
-    
     if (info.data == -1) then
         local id = info.id
         local slotId = classedModules[id].slotId
@@ -159,7 +158,6 @@ local slotSetup = function(params, result, slotId)
         end
     end
     
-    
     insert(
         result.slots,
         {
@@ -169,7 +167,6 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
-    
     insert(
         result.slots,
         {
@@ -242,19 +239,19 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     local function setPos()
         if hasCenterNodeLeft or hasCenterNodeRight or hasInfNode or hasSupNode then
-            local pos = {{0, 0.05}, {0.05, 0.45}, {0.45, 0.5}, {1, 0.95}, {0.95, 0.55}, {0.55, 0.5}}
+            local pos = {{0, 0.5}, {0.5, 1}}
             local leftNode, rightNode = nil, nil
             if hasCenterNodeLeft then
-                leftNode = 10
+                leftNode = 1
             elseif hasSupNode then
-                leftNode = 8
+                leftNode = 3
             end
             if hasCenterNodeRight then
-                rightNode = 3
-            elseif hasInfNode then
                 rightNode = 1
+            elseif hasInfNode then
+                rightNode = 0
             end
-            return pos, leftNode, rightNode, {0, 1, 2, 3, 4, 5, 11, 10, 9, 8, 7, 6}
+            return pos, leftNode, rightNode, {0, 1, 2, 3}
         elseif rev then
             return {{1, 0}}, nil, nil, {1, 0}
         else
@@ -293,11 +290,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     
     local edges = {
-        type = "TRACK",
+        type = "STREET",
         alignTerrain = true,
         params = {
             type = trackType,
             catenary = false,
+            tramTrackType = "YES"
         },
         edges = e * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
         snapNodes = func.filter({(not info.octa[1]) and seqNodes[#seqNodes], (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
@@ -312,7 +310,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     insert(result.edgeLists, edges)
     
     params.edgeIndex[slotId] = #result.edgeLists
-    if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
+    if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
         insert(result.invokeLater, function()
             local indexL = params.edgeIndex[slotId]
             local indexR = params.edgeIndex[info.octa[1]]
@@ -371,9 +369,47 @@ end
 ---@param modules table<slotid, module>
 ---@param classified classified_modules
 ---@param slotId slotid
+---@return slottype
+---@return slotid
+---@return integer
+local preClassify = function(modules, classified, slotId)
+    local type, id, data = ust.slotInfo(slotId)
+    
+    classified[id] = {
+        type = type,
+        id = id,
+        slotId = slotId,
+        data = data,
+        info = {},
+        slot = {},
+        metadata = {}
+    }
+    
+    modules[slotId].info = {
+        type = type,
+        id = id,
+        slotId = slotId,
+        data = data,
+        octa = {false, false, false, false, false, false, false, false},
+        comp = {},
+        pos = coor.xyz(0, 0, 0),
+        width = 5,
+        length = 20,
+    }
+    
+    modules[slotId].makeData = function(type, data)
+        return ust.mixData(ust.base(id, type), data)
+    end
+    
+    return type, id, data
+end
+
+---@param modules table<slotid, module>
+---@param classified classified_modules
+---@param slotId slotid
 ---@param params any
 local postClassify = function(modules, classified, slotId, params)
-    modules[slotId].info.height = (params.refHeight - modules[slotId].metadata.height) + (modules[slotId].info.extraHeight or 0)
+    modules[slotId].info.height = params.refHeight + (modules[slotId].info.extraHeight or 0)
 end
 
 function data()
@@ -382,7 +418,7 @@ function data()
         preProcessRemove = preProcessRemove,
         slotSetup = slotSetup,
         updateFn = updateFn,
-        preClassify = ust.preClassify,
+        preClassify = preClassify,
         postClassify = postClassify,
         getModelsFn = function(params)
             return {}

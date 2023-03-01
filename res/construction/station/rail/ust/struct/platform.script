@@ -66,7 +66,7 @@ local preProcessAdd = function(modules, change, classedModules, info)
         }
         
         local function isTrack(pos)
-            return octa[pos] and (modules[octa[pos]].metadata.isTrack or modules[octa[pos]].metadata.isPlaceholder)
+            return octa[pos] and (modules[octa[pos]].metadata.isTrack or modules[octa[pos]].metadata.isStreet or modules[octa[pos]].metadata.isPlaceholder)
         end
         
         local function isPlatform(pos)
@@ -199,6 +199,15 @@ local slotSetup = function(params, result, slotId)
     insert(
         result.slots,
         {
+            id = makeData(4, -1),
+            transf = transfPosC,
+            type = "ust_street",
+            spacing = {0, 0, 0, 0}
+        }
+    )
+    insert(
+        result.slots,
+        {
             id = makeData(2, -1),
             transf = transfPosC,
             type = "ust_platform",
@@ -277,6 +286,10 @@ local calculateLimit = function(arc)
         end
 end
 
+local function isTrackOrStreet(module)
+    return module.metadata.isTrack or module.metadata.isStreet
+end
+
 ---Recalculate the baseline for platforms
 ---@param x number
 ---@param y number
@@ -306,7 +319,7 @@ local platformArcs = function(x, y, z, data)
                 or (m.info.octa[5] and ar:rad(data.modules[m.info.octa[5]].info.pts[2][1]) or ar:rad(data.yState.pos))
         end
         local limit = function(limL, limR, p, fFar)
-            if refModule2 and refModule.metadata.isTrack and refModule2.metadata.isTrack then
+            if refModule2 and isTrackOrStreet(refModule) and isTrackOrStreet(refModule2) then
                 -- Two sides are tracks
                 local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
                 local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arcL.o) or (arcL.o - refModule.info.pts[p][1])):normalized()
@@ -316,19 +329,19 @@ local platformArcs = function(x, y, z, data)
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     calculateLimit(arcR)(lim, refModule2.info.pts[p]),
                     fFar(arcL, refModule), fFar(arcR, refModule2)
-            elseif refModule2 and refModule2.metadata.isTrack and not refModule.metadata.isTrack then
+            elseif refModule2 and isTrackOrStreet(refModule2) and not isTrackOrStreet(refModule) then
                 local lim = refModule2.info.limits[p]
                 return
                     limL,
                     calculateLimit(arcR)(lim, refModule2.info.pts[p]),
                     fFar(arcL, refModule), fFar(arcR, refModule2)
-            elseif refModule2 and refModule.metadata.isTrack and not refModule2.metadata.isTrack then
+            elseif refModule2 and isTrackOrStreet(refModule) and not isTrackOrStreet(refModule2) then
                 local lim = refModule2.info.limits[p]
                 return
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
                     limR,
                     fFar(arcL, refModule), fFar(arcR, refModule2)
-            elseif refModule.metadata.isTrack and not refModule2 then
+            elseif isTrackOrStreet(refModule) and not refModule2 then
                 local lim = refModule.info.limits[p]
                 return
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),

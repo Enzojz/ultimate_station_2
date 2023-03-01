@@ -28,7 +28,7 @@ ust.octa = function(modules, classedModules)
     end
     
     for slotId, module in pairs(modules) do
-        if module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder then
+        if module.metadata.isTrack or module.metadata.isStreet or module.metadata.isPlatform or module.metadata.isPlaceholder then
             local info = module.info
             local x, y, z = info.pos.x, info.pos.y, info.pos.z
             
@@ -254,10 +254,10 @@ ust.genericArcs = function(x, y, z, data)
     if (
     ((m.info.refPos.x == 0 and x < 0) or m.info.refPos.x < 0)
         and m.info.octa[3]
-        and (data.modules[m.info.octa[3]].metadata.isTrack or data.modules[m.info.octa[3]].metadata.isPlaceholder)
+        and (data.modules[m.info.octa[3]].metadata.isTrack or data.modules[m.info.octa[3]].metadata.isStreet or data.modules[m.info.octa[3]].metadata.isPlaceholder)
         and not data.modules[m.info.octa[3]].info.ref.left
         )
-        or (m.metadata.isTrack and ref == m.info.octa[3])
+        or ((m.metadata.isTrack or m.metadata.isStreet) and ref == m.info.octa[3])
     then
         -- Left side, a track on the right
         if m.info.octa[1] and data.modules[m.info.octa[1]].metadata.isPlatform then
@@ -277,10 +277,10 @@ ust.genericArcs = function(x, y, z, data)
     elseif (
     ((m.info.refPos.x == 0 and x >= 0) or m.info.refPos.x > 0)
         and m.info.octa[7]
-        and (data.modules[m.info.octa[7]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isPlaceholder)
+        and (data.modules[m.info.octa[7]].metadata.isTrack or data.modules[m.info.octa[7]].metadata.isStreet or data.modules[m.info.octa[7]].metadata.isPlaceholder)
         and not data.modules[m.info.octa[7]].info.ref.right
         ) or
-        (m.metadata.isTrack and ref == m.info.octa[7])
+        ((m.metadata.isTrack or m.metadata.isStreet) and ref == m.info.octa[7])
     then
         -- Right side, a track on the left
         if m.info.octa[1] and data.modules[m.info.octa[1]].metadata.isPlatform then

@@ -55,7 +55,29 @@ local setTrackHeight = function(modules, classedModules, slotId, height)
         local m = modules[slotId]
         local info = m.info
         for _, octa in ipairs({info.octa[1], info.octa[5]}) do
-            if octa and modules[octa] and modules[octa].metadata.isTrack then
+            if octa and modules[octa] and (modules[octa].metadata.isTrack) then
+                if not lut[octa] then
+                    searchModules(octa)
+                end
+            end
+        end
+    end
+    
+    searchModules(slotId)
+    
+    for slotId, _ in pairs(lut) do
+        setHeight(modules, classedModules, slotId, height)
+    end
+end
+
+local setStreetHeight = function(modules, classedModules, slotId, height)
+    local lut = {}
+    local function searchModules(slotId)
+        lut[slotId] = true
+        local m = modules[slotId]
+        local info = m.info
+        for _, octa in ipairs({info.octa[1], info.octa[5]}) do
+            if octa and modules[octa] and (modules[octa].metadata.isStreet) then
                 if not lut[octa] then
                     searchModules(octa)
                 end
@@ -118,6 +140,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
                 
                 if m.metadata.isTrack then
                     setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+                elseif m.metadata.isStreet then
+                    setStreetHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
                 elseif m.metadata.isPlatform then
                     setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
                 elseif m.metadata.isPlaceholder then
@@ -132,6 +156,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
             
             if m.metadata.isTrack then
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isStreet then
+                setStreetHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlatform then
                 setPlatformHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlaceholder then
@@ -144,6 +170,8 @@ local preProcessAdd = function(modules, change, classedModules, info)
             
             if m.metadata.isTrack then
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
+            elseif m.metadata.isStreet then
+                setStreetHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlatform then
                 setHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isPlaceholder then
@@ -188,7 +216,7 @@ local addSlot = function(params, result)
     
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and (module.metadata.isTrack or module.metadata.isPlatform or module.metadata.isPlaceholder)) then
+        if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet or module.metadata.isPlatform or module.metadata.isPlaceholder)) then
             local info = module.info
             local makeData = module.makeData
             local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)

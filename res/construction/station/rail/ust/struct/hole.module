@@ -47,7 +47,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
 
             end
         end)
-    elseif module.metadata.isTrack then
+    elseif module.metadata.isTrack or module.metadata.isStreet then
         local n = 4
         local leftPts = ust.basePts(info.arcs.left, n)
         local rightPts = ust.basePts(info.arcs.right, n)

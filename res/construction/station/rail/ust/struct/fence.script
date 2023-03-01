@@ -7,7 +7,7 @@ local insert = table.insert
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if module.metadata and (module.metadata.isPlatform or module.metadata.isTrack) then
+        if module.metadata and (module.metadata.isPlatform or module.metadata.isTrack or module.metadata.isStreet) then
             local info = module.info
             local makeData = module.makeData
             
@@ -21,7 +21,7 @@ local addSlot = function(params, result)
             local ptsL, vecL = ust.basePts(info.arcs.left, n)
             local ptsR, vecR = ust.basePts(info.arcs.right, n)
             
-            if not (module.metadata.isTrack and octa7 and octa7.isPlatform and octa7.info.height == info.height) then
+            if not ((module.metadata.isTrack or module.metadata.isStreet) and octa7 and octa7.isPlatform and octa7.info.height == info.height) then
                 local refPtL = ptsL[2] + coor.xyz(0, 0, info.height)
                 local refVecL = vecL[2]
                 
@@ -38,7 +38,7 @@ local addSlot = function(params, result)
                     })
             end
             
-            if not (module.metadata.isTrack and octa3 and octa3.isPlatform and octa3.info.height == info.height) then
+            if not ((module.metadata.isTrack or module.metadata.isStreet) and octa3 and octa3.isPlatform and octa3.info.height == info.height) then
                 local refPtR = ptsR[2] + coor.xyz(0, 0, info.height)
                 local refVecR = vecR[2]
                 
@@ -73,7 +73,7 @@ local addSlot = function(params, result)
                     })
             end
             
-            if not info.octa[5] or  (info.octa[5] and octa5.info.height ~= info.height) then
+            if not info.octa[5] or (info.octa[5] and octa5.info.height ~= info.height) then
                 local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, info.height)
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
                 

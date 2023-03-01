@@ -122,7 +122,7 @@ end
 ---@return integer
 ust.slotInfo = function(slotId)
         -- Platform/track
-        -- 1 ~ 2 : 01 : track 02 platform 03 placeholder
+        -- 1 ~ 2 : 01 : track 02 platform 03 placeholder 04 streets
         -- 3 ~ 6 : id
         -- Component
         -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 24 fences/walls 25 bridge 26 tunnel 27 catenary 28 roof 29 type 31 5m Entry 32 10m Entry 33 20m Entry
@@ -355,6 +355,12 @@ ust.newTopologySlots = function(params, makeData, pos)
             type = "ust_placeholder",
             spacing = {0, 0, 0, 0}
         }
+        params.slotGrid[pos.z][x][y].street = {
+            id = makeData(4, octa),
+            transf = transf,
+            type = "ust_street",
+            spacing = {0, 0, 0, 0}
+        }
     end
 end
 
@@ -432,7 +438,7 @@ ust.preClassify = function(modules, classified, slotId)
         octa = {false, false, false, false, false, false, false, false},
         comp = {},
         pos = coor.xyz(0, 0, 0),
-        width = 5,
+        width = modules[slotId].metadata.width or 5,
         length = 20,
     }
     
@@ -519,14 +525,15 @@ ust.initTerrainList = function(result, id)
     end
 end
 
-local function searchTerminalGroups(params, result)
+local function searchTerminalGroups(params, fn)
+    local nbGroup = #params.trackGroup
     local modules = pipe.new
         * func.keys(params.classedModules)
         * pipe.map(function(id) return params.classedModules[id].slotId end)
         * pipe.map(function(slotId) return params.modules[slotId] end)
-        * pipe.filter(function(m) return m.metadata.isTrack end)
-
-    local sortedModules = modules 
+        * pipe.filter(fn)
+    
+    local sortedModules = modules
         * pipe.sort(function(lhs, rhs) return (lhs.info.pos.x == rhs.info.pos.x) and (lhs.info.pos.y < rhs.info.pos.y) or (lhs.info.pos.x < rhs.info.pos.x) end)
     
     for _, m in ipairs(sortedModules) do
@@ -550,7 +557,7 @@ local function searchTerminalGroups(params, result)
                     insert(groupsRight, {})
                 end
                 m = params.modules[m.info.octa[1]]
-            until not m or not m.metadata.isTrack
+            until not m or not fn(m)
             
             for _, groupLeft in ipairs(groupsLeft) do
                 if (#groupLeft > 0) then
@@ -573,10 +580,35 @@ local function searchTerminalGroups(params, result)
             end
         end
     end
-
-    result.terminalGroups = func.map(params.trackGroup, function() return {} end)
+    return nbGroup, #params.trackGroup
 end
 
-ust.searchTerminalGroups = searchTerminalGroups
+local searchTrackTerminals = function(params, result)
+    local f, t = searchTerminalGroups(params, function(m) return m.metadata.isTrack end)
+    if t > f then
+        insert(result.stations, {
+            terminals = func.seq(f, t - 1),
+            tag = 1
+        })
+    end
+end
+
+
+local searchStreetTerminals = function(params, result)
+    local f, t = searchTerminalGroups(params, function(m) return m.metadata.isStreet end)
+    if t > f then
+        insert(result.stations, {
+            terminals = func.seq(f, t - 1),
+            tag = 2
+        })
+    end
+end
+
+ust.searchTerminalGroups = function(params, result)
+    searchTrackTerminals(params, result)
+    searchStreetTerminals(params, result)
+    
+    result.terminalGroups = func.map(params.trackGroup, function() return {} end)
+end
 
 return ust

@@ -46,7 +46,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     for i = 1, 8 do
         if info.octa[i] then
             octaModules[i] = info.octa[i] and params.modules[info.octa[i]]
-            isTrack[i] = octaModules[i].metadata and octaModules[i].metadata.isTrack or false
+            isTrack[i] = octaModules[i].metadata and (octaModules[i].metadata.isTrack or octaModules[i].metadata.isStreet) or false
             isPlatform[i] = octaModules[i].metadata and octaModules[i].metadata.isPlatform or false
         else
             octaModules[i] = false

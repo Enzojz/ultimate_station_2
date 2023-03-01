@@ -22,8 +22,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i + 1]):mRot() * coor.trans(pos)
             
             if i % 4 == 1 then
-                local m3 = module.info.octa[3] and params.modules[module.info.octa[3]].metadata.isTrack or false
-                local m7 = module.info.octa[7] and params.modules[module.info.octa[7]].metadata.isTrack or false
+                local m3 = module.info.octa[3] and (params.modules[module.info.octa[3]].metadata.isTrack or params.modules[module.info.octa[3]].metadata.isStreet) or false
+                local m7 = module.info.octa[7] and (params.modules[module.info.octa[7]].metadata.isTrack or params.modules[module.info.octa[7]].metadata.isStreet) or false
                 if m3 or m7 then
                     local number3 = m3 and tostring(params.modules[module.info.octa[3]].info.trackGroup.left) or ""
                     local number7 = m7 and tostring(params.modules[module.info.octa[7]].info.trackGroup.right) or ""
