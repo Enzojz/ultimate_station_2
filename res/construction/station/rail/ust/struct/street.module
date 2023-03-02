@@ -6,7 +6,10 @@ local quat = require "ust/quaternion"
 local dump = require "luadump"
 local livetext = require "ust/livetext"
 
-local fitModels = ust.fitModel(1, 1, 1, true, true)
+local fitModels = {
+    paving = ust.fitModel(1, 1, 1, true, true),
+    tram = ust.fitModel(2, 0.2, 1, true, true)
+}
 
 local insert = table.insert
 local gap = 0.01
@@ -67,7 +70,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             else
                 return {{{1, 0}}}, nil, nil, {1, 0}
             end
-        else 
+        else
             return {{{0, 1}}}, nil, nil, {0, 1}
         end
     end
@@ -95,7 +98,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         type = "STREET",
         alignTerrain = true,
         params = {
-            type = "ust/brick.lua",
+            type = "ust/asphalt.lua",
             catenary = false,
             tramTrackType = "YES"
         },
@@ -116,7 +119,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             type = "STREET",
             alignTerrain = true,
             params = {
-                type = "ust/brick_core.lua",
+                type = "ust/asphalt_core.lua",
                 catenary = false,
                 tramTrackType = "YES"
             },
@@ -136,11 +139,33 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
         insert(result.edgeLists, edgesCore)
         for _, conn in ipairs(conn) do
-            local pts = pipe.new * conn
+            local ptC = pipe.new * conn
                 * pipe.map(function(c) return info.arcs.center.inf * (1 - c) + info.arcs.center.sup * c end)
                 * pipe.map(function(rad) return info.arcs.center:pt(rad) + coor.xyz(0, 0, info.height) end)
             
-            insert(result.models, ust.unitLane(pts[1], pts[2], tag, "ust/transport_lane.mdl"))
+            insert(result.models, ust.unitLane(ptC[1], ptC[2], tag, "ust/transport_lane.mdl"))
+            
+            local ptRef = pipe.new * conn
+                * pipe.map(function(c) return info.arcs.left.inf * (1 - c) + info.arcs.left.sup * c end)
+                * pipe.map(function(rad) return info.arcs.left:pt(rad) + coor.xyz(0, 0, info.height) end)
+            
+            local vecs = func.map2(ptC, ptRef, function(ptC, ptL) return (ptL - ptC): normalized() end)
+
+            local ptL = func.map2(ptC, vecs, function(pt, vec) return pt + vec end)
+            local ptR = func.map2(ptC, vecs, function(pt, vec) return pt - vec end)
+
+            local centre = {
+                lt = ptR[2],
+                rt = ptL[2],
+                rb = ptL[1],
+                lb = ptR[1],
+            }
+            
+            insert(result.models, ust.newModel("ust/paving/ba/tram_tl.mdl", tag, fitModels.tram(centre, true)));
+            insert(result.models, ust.newModel("ust/paving/ba/tram_br.mdl", tag, fitModels.tram(centre, false)));
+            insert(result.models, ust.newModel("ust/paving/ba/tram_paving_tl.mdl", tag, fitModels.tram(centre, true)));
+            insert(result.models, ust.newModel("ust/paving/ba/tram_paving_br.mdl", tag, fitModels.tram(centre, false)));
+        
         end
     end
     
@@ -160,14 +185,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     --         result.edgeLists[indexR].edges[edgesR.seqNodes[1] + 1][1] = pt
     --     end)
     -- end
-
-
-
     local n = 4
     
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
-
+    
     
     for i = 1, n do
         local sup = i + 1
@@ -179,10 +201,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             rb = rightPts[inf],
         }
         
-        insert(result.models, ust.newModel("ust/paving/brick_tl.mdl", tag, coor.transZ(info.height) * fitModels(centre, true)));
-        insert(result.models, ust.newModel("ust/paving/brick_br.mdl", tag, coor.transZ(info.height) * fitModels(centre, false)));
+        insert(result.models, ust.newModel("ust/paving/asphalt/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
+        insert(result.models, ust.newModel("ust/paving/asphalt/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
     end
-
+    
     local face = pipe.new + leftPts + func.rev(rightPts)
     
     ust.initTerrainList(result, info.id)
@@ -200,8 +222,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             },
         },
     }
-
-
+    
+    
     if params.debug == 1 then
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
@@ -244,7 +266,7 @@ function data()
         metadata = {
             typeName = "ust_street",
             isStreet = true,
-            width = 5,
+            width = 3.5,
             height = 0,
             typeId = 4,
             scriptName = "construction/station/rail/ust/struct/street",

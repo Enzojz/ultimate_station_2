@@ -1,0 +1,34 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 1, 0, 0 },
+      bbMin = { 0, -1, 0 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "street/new_medium_tram_paving.mtl" },
+            mesh = "ust/paving/street_gap_tl.msh",
+            name = "brick_tram_tl",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

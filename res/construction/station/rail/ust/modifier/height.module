@@ -37,7 +37,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftPts, leftVecs = ust.basePts(info.arcs.left, n)
 
     local rotZ = quat.byVec(coor.xyz(0, 1, 0), vecs[7]):mRot()
-    local textR = ("H: %d mm"):format(info.height * 1000)
+    local textR = ("H: %d mm"):format((m.metadata.isTrack and info.height or (info.height - params.refHeight)) * 1000)
     
     local addText = function(label, pos, fTrans, h)
         local nameModelsF, width = livetext(h or 2)(label)

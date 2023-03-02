@@ -6,26 +6,23 @@ function data() return {
             fadeOutStartDist = 10000,
         },
         map_albedo = {
-            fileName = "streets/old_medium_paving.dds",
+            fileName = "streets/new_medium_paving_albedo.dds",
             type = "TWOD",
             wrapS = "REPEAT",
             wrapT = "REPEAT",
         },
         map_metal_gloss_ao = {
-            fileName = "streets/old_medium_paving_metal_gloss_ao.dds",
+            fileName = "streets/new_medium_paving_metall_gloss_ao.dds",
             type = "TWOD",
             wrapS = "REPEAT",
             wrapT = "REPEAT",
         },
         map_normal = {
-            fileName = "streets/old_medium_paving_nrml.dds",
+            fileName = "streets/new_medium_paving_normal.dds",
             redGreen = true,
             type = "TWOD",
             wrapS = "REPEAT",
             wrapT = "REPEAT",
-        },
-        normal_scale = {
-            normalScale = 1
         },
         polygon_offset = {
             factor = -1,
@@ -45,7 +42,7 @@ function data() return {
             mode = "NORMAL",
             op = "MULTIPLICATION",
             opacity = -256,
-            scale = {1 / 12, 1 / 12}
+            scale = {1 / 8, 1 / 8}
         },
         map_op_2 = {
             fileName = "streets/new_overlay.dds",
@@ -56,8 +53,8 @@ function data() return {
         operation_2 = {
             mode = "WORLD_XY",
             op = "OVERLAY",
-            opacity = 0.80000001192093,
-            scale = {0.0024999999441206, 0.0024999999441206, },
+            opacity = 0.40000000596046,
+            scale = {0.0049999998882413, 0.0049999998882413, },
         },
     },
     type = "PHYSICAL_NRML_MAP_OP"

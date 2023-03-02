@@ -28,8 +28,8 @@ function data() return {
             normalScale = 1
         },
         polygon_offset = {
-            factor = -1,
-            units = -1,
+            factor = -2,
+            units = -2,
             forceDepthWrite = true,
         },
         two_sided = {
@@ -45,20 +45,20 @@ function data() return {
             mode = "NORMAL",
             op = "MULTIPLICATION",
             opacity = -256,
-            scale = {1/12, 1/12}
+            scale = {1 / 12, 1 / 12}
         },
-		map_op_2 = {
-			fileName = "streets/new_overlay.dds",
-			type = "TWOD",
-			wrapS = "REPEAT",
-			wrapT = "REPEAT",
-		},
-		operation_2 = {
-			mode = "WORLD_XY",
-			op = "OVERLAY",
-			opacity = 0.80000001192093,
-			scale = { 0.0024999999441206, 0.0024999999441206, },
-		},
+        map_op_2 = {
+            fileName = "streets/new_overlay.dds",
+            type = "TWOD",
+            wrapS = "REPEAT",
+            wrapT = "REPEAT",
+        },
+        operation_2 = {
+            mode = "WORLD_XY",
+            op = "OVERLAY",
+            opacity = 0.80000001192093,
+            scale = {0.0024999999441206, 0.0024999999441206, },
+        },
     },
     type = "PHYSICAL_NRML_MAP_OP"
 } end

@@ -17,7 +17,7 @@ function data()
         transportModesSidewalk = { },
         materials = {
             streetPaving = {
-                name = "street/new_medium_paving.mtl",
+                name = "ust/paving/asphalt_street.mtl",
                 size = { 8.0, 8.0 }
             },		
             streetBus = {
