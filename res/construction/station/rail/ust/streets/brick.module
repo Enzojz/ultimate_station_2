@@ -3,7 +3,6 @@ local coor = require "ust/coor"
 local pipe = require "ust/pipe"
 local ust = require "ust"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 local livetext = require "ust/livetext"
 
 local fitModels = {
@@ -13,6 +12,7 @@ local fitModels = {
 
 local insert = table.insert
 local gap = 0.01
+
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local function setPos()
@@ -98,7 +98,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         type = "STREET",
         alignTerrain = true,
         params = {
-            type = "ust/asphalt.lua",
+            type = "ust/brick.lua",
             catenary = false,
             tramTrackType = "YES"
         },
@@ -119,7 +119,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             type = "STREET",
             alignTerrain = true,
             params = {
-                type = "ust/asphalt_core.lua",
+                type = "ust/brick_core.lua",
                 catenary = false,
                 tramTrackType = "YES"
             },
@@ -161,10 +161,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 lb = ptR[1],
             }
             
-            insert(result.models, ust.newModel("ust/paving/ba/tram_tl.mdl", tag, fitModels.tram(centre, true)));
-            insert(result.models, ust.newModel("ust/paving/ba/tram_br.mdl", tag, fitModels.tram(centre, false)));
-            insert(result.models, ust.newModel("ust/paving/ba/tram_paving_tl.mdl", tag, fitModels.tram(centre, true)));
-            insert(result.models, ust.newModel("ust/paving/ba/tram_paving_br.mdl", tag, fitModels.tram(centre, false)));
+            insert(result.models, ust.newModel("ust/paving/brick/tram_tl.mdl", tag, fitModels.tram(centre, true)));
+            insert(result.models, ust.newModel("ust/paving/brick/tram_br.mdl", tag, fitModels.tram(centre, false)));
+            insert(result.models, ust.newModel("ust/paving/brick/tram_paving_tl.mdl", tag, fitModels.tram(centre, true)));
+            insert(result.models, ust.newModel("ust/paving/brick/tram_paving_br.mdl", tag, fitModels.tram(centre, false)));
         
         end
     end
@@ -201,8 +201,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             rb = rightPts[inf],
         }
         
-        insert(result.models, ust.newModel("ust/paving/asphalt/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
-        insert(result.models, ust.newModel("ust/paving/asphalt/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
+        insert(result.models, ust.newModel("ust/paving/brick/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
+        insert(result.models, ust.newModel("ust/paving/brick/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
     end
     
     local face = pipe.new + leftPts + func.rev(rightPts)
@@ -214,7 +214,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         modes = {
             {
                 type = "FILL",
-                key = "shared/asphalt_01.gtex.lua"
+                key = "shared/brick_01.gtex.lua"
             },
             {
                 type = "STROKE_OUTER",
@@ -253,8 +253,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_CATENARY"),
-            description = _("MENU_MODULE_CATENARY_DESC"),
+            name = _("MENU_MODULE_STREET_BRICK"),
+            description = _("MENU_MODULE_STREET_BRICK_DESC"),
         },
         category = {
             categories = {"ust_cat_street"},

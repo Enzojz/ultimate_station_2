@@ -4,14 +4,14 @@ function data()
         streetWidth = 3.0,
         sidewalkWidth = 0.0,
         sidewalkHeight = .00,
-        yearFrom = 1925,
+        yearFrom = 0,
         yearTo = 0,
         aiLock = true,
         country = false,
-        speed = 30.0,
-        type = "one way new small",
-        name = _("Small one-way street"),
-        desc = _("One-lane one-way street with a speed limit of %2%."),
+        speed = 60.0,
+        type = "one way old small",
+        name = _("MENU_STREET_BRICK"),
+        desc = _("MENU_STREET_BRICK_DEC"),
         categories = {"one-way"},
         borderGroundTex = "street_border.lua",
         materials = {
@@ -66,7 +66,6 @@ function data()
             isolatorCurve = "asset/cable_isolator.mdl",
             junction = "asset/cable_junction.mdl"
         },
-        signalAssetName = "asset/ampel.mdl",
         cost = 20.0,
     }
 end

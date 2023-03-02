@@ -12,7 +12,7 @@ function data() return {
    lods = {
       {
          node = {
-            materials = { "ust/paving/street.mtl" },
+            materials = { "ust/paving/brick.mtl" },
             mesh = "ust/paving/street_br.msh",
             name = "brick_br",
             transf = {
