@@ -6,6 +6,8 @@ local quat = require "ust/quaternion"
 local dump = require "luadump"
 local livetext = require "ust/livetext"
 
+local fitModels = ust.fitModel(1, 1, 1, true, true)
+
 local insert = table.insert
 local gap = 0.01
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
@@ -93,7 +95,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         type = "STREET",
         alignTerrain = true,
         params = {
-            type = "tram_asphalt.lua",
+            type = "ust/brick.lua",
             catenary = false,
             tramTrackType = "YES"
         },
@@ -114,7 +116,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             type = "STREET",
             alignTerrain = true,
             params = {
-                type = "tram_asphalt_core.lua",
+                type = "ust/brick_core.lua",
                 catenary = false,
                 tramTrackType = "YES"
             },
@@ -165,6 +167,21 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
+
+    
+    for i = 1, n do
+        local sup = i + 1
+        local inf = i
+        local centre = {
+            lt = leftPts[sup],
+            rt = rightPts[sup],
+            lb = leftPts[inf],
+            rb = rightPts[inf],
+        }
+        
+        insert(result.models, ust.newModel("ust/paving/brick_tl.mdl", tag, coor.transZ(info.height) * fitModels(centre, true)));
+        insert(result.models, ust.newModel("ust/paving/brick_br.mdl", tag, coor.transZ(info.height) * fitModels(centre, false)));
+    end
 
     local face = pipe.new + leftPts + func.rev(rightPts)
     
