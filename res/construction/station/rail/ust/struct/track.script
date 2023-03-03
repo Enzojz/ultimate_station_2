@@ -255,10 +255,18 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 rightNode = 1
             end
             return pos, leftNode, rightNode, {0, 1, 2, 3, 4, 5, 11, 10, 9, 8, 7, 6}
-        elseif rev then
-            return {{1, 0}}, nil, nil, {1, 0}
+        elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) or (info.octa[5] and params.modules[info.octa[5]].metadata.isTrack) then
+            if rev then
+                return {{1, 0}}, nil, nil, {1, 0}
+            else
+                return {{0, 1}}, nil, nil, {0, 1}
+            end
         else
-            return {{0, 1}}, nil, nil, {0, 1}
+            if rev then
+                return {{1, 0.5}, {0.5, 0}}, nil, nil, {3, 2, 1, 0}
+            else
+                return {{0, 0.5}, {0.5, 1}}, nil, nil, {0, 1, 2, 3}
+            end
         end
     end
     
@@ -312,6 +320,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     insert(result.edgeLists, edges)
     
     params.edgeIndex[slotId] = #result.edgeLists
+    
     if (info.octa[1] and params.modules[info.octa[1]].metadata.isTrack) then
         insert(result.invokeLater, function()
             local indexL = params.edgeIndex[slotId]
@@ -323,7 +332,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local ptL = coor.tuple2Vec(nodeL[1])
             local ptR = coor.tuple2Vec(nodeR[1])
             local pt = ptL:avg(ptR):toTuple()
-            result.edgeLists[indexL].edges[edgesL.seqNodes[#edgesL.seqNodes] + 1][0] = pt
+            result.edgeLists[indexL].edges[edgesL.seqNodes[#edgesL.seqNodes] + 1][1] = pt
             result.edgeLists[indexR].edges[edgesR.seqNodes[1] + 1][1] = pt
         end)
     end

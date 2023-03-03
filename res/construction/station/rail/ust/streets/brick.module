@@ -28,20 +28,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 local posCore = {{0.3 + gap, 0.5}, {0.5, 0.7 - gap}}
                 local conn = {{0.7 - gap, 0.7}, {0.3 + gap, 0.3}}
                 local node = 1
-                return {pos, posCore}, conn, node, {0, 1, 2, 3}
+                return {pos, posCore}, conn, node, {0, 1, 2, 3}, {1, 1}, {1, 4}
             elseif hasInfNode then
                 local pos = {{0.2, 1}}
                 local posCore = {{0, 0.2 - gap}}
                 local conn = {{0.2 - gap, 0.2}}
                 local node = 0
-                return {pos, posCore}, conn, node, {0, 1}
+                return {pos, posCore}, conn, node, {0, 1}, {2, 1}, {1, 2}
             elseif hasSupNode then
                 local pos = {{0, 0.8}}
                 local posCore = {{0.8 + gap, 1}}
                 local conn = {{0.8, 0.8 + gap}}
-                return {pos, posCore}, conn, nil, {0, 1}
+                return {pos, posCore}, conn, nil, {0, 1}, {1, 1}, {2, 2}
+            elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+                return {{{0, 1}}}, nil, nil, {0, 1}, {1, 1}, {1, 2}
             else
-                return {{{0, 1}}}, nil, nil, {0, 1}
+                return {{{0, 0.5}, {0.5, 1}}}, nil, nil, {0, 1, 2, 3}, {1, 1}, {1, 4}
             end
         elseif info.trackGroup.left then
             local trackGroup = params.trackGroup[info.trackGroup.left]
@@ -55,27 +57,33 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 local posCore = {{0.7 - gap, 0.5}, {0.5, 0.3 + gap}}
                 local conn = {{0.7 - gap, 0.7}, {0.3 + gap, 0.3}}
                 local node = 1
-                return {pos, posCore}, conn, node, {3, 2, 1, 0}
+                return {pos, posCore}, conn, node, {3, 2, 1, 0}, {1, 4}, {1, 1}
             elseif hasSupNode then
                 local pos = {{0.8, 0}}
                 local posCore = {{1, 0.8 + gap}}
                 local conn = {{0.8, 0.8 + gap}}
                 local node = 0
-                return {pos, posCore}, conn, node, {1, 0}
+                return {pos, posCore}, conn, node, {1, 0}, {1, 2}, {2, 1}
             elseif hasInfNode then
                 local pos = {{1, 0.2}}
                 local posCore = {{0.2 - gap, 0}}
                 local conn = {{0.2 - gap, 0.2}}
-                return {pos, posCore}, conn, nil, {1, 0}
+                return {pos, posCore}, conn, nil, {1, 0}, {2, 2}, {1, 1}
+            elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+                return {{{1, 0}}}, nil, nil, {1, 0}, {1, 2}, {1, 1}
             else
-                return {{{1, 0}}}, nil, nil, {1, 0}
+                return {{{1, 0.5}, {0.5, 0}}}, nil, nil, {3, 2, 1, 0}, {1, 4}, {1, 1}
             end
+        elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+            return {{{0, 1}}}, nil, nil, {0, 1}, {1, 1}, {1, 2}
         else
-            return {{{0, 1}}}, nil, nil, {0, 1}
+            return {{{0, 0.5}, {0.5, 1}}}, nil, nil, {0, 1, 2, 3}, {1, 1}, {1, 4}
         end
     end
     
-    local pos, conn, node, seqNodes = setPos()
+    local pos, conn, node, seqNodes, bNode, eNode = setPos()
+    
+    params.edgeIndex[slotId] = {#result.edgeLists + bNode[1], bNode[2], #result.edgeLists + eNode[1], eNode[2]}
     
     local e = func.map(pos,
         pipe.map(function(idx)
@@ -99,8 +107,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         alignTerrain = true,
         params = {
             type = "ust/brick.lua",
-            catenary = false,
-            tramTrackType = "YES"
+            tramTrackType = "ELECTRIC"
         },
         edges = pipe.new * e[1] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
         snapNodes = func.filter({(not info.octa[1]) and seqNodes[#seqNodes], (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
@@ -120,8 +127,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             alignTerrain = true,
             params = {
                 type = "ust/brick_core.lua",
-                catenary = false,
-                tramTrackType = "YES"
+                tramTrackType = "ELECTRIC"
             },
             edges = pipe.new * e[2] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
             snapNodes = {},
@@ -169,22 +175,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    -- params.edgeIndex[slotId] = #result.edgeLists
-    -- if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
-    --     insert(result.invokeLater, function()
-    --         local indexL = params.edgeIndex[slotId]
-    --         local indexR = params.edgeIndex[info.octa[1]]
-    --         local edgesL = result.edgeLists[indexL]
-    --         local edgesR = result.edgeLists[indexR]
-    --         local nodeL = edgesL.edges[edgesL.seqNodes[#edgesL.seqNodes] + 1]
-    --         local nodeR = edgesR.edges[edgesR.seqNodes[1] + 1]
-    --         local ptL = coor.tuple2Vec(nodeL[1])
-    --         local ptR = coor.tuple2Vec(nodeR[1])
-    --         local pt = ptL:avg(ptR):toTuple()
-    --         result.edgeLists[indexL].edges[edgesL.seqNodes[#edgesL.seqNodes] + 1][0] = pt
-    --         result.edgeLists[indexR].edges[edgesR.seqNodes[1] + 1][1] = pt
-    --     end)
-    -- end
     local n = 4
     
     local leftPts = ust.basePts(info.arcs.left, n)
@@ -204,17 +194,31 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         insert(result.models, ust.newModel("ust/paving/brick/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
         insert(result.models, ust.newModel("ust/paving/brick/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
     end
+
+    if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
+        insert(result.invokeLater, function()
+            local indexL = params.edgeIndex[slotId]
+            local indexR = params.edgeIndex[info.octa[1]]
+            local edgesL = result.edgeLists[indexL[3]]
+            local edgesR = result.edgeLists[indexR[1]]
+            local nodeL = edgesL.edges[indexL[4]]
+            local nodeR = edgesR.edges[indexR[2]]
+            local ptL = coor.tuple2Vec(nodeL[1])
+            local ptR = coor.tuple2Vec(nodeR[1])
+            local pt = ptL:avg(ptR):toTuple()
+            result.edgeLists[indexL[3]].edges[indexL[4]][1] = pt
+            result.edgeLists[indexR[1]].edges[indexR[2]][1] = pt
+        end)
+    end
     
     local face = pipe.new + leftPts + func.rev(rightPts)
-    
     ust.initTerrainList(result, info.id)
-    
     result.groundFaceLists[info.id] = {
         face = func.map(face, coor.vec2Tuple),
         modes = {
             {
                 type = "FILL",
-                key = "shared/brick_01.gtex.lua"
+                key = "shared/asphalt_01.gtex.lua"
             },
             {
                 type = "STROKE_OUTER",
