@@ -1,7 +1,6 @@
 local ust = require "ust"
 local coor = require "ust/coor"
 local insert = table.insert
-local dump = require "luadump"
 
 local setHeight = function(modules, classedModules, slotId, height)
     local m = modules[slotId]

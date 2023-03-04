@@ -71,7 +71,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
-
+    
     insert(result.slots, {
         id = makeData(25, -1),
         transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
@@ -79,7 +79,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         spacing = {0, 0, 0, 0}
     })
     
-    if module.metadata.isTrack or module.metadata.isStreet then
+    if module.metadata.isTrack then
         insert(result.invokeLater, function()
             local trackEdgeIndex = params.edgeIndex[trackSlotId]
             local trackEdges = result.edgeLists[trackEdgeIndex]
@@ -87,6 +87,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 trackEdges.edgeType = "BRIDGE"
                 trackEdges.edgeTypeName = bridgeName
                 trackEdges.alignTerrain = nil
+            end
+        end)
+    elseif module.metadata.isStreet then
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId][5]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.edgeType = "BRIDGE"
+                trackEdges.edgeTypeName = bridgeName
+                trackEdges.alignTerrain = nil
+            end
+            if result.edgeLists[trackEdgeIndex + 1] and result.edgeLists[trackEdgeIndex + 1].slot == trackSlotId then
+                local trackEdges = result.edgeLists[trackEdgeIndex + 1]
+                if trackEdges then
+                    trackEdges.edgeType = "BRIDGE"
+                    trackEdges.edgeTypeName = bridgeName
+                    trackEdges.alignTerrain = nil
+                end
             end
         end)
     elseif module.metadata.isPlatform then
@@ -122,19 +140,19 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         params.edgeIndex[module.info.slotId] = #result.edgeLists
         if (module.info.octa[1] and params.modules[module.info.octa[1]].metadata.isPlatform) then
             insert(result.invokeLater, function()
-                
-                local indexL = params.edgeIndex[module.info.slotId]
-                local indexR = params.edgeIndex[module.info.octa[1]]
-                if indexL and indexR then
-                    local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
-                    local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[1][1])
-                    local pt = ptL:avg(ptR):toTuple()
-                    result.edgeLists[indexL].edges[2][1] = pt
-                    result.edgeLists[indexR].edges[1][1] = pt
-                end
+                    
+                    local indexL = params.edgeIndex[module.info.slotId]
+                    local indexR = params.edgeIndex[module.info.octa[1]]
+                    if indexL and indexR then
+                        local ptL = coor.tuple2Vec(result.edgeLists[indexL].edges[2][1])
+                        local ptR = coor.tuple2Vec(result.edgeLists[indexR].edges[1][1])
+                        local pt = ptL:avg(ptR):toTuple()
+                        result.edgeLists[indexL].edges[2][1] = pt
+                        result.edgeLists[indexR].edges[1][1] = pt
+                    end
             end)
         end
-
+        
         insert(result.invokeLater, function()
             result.terrainLists[info.id].equal = nil
             result.terrainLists[info.id].equalOpt = nil

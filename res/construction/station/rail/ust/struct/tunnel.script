@@ -74,7 +74,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         spacing = {0, 0, 0, 0}
     })
     
-    if module.metadata.isTrack or module.metadata.isStreet then
+    if module.metadata.isTrack then
         insert(result.invokeLater, function()
             local trackEdgeIndex = params.edgeIndex[trackSlotId]
             local trackEdges = result.edgeLists[trackEdgeIndex]
@@ -82,6 +82,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
                 trackEdges.edgeType = "TUNNEL"
                 trackEdges.edgeTypeName = tunnelName
                 alignTerrain = nil
+            end
+        end)
+    elseif module.metadata.isStreet then
+        insert(result.invokeLater, function()
+            local trackEdgeIndex = params.edgeIndex[trackSlotId][5]
+            local trackEdges = result.edgeLists[trackEdgeIndex]
+            if trackEdges then
+                trackEdges.edgeType = "TUNNEL"
+                trackEdges.edgeTypeName = tunnelName
+                alignTerrain = nil
+            end
+            if result.edgeLists[trackEdgeIndex + 1] and result.edgeLists[trackEdgeIndex + 1].slot == trackSlotId then
+                local trackEdges = result.edgeLists[trackEdgeIndex + 1]
+                if trackEdges then
+                    trackEdges.edgeType = "TUNNEL"
+                    trackEdges.edgeTypeName = tunnelName
+                    alignTerrain = nil
+                end
             end
         end)
     elseif module.metadata.isPlatform then

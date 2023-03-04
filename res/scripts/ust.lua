@@ -5,7 +5,7 @@ local arc = require "ust/coorarc"
 local quat = require "ust/quaternion"
 local ust = require "ust_gridization"
 local livetext = require "ust/livetext"
-local dump = require "luadump"
+-- local dump = require "luadump"
 
 local math = math
 local abs = math.abs

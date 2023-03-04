@@ -26,13 +26,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })
-
+    
     
     if module.metadata.isPlatform then
         insert(result.invokeLater, function()
             result.terrainLists[info.id].equal = nil
             result.terrainLists[info.id].equalOpt = nil
-
+            
             if result.groundFaceLists[info.id] then
                 result.groundFaceLists[info.id].modes = {
                     {
@@ -44,7 +44,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                         key = "street_border.lua"
                     },
                 }
-
+            
             end
         end)
     elseif module.metadata.isTrack or module.metadata.isStreet then
@@ -53,7 +53,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local rightPts = ust.basePts(info.arcs.right, n)
         
         local face = pipe.new + leftPts + func.rev(rightPts)
-    
+        
         insert(result.groundFaces, {
             face = func.map(face, coor.vec2Tuple),
             modes = {
@@ -68,13 +68,29 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             },
         })
         
-        insert(result.invokeLater, function()
-            local trackEdgeIndex = params.edgeIndex[trackSlotId]
-            local trackEdges = result.edgeLists[trackEdgeIndex]
-            if trackEdges then
-                trackEdges.alignTerrain = false
-            end
-        end)
+        if module.metadata.isTrack then
+            insert(result.invokeLater, function()
+                local trackEdgeIndex = params.edgeIndex[trackSlotId]
+                local trackEdges = result.edgeLists[trackEdgeIndex]
+                if trackEdges then
+                    trackEdges.alignTerrain = false
+                end
+            end)
+        elseif module.metadata.isStreet then
+            insert(result.invokeLater, function()
+                local trackEdgeIndex = params.edgeIndex[trackSlotId][5]
+                local trackEdges = result.edgeLists[trackEdgeIndex]
+                if trackEdges then
+                    trackEdges.alignTerrain = false
+                end
+                if result.edgeLists[trackEdgeIndex + 1] and result.edgeLists[trackEdgeIndex + 1].slot == trackSlotId then
+                    local trackEdges = result.edgeLists[trackEdgeIndex + 1]
+                    if trackEdges then
+                        trackEdges.alignTerrain = false
+                    end
+                end
+            end)
+        end
     end
 end
 
