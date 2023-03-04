@@ -338,18 +338,19 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     end
     
     if params.debug == 1 then
+        local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
         
-        local addText = function(label, pos, fAlign, h)
+        local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * quat.byVec(coor.xyz(0, 1, 0), info.gravity[2]):mRot() * coor.trans(pos) * coor.transZ(info.height + 0.5) end)) do
-                insert(result.models, m)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf * coor.transZ(info.height) end)) do
+                table.insert(result.models, m)
             end
         end
         
-        addText(text, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, 0) end)
-        addText(pos, info.gravity[1], function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        addText(text, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
         
         ust.marking(result, slotId, params)
     end
@@ -365,16 +366,9 @@ local function gridization(x, y, z, data)
     
     local refArc = data.modules[slotId].info.arcs
     
-    local gravity = {
-        refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5),
-        refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)
-    }
-    
     data.modules[slotId].info.transf =
-        quat.byVec(coor.xyz(0, 1, 0), gravity[2]):mRot() *
-        coor.trans(gravity[1])
-    
-    data.modules[slotId].info.gravity = gravity
+        quat.byVec(coor.xyz(0, 1, 0), refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)):mRot() *
+        coor.trans(refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5))
 end
 
 ---@param modules table<slotid, module>

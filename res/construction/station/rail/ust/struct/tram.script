@@ -3,7 +3,7 @@ local coor = require "ust/coor"
 
 local insert = table.insert
 
-local setCatenary = function(modules, classedModules, slotId, module)
+local setTram = function(modules, classedModules, slotId, module)
     local lut = {}
     local function searchModules(slotId)
         lut[slotId] = true
@@ -33,9 +33,9 @@ end
 local preProcessAdd = function(modules, change, classedModules, info)
     ust.octa(modules, classedModules)
     if info.data == 1 then
-        setCatenary(modules, classedModules, classedModules[info.id].slotId, change.module)
+        setTram(modules, classedModules, classedModules[info.id].slotId, change.module)
     elseif info.data == -2 then
-        setCatenary(modules, classedModules, classedModules[info.id].slotId)
+        setTram(modules, classedModules, classedModules[info.id].slotId)
     end
 end
 
