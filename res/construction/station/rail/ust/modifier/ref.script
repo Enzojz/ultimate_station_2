@@ -19,9 +19,10 @@ local preProcessAdd = function(modules, change, classedModules, info)
         local _, _, oldData = ust.slotInfo(oldSlot)
         
         if (oldData + info.data ~= 0) then -- Prevent case no ref
+            local m = modules[classedModules[id].slotId]
             modules[oldSlot] = nil
             
-            local addSlot = ust.mixData(ust.base(id, 60), info.data)
+            local addSlot = m.makeData(60, info.data)
             modules[addSlot] = {
                 metadata = {isData = true},
                 name = "station/rail/ust/data/ref.module",

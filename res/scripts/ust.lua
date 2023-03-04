@@ -6,7 +6,6 @@ local quat = require "ust/quaternion"
 local ust = require "ust_gridization"
 local livetext = require "ust/livetext"
 -- local dump = require "luadump"
-
 local math = math
 local abs = math.abs
 local floor = math.floor
@@ -76,8 +75,7 @@ end
 ---@param data integer
 ---@return slotid
 ust.mixData = function(base, data)
-        -- local data = data > 0 and data or (1000 - data)
-        return (data < 0 and -base or base) + 1000000 * data
+    return (data < 0 and -base or base) + 1000000 * data
 end
 
 ---@param info slotinfo
@@ -138,7 +136,6 @@ ust.slotInfo = function(slotId)
         -- > 6: data
         -- Modifier
         -- 1 ~ 2 : 80 81 82 radius 83 84 extraHeight 85 86 width 87 88 gradient 89 90 wall height 91 92 ref 93 94 overlap 95 96 slope
-        
         local slotIdAbs = math.abs(slotId)
         if slotIdAbs % 1 ~= 0 then -- trick for probably a bug from the game, slotId can be non interger
             slotIdAbs = floor(slotIdAbs + 0.5)
@@ -387,13 +384,13 @@ ust.classifyComp = function(modules, classified, slotId)
     }
     
     modules[classified[id].slotId].info.comp[type] = true
-
+    
     if not modules[classified[id].slotId].info.compList[type] then
-        modules[classified[id].slotId].info.compList[type] = { slotId }
+        modules[classified[id].slotId].info.compList[type] = {slotId}
     else
         insert(modules[classified[id].slotId].info.compList[type], slotId)
     end
-
+    
     modules[slotId].makeData = function(type, data)
         return ust.mixData(ust.base(id, type), data)
     end

@@ -28,7 +28,7 @@ local setWidth = function(modules, classedModules, slotId, width)
         end
         
         if width then
-            local addSlot = ust.mixData(ust.base(id, 58), width)
+            local addSlot = m.makeData(58, width)
             modules[addSlot] = {
                 metadata = {isData = true},
                 name = "station/rail/ust/data/geometry.module",

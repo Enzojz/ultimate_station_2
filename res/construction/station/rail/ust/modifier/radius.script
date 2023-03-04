@@ -33,7 +33,7 @@ local preProcessAdd = function(radiusFn)
             end
             if info.type == 80 and info.data == 2 then
                 -- Make straight
-                local addSlot = ust.mixData(ust.base(id, 56), 0)
+                local addSlot = m.makeData(56, 0)
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/data/radius.module",
@@ -49,7 +49,7 @@ local preProcessAdd = function(radiusFn)
                 local radius = radiusFn(info.data, m, m.info.radius)
                 if radius > 999999 then radius = 999999 elseif radius < -999999 then radius = -999999 end
                 
-                local addSlot = ust.mixData(ust.base(id, 54), radius > 0 and radius % 1000 or -(-radius % 1000))
+                local addSlot = m.makeData(54, radius > 0 and radius % 1000 or -(-radius % 1000))
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/data/radius.module",
@@ -60,7 +60,7 @@ local preProcessAdd = function(radiusFn)
                     variant = 0
                 }
                 
-                local addSlot = ust.mixData(ust.base(id, 55), radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
+                local addSlot = m.makeData(55, radius > 0 and floor(radius / 1000) or -(floor(-radius / 1000)))
                 modules[addSlot] = {
                     metadata = {isData = true},
                     name = "station/rail/ust/data/radius.module",

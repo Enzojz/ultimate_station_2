@@ -27,7 +27,7 @@ local setOverlap = function(modules, classedModules, slotId, overlap, dataId)
         end
         
         if overlap then
-            local addSlot = ust.mixData(ust.base(id, dataId), overlap)
+            local addSlot = m.makeData(dataId, overlap)
             modules[addSlot] = {
                 metadata = {isData = true},
                 name = "station/rail/ust/data/geometry.module",
