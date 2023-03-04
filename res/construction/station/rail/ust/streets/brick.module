@@ -83,7 +83,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local pos, conn, node, seqNodes, bNode, eNode = setPos()
     
-    params.edgeIndex[slotId] = {#result.edgeLists + bNode[1], bNode[2], #result.edgeLists + eNode[1], eNode[2]}
+    params.edgeIndex[slotId] = {#result.edgeLists + bNode[1], bNode[2], #result.edgeLists + eNode[1], eNode[2], #result.edgeLists + 1}
     
     local e = func.map(pos,
         pipe.map(function(idx)
@@ -107,7 +107,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         alignTerrain = true,
         params = {
             type = "ust/brick.lua",
-            tramTrackType = "ELECTRIC"
+            tramTrackType = "NO"
         },
         edges = pipe.new * e[1] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
         snapNodes = func.filter({(not info.octa[1]) and seqNodes[#seqNodes], (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
@@ -127,7 +127,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             alignTerrain = true,
             params = {
                 type = "ust/brick_core.lua",
-                tramTrackType = "ELECTRIC"
+                tramTrackType = "NO"
             },
             edges = pipe.new * e[2] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
             snapNodes = {},
@@ -155,11 +155,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 * pipe.map(function(c) return info.arcs.left.inf * (1 - c) + info.arcs.left.sup * c end)
                 * pipe.map(function(rad) return info.arcs.left:pt(rad) + coor.xyz(0, 0, info.height) end)
             
-            local vecs = func.map2(ptC, ptRef, function(ptC, ptL) return (ptL - ptC): normalized() end)
-
+            local vecs = func.map2(ptC, ptRef, function(ptC, ptL) return (ptL - ptC):normalized() end)
+            
             local ptL = func.map2(ptC, vecs, function(pt, vec) return pt + vec end)
             local ptR = func.map2(ptC, vecs, function(pt, vec) return pt - vec end)
-
+            
             local centre = {
                 lt = ptR[2],
                 rt = ptL[2],
@@ -167,11 +167,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 lb = ptR[1],
             }
             
-            insert(result.models, ust.newModel("ust/paving/brick/tram_tl.mdl", tag, fitModels.tram(centre, true)));
-            insert(result.models, ust.newModel("ust/paving/brick/tram_br.mdl", tag, fitModels.tram(centre, false)));
-            insert(result.models, ust.newModel("ust/paving/brick/tram_paving_tl.mdl", tag, fitModels.tram(centre, true)));
-            insert(result.models, ust.newModel("ust/paving/brick/tram_paving_br.mdl", tag, fitModels.tram(centre, false)));
-        
+            insert(result.invokeLater, function()
+                if info.tramTrack then
+                    insert(result.models, ust.newModel("ust/paving/brick/tram_tl.mdl", tag, fitModels.tram(centre, true)));
+                    insert(result.models, ust.newModel("ust/paving/brick/tram_br.mdl", tag, fitModels.tram(centre, false)));
+                    insert(result.models, ust.newModel("ust/paving/brick/tram_paving_tl.mdl", tag, fitModels.tram(centre, true)));
+                    insert(result.models, ust.newModel("ust/paving/brick/tram_paving_br.mdl", tag, fitModels.tram(centre, false)));
+                end
+            end)
         end
     end
     
@@ -194,7 +197,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         insert(result.models, ust.newModel("ust/paving/brick/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
         insert(result.models, ust.newModel("ust/paving/brick/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
     end
-
+    
     if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
         insert(result.invokeLater, function()
             local indexL = params.edgeIndex[slotId]

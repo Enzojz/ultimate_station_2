@@ -1,6 +1,7 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local ust = require "ust"
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -333,12 +334,12 @@ local updateFn = function(params, closureParams)
     }
     
     params.classedModules = classifyModules(params.modules)
+    dump()(params.classedModules)
     for slotId, m in pairs(params.modules) do
         if (m.metadata and m.metadata.postClassify) then
             game.res.script[m.metadata.scriptName][m.metadata.postClassify](params.modules, result, slotId, params)
         end
     end
-    
     params.grid = ust.gridization(params.modules, params.classedModules)
     
     params.slotGrid = {}

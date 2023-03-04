@@ -10,7 +10,7 @@ local setCatenary = function(modules, classedModules, slotId, module)
         local m = modules[slotId]
         local info = m.info
         for _, octa in ipairs({info.octa[1], info.octa[5]}) do
-            if octa and modules[octa] and (modules[octa].metadata.isTrack or modules[octa].metadata.isStreet) then
+            if octa and modules[octa] and modules[octa].metadata.isStreet then
                 if not lut[octa] then
                     searchModules(octa)
                 end
@@ -21,23 +21,20 @@ local setCatenary = function(modules, classedModules, slotId, module)
     for slotId, _ in pairs(lut) do
         local m = modules[slotId]
         if module then
-            if m.info.comp[27] then
-                for _, slotId in ipairs(m.info.compList[27]) do
-                    modules[slotId] = nil
-                end
-            end
-            modules[m.makeData(27, 0)] = module
+            modules[m.makeData(27, 1)] = module
         else
-            modules[m.makeData(27, 0)] = nil 
+            for _, slotId in ipairs(m.info.compList[27]) do
+                modules[slotId] = nil
+            end
         end
     end
 end
 
 local preProcessAdd = function(modules, change, classedModules, info)
     ust.octa(modules, classedModules)
-    if info.data == 0 then
+    if info.data == 1 then
         setCatenary(modules, classedModules, classedModules[info.id].slotId, change.module)
-    elseif info.data == -1 then
+    elseif info.data == -2 then
         setCatenary(modules, classedModules, classedModules[info.id].slotId)
     end
 end
@@ -45,17 +42,31 @@ end
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
-        if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet)) then
+        if (module.metadata and module.metadata.isStreet) then
             local info = module.info
             local makeData = module.makeData
             local transf = info.transf * coor.transZ(info.height)
-            
-            insert(result.slots, {
-                id = makeData(27, 0),
-                transf = transf,
-                type = "ust_catenary",
-                spacing = {0, 0, 0, 0}
-            })
+            if not info.comp[27] or makeData(27, 1) == info.compList[27][1] then
+                insert(result.slots, {
+                    id = makeData(27, 1),
+                    transf = transf,
+                    type = "ust_tram",
+                    spacing = {0, 0, 0, 0}
+                })
+            else
+                insert(result.slots, {
+                    id = makeData(27, -2),
+                    transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
+                    type = "ust_tram",
+                    spacing = {0, 0, 0, 0}
+                })
+                insert(result.slots, {
+                    id = makeData(27, -2),
+                    transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
+                    type = "ust_tram",
+                    spacing = {0, 0, 0, 0}
+                })
+            end
         end
     end
 end

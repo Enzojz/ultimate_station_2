@@ -1,6 +1,7 @@
 local ust = require "ust"
 local coor = require "ust/coor"
 local insert = table.insert
+local dump = require "luadump"
 
 local setHeight = function(modules, classedModules, slotId, height)
     local m = modules[slotId]
@@ -12,7 +13,7 @@ local setHeight = function(modules, classedModules, slotId, height)
     end
     
     if height then
-        local addSlot = ust.mixData(ust.base(id, 59), height)
+        local addSlot = m.makeData(59, height)
         modules[addSlot] = {
             metadata = {isData = true},
             name = "station/rail/ust/data/geometry.module",
@@ -86,7 +87,6 @@ local setStreetHeight = function(modules, classedModules, slotId, height)
     end
     
     searchModules(slotId)
-    
     for slotId, _ in pairs(lut) do
         setHeight(modules, classedModules, slotId, height)
     end
@@ -137,7 +137,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
                 if extraHeight == 0 then
                     extraHeight = nil
                 end
-                
                 if m.metadata.isTrack then
                     setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
                 elseif m.metadata.isStreet then
@@ -167,7 +166,6 @@ local preProcessAdd = function(modules, change, classedModules, info)
             local delta = info.data
             local extraHeight = (m.info.extraHeight or 0) * 10 + delta
             if extraHeight > 999 then extraHeight = 999 elseif extraHeight < -999 then extraHeight = -999 end
-            
             if m.metadata.isTrack then
                 setTrackHeight(modules, classedModules, classedModules[id].slotId, extraHeight)
             elseif m.metadata.isStreet then

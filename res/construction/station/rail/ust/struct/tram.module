@@ -2,7 +2,6 @@ local insert = table.insert
 local coor = require "ust/coor"
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    
     local info = params.modules[slotId].info
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
@@ -10,38 +9,30 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local transf = module.info.transf * coor.transZ(module.info.height)
     
     insert(result.slots, {
-        id = makeData(27, -1),
+        id = makeData(27, -2),
         transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
-        type = "ust_catenary",
+        type = "ust_tram",
         spacing = {0, 0, 0, 0}
     })
     insert(result.slots, {
-        id = makeData(27, -1),
+        id = makeData(27, -2),
         transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
-        type = "ust_catenary",
+        type = "ust_tram",
         spacing = {0, 0, 0, 0}
     })
     
-    if module.metadata.isTrack then
-        insert(result.invokeLater, function()
-            local trackEdgeIndex = params.edgeIndex[trackSlotId]
-            local trackEdges = result.edgeLists[trackEdgeIndex]
-            if trackEdges then
-                trackEdges.params.catenary = true
-            end
-        end)
-    elseif module.metadata.isStreet then
+    if module.metadata.isStreet then
         module.info.tramTrack = true
         insert(result.invokeLater, function()
             local trackEdgeIndex = params.edgeIndex[trackSlotId][5]
             local trackEdges = result.edgeLists[trackEdgeIndex]
             if trackEdges then
-                trackEdges.params.tramTrackType = "ELECTRIC"
+                trackEdges.params.tramTrackType = "YES"
             end
             if result.edgeLists[trackEdgeIndex + 1] and result.edgeLists[trackEdgeIndex + 1].slot == trackSlotId then
                 local trackEdges = result.edgeLists[trackEdgeIndex + 1]
                 if trackEdges then
-                    trackEdges.params.tramTrackType = "ELECTRIC"
+                    trackEdges.params.tramTrackType = "YES"
                 end
             end
         end)
@@ -61,19 +52,18 @@ function data()
         description = {
             name = _("MENU_MODULE_CATENARY"),
             description = _("MENU_MODULE_CATENARY_DESC"),
-            icon = "ui/tracks/electrify.tga"
         },
         category = {
             categories = {"ust_cat_comp"},
         },
-        type = "ust_catenary",
+        type = "ust_tram",
         order = {
             value = 1,
         },
         metadata = {
-            typeName = "ust_catenary",
+            typeName = "ust_tram",
             typeId = 27,
-            scriptName = "construction/station/rail/ust/struct/catenary",
+            scriptName = "construction/station/rail/ust/struct/tram",
             preProcessAdd = "preProcessAdd",
             addSlot = "addSlot",
             classify = "classify"
