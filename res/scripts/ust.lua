@@ -158,6 +158,7 @@ ust.arcPacker = function(pt, vec, length, radius, isRev)
     local tVec = coor.xyz(-nVec.y, nVec.x, 0)
     local radius = isRev and -radius or radius
     local o = pt + tVec * radius
+    
     local ar = arc.byOR(o, abs(radius))
     local inf = ar:rad(pt)
     local sup = inf + length / radius
@@ -464,10 +465,6 @@ ust.marking = function(result, slotId, params)
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
     
-    local hRef = info.height
-    local hVec = coor.xyz(0, 0, hRef)
-    local hTrans = coor.trans(hVec)
-    
     local n = 10
     local ptsL, vecL = ust.basePts(info.arcs.left, n)
     local ptsR, vecR = ust.basePts(info.arcs.right, n)
@@ -475,7 +472,7 @@ ust.marking = function(result, slotId, params)
     
     local addText = function(label, transf, f)
         local nameModelsF, width = livetext(2)(label)
-        for _, m in ipairs(nameModelsF(function() return (f or coor.I()) * coor.transZ(-0.85) * coor.rotX90N * hTrans * transf end)) do
+        for _, m in ipairs(nameModelsF(function() return (f or coor.I()) * coor.transZ(-0.85) * coor.rotX90N * transf end)) do
             table.insert(result.models, m)
         end
     end

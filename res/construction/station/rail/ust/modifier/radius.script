@@ -131,12 +131,11 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet)) then
             local info = module.info
             local makeData = module.makeData
-            local transfPosC = info.transf * coor.transZ(info.height)
             
             if not anyRadiusModifiable then
                 table.insert(result.slots, {
                     id = makeData(80, 0),
-                    transf = transfPosC,
+                    transf = info.transf,
                     type = "ust_radius_modifier",
                     spacing = {0, 0, 0, 0}
                 })

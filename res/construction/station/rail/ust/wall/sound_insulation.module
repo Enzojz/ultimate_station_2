@@ -10,10 +10,7 @@ local fitModels = ust.fitModel(0.5, 5, 5, true, true)
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local info = params.modules[params.classedModules[id].slotId].info
-    local baseHeight = info.height
     local data = params.modules[slotId].info.data
-    
-    local hTrans = coor.transZ(baseHeight)
     
     if data == 3 or data == 7 then
         local n = 2
@@ -23,8 +20,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local refPt = pts[i]:avg(pts[i + 1])
             local refVec = pts[i] - pts[i + 1]
             local lengthScale = refVec:length() / 10
-            local transf = hTrans
-                * coor.scaleX(lengthScale)
+            local transf = coor.scaleX(lengthScale)
                 * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                 * coor.trans(refPt)
             

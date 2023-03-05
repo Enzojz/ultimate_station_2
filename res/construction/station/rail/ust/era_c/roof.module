@@ -24,9 +24,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = module.info
     local makeData = module.makeData
     
-    local hVec = coor.xyz(0, 0, info.height)
-    local hTrans = coor.trans(hVec)
-    
     local n = 4
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
@@ -52,7 +49,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         edges[4][i] = centerPts[i] - vec * 0.25
         
         for k = 1, 7 do
-            edges[k][i] = edges[k][i] + hVec
+            edges[k][i] = edges[k][i]
         end
     end
     
@@ -106,12 +103,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     
     end
-    insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag, coor.transZ(2.3) * coor.rotZ90P * module.info.transf * hTrans));
+    insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag, coor.transZ(2.3) * coor.rotZ90P * module.info.transf));
     
     -- SLot to replace itself
     insert(result.slots, {
         id = makeData(28, -1),
-        transf = module.info.transf * hTrans,
+        transf = module.info.transf,
         type = "ust_roof",
         spacing = {0, 0, 0, 0}
     })

@@ -48,11 +48,10 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet)) then
             local info = module.info
             local makeData = module.makeData
-            local transf = info.transf * coor.transZ(info.height)
             
             insert(result.slots, {
                 id = makeData(27, 0),
-                transf = transf,
+                transf = info.transf,
                 type = "ust_catenary",
                 spacing = {0, 0, 0, 0}
             })

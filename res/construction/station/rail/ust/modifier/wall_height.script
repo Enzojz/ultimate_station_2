@@ -169,7 +169,6 @@ local addSlot = function(params, result)
                 local m = params.modules[parentSlotId]
                 local info = m.info
                 local makeData = m.makeData
-                local refH = info.height
                 
                 local rightPts, rightVecs = ust.basePts(info.arcs.right, 4)
                 local leftPts, leftVecs = ust.basePts(info.arcs.left, 4)
@@ -177,28 +176,28 @@ local addSlot = function(params, result)
                 if data == 3 then
                     table.insert(result.slots, {
                         id = makeData(89, data),
-                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * quat.byVec(coor.xyz(1, 0, 0), rightVecs[3]):mRot() * coor.trans(rightPts[3]) * coor.transZ(refH),
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * quat.byVec(coor.xyz(1, 0, 0), rightVecs[3]):mRot() * coor.trans(rightPts[3]),
                         type = "ust_wall_height_modifier",
                         spacing = {0, 0, 0, 0}
                     })
                 elseif data == 7 then
                     table.insert(result.slots, {
                         id = makeData(89, data),
-                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * quat.byVec(coor.xyz(1, 0, 0), leftVecs[3]):mRot() * coor.trans(leftPts[3]) * coor.transZ(refH),
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * quat.byVec(coor.xyz(1, 0, 0), leftVecs[3]):mRot() * coor.trans(leftPts[3]),
                         type = "ust_wall_height_modifier",
                         spacing = {0, 0, 0, 0}
                     })
                 elseif data == 1 then
                     table.insert(result.slots, {
                         id = makeData(89, data),
-                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * quat.byVec(coor.xyz(0, 1, 0), centerVecs[5]):mRot() * coor.trans(centerPts[5]) * coor.transZ(refH),
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * quat.byVec(coor.xyz(0, 1, 0), centerVecs[5]):mRot() * coor.trans(centerPts[5]),
                         type = "ust_wall_height_modifier",
                         spacing = {0, 0, 0, 0}
                     })
                 elseif data == 5 then
                     table.insert(result.slots, {
                         id = makeData(89, data),
-                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * quat.byVec(coor.xyz(0, 1, 0), centerVecs[1]):mRot() * coor.trans(centerPts[1]) * coor.transZ(refH),
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * quat.byVec(coor.xyz(0, 1, 0), centerVecs[1]):mRot() * coor.trans(centerPts[1]),
                         type = "ust_wall_height_modifier",
                         spacing = {0, 0, 0, 0}
                     })

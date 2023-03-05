@@ -15,8 +15,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local baseHeight = info.height
     local data = params.modules[slotId].info.data
     
-    local hTrans = coor.transZ(baseHeight)
-    
     if data == 3 or data == 7 then
         local mInf = params.modules[m.makeData(24, data == 7 and 26 or 24)]
         local mSup = params.modules[m.makeData(24, data == 7 and 28 or 22)]
@@ -51,15 +49,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
             }
             
-            insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, true)))
-            insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(hRef) * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(hRef) * fitModels(coords, false)))
             
             if hInf > hSup then
-                insert(result.models, ust.newModel("ust/walls/brick_2_inf_tl.mdl", tag, coor.scaleZ(hInf - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/brick_2_inf_br.mdl", tag, coor.scaleZ(hInf - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_inf_tl.mdl", tag, coor.scaleZ(hInf - hRef) * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_inf_br.mdl", tag, coor.scaleZ(hInf - hRef) * coor.transZ(hRef) * fitModels(coords, false)))
             elseif hSup > hInf then
-                insert(result.models, ust.newModel("ust/walls/brick_2_sup_tl.mdl", tag, coor.scaleZ(hSup - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/brick_2_sup_br.mdl", tag, coor.scaleZ(hSup - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_sup_tl.mdl", tag, coor.scaleZ(hSup - hRef) * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_sup_br.mdl", tag, coor.scaleZ(hSup - hRef) * coor.transZ(hRef) * fitModels(coords, false)))
             end
         end
     elseif data == 1 or data == 5 then
@@ -97,15 +95,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 lb = vecP + ptL
             }
             
-            insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, true)))
-            insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(hRef) * hTrans * fitModels(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_tl.mdl", tag, coor.scaleZ(hRef) * fitModels(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/brick_2_br.mdl", tag, coor.scaleZ(hRef) * fitModels(coords, false)))
             
             if hLeft > hRight then
-                insert(result.models, ust.newModel("ust/walls/brick_2_sup_tl.mdl", tag, coor.scaleZ(hLeft - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/brick_2_sup_br.mdl", tag, coor.scaleZ(hLeft - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_sup_tl.mdl", tag, coor.scaleZ(hLeft - hRef) * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_sup_br.mdl", tag, coor.scaleZ(hLeft - hRef) * coor.transZ(hRef) * fitModels(coords, false)))
             elseif hRight > hLeft then
-                insert(result.models, ust.newModel("ust/walls/brick_2_inf_tl.mdl", tag, coor.scaleZ(hRight - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, true)))
-                insert(result.models, ust.newModel("ust/walls/brick_2_inf_br.mdl", tag, coor.scaleZ(hRight - hRef) * hTrans * coor.transZ(hRef) * fitModels(coords, false)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_inf_tl.mdl", tag, coor.scaleZ(hRight - hRef) * coor.transZ(hRef) * fitModels(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/brick_2_inf_br.mdl", tag, coor.scaleZ(hRight - hRef) * coor.transZ(hRef) * fitModels(coords, false)))
             end
         end
     end

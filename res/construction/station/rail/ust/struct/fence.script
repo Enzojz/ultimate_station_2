@@ -22,7 +22,7 @@ local addSlot = function(params, result)
             local ptsR, vecR = ust.basePts(info.arcs.right, n)
             
             if not ((module.metadata.isTrack or module.metadata.isStreet) and octa7 and octa7.isPlatform and octa7.info.height == info.height) then
-                local refPtL = ptsL[2] + coor.xyz(0, 0, info.height)
+                local refPtL = ptsL[2]
                 local refVecL = vecL[2]
                 
                 local transfL =
@@ -39,7 +39,7 @@ local addSlot = function(params, result)
             end
             
             if not ((module.metadata.isTrack or module.metadata.isStreet) and octa3 and octa3.isPlatform and octa3.info.height == info.height) then
-                local refPtR = ptsR[2] + coor.xyz(0, 0, info.height)
+                local refPtR = ptsR[2]
                 local refVecR = vecR[2]
                 
                 local transfR =
@@ -57,7 +57,7 @@ local addSlot = function(params, result)
             
             
             if not info.octa[1] or (info.octa[1] and octa1.info.height ~= info.height) then
-                local refPt = ptsR[3]:avg(ptsL[3]) + coor.xyz(0, 0, info.height)
+                local refPt = ptsR[3]:avg(ptsL[3])
                 local refVec = (ptsR[3] - ptsL[3]):normalized()
                 
                 local transf =
@@ -74,7 +74,7 @@ local addSlot = function(params, result)
             end
             
             if not info.octa[5] or (info.octa[5] and octa5.info.height ~= info.height) then
-                local refPt = ptsR[1]:avg(ptsL[1]) + coor.xyz(0, 0, info.height)
+                local refPt = ptsR[1]:avg(ptsL[1])
                 local refVec = (ptsR[1] - ptsL[1]):normalized()
                 
                 local transf =
@@ -100,8 +100,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
     local info = m.info
     local data = params.modules[slotId].info.data
     
-    local hTrans = coor.transZ(info.height)
-    
     insert(
         result.slots, {
             id = m.makeData(24, 10 + data),
@@ -123,8 +121,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
                 local refPt = pts[i]:avg(pts[i + 1])
                 local refVec = pts[i] - pts[i + 1]
                 local lengthScale = refVec:length() / config.width
-                local transf = hTrans
-                    * coor.scaleX(lengthScale)
+                local transf = coor.scaleX(lengthScale)
                     * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
                 
@@ -134,8 +131,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
             for i = 1, n + 1 do
                 local refPt = pts[i]
                 local refVec = vec[i]
-                local transf = hTrans
-                    * quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
+                local transf = quat.byVec(coor.xyz(data == 7 and 1 or -1, 0, 0), refVec):mRot()
                     * coor.trans(refPt)
                 
                 insert(result.models, ust.newModel(config.pole:format(color), tag, transf));
@@ -165,8 +161,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
         
         for i = 1, n do
             local refPt = ptL + vec * ((i - 0.5) * baseLength)
-            local transf = hTrans
-                * coor.scaleX(baseLength / config.width)
+            local transf = coor.scaleX(baseLength / config.width)
                 * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
             
@@ -175,8 +170,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, co
         
         for i = 0, n do
             local refPt = ptL + vec * (i * baseLength)
-            local transf = hTrans
-                * quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
+            local transf = quat.byVec(coor.xyz(data == 1 and -1 or 1, 0, 0), vec):mRot()
                 * coor.trans(refPt)
             
             insert(result.models, ust.newModel(config.pole:format(color), tag, transf));

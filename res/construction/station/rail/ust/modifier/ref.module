@@ -12,12 +12,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[sId].info
     local isPlatform = params.modules[sId].metadata.isPlatform
     local isTrackOrStreet = params.modules[sId].metadata.isTrack or params.modules[sId].metadata.isStreet
-    local refH = info.height
     local makeData = params.modules[sId].makeData
     
     insert(result.slots, {
         id = makeData(91, 1),
-        transf = info.transf * coor.transZ(refH),
+        transf = info.transf,
         type = "ust_ref_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -31,7 +30,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         if cond then
             insert(result.slots, {
                 id = makeData(92, data),
-                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf * coor.transZ(refH),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(-0.25 * pi) * transf,
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 2
@@ -39,7 +38,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             insert(result.slots, {
                 id = makeData(92, data),
-                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf * coor.transZ(refH),
+                transf = coor.scale(coor.xyz(0.125, 0.5, 1)) * coor.rotZ(0.25 * pi) * transf,
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 2
@@ -47,7 +46,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         else
             insert(result.slots, {
                 id = makeData(92, data),
-                transf = transf * coor.transZ(refH),
+                transf = transf,
                 type = "ust_ref_modifier",
                 spacing = {0, 0, 0, 0},
                 shape = 1

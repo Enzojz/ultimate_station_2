@@ -125,7 +125,6 @@ local slotSetup = function(params, result, slotId)
     local makeData = params.modules[slotId].makeData
     
     local arcs = info.arcs
-    local transfPosC = info.transf * coor.transZ(info.height)
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
@@ -151,7 +150,7 @@ local slotSetup = function(params, result, slotId)
         then
             insert(result.slots, {
                 id = makeData(4, -2),
-                transf = transfPosC,
+                transf = info.transf,
                 type = "ust_remove",
                 spacing = {0, 0, 0, 0}
             })
@@ -162,7 +161,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(1, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_track",
             spacing = {0, 0, 0, 0}
         }
@@ -171,7 +170,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(4, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_street",
             spacing = {0, 0, 0, 0}
         }
@@ -181,7 +180,7 @@ local slotSetup = function(params, result, slotId)
             result.slots,
             {
                 id = makeData(2, -1),
-                transf = transfPosC,
+                transf = info.transf,
                 type = "ust_platform",
                 spacing = {0, 0, 0, 0}
             }
@@ -192,12 +191,12 @@ local slotSetup = function(params, result, slotId)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     if not (info.octa[3]) then
-        local transf = coor.transX(metadata.width) * transfPosC
+        local transf = coor.transX(metadata.width) * info.transf
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
     end
     
     if not (info.octa[7]) then
-        local transf = coor.transX(-metadata.width) * transfPosC
+        local transf = coor.transX(-metadata.width) * info.transf
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     

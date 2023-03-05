@@ -11,14 +11,12 @@ local addSlot = function(params, result)
             local info = module.info
             local makeData = module.makeData
 
-            local tPlatform = coor.transZ(info.height)
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 2)
 
             local centerPt = centerPts[2]
             local centerVec = centerVecs[2]
             
-            local centerTransfZ0 = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
-            local centerTransf = tPlatform * centerTransfZ0
+            local centerTransf = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
             
             insert(result.slots, {
                 id = makeData(22, 0),

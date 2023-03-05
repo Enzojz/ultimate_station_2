@@ -7,8 +7,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = params.modules[slotId].info
     local n = 4
     
-    local hVec = coor.xyz(0, 0, info.height)
-
     local leftPts = ust.basePts(info.arcs.left, n)
     local rightPts = ust.basePts(info.arcs.right, n)
     
@@ -18,8 +16,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local rightLane = {}
 
     for i = 1, n + 1 do
-        leftLaneBorder[i] = leftPts[i] + hVec
-        rightLaneBorder[i] = rightPts[i] + hVec
+        leftLaneBorder[i] = leftPts[i]
+        rightLaneBorder[i] = rightPts[i]
         
         local vec = (leftLaneBorder[i] - rightLaneBorder[i]):normalized()
         
@@ -39,7 +37,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf * coor.transZ(info.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
                 table.insert(result.models, m)
             end
         end

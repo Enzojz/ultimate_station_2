@@ -10,7 +10,6 @@ local addSlot = function(params, result)
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-            local transZ = coor.transZ(info.height)
             
             local n = 4
             local leftPts = ust.basePts(info.arcs.left, n)
@@ -20,21 +19,21 @@ local addSlot = function(params, result)
             for i = 1, (info.octa[1] and 4 or 5) do
                 insert(result.slots, {
                     id = makeData(40, i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(centerPts[i]) * transZ,
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(centerPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })
 
                 insert(result.slots, {
                     id = makeData(40, 10 + i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(leftPts[i]) * transZ,
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(leftPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })
                 
                 insert(result.slots, {
                     id = makeData(40, 20 + i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(rightPts[i]) * transZ,
+                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(rightPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })

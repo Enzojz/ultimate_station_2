@@ -10,15 +10,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local info = module.info
     local makeData = module.makeData
     
-    local hVec = coor.xyz(0, 0, info.height)
-    local hTrans = coor.trans(hVec)
-    
     local n = 4
     local centerPts, vecs = ust.basePts(info.arcs.center, n)
     
     for i = 1, n do
         if i % 2 == 1 then
-            local pos = centerPts[i + 1] + hVec
+            local pos = centerPts[i + 1]
             local transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i + 1]):mRot() * coor.trans(pos)
             
             if i % 4 == 1 then
@@ -47,7 +44,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     -- SLot to replace itself
     insert(result.slots, {
         id = makeData(28, -1),
-        transf = module.info.transf * hTrans,
+        transf = module.info.transf,
         type = "ust_roof",
         spacing = {0, 0, 0, 0}
     })

@@ -156,9 +156,7 @@ local slotSetup = function(params, result, slotId)
     local info = params.modules[slotId].info
     local makeData = params.modules[slotId].makeData
     local pos = info.pos
-    
-    local transfPosC = info.transf * coor.transZ(info.height)
-    
+        
     insert(result.slots, {
         id = slotId,
         transf = module.info.transf,
@@ -179,7 +177,7 @@ local slotSetup = function(params, result, slotId)
         then
             insert(result.slots, {
                 id = makeData(2, -2),
-                transf = transfPosC,
+                transf = info.transf,
                 type = "ust_remove",
                 spacing = {0, 0, 0, 0}
             })
@@ -191,7 +189,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(1, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_track",
             spacing = {0, 0, 0, 0}
         }
@@ -200,7 +198,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(4, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_street",
             spacing = {0, 0, 0, 0}
         }
@@ -209,7 +207,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(2, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_platform",
             spacing = {0, 0, 0, 0}
         }
@@ -218,7 +216,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(3, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_placeholder",
             spacing = {0, 0, 0, 0}
         }
@@ -281,7 +279,7 @@ local calculateLimit = function(arc)
         ---@param ptvec coor3[]
         ---@return number
         return function(l, ptvec)
-            local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):length2() < (rhs - ptvec[1]):length2() end)
+            local pt = func.min(arc / l, function(lhs, rhs) return (lhs - ptvec[1]):withZ(0):length2() < (rhs - ptvec[1]):withZ(0):length2() end)
             return arc:rad(pt)
         end
 end
@@ -302,7 +300,7 @@ local platformArcs = function(x, y, z, data)
     
     local refModule = function(offset)
         local refModule = data.modules[data.grid[z][x + offset][y]]
-        local refO = refModule.info.arcs.center.o
+        local refO = refModule.info.arcs.center.o:withZ(m.info.height)
         local refRadius = refModule.info.radius + (data.xState.pos[x] - data.xState.pos[x + offset])
         return refModule,
             function() return arc.byOR(refO, refRadius - m.info.width * 0.5, refModule.info.arcs.center:limits()) end,
@@ -322,8 +320,8 @@ local platformArcs = function(x, y, z, data)
             if refModule2 and isTrackOrStreet(refModule) and isTrackOrStreet(refModule2) then
                 -- Two sides are tracks
                 local limit = refModule.info.pts[p][1]:avg(refModule2.info.pts[p][1])
-                local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arcL.o) or (arcL.o - refModule.info.pts[p][1])):normalized()
-                local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arcR.o) or (arcR.o - refModule2.info.pts[p][1])):normalized()
+                local vecLimL = (refModule.info.radius > 0 and (refModule.info.pts[p][1] - arcL.o) or (arcL.o - refModule.info.pts[p][1])):withZ(0):normalized()
+                local vecLimR = (refModule2.info.radius > 0 and (refModule2.info.pts[p][1] - arcR.o) or (arcR.o - refModule2.info.pts[p][1])):withZ(0):normalized()
                 local lim = line.byVecPt((vecLimL + vecLimR):normalized(), limit)
                 return
                     calculateLimit(arcL)(lim, refModule.info.pts[p]),
@@ -416,8 +414,8 @@ local platformArcs = function(x, y, z, data)
     elseif ref.prev then
         local arcs = data.modules[m.info.octa[5]].info.arcs
         
-        arcL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
-        arcR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+        arcL = arc.byOR(arcs.left.o:withZ(m.info.height), arcs.left.r, arcs.left:limits())
+        arcR = arc.byOR(arcs.right.o:withZ(m.info.height), arcs.right.r, arcs.right:limits())
         
         arcL = arcL:withLimits({
             inf = arcL.sup,
@@ -433,8 +431,8 @@ local platformArcs = function(x, y, z, data)
     elseif ref.next then
         local arcs = data.modules[m.info.octa[1]].info.arcs
         
-        arcL = arc.byOR(arcs.left.o, arcs.left.r, arcs.left:limits())
-        arcR = arc.byOR(arcs.right.o, arcs.right.r, arcs.right:limits())
+        arcL = arc.byOR(arcs.left.o:withZ(m.info.height), arcs.left.r, arcs.left:limits())
+        arcR = arc.byOR(arcs.right.o:withZ(m.info.height), arcs.right.r, arcs.right:limits())
         
         arcL = arcL:withLimits({
             sup = arcL.inf,
@@ -477,7 +475,7 @@ local platformArcs = function(x, y, z, data)
             r = 10e8
         end
         
-        o = o:withZ(0)
+        o.z = m.info.height
         
         local vecInf = pts[1] - o
         local vecSup = pts[3] - o

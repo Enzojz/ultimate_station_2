@@ -70,27 +70,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             if (i ~= 0) then
                 for _, z in ipairs(loopvars) do
                     local diff, ref, rotZ, h = unpack(z)
-                    local trans = coor.transY(i % 2 == 1 and -0.2 or 0.2) * coor.rotZ180 * rotZ * coor.trans(leftPts[ref]) * coor.transZ(info.height + h + i * 0.1)
+                    local trans = coor.transY(i % 2 == 1 and -0.2 or 0.2) * coor.rotZ180 * rotZ * coor.trans(leftPts[ref]) * coor.transZ(h + i * 0.1)
                     setButton(i - diff, i, trans)
                 end
             end
         end
         
         addText("⊘",
-            function(w) return coor.trans(coor.xyz(-0.5 * w, 0, -0.4)) * coor.rotZ90N * rotZ3 * coor.trans(leftPts[3]) * coor.transZ(info.height + (hSup + hInf) * 0.5 - 2) end,
+            function(w) return coor.trans(coor.xyz(-0.5 * w, 0, -0.4)) * coor.rotZ90N * rotZ3 * coor.trans(leftPts[3]) * coor.transZ((hSup + hInf) * 0.5 - 2) end,
             1)
         
         addText(("%.1fm"):format(hInf),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ90N * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(info.height + hInf - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ90N * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(hInf - 2) end,
             1)
         
         addText(("%.1fm"):format(hSup),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ90N * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(info.height + hSup - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ90N * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(hSup - 2) end,
             1)
 
         insert(result.slots, {
             id = makeData(89, -7),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotY90P * rotZ3 * coor.trans(leftPts[3]) * coor.transZ(info.height + (hSup + hInf) * 0.5 - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotY90P * rotZ3 * coor.trans(leftPts[3]) * coor.transZ((hSup + hInf) * 0.5 - 2),
             type = "ust_wall_height_modifier",
             shape = 0,
             spacing = {0, 0, 0, 0}
@@ -98,7 +98,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         insert(result.slots, {
             id = makeData(89, 16),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90N * coor.rotY90P * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(info.height + hInf - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90N * coor.rotY90P * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(hInf - 2),
             type = "ust_wall_height_modifier",
             shape = 1,
             spacing = {0, 0, 0, 0}
@@ -106,7 +106,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         insert(result.slots, {
             id = makeData(89, 18),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90P * coor.rotY90P * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(info.height + hSup - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90P * coor.rotY90P * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(hSup - 2),
             type = "ust_wall_height_modifier",
             shape = 1,
             spacing = {0, 0, 0, 0}
@@ -125,27 +125,27 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             if (i ~= 0) then
                 for _, z in ipairs(loopvars) do
                     local diff, ref, rotZ, h = unpack(z)
-                    local trans = coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ * coor.trans(rightPts[ref]) * coor.transZ(info.height + h + i * 0.1)
+                    local trans = coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ * coor.trans(rightPts[ref]) * coor.transZ(h + i * 0.1)
                     setButton(i + diff, i, trans)
                 end
             end
         end
         
         addText("⊘",
-            function(w) return coor.trans(coor.xyz(-0.5 * w, 0, -0.4)) * coor.rotZ90P * rotZ3 * coor.trans(rightPts[3]) * coor.transZ(info.height + (hSup + hInf) * 0.5 - 2) end,
+            function(w) return coor.trans(coor.xyz(-0.5 * w, 0, -0.4)) * coor.rotZ90P * rotZ3 * coor.trans(rightPts[3]) * coor.transZ((hSup + hInf) * 0.5 - 2) end,
             1)
         
         addText(("%.1fm"):format(hInf),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ90P * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(info.height + hInf - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ90P * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(hInf - 2) end,
             1)
         
         addText(("%.1fm"):format(hSup),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ90P * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(info.height + hSup - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ90P * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(hSup - 2) end,
             1)
         
         insert(result.slots, {
             id = makeData(89, -3),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotY90N * rotZ3 * coor.trans(rightPts[3]) * coor.transZ(info.height + (hSup + hInf) * 0.5 - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotY90N * rotZ3 * coor.trans(rightPts[3]) * coor.transZ((hSup + hInf) * 0.5 - 2),
             type = "ust_wall_height_modifier",
             shape = 0,
             spacing = {0, 0, 0, 0}
@@ -153,7 +153,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         insert(result.slots, {
             id = makeData(89, 14),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90N * coor.rotY90N * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(info.height + hInf - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90N * coor.rotY90N * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(hInf - 2),
             type = "ust_wall_height_modifier",
             shape = 1,
             spacing = {0, 0, 0, 0}
@@ -161,7 +161,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         insert(result.slots, {
             id = makeData(89, 12),
-            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90P * coor.rotY90N * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(info.height + hSup - 2),
+            transf = coor.scale(coor.xyz(0.5, 0.5, 1)) * coor.rotZ90P * coor.rotY90N * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(hSup - 2),
             type = "ust_wall_height_modifier",
             shape = 1,
             spacing = {0, 0, 0, 0}
@@ -174,22 +174,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         for i = -10, 10, 1 do
             if (i ~= 0) then
                 setButton(i - 90, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(leftPts[5]) * coor.transZ(info.height + hLeft + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(leftPts[5]) * coor.transZ(hLeft + i * 0.1))
                 
                 setButton(i + 90, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(rightPts[5]) * coor.transZ(info.height + hRight + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(rightPts[5]) * coor.transZ(hRight + i * 0.1))
                 
                 setButton(i + 120, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(centerPts[5]) * coor.transZ(info.height + (hRight + hLeft) * 0.5 + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ5 * coor.rotZ90P * coor.trans(centerPts[5]) * coor.transZ((hRight + hLeft) * 0.5 + i * 0.1))
             end
         end
         
         addText(("%.1fm"):format(hLeft),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ180 * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(info.height + hLeft - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ180 * rotZ5 * coor.trans(leftPts[5]) * coor.transZ(hLeft - 2) end,
             1)
         
         addText(("%.1fm"):format(hRight),
-            function(w) return coor.transX(-0.5 * w) * coor.rotZ180 * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(info.height + hRight - 2) end,
+            function(w) return coor.transX(-0.5 * w) * coor.rotZ180 * rotZ5 * coor.trans(rightPts[5]) * coor.transZ(hRight - 2) end,
             1)
     elseif pos == 5 then
         local hSlotIdLeft = makeData(24, 26)
@@ -199,22 +199,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         for i = -10, 10, 1 do
             if (i ~= 0) then
                 setButton(i - 30, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(leftPts[1]) * coor.transZ(info.height + hLeft + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(leftPts[1]) * coor.transZ(hLeft + i * 0.1))
                 
                 setButton(i + 30, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(rightPts[1]) * coor.transZ(info.height + hRight + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(rightPts[1]) * coor.transZ(hRight + i * 0.1))
                 
                 setButton(i, i,
-                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(centerPts[1]) * coor.transZ(info.height + (hRight + hLeft) * 0.5 + i * 0.1))
+                    coor.transY(i % 2 == 1 and -0.2 or 0.2) * rotZ1 * coor.rotZ90N * coor.trans(centerPts[1]) * coor.transZ((hRight + hLeft) * 0.5 + i * 0.1))
             end
         end
         
         addText(("%.1fm"):format(hLeft),
-            function(w) return coor.transX(-0.5 * w) * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(info.height + hLeft - 2) end,
+            function(w) return coor.transX(-0.5 * w) * rotZ1 * coor.trans(leftPts[1]) * coor.transZ(hLeft - 2) end,
             1)
         
         addText(("%.1fm"):format(hRight),
-            function(w) return coor.transX(-0.5 * w) * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(info.height + hRight - 2) end,
+            function(w) return coor.transX(-0.5 * w) * rotZ1 * coor.trans(rightPts[1]) * coor.transZ(hRight - 2) end,
             1)
     end
 end

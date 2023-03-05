@@ -16,16 +16,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local sId = params.classedModules[id].slotId
     local info = params.modules[sId].info
-    local transZ = coor.transZ(info.height)
     local makeData = params.modules[sId].makeData
     
     -- Entry for radius system
-    local arcs = info.arcs
-    local transf = info.transf * transZ
-    
     insert(result.slots, {
         id = makeData(93, -1),
-        transf = transf,
+        transf = info.transf,
         type = "ust_overlap_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -39,7 +35,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local addText = function(label, pos, fTrans, h)
         local nameModelsF, width = livetext(h or 2)(label)
-        for _, m in ipairs(nameModelsF(function() return fTrans(width) * coor.rotX90N * rotZ * coor.trans(pos) * transZ end)) do
+        for _, m in ipairs(nameModelsF(function() return fTrans(width) * coor.rotX90N * rotZ * coor.trans(pos) end)) do
             insert(result.models, m)
         end
     end
@@ -48,7 +44,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     insert(result.slots, {
         id = makeData(93, -2),
-        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[4]):mRot() * coor.trans(centerPts[4]) * transZ,
+        transf = coor.scale(coor.xyz(0.5, 0.5, 0.5)) * quat.byVec(coor.xyz(0, 1, 0), vecs[4]):mRot() * coor.trans(centerPts[4]),
         type = "ust_overlap_modifier",
         spacing = {0, 0, 0, 0}
     })
@@ -60,7 +56,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local dw = coor.xyz(i * 0.1, 0, 0)
             insert(result.slots, {
                 id = makeData(94, ((info.leftOverlap or 0) * 10 + i)),
-                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(-dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(leftPts[7]) * transZ,
+                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(-dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(leftPts[7]),
                 type = "ust_overlap_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
@@ -68,7 +64,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             insert(result.slots, {
                 id = makeData(94, (info.rightOverlap or 0) * 10 + i + 40),
-                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(rightPts[7]) * transZ,
+                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(rightPts[7]),
                 type = "ust_overlap_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}

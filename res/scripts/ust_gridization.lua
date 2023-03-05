@@ -2,6 +2,7 @@ local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local line = require "ust/coorline"
+local dump = require "luadump"
 
 local pi = math.pi
 local unpack = table.unpack
@@ -247,7 +248,7 @@ ust.genericArcs = function(x, y, z, data)
     local slotId = data.grid[z][x][y]
     local ref = data.parentMap[slotId]
     local m = data.modules[slotId]
-    local packer = ust.arcPacker(data.yState.pos, data.yState.vec, m.info.length, m.info.radius, ref == m.info.octa[1])
+    local packer = ust.arcPacker(data.yState.pos:withZ(m.info.height), data.yState.vec, m.info.length, m.info.radius, ref == m.info.octa[1])
     local ar, arL, arR = packer(-m.info.width * 0.5, m.info.width * 0.5)
     
     -- ALignement of starting point and ending point

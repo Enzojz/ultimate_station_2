@@ -126,7 +126,6 @@ local slotSetup = function(params, result, slotId)
     local makeData = params.modules[slotId].makeData
     
     local arcs = info.arcs
-    local transfPosC = info.transf * coor.transZ(info.height)
     
     local pos = info.pos
     local metadata = params.modules[slotId].metadata
@@ -152,7 +151,7 @@ local slotSetup = function(params, result, slotId)
         then
             insert(result.slots, {
                 id = makeData(1, -2),
-                transf = transfPosC,
+                transf = info.transf,
                 type = "ust_remove",
                 spacing = {0, 0, 0, 0}
             })
@@ -164,7 +163,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(1, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_track",
             spacing = {0, 0, 0, 0}
         }
@@ -174,7 +173,7 @@ local slotSetup = function(params, result, slotId)
         result.slots,
         {
             id = makeData(4, -1),
-            transf = transfPosC,
+            transf = info.transf,
             type = "ust_street",
             spacing = {0, 0, 0, 0}
         }
@@ -184,7 +183,7 @@ local slotSetup = function(params, result, slotId)
             result.slots,
             {
                 id = makeData(2, -1),
-                transf = transfPosC,
+                transf = info.transf,
                 type = "ust_platform",
                 spacing = {0, 0, 0, 0}
             }
@@ -195,12 +194,12 @@ local slotSetup = function(params, result, slotId)
     local newTopologySlots = ust.newTopologySlots(params, makeData, pos)
     
     if not (info.octa[3]) then
-        local transf = coor.transX(metadata.width) * transfPosC
+        local transf = coor.transX(metadata.width) * info.transf
         newTopologySlots(pos.x + 1, pos.y, transf, 3)
     end
     
     if not (info.octa[7]) then
-        local transf = coor.transX(-metadata.width) * transfPosC
+        local transf = coor.transX(-metadata.width) * info.transf
         newTopologySlots(pos.x - 1, pos.y, transf, 7)
     end
     
@@ -289,11 +288,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
             local length = (idx[2] - idx[1]) * info.length
             return {
                 {
-                    info.arcs.center:pt(inf) + coor.xyz(0, 0, info.height),
+                    info.arcs.center:pt(inf),
                     info.arcs.center:tangent(inf) * length
                 },
                 {
-                    info.arcs.center:pt(sup) + coor.xyz(0, 0, info.height),
+                    info.arcs.center:pt(sup),
                     info.arcs.center:tangent(sup) * length
                 }
             }
@@ -344,7 +343,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         
         local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf * coor.transZ(info.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
                 table.insert(result.models, m)
             end
         end

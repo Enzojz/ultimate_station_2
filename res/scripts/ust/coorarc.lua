@@ -217,7 +217,7 @@ end
 ---@param pt coor
 ---@return coor
 function arc.ptByPt(arc, pt)
-    return (pt - arc.o):normalized() * arc.r + arc.o
+    return (pt - arc.o):withZ(0):normalized() * arc.r + arc.o
 end
 
 ---@param arc arc
@@ -236,7 +236,7 @@ function arc.intersectionLine(arc, line, betweenLimit)
     local xpt = betweenLimit and function(x, y, z)
         local pt = coor.xyz(x, y, z)
         local rad = arc:rad(pt)
-        if (rad >= arc.inf and rad <= arc.sup) or (rad >= arc.sup and rad <= arc.inf) then return pt else return nil end
+        if (rad >= arc.inf and rad <= arc.sup) or (rad >= arc.sup and rad <= arc.inf) then return arc:pt(rad) else return nil end
     end or coor.xyz
     if (abs(line.a) > 1e-10) then
         

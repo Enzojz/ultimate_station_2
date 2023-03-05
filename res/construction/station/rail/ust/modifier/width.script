@@ -106,12 +106,11 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isPlatform or module.metadata.isPlaceholder)) then
             local info = module.info
             local makeData = module.makeData
-            local transfPosC = info.transf * coor.transZ(info.height)
             
             if not anyWidthModifiable then
                 table.insert(result.slots, {
                     id = makeData(85, 0),
-                    transf = transfPosC,
+                    transf = info.transf,
                     type = "ust_width_modifier",
                     spacing = {0, 0, 0, 0}
                 })

@@ -55,9 +55,6 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
     end
     
-    local hVec = coor.xyz(0, 0, info.height)
-    local hTrans = coor.transZ(info.height)
-    
     local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left) and octaModules[7].info.height == info.height
     local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right) and octaModules[3].info.height == info.height
     
@@ -89,14 +86,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         leftCentre[i] = leftPts[i] + vec * leftOverlap - vec * 0.85
         rightCentre[i] = rightPts[i] - vec * rightOverlap + vec * 0.85
         
-        leftLaneBorder[i] = leftPts[i] + hVec
-        rightLaneBorder[i] = rightPts[i] + hVec
+        leftLaneBorder[i] = leftPts[i]
+        rightLaneBorder[i] = rightPts[i]
         
         local vec = (leftLaneBorder[i] - rightLaneBorder[i]):normalized()
         
         leftLane[i] = leftLaneBorder[i] - vec * 1.2
         rightLane[i] = rightLaneBorder[i] + vec * 1.2
-        centerLane[i] = centerPts[i] + hVec
+        centerLane[i] = centerPts[i]
     end
     
     params.extra[slotId] = {
@@ -172,12 +169,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         
         local addBlock = function(mdl, pos)
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false)));
         end
         local addLastBlock = function(mdl, pos)
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * hTrans * fitMdl[mdl](pos, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * fitMdl[mdl](pos, false)));
         end
         
         if isLast then
@@ -277,8 +274,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         end
         
         
-        local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):length2() < 1e-4
-        local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):length2() < 1e-4
+        local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):withZ(0):length2() < 1e-4
+        local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):withZ(0):length2() < 1e-4
         
         if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
             local trackGroup = octaModules[7].info.trackGroup.right
@@ -352,12 +349,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             local vecLeft = (centerPts[inf] - leftPts[inf]) / (#leftInterPts[inf] - 1)
             for n = 1, #leftInterPts[inf] do
-                insert(result.models, ust.unitLane(leftPts[inf] + vecLeft * (n - 1) + hVec, leftInterPts[inf][n], tag))
+                insert(result.models, ust.unitLane(leftPts[inf] + vecLeft * (n - 1), leftInterPts[inf][n], tag))
             end
             
             local vecRight = (centerPts[inf] - rightPts[inf]) / (#rightInterPts[inf] - 1)
             for n = 1, #rightInterPts[inf] - 1 do
-                insert(result.models, ust.unitLane(rightPts[inf] + vecRight * (n - 1) + hVec, rightInterPts[inf][n], tag))
+                insert(result.models, ust.unitLane(rightPts[inf] + vecRight * (n - 1), rightInterPts[inf][n], tag))
             end
         end
         if isLast and not isPlatform[1] then
@@ -365,12 +362,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             local vecLeft = (centerPts[sup] - leftPts[sup]) / (#leftInterPts[sup] - 1)
             for n = 1, #leftInterPts[sup] do
-                insert(result.models, ust.unitLane(leftPts[sup] + vecLeft * (n - 1) + hVec, leftInterPts[sup][n], tag))
+                insert(result.models, ust.unitLane(leftPts[sup] + vecLeft * (n - 1), leftInterPts[sup][n], tag))
             end
             
             local vecRight = (centerPts[sup] - rightPts[sup]) / (#rightInterPts[sup] - 1)
             for n = 1, #rightInterPts[sup] - 1 do
-                insert(result.models, ust.unitLane(rightPts[sup] + vecRight * (n - 1) + hVec, rightInterPts[sup][n], tag))
+                insert(result.models, ust.unitLane(rightPts[sup] + vecRight * (n - 1), rightInterPts[sup][n], tag))
             end
 
             for n = 1, #leftInterPts[sup] - 1 do
@@ -386,7 +383,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     ust.initTerrainList(result, info.id)
     
-    insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(info.extraHeight or 0) end) * pipe.map(coor.vec2Tuple))
+    insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(-info.height + (info.extraHeight or 0)) end) * pipe.map(coor.vec2Tuple))
     result.groundFaceLists[info.id] = {
         face = func.map(face, coor.vec2Tuple),
         modes = {
@@ -407,7 +404,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         
         local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf * hTrans end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
                 table.insert(result.models, m)
             end
         end

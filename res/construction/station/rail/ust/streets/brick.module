@@ -4,6 +4,7 @@ local pipe = require "ust/pipe"
 local ust = require "ust"
 local quat = require "ust/quaternion"
 local livetext = require "ust/livetext"
+local dump = require "luadump"
 
 local fitModels = {
     paving = ust.fitModel(1, 1, 1, true, true),
@@ -14,6 +15,7 @@ local insert = table.insert
 local gap = 0.01
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    print("X")
     local info = params.modules[slotId].info
     local function setPos()
         if info.trackGroup.right then
@@ -92,11 +94,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local length = (idx[2] - idx[1]) * info.length
             return {
                 {
-                    info.arcs.center:pt(inf) + coor.xyz(0, 0, info.height),
+                    info.arcs.center:pt(inf),
                     info.arcs.center:tangent(inf) * length
                 },
                 {
-                    info.arcs.center:pt(sup) + coor.xyz(0, 0, info.height),
+                    info.arcs.center:pt(sup),
                     info.arcs.center:tangent(sup) * length
                 }
             }
@@ -118,7 +120,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         },
         slot = slotId
     }
-    
+
     insert(result.edgeLists, edges)
     
     if e[2] then
@@ -147,13 +149,13 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         for _, conn in ipairs(conn) do
             local ptC = pipe.new * conn
                 * pipe.map(function(c) return info.arcs.center.inf * (1 - c) + info.arcs.center.sup * c end)
-                * pipe.map(function(rad) return info.arcs.center:pt(rad) + coor.xyz(0, 0, info.height) end)
+                * pipe.map(function(rad) return info.arcs.center:pt(rad) end)
             
             insert(result.models, ust.unitLane(ptC[1], ptC[2], tag, "ust/transport_lane.mdl"))
             
             local ptRef = pipe.new * conn
                 * pipe.map(function(c) return info.arcs.left.inf * (1 - c) + info.arcs.left.sup * c end)
-                * pipe.map(function(rad) return info.arcs.left:pt(rad) + coor.xyz(0, 0, info.height) end)
+                * pipe.map(function(rad) return info.arcs.left:pt(rad) end)
             
             local vecs = func.map2(ptC, ptRef, function(ptC, ptL) return (ptL - ptC):normalized() end)
             
@@ -194,8 +196,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             rb = rightPts[inf],
         }
         
-        insert(result.models, ust.newModel("ust/paving/brick/paving_tl.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, true)));
-        insert(result.models, ust.newModel("ust/paving/brick/paving_br.mdl", tag, coor.transZ(info.height) * fitModels.paving(centre, false)));
+        insert(result.models, ust.newModel("ust/paving/brick/paving_tl.mdl", tag, fitModels.paving(centre, true)));
+        insert(result.models, ust.newModel("ust/paving/brick/paving_br.mdl", tag, fitModels.paving(centre, false)));
     end
     
     if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
@@ -231,13 +233,12 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     }
     
     if params.debug == 1 then
-        local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
         local text = tostring(info.id)
         local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
         
         local addText = function(label, fAlign, h)
             local nameModelsF, width = livetext(h or 2)(label)
-            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf * coor.transZ(info.height) end)) do
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
                 table.insert(result.models, m)
             end
         end

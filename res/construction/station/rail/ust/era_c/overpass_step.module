@@ -30,7 +30,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local hPlatform = info.height
     local hOverpass = colHeight
     local tPlatform = coor.transZ(hPlatform)
-    local tOverpass = coor.transZ(hOverpass)
+    local tOverpass = coor.transZ(hOverpass - hPlatform)
     
     local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
     
@@ -70,7 +70,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local nPart = math.floor(nComp / 30 + 0.3)
         if nPart < 1 then nPart = 1 end
         local nCompPerPart = math.floor(nComp / nPart)
-        local hBase = existsBase and hOverpass - nComp * 0.2 or hPlatform
+        local hBase = existsBase and (hOverpass - nComp * 0.2 - hPlatform) or 0
         
         local baseVecTransf = quat.byVec(coor.xyz(0, 1, 0), baseVec):mRot()
         if existsBase then
@@ -163,14 +163,14 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         if module.metadata.isPlatform then
             if existsBase then
                 insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
-                insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
+                insert(result.models, ust.unitLane(stairsPts[3], baseRef, tag))
             end
         else
             if existsBase then
                 insert(result.models, ust.unitLane(stairsPts[2], stairsPts[3], tag))
-                insert(result.models, ust.unitLane(stairsPts[3], baseRef .. tPlatform, tag))
+                insert(result.models, ust.unitLane(stairsPts[3], baseRef, tag))
             end
-            insert(result.models, ust.unitLane(baseRef .. tPlatform, (baseRef .. tPlatform) - (baseVec * 0.5), tag, "ust/linking_lane.mdl"))
+            insert(result.models, ust.unitLane(baseRef, baseRef - (baseVec * 0.5), tag, "ust/linking_lane.mdl"))
         end
     end
 end

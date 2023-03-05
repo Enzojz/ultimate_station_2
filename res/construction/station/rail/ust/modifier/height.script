@@ -216,13 +216,11 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet or module.metadata.isPlatform or module.metadata.isPlaceholder)) then
             local info = module.info
             local makeData = module.makeData
-            local refH = (module.metadata.isPlatform and params.platformHeight or module.metadata.height) + (info.extraHeight or 0)
-            local transfPosC = info.transf * coor.transZ(refH)
             
             if not anyHeightModifiable then
                 table.insert(result.slots, {
                     id = makeData(83, 0),
-                    transf = transfPosC,
+                    transf = info.transf,
                     type = "ust_height_modifier",
                     spacing = {0, 0, 0, 0}
                 })

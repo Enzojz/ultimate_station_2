@@ -12,17 +12,16 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local makeData = module.makeData
     
     local info = params.modules[trackSlotId].info
-    local transZ = coor.transZ(info.height)
     
     insert(result.slots, {
         id = makeData(26, -1),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transform * transZ,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transform,
         type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })
     insert(result.slots, {
         id = makeData(26, -1),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transform * transZ,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transform,
         type = "ust_tunnel",
         spacing = {0, 0, 0, 0}
     })

@@ -10,7 +10,7 @@ local addSlot = function(params, result)
             local info = module.info
             local makeData = module.makeData
             local slotId = makeData(28, 0)
-            local transf = info.transf * coor.transZ(params.modules[slotId] and (info.height - 1) or info.height)
+            local transf = info.transf * coor.transZ(params.modules[slotId] and -1 or 0)
             
             insert(result.slots, {
                 id = slotId,

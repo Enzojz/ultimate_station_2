@@ -1,7 +1,7 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local ust = require "ust"
--- local dump = require "luadump"
+local dump = require "luadump"
 
 local insert = table.insert
 

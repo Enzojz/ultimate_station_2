@@ -31,11 +31,10 @@ local addSlot = function(params, result)
         if (module.metadata and (module.metadata.isTrack or module.metadata.isStreet or module.metadata.isPlatform)) then
             local info = module.info
             local makeData = module.makeData
-            local transf = info.transf * coor.transZ(info.height)
             
             insert(result.slots, {
                 id = makeData(25, 0),
-                transf = transf,
+                transf = info.transf,
                 type = "ust_bridge",
                 spacing = {0, 0, 0, 0}
             })
@@ -63,18 +62,17 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
     local makeData = params.modules[params.classedModules[info.id].slotId].makeData
-    local transf = module.info.transf * coor.transZ(module.info.height)
     
     insert(result.slots, {
         id = makeData(25, -1),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * module.info.transf,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
     
     insert(result.slots, {
         id = makeData(25, -1),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * module.info.transf,
         type = "ust_bridge",
         spacing = {0, 0, 0, 0}
     })
@@ -112,11 +110,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
         local length = info.arcs.center:length()
         local baseEdge = {
             {
-                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, info.extraHeight),
+                info.arcs.center:pt(info.arcs.center.inf) + coor.xyz(0, 0, -params.platformHeight),
                 info.arcs.center:tangent(info.arcs.center.inf) * length,
             },
             {
-                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, info.extraHeight),
+                info.arcs.center:pt(info.arcs.center.sup) + coor.xyz(0, 0, -params.platformHeight),
                 info.arcs.center:tangent(info.arcs.center.sup) * length,
             },
         }

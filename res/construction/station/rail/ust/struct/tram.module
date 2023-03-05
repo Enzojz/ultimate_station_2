@@ -6,17 +6,16 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local trackSlotId = params.classedModules[info.id].slotId
     local module = params.modules[trackSlotId]
     local makeData = params.modules[params.classedModules[info.id].slotId].makeData
-    local transf = module.info.transf * coor.transZ(module.info.height)
     
     insert(result.slots, {
         id = makeData(27, -2),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(0.25 * math.pi) * module.info.transf,
         type = "ust_tram",
         spacing = {0, 0, 0, 0}
     })
     insert(result.slots, {
         id = makeData(27, -2),
-        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * transf,
+        transf = coor.scale(coor.xyz(1, 0.1, 1)) * coor.rotZ(-0.25 * math.pi) * module.info.transf,
         type = "ust_tram",
         spacing = {0, 0, 0, 0}
     })

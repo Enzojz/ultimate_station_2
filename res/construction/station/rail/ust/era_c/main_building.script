@@ -42,7 +42,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 20 + i),
-                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i) * coor.transZ(info.height),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -57,7 +57,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                         insert(
                             result.slots, {
                                 id = makeData(moduleId, 40 + i),
-                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i) * coor.transZ(info.height),
+                                transf = quat.byVec(coor.xyz(1, 0, 0), vec):mRot() * coor.trans(pt + (vec * 2.5) * i),
                                 type = "ust_component_main_" .. width,
                                 spacing = spacing
                             })
@@ -147,7 +147,7 @@ local addSlotFn = function(params, result, width, spacing, moduleId)
                             insert(
                                 result.slots, {
                                     id = makeData(moduleId, octapos),
-                                    transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5) * coor.transZ(info.height),
+                                    transf = quat.byVec(coor.xyz(0, -1, 0), octapos > 5 and vec or -vec):mRot() * coor.trans((xInfo.sup.pt + xInfo.inf.pt) * 0.5),
                                     type = "ust_component_main_" .. width,
                                     spacing = spacing
                                 })
@@ -223,8 +223,8 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
         if data < 5 then
             pos.lt, pos.lb, pos.rt, pos.rb = pos.rt, pos.rb, pos.lt, pos.lb
         end
-        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * coor.transZ(info.height)));
-        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * coor.transZ(info.height)));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true)));
+        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false)));
     end
     
     local platformPts = {}
@@ -429,7 +429,7 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
             if y == pos.y then
                 local module = params.modules[slotId]
                 if module and module.metadata.isPlatform then
-                    insert(pts, module.info.arcs.center:pt(data < 30 and module.info.arcs.center.sup or module.info.arcs.center.inf) .. coor.transZ(info.height))
+                    insert(pts, module.info.arcs.center:pt(data < 30 and module.info.arcs.center.sup or module.info.arcs.center.inf))
                 end
             end
         end
