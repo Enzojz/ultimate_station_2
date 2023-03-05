@@ -78,7 +78,7 @@ end
 local preProcessAddPrecise =
     preProcessAdd(function(data, m, radius)
         local delta = data > 0 and pow(10, data - 1) or -pow(10, -data - 1)
-        if m.info.radius == 10e8 or m.info.straight then
+        if m.info.radius == ust.infi or m.info.straight then
             return delta
         else
             return radius + delta

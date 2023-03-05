@@ -273,11 +273,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             end
         end
         
-        
-        local leftTrack = isTrack[7] and octaModules[7].info.arcs.right.radius == info.arcs.left.radius and (octaModules[7].info.arcs.right.o - info.arcs.left.o):withZ(0):length2() < 1e-4
-        local rightTrack = isTrack[3] and octaModules[3].info.arcs.left.radius == info.arcs.right.radius and (octaModules[3].info.arcs.left.o - info.arcs.right.o):withZ(0):length2() < 1e-4
-        
-        if (leftTrack and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+        if (isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
             local trackGroup = octaModules[7].info.trackGroup.right
             insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
             if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
@@ -292,7 +288,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             end
         end
         
-        if (rightTrack and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
+        if (isTrack[3] and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
             local trackGroup = octaModules[3].info.trackGroup.left
             insert(result.models, ust.unitLane(rightLane[sup], rightLane[inf], tag, "ust/terminal_lane.mdl"))
             

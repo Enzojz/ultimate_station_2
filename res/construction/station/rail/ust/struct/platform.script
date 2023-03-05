@@ -468,10 +468,10 @@ local platformArcs = function(x, y, z, data)
         local o = lines[1] - lines[2]
         if not o then
             local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
-            local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+            local normalLength = math.sqrt(ust.infi * ust.infi - halfChordLength2)
             local midPt = pts[1]:avg(pts[3])
             o = midPt + ((pts[3] - pts[1]):normalized() .. coor.rotZ90P) * normalLength
-            r = 10e8
+            r = ust.infi
         end
         
         o = o:withZ(m.info.height)
@@ -480,13 +480,13 @@ local platformArcs = function(x, y, z, data)
         local vecSup = pts[3] - o
         
         local r = vecInf:length()
-        if r > 10e8 then
+        if r > ust.infi then
             local halfChordLength2 = (pts[3] - pts[1]):length2() * 0.25
-            local normalLength = math.sqrt(10e8 * 10e8 - halfChordLength2)
+            local normalLength = math.sqrt(ust.infi * ust.infi - halfChordLength2)
             o = pts[1]:avg(pts[3]) + (o - pts[2]):normalized() * normalLength
             vecInf = pts[1] - o
             vecSup = pts[3] - o
-            r = 10e8
+            r = ust.infi
         end
         local ar = arc.byOR(o, r)
         

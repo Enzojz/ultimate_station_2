@@ -5,7 +5,6 @@ local arc = require "ust/coorarc"
 local quat = require "ust/quaternion"
 local ust = require "ust_gridization"
 local livetext = require "ust/livetext"
--- local dump = require "luadump"
 local math = math
 local abs = math.abs
 local floor = math.floor
@@ -552,17 +551,34 @@ local function searchTerminalGroups(params, fn)
                 if not m.info.trackGroup then
                     m.info.trackGroup = {}
                 end
-                if m.info.octa[7] and params.modules[m.info.octa[7]].metadata.isPlatform then
-                    insert(groupsLeft[#groupsLeft], m.info.slotId)
-                elseif #groupsLeft[#groupsLeft] > 0 then
-                    insert(groupsLeft, {})
+                do
+                    local mocta = m.info.octa[7] and params.modules[m.info.octa[7]] or nil
+                    if mocta and mocta.metadata.isPlatform and
+                        (mocta.info.ref.right
+                        or m.info.ref.left
+                        or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
+                        or (mocta.info.radius == m.info.radius and (mocta.info.arcs.right.o - m.info.arcs.left.o):withZ(0):length2() < 1e-4))
+                    then
+                        insert(groupsLeft[#groupsLeft], m.info.slotId)
+                    elseif #groupsLeft[#groupsLeft] > 0 then
+                        insert(groupsLeft, {})
+                    end
                 end
                 
-                if m.info.octa[3] and params.modules[m.info.octa[3]].metadata.isPlatform then
-                    insert(groupsRight[#groupsRight], m.info.slotId)
-                elseif #groupsRight[#groupsRight] > 0 then
-                    insert(groupsRight, {})
+                do
+                    local mocta = m.info.octa[3] and params.modules[m.info.octa[3]] or nil
+                    if mocta and mocta.metadata.isPlatform and
+                        (mocta.info.ref.left
+                        or m.info.ref.right
+                        or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
+                        or (mocta.info.radius == m.info.radius and (mocta.info.arcs.left.o - m.info.arcs.right.o):withZ(0):length2() < 1e-4))
+                    then
+                        insert(groupsRight[#groupsRight], m.info.slotId)
+                    elseif #groupsRight[#groupsRight] > 0 then
+                        insert(groupsRight, {})
+                    end
                 end
+                
                 m = params.modules[m.info.octa[1]]
             until not m or not fn(m)
             

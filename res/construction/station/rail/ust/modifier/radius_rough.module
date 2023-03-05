@@ -56,7 +56,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         spacing = {0, 0, 0, 0}
     })
 
-    addText(info.radius >= 10e8 and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+"), info.refPos.y < 0 and 2 or 4)
+    addText(info.radius >= ust.infi and "R∞" or string.format("R%d(%s)", abs(info.radius), info.radius < 0 and "-" or "+"), info.refPos.y < 0 and 2 or 4)
     addText("∞", info.refPos.y < 0 and 4 or 2)
     addText("⊘", info.refPos.y < 0 and 5 or 1)
     

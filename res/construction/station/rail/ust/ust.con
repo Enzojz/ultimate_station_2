@@ -1,7 +1,6 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-local dump = require "luadump"
 
 local insert = table.insert
 
@@ -341,7 +340,7 @@ local updateFn = function(params, closureParams)
         end
     end
     params.grid = ust.gridization(params.modules, params.classedModules)
-    
+
     params.slotGrid = {}
     params.trackGroup = {}
     params.platformGroup = {}
@@ -349,7 +348,7 @@ local updateFn = function(params, closureParams)
     params.extra = {}
     
     ust.searchTerminalGroups(params, result)
-    
+
     -- slotSetup adds slots for modules itself
     for slotId, module in pairs(params.modules) do
         if module.metadata.slotSetup then
@@ -387,7 +386,7 @@ local updateFn = function(params, closureParams)
                 end
             end
         end
-        
+
         for _, fn in ipairs(result.invokeLater) do
             fn()
         end

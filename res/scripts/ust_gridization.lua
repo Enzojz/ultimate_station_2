@@ -2,7 +2,6 @@ local func = require "ust/func"
 local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local line = require "ust/coorline"
-local dump = require "luadump"
 
 local pi = math.pi
 local unpack = table.unpack
@@ -228,7 +227,7 @@ ust.calculateRaidus = function(x, y, z, data)
     end
     
     if m.info.straight then
-        m.info.radius = 10e8
+        m.info.radius = ust.infi
     elseif not m.info.radius then
         if ref == m.info.octa[5] or ref == m.info.octa[1] then
             m.info.radius = data.modules[ref].info.radius
@@ -237,7 +236,7 @@ ust.calculateRaidus = function(x, y, z, data)
         elseif ref == m.info.octa[7] then
             m.info.radius = data.modules[m.info.octa[7]].info.radius + (data.xState.width[x - 1] + data.xState.width[x]) * 0.5
         else
-            m.info.radius = 10e8
+            m.info.radius = ust.infi
         end
     end
     
