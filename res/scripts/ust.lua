@@ -557,7 +557,7 @@ local function searchTerminalGroups(params, fn)
                         (mocta.info.ref.right
                         or m.info.ref.left
                         or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
-                        or (mocta.info.radius == m.info.radius and (mocta.info.arcs.right.o - m.info.arcs.left.o):withZ(0):length2() < 1e-4))
+                        or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.right.o - m.info.arcs.left.o):withZ(0):length2() < 1e-4))
                     then
                         insert(groupsLeft[#groupsLeft], m.info.slotId)
                     elseif #groupsLeft[#groupsLeft] > 0 then
@@ -571,7 +571,7 @@ local function searchTerminalGroups(params, fn)
                         (mocta.info.ref.left
                         or m.info.ref.right
                         or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
-                        or (mocta.info.radius == m.info.radius and (mocta.info.arcs.left.o - m.info.arcs.right.o):withZ(0):length2() < 1e-4))
+                        or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.left.o - m.info.arcs.right.o):withZ(0):length2() < 1e-4))
                     then
                         insert(groupsRight[#groupsRight], m.info.slotId)
                     elseif #groupsRight[#groupsRight] > 0 then
