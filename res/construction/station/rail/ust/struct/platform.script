@@ -7,7 +7,6 @@ local arc = require "ust/coorarc"
 local line = require "ust/coorline"
 
 local insert = table.insert
-
 local ustg = require "ust_gridization"
 
 local getTranfs = function(info, pos, width)
@@ -475,7 +474,7 @@ local platformArcs = function(x, y, z, data)
             r = 10e8
         end
         
-        o.z = m.info.height
+        o = o:withZ(m.info.height)
         
         local vecInf = pts[1] - o
         local vecSup = pts[3] - o
@@ -492,7 +491,7 @@ local platformArcs = function(x, y, z, data)
         local ar = arc.byOR(o, r)
         
         local inf = ar:rad(pts[1])
-        
+
         local length = math.asin(vecInf:cross(vecSup).z / (r * r)) * r
         local sup = inf + length / r
         
