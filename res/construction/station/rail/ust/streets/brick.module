@@ -13,7 +13,6 @@ local insert = table.insert
 local gap = 0.01
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    print("X")
     local info = params.modules[slotId].info
     local function setPos()
         if info.trackGroup.right then

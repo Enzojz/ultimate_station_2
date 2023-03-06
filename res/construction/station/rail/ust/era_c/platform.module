@@ -60,7 +60,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     local leftOverlap = isPlatform[7] and 0 or (info.leftOverlap or 0)
     local rightOverlap = isPlatform[3] and 0 or (info.rightOverlap or 0)
-
+    
     local n = 4
     
     local leftPts = ust.basePts(info.arcs.left, n)
@@ -78,7 +78,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local leftInterPts = {}
     local rightInterPts = {}
     local centerLane = {}
-
+    
     for i = 1, n + 1 do
         local vec = (leftPts[i] - rightPts[i]):normalized()
         leftEdge[i] = leftPts[i] + vec * leftOverlap
@@ -119,7 +119,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     
     for i = 1, n + 1 do
         local interLength = (leftLane[i] - rightLane[i]):length() / 2
-        local interSegs = interLength < 3 and 1 or (math.floor((interLength - 3) / 5) + 1)
+        local interSegs = interLength < 2.5 and 1 or (math.floor(interLength / 2.5) + 1)
         local leftInterVec = (centerLane[i] - leftLane[i]) / interSegs
         local rightInterVec = (centerLane[i] - rightLane[i]) / interSegs
         leftInterPts[i] = func.seqMap({0, interSegs}, function(n) return leftLane[i] + leftInterVec * n end)
@@ -273,34 +273,42 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             end
         end
         
-        if (isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+        local isLeftTerminal = isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right
+        local isRightTerminal = isTrack[3] and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left
+        
+        local addLeftTerminals = isLeftTerminal and function(f, t)
             local trackGroup = octaModules[7].info.trackGroup.right
-            insert(result.models, ust.unitLane(leftLane[inf], leftLane[sup], tag, "ust/terminal_lane.mdl"))
+            insert(result.models, ust.unitLane(f, t, tag, "ust/terminal_lane.mdl"))
             if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
             insert(params.platformGroup[trackGroup].models, #result.models - 1)
-        else
-            insert(result.models, ust.unitLane(leftLane[sup], leftLane[inf], tag))
-            if leftConnected then
-                insert(result.models, ust.unitLane(leftLane[inf], leftLaneBorder[inf], tag))
-                if isLast and not isPlatform[1] then
-                    insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
-                end
-            end
+        end or function(f, t)
+            insert(result.models, ust.unitLane(f, t, tag))
         end
         
-        if (isTrack[3] and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left) then
+        local addRightTerminals = isRightTerminal and function(f, t)
             local trackGroup = octaModules[3].info.trackGroup.left
-            insert(result.models, ust.unitLane(rightLane[sup], rightLane[inf], tag, "ust/terminal_lane.mdl"))
+            insert(result.models, ust.unitLane(f, t, tag, "ust/terminal_lane.mdl"))
             
             if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, right = true} end
             insert(params.platformGroup[trackGroup].models, #result.models - 1)
-        else
-            insert(result.models, ust.unitLane(rightLane[sup], rightLane[inf], tag))
-            if rightConnected then
-                insert(result.models, ust.unitLane(rightLane[inf], rightLaneBorder[inf], tag))
-                if isLast and not isPlatform[1] then
-                    insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
-                end
+        end or function(f, t)
+            insert(result.models, ust.unitLane(f, t, tag))
+        end
+        
+        
+        addLeftTerminals(leftLane[inf], leftLane[sup])
+        if leftConnected then
+            insert(result.models, ust.unitLane(leftLane[inf], leftLaneBorder[inf], tag))
+            if isLast and not isPlatform[1] then
+                insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
+            end
+        end
+        
+        addRightTerminals(rightLane[sup], rightLane[inf])
+        if rightConnected then
+            insert(result.models, ust.unitLane(rightLane[inf], rightLaneBorder[inf], tag))
+            if isLast and not isPlatform[1] then
+                insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
             end
         end
         
@@ -311,31 +319,37 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             insert(result.models, ust.unitLane(rightInterPts[inf][n], rightInterPts[inf][n + 1], tag))
         end
         
+        -- intermediate lanes
         if #leftInterPts[inf] == #leftInterPts[sup] then
             for n = 2, #leftInterPts[inf] - 1 do
-                insert(result.models, ust.unitLane(leftInterPts[inf][n], leftInterPts[sup][n], tag))
+                addLeftTerminals(leftInterPts[inf][n], leftInterPts[sup][n])
             end
         else
             local short = leftInterPts[#leftInterPts[inf] < #leftInterPts[sup] and inf or sup]
             local long = leftInterPts[#leftInterPts[inf] > #leftInterPts[sup] and inf or sup]
-
+            
             for n = 2, #long - 1 do
                 local vec = func.min(func.map(short, function(pt) return pt - long[n] end), function(lhs, rhs) return lhs:length2() < rhs:length2() end)
-                insert(result.models, ust.unitLane(long[n], long[n] + vec, tag))
+                addLeftTerminals(leftInterPts[inf][n], leftInterPts[sup][n])
             end
         end
         
         if #rightInterPts[inf] == #rightInterPts[sup] then
             for n = 2, #rightInterPts[inf] - 1 do
-                insert(result.models, ust.unitLane(rightInterPts[inf][n], rightInterPts[sup][n], tag))
+                addRightTerminals(rightInterPts[sup][n], rightInterPts[inf][n])
             end
         else
             local short = rightInterPts[#rightInterPts[inf] < #rightInterPts[sup] and inf or sup]
             local long = rightInterPts[#rightInterPts[inf] > #rightInterPts[sup] and inf or sup]
-
+            
             for n = 2, #long - 1 do
                 local vec = func.min(func.map(short, function(pt) return pt - long[n] end), function(lhs, rhs) return lhs:length2() < rhs:length2() end)
-                insert(result.models, ust.unitLane(long[n], long[n] + vec, tag))
+                addRightTerminals(long[n] + vec, long[n])
+                if (isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+                    local trackGroup = octaModules[7].info.trackGroup.right
+                    if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
+                    insert(params.platformGroup[trackGroup].models, #result.models - 1)
+                end
             end
         end
         
@@ -365,7 +379,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             for n = 1, #rightInterPts[sup] - 1 do
                 insert(result.models, ust.unitLane(rightPts[sup] + vecRight * (n - 1), rightInterPts[sup][n], tag))
             end
-
+            
             for n = 1, #leftInterPts[sup] - 1 do
                 insert(result.models, ust.unitLane(leftInterPts[sup][n], leftInterPts[sup][n + 1], tag))
             end
