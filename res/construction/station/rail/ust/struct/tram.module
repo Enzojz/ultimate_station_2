@@ -49,8 +49,9 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_CATENARY"),
-            description = _("MENU_MODULE_CATENARY_DESC"),
+            name = _("MENU_MODULE_TRAM"),
+            description = _("MENU_MODULE_TRAM_DESC"),
+            icon = "ui/streets/tram_old.tga"
         },
         category = {
             categories = {"ust_cat_comp"},

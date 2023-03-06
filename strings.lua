@@ -214,7 +214,7 @@ function data()
             MENU_MODULE_COLOR_YELLOW = "Yellow",
             MENU_MODULE_COLOR_YELLOW_DESC = "Yellow for some applicable components",
             MENU_MODULE_CATENARY = "Catenary switch",
-            MENU_MODULE_CATENARY_DESC = "Electrify or unelectrify tracks",
+            MENU_MODULE_CATENARY_DESC = "Electrify or unelectrify tracks, or set catenary over tram street.",
             MENU_MODULE_PLATFORM_SEATS = "Platform Seats",
             MENU_MODULE_PLATFORM_SEATS_DESC = "Put some seats for passengers.",
             MENU_MODULE_PLATFORM_TRASHBIN = "Trash bin",
@@ -225,7 +225,11 @@ function data()
             MENU_MODULE_OPEN_CUT_DESC = "Make an open cut over platforms or tracks.",
             MENU_MODULE_VOID_TUNNEL = "Tunnel without portal",
             MENU_OVERLAP_MODIFIER = "Overlapping modifier",
-            MENU_OVERLAP_MODIFIER_DESC = "Makes platform and track closer"
+            MENU_OVERLAP_MODIFIER_DESC = "Makes platform and track closer",
+            MENU_MODULE_TRAM = "Tram switch",
+            MENU_MODULE_TRAM_DESC = "Set or unset tram track on street",
+            MENU_MODULE_STREET_BRICK = "Bricked street",
+            MENU_MODULE_STREET_BRICK_DESC = "Set a route/tram terminal in the station"
         },
         zh_CN = {
             MOD_NAME = "终极车站",

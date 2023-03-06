@@ -93,6 +93,9 @@ function data()
             isComponent = true,
             isBuilding = true,
             typeId = 32,
+            moreCapacity = {
+                passenger = 50
+            }
         },
         
         updateFn = updateFn,

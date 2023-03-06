@@ -1,7 +1,6 @@
 local func = require "ust/func"
 local pipe = require "ust/pipe"
 local ust = require "ust"
-
 local insert = table.insert
 
 local rList = {15, 12, 10, 8, 7.5, 6, 5, 4, 3.5, 3, 2.5, 2, 1.75, 1.5, 1.25, 1, 0.9, 0.85, 0.8, 0.75, 0.7, 0.666, 0.633, 0.6, 0.566, 0.533, 0.5, 0.475, 0.45, 0.425, 0.4, 0.375, 0.35, 0.325, 0.3, 0.28, 0.26, 0.24, 0.22, 0.2, 0.18, 0.16, 0.14, 0.12, 0.1, 0.09, 0.08, 0.07, 0.06, 0.05}
@@ -364,6 +363,18 @@ local updateFn = function(params, closureParams)
     end
 
     result.terminateConstructionHook = function()
+
+        local moreCapacity = {
+            passenger = 0,
+            cargo = 0
+        }
+        for slotId, m in pairs(params.modules) do
+            if m.metadata.moreCapacity then
+                moreCapacity.passenger = moreCapacity.passenger + (m.metadata.moreCapacity.passenger or 0)
+                moreCapacity.cargo = moreCapacity.cargo + (m.metadata.moreCapacity.cargo or 0)
+            end
+        end
+
         for i, track in ipairs(params.trackGroup) do
             local platform = params.platformGroup[i]
             if platform then
@@ -375,6 +386,12 @@ local updateFn = function(params, closureParams)
                     result.terminalGroups[i].terminals = func.map(platform.models, function(p) return {p, 0} end)
                 end
             end
+        end
+
+        for i, station in ipairs(result.stations) do
+            station.pool = {
+                moreCapacity = moreCapacity.passenger
+            }
         end
         
         for _, z in pairs(params.slotGrid) do
