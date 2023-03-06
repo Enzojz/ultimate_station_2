@@ -1,0 +1,42 @@
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_COLOR_BLACK"),
+            description = _("MENU_MODULE_COLOR_BLACK_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_color"},
+        },
+        type = "ust_color",
+        order = {
+            value = 5,
+        },
+        metadata = {
+            color = "black",
+            typeId = 29,
+            typeName = "ust_color",
+            scriptName = "construction/station/rail/ust/color/color",
+            preProcessAdd = "preProcessAdd",
+            slotSetup = "slotSetup",
+            classify = "classify"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
