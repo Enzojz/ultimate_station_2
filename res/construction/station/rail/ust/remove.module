@@ -14,11 +14,11 @@ function data()
             description = _("MODULE_REMOVE_HELPER_DESC"),
         },
         category = {
-            categories = {"ust_cat_track", "ust_cat_platform"}
+            categories = {"ust_cat_track", "ust_cat_platform", "ust_cat_street"}
         },
         type = "ust_remove",
         order = {
-            value = 1,
+            value = 0,
         },
         metadata = {
 			typeName = "ust_remove",

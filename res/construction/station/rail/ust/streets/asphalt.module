@@ -1,11 +1,11 @@
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    game.res.script["construction/station/rail/ust/struct/street"].updateFn(result, transform, tag, slotId, addModelFn, params, "brick")
+    game.res.script["construction/station/rail/ust/struct/street"].updateFn(result, transform, tag, slotId, addModelFn, params, "asphalt")
 end
 
 function data()
     return {
         availability = {
-            yearFrom = 0,
+            yearFrom = 1925,
             yearTo = 0,
         },
         buildMode = "SINGLE",
@@ -13,15 +13,15 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_STREET_BRICK"),
-            description = _("MENU_MODULE_STREET_BRICK_DESC"),
+            name = _("MENU_MODULE_STREET_ASPHALT"),
+            description = _("MENU_MODULE_STREET_ASPHALT_DESC"),
         },
         category = {
             categories = {"ust_cat_street"},
         },
         type = "ust_street",
         order = {
-            value = 10,
+            value = 11,
         },
         metadata = {
             typeName = "ust_street",

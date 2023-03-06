@@ -63,11 +63,11 @@ function data()
             icon = "ui/tracks/electrify.tga"
         },
         category = {
-            categories = {"ust_cat_comp"},
+            categories = {"ust_cat_comp", "ust_cat_street"},
         },
         type = "ust_catenary",
         order = {
-            value = 1,
+            value = 0,
         },
         metadata = {
             typeName = "ust_catenary",

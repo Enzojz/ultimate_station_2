@@ -222,11 +222,11 @@ local function gridization(x, y, z, data)
     coroutine.yield()
     
     local refArc = data.modules[slotId].info.arcs
-        
+    
     data.modules[slotId].info.transf =
         quat.byVec(coor.xyz(0, 1, 0), refArc.center:tangent((refArc.center.inf + refArc.center.sup) * 0.5)):mRot() *
         coor.trans(refArc.center:pt((refArc.center.inf + refArc.center.sup) * 0.5))
-    
+
 end
 
 ---@param modules table<slotid, module>
@@ -244,6 +244,241 @@ local fitModels = {
 
 local gap = 0.01
 
+local updateFn = function(result, transform, tag, slotId, addModelFn, params, prefix)
+    local info = params.modules[slotId].info
+    local function setPos()
+        if info.trackGroup.right then
+            local trackGroup = params.trackGroup[info.trackGroup.right]
+            local n = #trackGroup
+            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
+            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos
+            
+            if hasCenterNode then
+                local pos = {{0, 0.3}, {0.7, 1}}
+                local posCore = {{0.3 + gap, 0.5}, {0.5, 0.7 - gap}}
+                local conn = {{0.7 - gap, 0.7}, {0.3 + gap, 0.3}}
+                local node = 1
+                return {pos, posCore}, conn, node, {0, 1, 2, 3}, {1, 1}, {1, 4}
+            elseif hasInfNode then
+                local pos = {{0.2, 1}}
+                local posCore = {{0, 0.2 - gap}}
+                local conn = {{0.2 - gap, 0.2}}
+                local node = 0
+                return {pos, posCore}, conn, node, {0, 1}, {2, 1}, {1, 2}
+            elseif hasSupNode then
+                local pos = {{0, 0.8}}
+                local posCore = {{0.8 + gap, 1}}
+                local conn = {{0.8, 0.8 + gap}}
+                return {pos, posCore}, conn, nil, {0, 1}, {1, 1}, {2, 2}
+            elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+                return {{{0, 1}}}, nil, nil, {0, 1}, {1, 1}, {1, 2}
+            else
+                return {{{0, 0.5}, {0.5, 1}}}, nil, nil, {0, 1, 2, 3}, {1, 1}, {1, 4}
+            end
+        elseif info.trackGroup.left then
+            local trackGroup = params.trackGroup[info.trackGroup.left]
+            local n = #trackGroup
+            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos - 1
+            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+            
+            if hasCenterNode then
+                local pos = {{1, 0.7}, {0.3, 0}}
+                local posCore = {{0.7 - gap, 0.5}, {0.5, 0.3 + gap}}
+                local conn = {{0.7 - gap, 0.7}, {0.3 + gap, 0.3}}
+                local node = 1
+                return {pos, posCore}, conn, node, {3, 2, 1, 0}, {1, 4}, {1, 1}
+            elseif hasSupNode then
+                local pos = {{0.8, 0}}
+                local posCore = {{1, 0.8 + gap}}
+                local conn = {{0.8, 0.8 + gap}}
+                local node = 0
+                return {pos, posCore}, conn, node, {1, 0}, {1, 2}, {2, 1}
+            elseif hasInfNode then
+                local pos = {{1, 0.2}}
+                local posCore = {{0.2 - gap, 0}}
+                local conn = {{0.2 - gap, 0.2}}
+                return {pos, posCore}, conn, nil, {1, 0}, {2, 2}, {1, 1}
+            elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+                return {{{1, 0}}}, nil, nil, {1, 0}, {1, 2}, {1, 1}
+            else
+                return {{{1, 0.5}, {0.5, 0}}}, nil, nil, {3, 2, 1, 0}, {1, 4}, {1, 1}
+            end
+        elseif (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) or (info.octa[5] and params.modules[info.octa[5]].metadata.isStreet) then
+            return {{{0, 1}}}, nil, nil, {0, 1}, {1, 1}, {1, 2}
+        else
+            return {{{0, 0.5}, {0.5, 1}}}, nil, nil, {0, 1, 2, 3}, {1, 1}, {1, 4}
+        end
+    end
+    
+    local pos, conn, node, seqNodes, bNode, eNode = setPos()
+    
+    params.edgeIndex[slotId] = {#result.edgeLists + bNode[1], bNode[2], #result.edgeLists + eNode[1], eNode[2], #result.edgeLists + 1}
+    
+    local e = func.map(pos,
+        pipe.map(function(idx)
+            local inf = info.arcs.center.inf * (1 - idx[1]) + info.arcs.center.sup * idx[1]
+            local sup = info.arcs.center.inf * (1 - idx[2]) + info.arcs.center.sup * idx[2]
+            local length = (idx[2] - idx[1]) * info.length
+            return {
+                {
+                    info.arcs.center:pt(inf),
+                    info.arcs.center:tangent(inf) * length
+                },
+                {
+                    info.arcs.center:pt(sup),
+                    info.arcs.center:tangent(sup) * length
+                }
+            }
+        end)
+    )
+    local edges = {
+        type = "STREET",
+        alignTerrain = true,
+        params = {
+            type = ("ust/%s.lua"):format(prefix),
+            tramTrackType = "NO"
+        },
+        edges = pipe.new * e[1] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
+        snapNodes = func.filter({(not info.octa[1]) and seqNodes[#seqNodes], (not info.octa[5]) and seqNodes[1]}, pipe.noop()),
+        freeNodes = {},
+        seqNodes = seqNodes,
+        tag2nodes = {
+            [tag] = seqNodes
+        },
+        slot = slotId
+    }
+    
+    insert(result.edgeLists, edges)
+    
+    if e[2] then
+        local edgesCore = {
+            type = "STREET",
+            alignTerrain = true,
+            params = {
+                type = ("ust/%s_core.lua"):format(prefix),
+                tramTrackType = "NO"
+            },
+            edges = pipe.new * e[2] * pipe.flatten() * pipe.map(pipe.map(coor.vec2Tuple)),
+            snapNodes = {},
+            freeNodes = {},
+            seqNodes = seqNodes,
+            tag2nodes = {
+                [tag] = seqNodes
+            },
+            slot = slotId
+        }
+        
+        if node then
+            local nodes = func.mapFlatten(result.edgeLists, function(e) return e.edges end)
+            result.terminalGroups[info.trackGroup.left or info.trackGroup.right].vehicleNodeOverride = #nodes + node
+        end
+        insert(result.edgeLists, edgesCore)
+        for _, conn in ipairs(conn) do
+            local ptC = pipe.new * conn
+                * pipe.map(function(c) return info.arcs.center.inf * (1 - c) + info.arcs.center.sup * c end)
+                * pipe.map(function(rad) return info.arcs.center:pt(rad) end)
+            
+            insert(result.models, ust.unitLane(ptC[1], ptC[2], tag, "ust/transport_lane.mdl"))
+            
+            local ptRef = pipe.new * conn
+                * pipe.map(function(c) return info.arcs.left.inf * (1 - c) + info.arcs.left.sup * c end)
+                * pipe.map(function(rad) return info.arcs.left:pt(rad) end)
+            
+            local vecs = func.map2(ptC, ptRef, function(ptC, ptL) return (ptL - ptC):normalized() end)
+            
+            local ptL = func.map2(ptC, vecs, function(pt, vec) return pt + vec end)
+            local ptR = func.map2(ptC, vecs, function(pt, vec) return pt - vec end)
+            
+            local centre = {
+                lt = ptR[2],
+                rt = ptL[2],
+                rb = ptL[1],
+                lb = ptR[1],
+            }
+            
+            insert(result.invokeLater, function()
+                if info.tramTrack then
+                    insert(result.models, ust.newModel(("ust/paving/%s/tram_tl.mdl"):format(prefix), tag, fitModels.tram(centre, true)));
+                    insert(result.models, ust.newModel(("ust/paving/%s/tram_br.mdl"):format(prefix), tag, fitModels.tram(centre, false)));
+                    insert(result.models, ust.newModel(("ust/paving/%s/tram_paving_tl.mdl"):format(prefix), tag, fitModels.tram(centre, true)));
+                    insert(result.models, ust.newModel(("ust/paving/%s/tram_paving_br.mdl"):format(prefix), tag, fitModels.tram(centre, false)));
+                end
+            end)
+        end
+    end
+    
+    local n = 4
+    
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    
+    
+    for i = 1, n do
+        local sup = i + 1
+        local inf = i
+        local centre = {
+            lt = leftPts[sup],
+            rt = rightPts[sup],
+            lb = leftPts[inf],
+            rb = rightPts[inf],
+        }
+        
+        insert(result.models, ust.newModel(("ust/paving/%s/paving_tl.mdl"):format(prefix), tag, fitModels.paving(centre, true)));
+        insert(result.models, ust.newModel(("ust/paving/%s/paving_br.mdl"):format(prefix), tag, fitModels.paving(centre, false)));
+    end
+    
+    if (info.octa[1] and params.modules[info.octa[1]].metadata.isStreet) then
+        insert(result.invokeLater, function()
+            local indexL = params.edgeIndex[slotId]
+            local indexR = params.edgeIndex[info.octa[1]]
+            local edgesL = result.edgeLists[indexL[3]]
+            local edgesR = result.edgeLists[indexR[1]]
+            local nodeL = edgesL.edges[indexL[4]]
+            local nodeR = edgesR.edges[indexR[2]]
+            local ptL = coor.tuple2Vec(nodeL[1])
+            local ptR = coor.tuple2Vec(nodeR[1])
+            local pt = ptL:avg(ptR):toTuple()
+            result.edgeLists[indexL[3]].edges[indexL[4]][1] = pt
+            result.edgeLists[indexR[1]].edges[indexR[2]][1] = pt
+        end)
+    end
+    
+    local face = pipe.new + leftPts + func.rev(rightPts)
+    ust.initTerrainList(result, info.id)
+    result.groundFaceLists[info.id] = {
+        face = func.map(face, coor.vec2Tuple),
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    }
+    
+    if params.debug == 1 then
+        local text = tostring(info.id)
+        local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        
+        local addText = function(label, fAlign, h)
+            local nameModelsF, width = livetext(h or 2)(label)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        addText(text, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        
+        ust.marking(result, slotId, params)
+    end
+end
+
 function data()
     return {
         preProcessAdd = preProcessAdd,
@@ -254,7 +489,8 @@ function data()
         getModelsFn = function(params)
             return {}
         end,
-        gridization = gridization
+        gridization = gridization,
+        updateFn = updateFn
     }
 
 end

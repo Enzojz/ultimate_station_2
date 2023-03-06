@@ -15,15 +15,15 @@ Features:
 - Flexible overpass
 - Flexible underpass
 - Retaining wall and fences
+- Adjustable height for retaining walls
+- Tram and bus lanes
 
 The mod is not complete yet, but I release because it's in minimal usable state and the future evolution will not bother existing construction
 Evoltion to come
-- Adjustable height for retaining walls
 - Adjustable slope for each track and platform
 - Some extra components for tunnel station construction
 - Some extra components such as underpass entry
 - 1850 and 1920 era components
-- Tram and bus lanes
 
 The main disadvtange of this mod is that it is not compatible with none of module which is designed for vanilla modular construction, since they work differently. If you are an modder, you are welcomed to ask about implemention details.
 
@@ -40,25 +40,25 @@ La raison principale qui m'a pris autant de temps pour le finir, c'est tous les 
 
 Fonctionnalités :
 
-Rayons ajustables pour chaque segment de voie
-Hauteur ajustable pour chaque voie et plateforme
-Largeur ajustable pour chaque plateforme
-Voie ou plateforme sur pont
-Voie ou plateforme dans tunnel
-Passage surélevé flexible
-Passage souterrain flexible
-Mur de soutènement et clôtures
+- Rayons ajustables pour chaque segment de voie
+- Hauteur ajustable pour chaque voie et plateforme
+- Largeur ajustable pour chaque plateforme
+- Voie ou plateforme sur pont
+- Voie ou plateforme dans tunnel
+- Passage surélevé flexible
+- Passage souterrain flexible
+- Mur de soutènement et clôtures
+- Hauteur ajustable pour les murs de soutènement
+- Voies de tramway et d'autobus
 
 Le mod n'est pas encore complet, mais je le publie car il est dans un état minimal utilisable et l'évolution future ne dérangera pas les constructions existantes.
 
 Évolution à venir :
 
-Hauteur ajustable pour les murs de soutènement
-Pente ajustable pour chaque voie et plateforme
-Quelques composants supplémentaires pour la construction de gare de tunnel
-Quelques composants supplémentaires tels que l'entrée de passage inférieur
-Composants de l'ère 1850 et 1920
-Voies de tramway et d'autobus
+- Pente ajustable pour chaque voie et plateforme
+- Quelques composants supplémentaires pour la construction de gare de tunnel
+- Quelques composants supplémentaires tels que l'entrée de passage inférieur
+- Composants de l'ère 1850 et 1920
 
 Inconvénient majeur de ce mod : il n'est pas compatible avec aucun mod conçu pour la construction modulaire original, car ils fonctionnent différemment. Si vous êtes un moddeur, vous êtes invité à demander des détails sur l'adaptation.
 
@@ -83,15 +83,15 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 - 灵活自由的天桥
 - 灵活自由的地道
 - 自带挡土墙和围栏
+- 可以调整的挡土墙高度
+- 有轨电车和巴士道
 
 本模组没有完成全部功能，但是以现在的状态发布并不会影响新功能的加入
 以下是计划中的新功能
-- 可以调整的挡土墙高度
 - 可以调整的站台或股道坡度
 - 一些用于半地下站台和股道的组件
 - 一些配合地道使用的组件
 - 1850和1920年组件
-- 有轨电车和巴士道
 
 该模组的主要缺点是无法直接使用为现有原生模块化车站开发的模组，因为本模组在技术实现上与之不同。如果你对于将其他模组内容进行适配的工作感兴趣的话，可以和我联系，我会提供一些实现细节上的帮助。
 
@@ -116,15 +116,15 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 - 靈活自由的天橋
 - 靈活自由的地道
 - 自帶擋土牆和圍欄
+- 可以調整的擋土牆高度
+- 有軌電車和巴士道
 
 本模組沒有完成全部功能，但是以現在的狀態發佈並不會影響新功能的加入
 以下是計畫中的新功能
-- 可以調整的擋土牆高度
 - 可以調整的月臺或股道坡度
 - 一些用於半地下月臺和股道的組件
 - 一些配合地道使用的元件
 - 1850和1920年組件
-- 有軌電車和巴士道
 
 該模組的主要缺點是無法直接使用為現有原生模組化車站開發的模組，因為本模組在技術實現上與之不同。如果你對於將其他模組內容進行適配的工作感興趣的話，可以和我聯繫，我會提供一些實現細節上的幫助。
 
@@ -174,11 +174,11 @@ function data()
             MENU_MODULE_FENCE = "Green platform fences",
             MENU_MODULE_FENCE_DESC = "Some green platform fences",
             MENU_MODULE_MAIN_ENTRY_10 = "Small Station main entry",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "Station main entry of 10m wide.",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Station main entry of 10m wide, provide capacity of 30 of passengers to the station.",
             MENU_MODULE_MAIN_ENTRY_20 = "Midlle Station main entry",
-            MENU_MODULE_MAIN_ENTRY_20_DESC = "Station main entry of 20m wide.",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "Station main entry of 20m wide, provide capacity of 50 of passengers to the station.",
             MENU_MODULE_MAIN_ENTRY_40 = "Large Station main entry",
-            MENU_MODULE_MAIN_ENTRY_40_DESC = "Station main entry of 40m wide.",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "Station main entry of 40m wide, provide capacity of 200 of passengers to the station.",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "Platform overpass",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Place a platform overpass node.",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "Step access to platform overpass",
@@ -226,10 +226,13 @@ function data()
             MENU_MODULE_VOID_TUNNEL = "Tunnel without portal",
             MENU_OVERLAP_MODIFIER = "Overlapping modifier",
             MENU_OVERLAP_MODIFIER_DESC = "Makes platform and track closer",
+            UST_CAT_STREET = "Streets",
             MENU_MODULE_TRAM = "Tram switch",
             MENU_MODULE_TRAM_DESC = "Set or unset tram track on street",
             MENU_MODULE_STREET_BRICK = "Bricked street",
-            MENU_MODULE_STREET_BRICK_DESC = "Set a route/tram terminal in the station"
+            MENU_MODULE_STREET_BRICK_DESC = "Set a route/tram terminal in the station",
+            MENU_MODULE_STREET_ASPHALT = "Bricked street",
+            MENU_MODULE_STREET_ASPHALT_DESC = "Set a route/tram terminal in the station"
         },
         zh_CN = {
             MOD_NAME = "终极车站",
