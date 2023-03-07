@@ -56,7 +56,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             local dw = coor.xyz(i * 0.1, 0, 0)
             insert(result.slots, {
                 id = makeData(94, ((info.leftOverlap or 0) * 10 + i)),
-                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(-dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(leftPts[7]),
+                transf = coor.scale(coor.xyz(0.05, 0.25, 1)) * coor.trans(-dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(leftPts[7]),
                 type = "ust_overlap_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
@@ -64,7 +64,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             insert(result.slots, {
                 id = makeData(94, (info.rightOverlap or 0) * 10 + i + 40),
-                transf = coor.scale(coor.xyz(0.025, 1.2, 1)) * coor.trans(dw) * coor.transY(i % 2 == 1 and -0.3 or 0.3) * rotZ * coor.trans(rightPts[7]),
+                transf = coor.scale(coor.xyz(0.05, 0.25, 1)) * coor.trans(dw) * coor.transY(i % 2 == 0 and -0.3 or 0.3) * rotZ * coor.trans(rightPts[7]),
                 type = "ust_overlap_modifier",
                 shape = 0,
                 spacing = {0, 0, 0, 0}
@@ -72,10 +72,10 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             
             if i % 2 == 1 then
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[6] - (dw .. rotZ), function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[6] + (dw .. rotZ), function(w) return coor.transZ(-0.075) * coor.rotY90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[8] + (dw .. rotZ), function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY90P * coor.transX(0.1) end, 0.25)
             else
                 addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[8] - (dw .. rotZ), function(w) return coor.transZ(-0.075) * coor.rotY90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[8] + (dw .. rotZ), function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.rotY90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[6] + (dw .. rotZ), function(w) return coor.transZ(-0.075) * coor.rotY90P * coor.transX(0.1) end, 0.25)
             end
         end
     end

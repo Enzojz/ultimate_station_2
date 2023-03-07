@@ -126,11 +126,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             })
             
             if i % 2 == 1 then
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1) * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1)  * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1) * coor.rotZ90N end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90P end, 0.25)
             else
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90N * coor.transX(-0.1) end, 0.25)
-                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90P * coor.transX(0.1) end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), leftPts[9] + dz, function(w) return coor.trans(coor.xyz(-w, 0, -0.075)) * coor.transX(-1)  * coor.rotZ90N end, 0.25)
+                addText((i > 0 and "+%.1fm" or "%.1fm"):format(i * 0.1), rightPts[5] + dz, function(w) return coor.trans(coor.xyz(0, 0, -0.075)) * coor.transX(1)  * coor.rotZ90P end, 0.25)
             end
         end
     end

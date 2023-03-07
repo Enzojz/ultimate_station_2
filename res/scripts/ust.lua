@@ -140,7 +140,7 @@ ust.slotInfo = function(slotId)
             slotIdAbs = floor(slotIdAbs + 0.5)
         end
         local type = slotIdAbs % 100
-        local id = (slotIdAbs - type) / 100 % 1000
+        local id = floor(slotIdAbs / 100) % 1000
         local data = slotId > 0 and floor(slotIdAbs / 1000000) or -floor(slotIdAbs / 1000000)
         
         return type, id, data
