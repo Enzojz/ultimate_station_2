@@ -96,7 +96,20 @@ The expansion button is to expand the current target height to the whole platfor
 
 The width modifier works almost in the same way as height modifier, but the width always expands to the whole platform.
 
+The platform capcity is will be increased or reduced with the change of platform width.
+
 ![image](./image/2_6.jpg)
+
+### 2.7 Overlap modifier
+If you think the gap between the track and platform is too far or too close, you can use an overlaper modifier to change the gap.
+
+![image](./image/2_7.jpg)
+
+### 2.8 Wall height modifier
+The height of walls in the station can be adjusted, unless it's next to a platform or track higher than it.
+Use the wall height modifier to adjust the wall heights.
+
+![image](./image/2_8.jpg)
 
 ## 3 Functional modules
 ### 3.1 Remove helper
@@ -129,11 +142,23 @@ The open-cut make a hole above platform and track, it's useful when there are re
 ### 3.4 Color modifiers
 
 ![image](./image/3_4_1.jpg)
-You can change color of some components, for example fences, by color modifiers.
+
+íYou can change color of some components, for example fences, by color modifiers.
 These modifiers are only visible after applicable module are added to the station.
 Drop the color to the slot to change the color.
 
 ![image](./image/3_4_2.jpg)
+
+### 3.5 Overpass
+
+You can build overpass between platforms. All overpass at same row will be connected together.
+
+![image](./image/3_5_1.jpg)
+
+The height of the overpass is 6.5m above the highest rail crossed by the overpass, or the height of heightest platform if this platform is 6.5m higher than any rail.
+In case the overpass is at the high of highest platform, it will be a side access to the platform.
+
+![image](./image/3_5_2.jpg)
 
 ## Recommandations
 * As in February 2023, it's recommanded to use the mod with beta version of the game rather than release version. The reason is that in the release version, there's a vertical offset between defined slot position and rendered slot, this offset may make trouble using modifiers.
