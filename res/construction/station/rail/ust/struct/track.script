@@ -168,7 +168,6 @@ local slotSetup = function(params, result, slotId)
             spacing = {0, 0, 0, 0}
         }
     )
-    
     insert(
         result.slots,
         {
@@ -185,6 +184,15 @@ local slotSetup = function(params, result, slotId)
                 id = makeData(2, -1),
                 transf = info.transf,
                 type = "ust_platform",
+                spacing = {0, 0, 0, 0}
+            }
+        )
+        insert(
+            result.slots,
+            {
+                id = makeData(3, -1),
+                transf = info.transf,
+                type = "ust_placeholder",
                 spacing = {0, 0, 0, 0}
             }
     )
