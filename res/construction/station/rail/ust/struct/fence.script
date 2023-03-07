@@ -187,7 +187,9 @@ local preProcessRemove = function(modules, change, classedModules, info)
 end
 
 local preProcessRemoveWall = function(modules, change, classedModules, info)
+    local type, id = ust.slotInfo(change.slotId)
     modules[change.slotId] = nil
+    
     if modules[change.slotId + ust.mixData(0, 22)] then
         modules[change.slotId + ust.mixData(0, 22)] = nil
     end
@@ -199,6 +201,19 @@ local preProcessRemoveWall = function(modules, change, classedModules, info)
     end
     if modules[change.slotId + ust.mixData(0, 28)] then
         modules[change.slotId + ust.mixData(0, 28)] = nil
+    end
+    
+    if modules[ust.mixData(ust.base(id, 89), 3)] then
+        modules[ust.mixData(ust.base(id, 89), 3)] = nil
+    end
+    if modules[ust.mixData(ust.base(id, 89), 7)] then
+        modules[ust.mixData(ust.base(id, 89), 7)] = nil
+    end
+    if modules[ust.mixData(ust.base(id, 89), 1)] then
+        modules[ust.mixData(ust.base(id, 89), 1)] = nil
+    end
+    if modules[ust.mixData(ust.base(id, 89), 5)] then
+        modules[ust.mixData(ust.base(id, 89), 5)] = nil
     end
 end
 
