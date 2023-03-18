@@ -532,7 +532,6 @@ ust.initTerrainList = function(result, id)
 end
 
 local function searchTerminalGroups(params, fn)
-    local nbGroup = #params.trackGroup
     local modules = pipe.new
         * func.keys(params.classedModules)
         * pipe.map(function(id) return params.classedModules[id].slotId end)
@@ -542,48 +541,58 @@ local function searchTerminalGroups(params, fn)
     local sortedModules = modules
         * pipe.sort(function(lhs, rhs) return (lhs.info.pos.x == rhs.info.pos.x) and (lhs.info.pos.y < rhs.info.pos.y) or (lhs.info.pos.x < rhs.info.pos.x) end)
     
+    local passengerTerminals = {}
+    local cargoTerminals = {}
+
     for _, m in ipairs(sortedModules) do
         if not m.info.trackGroup then
-            local groupsLeft = {{}}
-            local groupsRight = {{}}
+            local pLeft = {{}}
+            local pRight = {{}}
+            local cLeft = {{}}
+            local cRight = {{}}
             
-            repeat
-                if not m.info.trackGroup then
-                    m.info.trackGroup = {}
-                end
-                do
-                    local mocta = m.info.octa[7] and params.modules[m.info.octa[7]] or nil
-                    if mocta and mocta.metadata.isPlatform and
-                        (mocta.info.ref.right
-                        or m.info.ref.left
-                        or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
-                        or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.right.o - m.info.arcs.left.o):withZ(0):length2() < 1e-4))
-                    then
-                        insert(groupsLeft[#groupsLeft], m.info.slotId)
-                    elseif #groupsLeft[#groupsLeft] > 0 then
-                        insert(groupsLeft, {})
+            local searchGroup = function(m, groupsLeft, groupsRight, fn2)
+                repeat
+                    if not m.info.trackGroup then
+                        m.info.trackGroup = {}
                     end
-                end
-                
-                do
-                    local mocta = m.info.octa[3] and params.modules[m.info.octa[3]] or nil
-                    if mocta and mocta.metadata.isPlatform and
-                        (mocta.info.ref.left
-                        or m.info.ref.right
-                        or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
-                        or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.left.o - m.info.arcs.right.o):withZ(0):length2() < 1e-4))
-                    then
-                        insert(groupsRight[#groupsRight], m.info.slotId)
-                    elseif #groupsRight[#groupsRight] > 0 then
-                        insert(groupsRight, {})
+                    do
+                        local mocta = m.info.octa[7] and params.modules[m.info.octa[7]] or nil
+                        if mocta and mocta.metadata.isPlatform and fn2(mocta)and
+                            (mocta.info.ref.right
+                            or m.info.ref.left
+                            or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
+                            or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.right.o - m.info.arcs.left.o):withZ(0):length2() < 1e-4))
+                        then
+                            insert(groupsLeft[#groupsLeft], m.info.slotId)
+                        elseif #groupsLeft[#groupsLeft] > 0 then
+                            insert(groupsLeft, {})
+                        end
                     end
-                end
-                
-                m = params.modules[m.info.octa[1]]
-            until not m or not fn(m)
+                    
+                    do
+                        local mocta = m.info.octa[3] and params.modules[m.info.octa[3]] or nil
+                        if mocta and mocta.metadata.isPlatform and fn2(mocta) and
+                            (mocta.info.ref.left
+                            or m.info.ref.right
+                            or (mocta.info.radius >= ust.infi and m.info.radius >= ust.infi)
+                            or (abs(mocta.info.radius / m.info.radius - 1) < 1e4 and (mocta.info.arcs.left.o - m.info.arcs.right.o):withZ(0):length2() < 1e-4))
+                        then
+                            insert(groupsRight[#groupsRight], m.info.slotId)
+                        elseif #groupsRight[#groupsRight] > 0 then
+                            insert(groupsRight, {})
+                        end
+                    end
+                    
+                    m = params.modules[m.info.octa[1]]
+                until not m or not fn(m)
+            end
+            searchGroup(m, pLeft, pRight, function(m) return not m.metadata.isCargo end)
+            searchGroup(m, cLeft, cRight, function(m) return m.metadata.isCargo end)
             
-            for _, groupLeft in ipairs(groupsLeft) do
+            for _, groupLeft in ipairs(pLeft) do
                 if (#groupLeft > 0) then
+                    insert(passengerTerminals, #params.trackGroup)
                     insert(params.trackGroup, groupLeft)
                     for pos, slotId in ipairs(groupLeft) do
                         params.modules[slotId].info.trackGroup.left = #params.trackGroup
@@ -592,8 +601,31 @@ local function searchTerminalGroups(params, fn)
                 end
             end
             
-            for _, groupRight in ipairs(groupsRight) do
+            for _, groupRight in ipairs(pRight) do
                 if (#groupRight > 0) then
+                    insert(passengerTerminals, #params.trackGroup)
+                    insert(params.trackGroup, groupRight)
+                    for pos, slotId in ipairs(groupRight) do
+                        params.modules[slotId].info.trackGroup.right = #params.trackGroup
+                        params.modules[slotId].info.trackGroup.rightPos = pos
+                    end
+                end
+            end
+            
+            for _, groupLeft in ipairs(cLeft) do
+                if (#groupLeft > 0) then
+                    insert(cargoTerminals, #params.trackGroup)
+                    insert(params.trackGroup, groupLeft)
+                    for pos, slotId in ipairs(groupLeft) do
+                        params.modules[slotId].info.trackGroup.left = #params.trackGroup
+                        params.modules[slotId].info.trackGroup.leftPos = pos
+                    end
+                end
+            end
+            
+            for _, groupRight in ipairs(cRight) do
+                if (#groupRight > 0) then
+                    insert(cargoTerminals, #params.trackGroup)
                     insert(params.trackGroup, groupRight)
                     for pos, slotId in ipairs(groupRight) do
                         params.modules[slotId].info.trackGroup.right = #params.trackGroup
@@ -603,26 +635,38 @@ local function searchTerminalGroups(params, fn)
             end
         end
     end
-    return nbGroup, #params.trackGroup
+    return passengerTerminals, cargoTerminals
 end
 
 local searchTrackTerminals = function(params, result)
-    local f, t = searchTerminalGroups(params, function(m) return m.metadata.isTrack end)
-    if t > f then
+    local p, c = searchTerminalGroups(params, function(m) return m.metadata.isTrack end)
+    if #p > 0 then
         insert(result.stations, {
-            terminals = func.seq(f, t - 1),
+            terminals = p,
             tag = 1
+        })
+    end
+    if #c > 0 then
+        insert(result.stations, {
+            terminals = c,
+            tag = 3
         })
     end
 end
 
 
 local searchStreetTerminals = function(params, result)
-    local f, t = searchTerminalGroups(params, function(m) return m.metadata.isStreet end)
-    if t > f then
+    local p, c = searchTerminalGroups(params, function(m) return m.metadata.isStreet end)
+    if #p > 0 then
         insert(result.stations, {
-            terminals = func.seq(f, t - 1),
-            tag = 2
+            terminals = p,
+            tag = 1
+        })
+    end
+    if #c > 0 then
+        insert(result.stations, {
+            terminals = c,
+            tag = 3
         })
     end
 end

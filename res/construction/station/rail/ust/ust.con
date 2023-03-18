@@ -103,6 +103,82 @@ local constructionTemplates = {
                 }
             }
         },
+    },
+    {
+        constructionType = "RAIL_STATION_CARGO",
+        type = "DYNAMIC",
+        availability = {
+            yearFrom = 0,
+            yearTo = 0
+        },
+        description = {
+            name = _("MENU_NAME"),
+            description = _("MENU_DESC"),
+            icon = "ui/construction/station/rail/ust/era_c.tga"
+        },
+        data = {
+            params = {
+                {
+                    key = "trackType",
+                    name = _("MENU_TRACK_TYPE"),
+                    uiType = "COMBOBOX",
+                    values = {_("Standard"), _("High-Speed")},
+                    defaultIndex = 0
+                },
+                {
+                    key = "catenary",
+                    name = _("MENU_TRACK_CAT"),
+                    values = {_("YES"), _("NO")},
+                    defaultIndex = 0
+                },
+                {
+                    key = "trackNb",
+                    name = _("MENU_TRACK_NR"),
+                    values = func.map(trackNumberList, tostring),
+                    uiType = "SLIDER",
+                    defaultIndex = 1
+                },
+                {
+                    key = "lPlatform",
+                    name = _("MENU_PLATFORM_LENGTH"),
+                    values = func.map(trackLengths, tostring),
+                    uiType = "SLIDER",
+                    defaultIndex = 5
+                },
+                {
+                    key = "platformWidth",
+                    name = _("MENU_PLATFORM_WIDTH"),
+                    values = {"5", "10", "15", "20"},
+                    defaultIndex = 1
+                },
+                {
+                    key = "radius",
+                    name = _("MENU_RADIUS"),
+                    values = rList * pipe.map(function(r) return r > 15 and "∞" or tostring(math.floor(r * 1000)) end),
+                    uiType = "SLIDER",
+                    defaultIndex = (#rList - 1) / 2
+                },
+                {
+                    key = "hPlatform",
+                    name = _("MENU_PLATFORM_HEIGHT"),
+                    values = func.map(hPlatformList, tostring),
+                    uiType = "SLIDER",
+                    defaultIndex = 3
+                },
+                {
+                    key = "platformLeft",
+                    name = _("MENU_PLATFORM_LEFT"),
+                    values = {_("YES"), _("NO")},
+                    defaultIndex = 0
+                },
+                {
+                    key = "platformRight",
+                    name = _("MENU_PLATFORM_RIGHT"),
+                    values = {_("YES"), _("AUTO")},
+                    defaultIndex = 2
+                }
+            }
+        },
     }
 }
 
@@ -347,7 +423,7 @@ local updateFn = function(params, closureParams)
     params.extra = {}
     
     ust.searchTerminalGroups(params, result)
-
+    
     -- slotSetup adds slots for modules itself
     for slotId, module in pairs(params.modules) do
         if module.metadata.slotSetup then

@@ -1,0 +1,472 @@
+local func = require "ust/func"
+local coor = require "ust/coor"
+local pipe = require "ust/pipe"
+local ust = require "ust"
+local quat = require "ust/quaternion"
+local livetext = require "ust/livetext"
+
+local insert = table.insert
+
+local ma = math
+local pi = ma.pi
+local abs = ma.abs
+
+local fitModels = {
+    surface = ust.fitModel(4.4, 5, -2, true, true),
+    edge = ust.fitModel(0.3, 5, -2, true, true),
+}
+
+-- e : extremity
+-- i : intermediate
+-- t : terminal side
+-- x : cross section
+local fitMdl = {
+    ["xe_ye_left"] = fitModels.edge,
+    ["xe_ye_right"] = fitModels.edge,
+    ["xe_yi_left"] = fitModels.edge,
+    ["xe_yi_right"] = fitModels.edge,
+    ["xi_ye_left"] = fitModels.edge,
+    ["xi_ye_left_t"] = fitModels.edge,
+    ["xi_ye_right"] = fitModels.edge,
+    ["xi_ye_right_t"] = fitModels.edge,
+    ["xi_yi_left"] = fitModels.edge,
+    ["xi_yi_left_x"] = fitModels.edge,
+    ["xi_yi_right"] = fitModels.edge,
+    ["xi_yi_right_x"] = fitModels.edge,
+    ["ye_centre"] = fitModels.surface,
+    ["ye_centre_t"] = fitModels.surface,
+    ["yi_centre"] = fitModels.surface,
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local info = params.modules[slotId].info
+    local isTrack = {}
+    local isPlatform = {}
+    local octaModules = {}
+    for i = 1, 8 do
+        if info.octa[i] then
+            octaModules[i] = info.octa[i] and params.modules[info.octa[i]]
+            isTrack[i] = octaModules[i].metadata and (octaModules[i].metadata.isTrack or octaModules[i].metadata.isStreet) or false
+            isPlatform[i] = octaModules[i].metadata and octaModules[i].metadata.isPlatform or false
+        else
+            octaModules[i] = false
+            isTrack[i] = false
+            isPlatform[i] = false
+        end
+    end
+    
+    local leftConnected = isPlatform[7] and (octaModules[7].info.ref.right or info.ref.left) and octaModules[7].info.height == info.height
+    local rightConnected = isPlatform[3] and (octaModules[3].info.ref.left or info.ref.right) and octaModules[3].info.height == info.height
+    
+    local leftOverlap = isPlatform[7] and 0 or (info.leftOverlap or 0)
+    local rightOverlap = isPlatform[3] and 0 or (info.rightOverlap or 0)
+    
+    local n = 4
+    
+    local leftPts = ust.basePts(info.arcs.left, n)
+    local rightPts = ust.basePts(info.arcs.right, n)
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, n)
+    
+    local leftEdge = {}
+    local rightEdge = {}
+    local leftCentre = {}
+    local rightCentre = {}
+    local leftLaneBorder = {}
+    local rightLaneBorder = {}
+    local leftLane = {}
+    local rightLane = {}
+    local leftInterPts = {}
+    local rightInterPts = {}
+    local centerLane = {}
+    
+    for i = 1, n + 1 do
+        local vec = (leftPts[i] - rightPts[i]):normalized()
+        leftEdge[i] = leftPts[i] + vec * leftOverlap
+        rightEdge[i] = rightPts[i] - vec * rightOverlap
+        leftCentre[i] = leftPts[i] + vec * leftOverlap - vec * 0.3
+        rightCentre[i] = rightPts[i] - vec * rightOverlap + vec * 0.3
+        
+        leftLaneBorder[i] = leftPts[i]
+        rightLaneBorder[i] = rightPts[i]
+        
+        local vec = (leftLaneBorder[i] - rightLaneBorder[i]):normalized()
+        
+        leftLane[i] = leftLaneBorder[i] - vec * 1.2
+        rightLane[i] = rightLaneBorder[i] + vec * 1.2
+        centerLane[i] = centerPts[i]
+    end
+    
+    params.extra[slotId] = {
+        leftLane = leftLane,
+        rightLane = rightLane
+    }
+    
+    if not isPlatform[1] then
+        leftLaneBorder[n + 1] = leftLaneBorder[n + 1] + (leftLaneBorder[n] - leftLaneBorder[n + 1]):normalized()
+        rightLaneBorder[n + 1] = rightLaneBorder[n + 1] + (rightLaneBorder[n] - rightLaneBorder[n + 1]):normalized()
+        leftLane[n + 1] = leftLane[n + 1] + (leftLane[n] - leftLane[n + 1]):normalized()
+        rightLane[n + 1] = rightLane[n + 1] + (rightLane[n] - rightLane[n + 1]):normalized()
+        centerLane[n + 1] = centerLane[n + 1] + (centerLane[n] - centerLane[n + 1]):normalized()
+    end
+    
+    if not isPlatform[5] then
+        leftLaneBorder[1] = leftLaneBorder[1] + (leftLaneBorder[2] - leftLaneBorder[1]):normalized()
+        rightLaneBorder[1] = rightLaneBorder[1] + (rightLaneBorder[2] - rightLaneBorder[1]):normalized()
+        leftLane[1] = leftLane[1] + (leftLane[2] - leftLane[1]):normalized()
+        rightLane[1] = rightLane[1] + (rightLane[2] - rightLane[1]):normalized()
+        centerLane[1] = centerLane[1] + (centerLane[2] - centerLane[1]):normalized()
+    end
+    
+    for i = 1, n + 1 do
+        local interLength = (leftLane[i] - rightLane[i]):length() / 2
+        local interSegs = interLength < 2.5 and 1 or (math.floor(interLength / 2.5) + 1)
+        local leftInterVec = (centerLane[i] - leftLane[i]) / interSegs
+        local rightInterVec = (centerLane[i] - rightLane[i]) / interSegs
+        leftInterPts[i] = func.seqMap({0, interSegs}, function(n) return leftLane[i] + leftInterVec * n end)
+        rightInterPts[i] = func.seqMap({0, interSegs}, function(n) return rightLane[i] + rightInterVec * n end)
+    end
+    
+    for i = 1, n do
+        local sup = i + 1
+        local inf = i
+        
+        local isFirst = i == 1
+        local isLast = i == 4
+        
+        local centre = {
+            lt = leftCentre[sup],
+            rt = rightCentre[sup],
+            lb = leftCentre[inf],
+            rb = rightCentre[inf],
+        }
+        
+        local width_centre = abs((centre.lt:avg(centre.lb) - centre.rt:avg(centre.rb)):length())
+        local n_center = math.floor(width_centre / 3.3 + 0.75)
+        local vect = (centre.rt - centre.lt) / n_center
+        local vecb = (centre.rb - centre.lb) / n_center
+        local centres = func.map(
+            func.seq(1, n_center or 1),
+            function(n) return {
+                lt = centre.lt + vect * (n - 1),
+                rt = centre.lt + vect * n,
+                lb = centre.lb + vecb * (n - 1),
+                rb = centre.lb + vecb * n,
+            } end)
+        
+        local left = {
+            lt = leftEdge[sup],
+            rt = leftCentre[sup],
+            lb = leftEdge[inf],
+            rb = leftCentre[inf],
+        }
+        
+        local right = {
+            lt = rightCentre[sup],
+            rt = rightEdge[sup],
+            lb = rightCentre[inf],
+            rb = rightEdge[inf],
+        }
+        
+        
+        local addBlock = function(mdl, pos)
+            insert(result.models, ust.newModel("ust/platform/era_b/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_b/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false)));
+        end
+        local addLastBlock = function(mdl, pos)
+            insert(result.models, ust.newModel("ust/platform/era_b/" .. mdl .. "_br.mdl", tag, coor.rotZ(pi) * fitMdl[mdl](pos, true)));
+            insert(result.models, ust.newModel("ust/platform/era_b/" .. mdl .. "_tl.mdl", tag, coor.rotZ(pi) * fitMdl[mdl](pos, false)));
+        end
+        
+        if isLast then
+            if isTrack[1] then
+                func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
+            elseif not info.octa[1] then
+                if (leftConnected and isPlatform[8]) or (rightConnected and isPlatform[4]) then
+                    func.forEach(centres, function(centre)addLastBlock("ye_centre_t", centre) end)
+                else
+                    func.forEach(centres, function(centre)addLastBlock("ye_centre", centre) end)
+                end
+            else
+                func.forEach(centres, function(centre)addLastBlock("yi_centre", centre) end)
+            end
+        elseif isFirst then
+            if isTrack[5] then
+                func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
+            elseif not info.octa[5] then
+                if (isPlatform[4] and rightConnected) or (leftConnected and isPlatform[6]) then
+                    func.forEach(centres, function(centre)addBlock("ye_centre_t", centre) end)
+                else
+                    func.forEach(centres, function(centre)addBlock("ye_centre", centre) end)
+                end
+            else
+                func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
+            end
+        else
+            func.forEach(centres, function(centre)addBlock("yi_centre", centre) end)
+        end
+        
+        if leftConnected then
+            if isLast then
+                if isTrack[1] or (isPlatform[8] and not isPlatform[1]) then
+                    addLastBlock("xi_ye_right_t", left)
+                elseif not isPlatform[1] then
+                    addLastBlock("xi_ye_right", left)
+                elseif not isPlatform[8] and isPlatform[1] then
+                    addLastBlock("xi_yi_right_x", left)
+                else
+                    addLastBlock("xi_yi_right", left)
+                end
+            elseif isFirst then
+                if isTrack[5] or (isPlatform[6] and not isPlatform[5]) then
+                    addBlock("xi_ye_left_t", left)
+                elseif not isPlatform[5] then
+                    addBlock("xi_ye_left", left)
+                elseif not isPlatform[6] and isPlatform[5] then
+                    addBlock("xi_yi_left_x", left)
+                else
+                    addBlock("xi_yi_left", left)
+                end
+            else
+                addBlock("xi_yi_left", left)
+            end
+        else
+            if isLast and not isPlatform[1] then
+                addLastBlock("xe_ye_right", left)
+            elseif isFirst and not isPlatform[5] then
+                addBlock("xe_ye_left", left)
+            else
+                addBlock("xe_yi_left", left)
+            end
+        end
+        
+        if rightConnected then
+            if isLast then
+                if isTrack[1] or (isPlatform[2] and not isPlatform[1]) then
+                    addLastBlock("xi_ye_left_t", right)
+                elseif not isPlatform[1] then
+                    addLastBlock("xi_ye_left", right)
+                elseif not isPlatform[2] and isPlatform[1] then
+                    addLastBlock("xi_yi_left_x", right)
+                else
+                    addLastBlock("xi_yi_left", right)
+                end
+            elseif isFirst then
+                if isTrack[5] or (isPlatform[4] and not isPlatform[5]) then
+                    addBlock("xi_ye_right_t", right)
+                elseif not isPlatform[5] then
+                    addBlock("xi_ye_right", right)
+                elseif not isPlatform[4] and isPlatform[5] then
+                    addBlock("xi_yi_right_x", right)
+                else
+                    addBlock("xi_yi_right", right)
+                end
+            else
+                addBlock("xi_yi_right", right)
+            end
+        else
+            if isLast and not isPlatform[1] then
+                addLastBlock("xe_ye_left", right)
+            elseif isFirst and not isPlatform[5] then
+                addBlock("xe_ye_right", right)
+            else
+                addBlock("xe_yi_right", right)
+            end
+        end
+        
+        local isLeftTerminal = isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right
+        local isRightTerminal = isTrack[3] and octaModules[3].info.trackGroup and octaModules[3].info.trackGroup.left
+        
+        local addLeftTerminals = isLeftTerminal and function(f, t)
+            local trackGroup = octaModules[7].info.trackGroup.right
+            insert(result.models, ust.unitLane(f, t, tag, "ust/cargo_lane.mdl"))
+            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
+            insert(params.platformGroup[trackGroup].models, #result.models - 1)
+        end or function(f, t)
+            insert(result.models, ust.unitLane(f, t, tag))
+        end
+        
+        local addRightTerminals = isRightTerminal and function(f, t)
+            local trackGroup = octaModules[3].info.trackGroup.left
+            insert(result.models, ust.unitLane(f, t, tag, "ust/cargo_lane.mdl"))
+            
+            if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, right = true} end
+            insert(params.platformGroup[trackGroup].models, #result.models - 1)
+        end or function(f, t)
+            insert(result.models, ust.unitLane(f, t, tag))
+        end
+        
+        
+        addLeftTerminals(leftLane[inf], leftLane[sup])
+        if leftConnected then
+            insert(result.models, ust.unitLane(leftLane[inf], leftLaneBorder[inf], tag))
+            if isLast and not isPlatform[1] then
+                insert(result.models, ust.unitLane(leftLane[sup], leftLaneBorder[sup], tag))
+            end
+        end
+        
+        addRightTerminals(rightLane[sup], rightLane[inf])
+        if rightConnected then
+            insert(result.models, ust.unitLane(rightLane[inf], rightLaneBorder[inf], tag))
+            if isLast and not isPlatform[1] then
+                insert(result.models, ust.unitLane(rightLane[sup], rightLaneBorder[sup], tag))
+            end
+        end
+        
+        for n = 1, #leftInterPts[inf] - 1 do
+            insert(result.models, ust.unitLane(leftInterPts[inf][n], leftInterPts[inf][n + 1], tag))
+        end
+        for n = 1, #rightInterPts[inf] - 1 do
+            insert(result.models, ust.unitLane(rightInterPts[inf][n], rightInterPts[inf][n + 1], tag))
+        end
+        
+        -- intermediate lanes
+        if #leftInterPts[inf] == #leftInterPts[sup] then
+            for n = 2, #leftInterPts[inf] - 1 do
+                addLeftTerminals(leftInterPts[inf][n], leftInterPts[sup][n])
+            end
+        else
+            local short = leftInterPts[#leftInterPts[inf] < #leftInterPts[sup] and inf or sup]
+            local long = leftInterPts[#leftInterPts[inf] > #leftInterPts[sup] and inf or sup]
+            
+            for n = 2, #long - 1 do
+                local vec = func.min(func.map(short, function(pt) return pt - long[n] end), function(lhs, rhs) return lhs:length2() < rhs:length2() end)
+                addLeftTerminals(leftInterPts[inf][n], leftInterPts[sup][n])
+            end
+        end
+        
+        if #rightInterPts[inf] == #rightInterPts[sup] then
+            for n = 2, #rightInterPts[inf] - 1 do
+                addRightTerminals(rightInterPts[sup][n], rightInterPts[inf][n])
+            end
+        else
+            local short = rightInterPts[#rightInterPts[inf] < #rightInterPts[sup] and inf or sup]
+            local long = rightInterPts[#rightInterPts[inf] > #rightInterPts[sup] and inf or sup]
+            
+            for n = 2, #long - 1 do
+                local vec = func.min(func.map(short, function(pt) return pt - long[n] end), function(lhs, rhs) return lhs:length2() < rhs:length2() end)
+                addRightTerminals(long[n] + vec, long[n])
+                if (isTrack[7] and octaModules[7].info.trackGroup and octaModules[7].info.trackGroup.right) then
+                    local trackGroup = octaModules[7].info.trackGroup.right
+                    if not params.platformGroup[trackGroup] then params.platformGroup[trackGroup] = {models = {}, left = true} end
+                    insert(params.platformGroup[trackGroup].models, #result.models - 1)
+                end
+            end
+        end
+        
+        
+        if isFirst and not isPlatform[5] then
+            insert(result.models, ust.unitLane(centerLane[sup], centerLane[inf], tag))
+            
+            local vecLeft = (centerPts[inf] - leftPts[inf]) / (#leftInterPts[inf] - 1)
+            for n = 1, #leftInterPts[inf] do
+                insert(result.models, ust.unitLane(leftPts[inf] + vecLeft * (n - 1), leftInterPts[inf][n], tag))
+            end
+            
+            local vecRight = (centerPts[inf] - rightPts[inf]) / (#rightInterPts[inf] - 1)
+            for n = 1, #rightInterPts[inf] - 1 do
+                insert(result.models, ust.unitLane(rightPts[inf] + vecRight * (n - 1), rightInterPts[inf][n], tag))
+            end
+        end
+        if isLast and not isPlatform[1] then
+            insert(result.models, ust.unitLane(centerLane[sup], centerLane[inf], tag))
+            
+            local vecLeft = (centerPts[sup] - leftPts[sup]) / (#leftInterPts[sup] - 1)
+            for n = 1, #leftInterPts[sup] do
+                insert(result.models, ust.unitLane(leftPts[sup] + vecLeft * (n - 1), leftInterPts[sup][n], tag))
+            end
+            
+            local vecRight = (centerPts[sup] - rightPts[sup]) / (#rightInterPts[sup] - 1)
+            for n = 1, #rightInterPts[sup] - 1 do
+                insert(result.models, ust.unitLane(rightPts[sup] + vecRight * (n - 1), rightInterPts[sup][n], tag))
+            end
+            
+            for n = 1, #leftInterPts[sup] - 1 do
+                insert(result.models, ust.unitLane(leftInterPts[sup][n], leftInterPts[sup][n + 1], tag))
+            end
+            for n = 1, #rightInterPts[sup] - 1 do
+                insert(result.models, ust.unitLane(rightInterPts[sup][n], rightInterPts[sup][n + 1], tag))
+            end
+        end
+    end
+    
+    local face = pipe.new + leftEdge + func.rev(rightEdge)
+    
+    ust.initTerrainList(result, info.id)
+    
+    insert(result.terrainLists[info.id].equal, face * pipe.map(function(v) return v .. coor.transZ(-info.height + (info.extraHeight or 0)) end) * pipe.map(coor.vec2Tuple))
+    result.groundFaceLists[info.id] = {
+        face = func.map(face, coor.vec2Tuple),
+        modes = {
+            {
+                type = "FILL",
+                key = "shared/asphalt_01.gtex.lua"
+            },
+            {
+                type = "STROKE_OUTER",
+                key = "street_border.lua"
+            },
+        },
+    }
+    
+    if params.debug == 1 then
+        local text = tostring(info.id)
+        local pos = string.format("(%d, %d)", info.pos.x, info.pos.y)
+        
+        local addText = function(label, fAlign, h)
+            local nameModelsF, width = livetext(h or 2)(label)
+            for _, m in ipairs(nameModelsF(function() return coor.trans(fAlign(width)) * coor.rotX90N * info.transf end)) do
+                table.insert(result.models, m)
+            end
+        end
+        
+        addText(text, function(w) return coor.xyz(-0.5 * w, 0, 0) end)
+        addText(pos, function(w) return coor.xyz(-0.5 * w, 0, -2) end, 0.75)
+        
+        ust.marking(result, slotId, params)
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_CARGO"),
+            description = _("MENU_MODULE_PLATFORM_CARGO_DESC"),
+            icon = "ui/construction/station/rail/modular_station/platform_passenger_era_c.tga"
+        },
+        category = {
+            categories = {"ust_cat_platform"},
+        },
+        type = "ust_platform",
+        order = {
+            value = 3,
+        },
+        metadata = {
+            typeName = "ust_platform",
+            isPlatform = true,
+            isCargo = true,
+            typeId = 2,
+            width = 10,
+            scriptName = "construction/station/rail/ust/struct/platform",
+            preProcessAdd = "preProcessAdd",
+            preProcessRemove = "preProcessRemove",
+            slotSetup = "slotSetup",
+            preClassify = "preClassify",
+            postClassify = "postClassify",
+            gridization = "gridization"
+        },
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -9,6 +9,11 @@ rList = pipe.new * rList * pipe.map(pipe.neg()) * pipe.rev() / ust.infi + rList
 local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 600, 800, 1000}
 local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
+local templatePlatform = {
+    "station/rail/ust/era_c/platform.module",
+    "station/rail/ust/cargo/platform.module"
+}
+
 local createTemplateFn = function(params)
     local trackModule = params.capturedParams.trackModuleList[params.trackType + 1]
     local baseLength = trackLengths[params.lPlatform + 1]
@@ -71,7 +76,7 @@ local createTemplateFn = function(params)
                     info.radius = radius
                 end
                 local slotId, slotIds = ust.slotIds(info)
-                result[slotId] = "station/rail/ust/era_c/platform.module"
+                result[slotId] = templatePlatform[params.templateIndex + 1]
                 for m, slotIds in pairs(slotIds) do
                     for _, slotId in ipairs(slotIds) do
                         result[slotId] = string.format("station/rail/ust/data/%s.module", m)

@@ -1,24 +1,24 @@
 function data()
     return {
         boundingInfo = {
-            bbMax = { 1, 0.5, 0.5 },
-            bbMin = { 0, -0.5, -0.5 }
+            bbMax = {1, 0.5, 0.5},
+            bbMin = {0, -0.5, -0.5}
         },
         collider = {
             params = {
-                center = { 0.5, 0, 0 },
-                halfExtents = { 0.5, 0.5, 0.5 }
+                center = {0.5, 0, 0},
+                halfExtents = {0.5, 0.5, 0.5}
             },
             type = "BOX"
         },
         lods = {
             {
-                animations = {  },
-                events = {  },
+                animations = {},
+                events = {},
                 node = {
-                    children = {  },
+                    children = {},
                     name = "RootNode",
-                    transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }
+                    transf = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}
                 },
                 static = true,
                 visibleFrom = 0,
@@ -31,36 +31,36 @@ function data()
                     {
                         nodes = {
                             {
-                                { 0, 0, 0 },
-                                { 0.5, 0, 0 },
+                                {0, 0, 0},
+                                {0.5, 0, 0},
                                 2.4
                             },
                             {
-                                { 0.5, 0, 0 },
-                                { 0.5, 0, 0 },
+                                {0.5, 0, 0},
+                                {0.5, 0, 0},
                                 2.4
                             },
                             {
-                                { 0.5, 0, 0 },
-                                { 0.5, 0, 0 },
+                                {0.5, 0, 0},
+                                {0.5, 0, 0},
                                 2.4
                             },
                             {
-                                { 1, 0, 0 },
-                                { 0.5, 0, 0 },
+                                {1, 0, 0},
+                                {0.5, 0, 0},
                                 2.4
                             }
                         },
                         linkable = false,
                         speedLimit = 20,
-                        transportModes = { "PERSON" }
+                        transportModes = {"PERSON"}
                     }
                 },
-                runways = { },
+                runways = {},
                 terminals = {
                     {
-                        personEdges = { 0, 1 },
-                        personNodes = { 1 }
+                        personEdges = {0, 1},
+                        personNodes = {1}
                     }
                 }
             }

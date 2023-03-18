@@ -43,7 +43,7 @@ function data()
                         },
                         linkable = false,
                         speedLimit = 20,
-                        transportModes = {"PERSON"}
+                        transportModes = {"PERSON", "CARGO"}
                     }
                 },
                 runways = {},
