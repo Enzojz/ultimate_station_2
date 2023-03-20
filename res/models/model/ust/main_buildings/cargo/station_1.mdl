@@ -1,0 +1,181 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 2.450001, 0, 1.435998 },
+      bbMin = { -2.450001, -15, 0 }
+   },
+   collider = {
+      params = {
+         halfExtents = { 2.450001, 7.500000, 0.717999 }
+      },
+      transf = {
+         1, 0, 0, 0, 
+         0, 1, 0, 0, 
+         0, 0, 1, 0, 
+         0, 0, 0, 1, 
+      },
+      type = "BOX"
+   },
+   lods = {
+      {
+         node = {
+            children = {
+               {
+                  materials = { "station/rail/cargo/cargo_station_borders_2.mtl", "station/rail/cargo/cargo_station_windows_and_doors_2.mtl", "station/rail/cargo/cargo_station_borders_1.mtl", "ust/era_b/cargo_floor.mtl" },
+                  mesh = "ust/main_buildings/cargo/station_1_lod0.msh",
+                  name = "station_1_lod0",
+                  transf = {
+                     1, 0, 0, 0, 
+                     0, 1, 0, 0, 
+                     0, 0, 1, 0, 
+                     0, 0, 0, 1, 
+                  }
+               }
+            },
+            name = "station_1",
+            transf = {
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
+               0, 0, 0, 1, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 500
+      },
+      {
+         node = {
+            children = {
+               {
+                  materials = { "station/rail/cargo/cargo_station_borders_2.mtl", "station/rail/cargo/cargo_station_windows_and_doors_2.mtl", "station/rail/cargo/cargo_station_borders_1.mtl", "ust/era_b/cargo_floor.mtl" },
+                  mesh = "ust/main_buildings/cargo/station_1_lod1.msh",
+                  name = "station_1_lod1",
+                  transf = {
+                     1.000000, 0.000000, -0.000000, 0.000000, 
+                     0.000000, 1.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 1.000000, 0.000000, 
+                     0.000000, 0.000000, 0.000000, 1.000000, 
+                  }
+               }
+            },
+            name = "station_1",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 500,
+         visibleTo = 3500
+      }
+   },
+   metadata = {
+      transportNetworkProvider = {
+         laneLists = {
+            {
+               linkable = false,
+               nodes = {
+                  {
+                     { -2.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 2.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { -5, -2.500000, 0.800000 },
+                     { 5, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 5, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 5, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 5, -2.500000, 0.800000 },
+                     { 5, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 5, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { -5, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  }
+               },
+               speedLimit = 20,
+               transportModes = { "CARGO" }
+            },
+            {
+               linkable = true,
+               nodes = {
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -12.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -14.500000, 0 },
+                     { 0, -12.500000, 0 },
+                     2.400000
+                  }
+               },
+               speedLimit = 20,
+               transportModes = { "CARGO" }
+            }
+         },
+         runways = {
+
+         },
+         terminals = {
+
+         }
+      }
+   },
+   version = 1
+} end

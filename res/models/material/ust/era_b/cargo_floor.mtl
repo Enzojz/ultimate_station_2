@@ -1,0 +1,64 @@
+function data() return {
+   order = 0,
+   params = {
+      fade_out_range = {
+         fadeOutEndDist = 20000,
+         fadeOutStartDist = 10000
+      },
+      map_albedo_opacity = {
+         fileName = "models/station/rail/cargo/cargo_station_concrete_001_albedo.dds",
+         type = "TWOD",
+         wrapS = "REPEAT",
+         wrapT = "REPEAT"
+      },
+      map_metal_gloss_ao = {
+         fileName = "models/station/rail/cargo/cargo_station_concrete_001_metal_gloss_ao.dds",
+         type = "TWOD",
+         wrapS = "REPEAT",
+         wrapT = "REPEAT"
+      },
+      map_normal = {
+         fileName = "models/station/rail/cargo/cargo_station_concrete_001_normal.dds",
+         type = "TWOD",
+         wrapS = "REPEAT",
+         wrapT = "REPEAT"
+      },
+      map_op_1 = {
+          fileName = "models/ust/op/yx.dds",
+          magFilter = "LINEAR",
+          minFilter = "LINEAR_MIPMAP_LINEAR"
+      },
+		map_op_2 = {
+			fileName = "models/industry/overlay_textures/small_08.dds",
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+		},
+      normal_scale = {
+          normalScale = 1,
+      },
+      operation_1 =
+      {
+          op = "MULTIPLICATION",
+          mode = "NORMAL",
+          scale = { 0.2, 0.2 },
+          opacity = -300.0
+      },
+		operation_2 = {
+			mode = "WORLD_XY",
+			op = "MULTIPLICATION",
+			opacity = 0.25,
+			scale = { 0.34999999403954, 0.34999999403954, },
+		},
+      polygon_offset = {
+         factor = 4,
+         units = 4,
+			forceDepthWrite = true,
+      },
+      two_sided = {
+         flipNormal = false,
+         twoSided = false
+      }
+   },
+   type = "PHYS_TRANSPARENT_NRML_MAP_OP"
+} end

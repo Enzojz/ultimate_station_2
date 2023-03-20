@@ -1,0 +1,101 @@
+local coor = require "ust/coor"
+
+--Begin Generated
+local generatedData = {
+	["cargo_station_main_2_assets_1"] = {
+		models = {
+			["asset/ground/barrel_steel.mdl"] = {
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -6.50000, -2.48000, 0.80000, 1.00000 },
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.15000, -4.40000, 0.80000, 1.00000 },
+				{ 0.77051, 0.63742, 0.00000, 0.00000, -0.62395, 0.75423, 0.20450, 0.00000, 0.13035, -0.15757, 0.97887, 0.00000, -1.09000, -4.39500, 0.87500, 1.00000 },
+			},
+			["asset/ground/container_waste2.mdl"] = {
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -6.74000, -16.90000, -0.00000, 1.00000 },
+			},
+			["asset/industry/cardboard_box_01.mdl"] = {
+				{ -0.65433, -0.02971, 0.00000, 0.00000, 0.02971, -0.65433, 0.00000, 0.00000, 0.00000, 0.00000, 0.65500, 0.00000, 4.32500, -16.41500, 0.00000, 1.00000 },
+				{ -0.79404, -0.23671, 0.00000, 0.00000, 0.23671, -0.79404, 0.00000, 0.00000, 0.00000, 0.00000, 0.82857, 0.00000, 4.86500, -16.44000, 0.00000, 1.00000 },
+			},
+			["station/rail/asset/cargo_lamps.mdl"] = {
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 5.00000, -22.00000, 0.00000, 1.00000 },
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -5.00000, -22.00000, 0.00000, 1.00000 },
+			},
+			["station/rail/asset/cargo_name_board.mdl"] = {
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -4.00000, -18.50000, 0.00000, 1.00000 },
+			},
+			["station/rail/asset/cargo_speakers.mdl"] = {
+				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 2.76000, -3.50000, 0.80000, 1.00000 },
+			},
+		},
+	},
+}
+--End Generated
+
+local mdls = {
+    main = "ust/main_buildings/cargo/station_2.mdl",
+    end_left = "ust/main_buildings/cargo/station_2_end_l.mdl",
+    end_right = "ust/main_buildings/cargo/station_2_end_r.mdl",
+}
+
+local config = {
+    width = 20,
+    extend = {11, -11, 0, -23, 4, 0},
+    generatedData = generatedData,
+    mdlList = {
+        mdls.end_left,
+        mdls.end_right,
+        mdls.main
+    }, 
+    connectors = {
+        coor.xyz(0, -2.5, 0),
+        coor.xyz(10, -2.5, 0),
+        coor.xyz(-10, -2.5, 0),
+    }
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/cargo/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_MAIN_ENTRY_CARGO_20"),
+            description = _("MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC"),
+            icon = "ui/construction/station/rail/modular_station/main_building_2_cargo.tga"
+        },
+        category = {
+            categories = {"ust_cat_entry"},
+        },
+        type = "ust_component_main_20",
+        order = {
+            value = 260,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/era_c/main_building",
+            classify = "classify",
+            typeName = "ust_component_main_20",
+            isComponent = true,
+            isBuilding = true,
+            typeId = 32,
+            moreCapacity = {
+                passenger = 50
+            }
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

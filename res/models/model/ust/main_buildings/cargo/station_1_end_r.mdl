@@ -1,0 +1,78 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 5, 0.200000, 1.435998 },
+      bbMin = { 2.405148, -15, 0 }
+   },
+   collider = {
+      params = {
+         halfExtents = { 1.297426, 7.600000, 0.717999 }
+      },
+      transf = {
+         1, 0, 0, 0, 
+         0, 1, 0, 0, 
+         0, 0, 1, 0, 
+         0, 0, 0, 1, 
+      },
+      type = "BOX"
+   },
+   lods = {
+      {
+         node = {
+            children = {
+               {
+                  materials = { "station/rail/cargo/cargo_station_borders_1.mtl", "station/rail/cargo/cargo_station_borders_2.mtl", "ust/era_b/cargo_floor.mtl", "station/rail/cargo/cargo_station_windows_and_doors_2.mtl" },
+                  mesh = "ust/main_buildings/cargo/station_1_end_r_lod0.msh",
+                  name = "station_1_end_r_lod0",
+                  transf = {
+                     1, 0, 0, 0, 
+                     0, 1, 0, 0, 
+                     0, 0, 1, 0, 
+                     0, 0, 0, 1, 
+                  }
+               }
+            },
+            name = "station_1_end_r",
+            transf = {
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
+               0, 0, 0, 1, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 500
+      },
+      {
+         node = {
+            children = {
+               {
+                  materials = { "station/rail/cargo/cargo_station_borders_2.mtl", "ust/era_b/cargo_floor.mtl", "station/rail/cargo/cargo_station_borders_1.mtl", "station/rail/cargo/cargo_station_windows_and_doors_2.mtl" },
+                  mesh = "ust/main_buildings/cargo/station_1_end_r_lod1.msh",
+                  name = "station_1_end_r_lod1",
+                  transf = {
+                     1.000000, 0.000000, -0.000000, 0.000000, 
+                     0.000000, 1.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 1.000000, 0.000000, 
+                     0.000000, 0.000000, 0.000000, 1.000000, 
+                  }
+               }
+            },
+            name = "station_1_end_r",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 500,
+         visibleTo = 3500
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

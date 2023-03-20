@@ -1,0 +1,217 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 9.250002, 0, 4.903150 },
+      bbMin = { -7.450000, -15, 0 }
+   },
+   collider = {
+      params = {
+         halfExtents = { 8.350001, 7.500000, 2.451575 }
+      },
+      transf = {
+         1, 0, 0, 0, 
+         0, 1, 0, 0, 
+         0, 0, 1, 0, 
+         0, 0, 0, 1, 
+      },
+      type = "BOX"
+   },
+   lods = {
+      {
+         node = {
+            children = {
+               {
+                  materials = {
+                     "ust/era_b/cargo_floor.mtl",
+                     "station/rail/cargo/cargo_station_roof_2.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_1.mtl",
+                     "station/rail/cargo/cargo_station_borders_1.mtl",
+                     "station/rail/cargo/cargo_station_wall_2.mtl",
+                     "station/rail/cargo/cargo_station_borders_2.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_2.mtl"
+                  },
+                  mesh = "ust/main_buildings/cargo/station_1_main_lod0.msh",
+                  name = "station_1_main_lod0",
+                  transf = {
+                     1, 0, 0, 0, 
+                     0, 1, 0, 0, 
+                     0, 0, 1, 0, 
+                     0, 0, 0, 1, 
+                  }
+               }
+            },
+            name = "station_1_main",
+            transf = {
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
+               0, 0, 0, 1, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 500
+      },
+      {
+         node = {
+            children = {
+               {
+                  materials = {
+                     "station/rail/cargo/cargo_station_wall_2.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_1.mtl",
+                     "ust/era_b/cargo_floor.mtl",
+                     "station/rail/cargo/cargo_station_roof_2.mtl",
+                     "station/rail/cargo/cargo_station_borders_2.mtl",
+                     "station/rail/cargo/cargo_station_borders_1.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_2.mtl"
+                  },
+                  mesh = "ust/main_buildings/cargo/station_1_main_lod1.msh",
+                  name = "station_1_main_lod1",
+                  transf = {
+                     1.000000, 0.000000, -0.000000, 0.000000, 
+                     0.000000, 1.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 1.000000, 0.000000, 
+                     0.000000, 0.000000, 0.000000, 1.000000, 
+                  }
+               }
+            },
+            name = "station_1_main",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 500,
+         visibleTo = 3500
+      }
+   },
+   metadata = {
+      transportNetworkProvider = {
+         laneLists = {
+            {
+               linkable = false,
+               nodes = {
+                  {
+                     { -10, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { -7.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { -2.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 2.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 7.500000, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 10, 0, 0.800000 },
+                     { 2.500000, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 10, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { -10, 0, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -2.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { -10, -2.500000, 0.800000 },
+                     { 10, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 10, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 10, 0, 0 },
+                     2.400000
+                  },
+                  {
+                     { 10, -2.500000, 0.800000 },
+                     { 10, 0, 0 },
+                     2.400000
+                  }
+               },
+               speedLimit = 20,
+               transportModes = { "CARGO" }
+            },
+            {
+               linkable = true,
+               nodes = {
+                  {
+                     { 0, -2.500000, 0.800000 },
+                     { 0, -10.500000, 0 },
+                     2.400000
+                  },
+                  {
+                     { -5, -14.500000, 0 },
+                     { 0, -10.500000, 0 },
+                     2.400000
+                  }
+               },
+               speedLimit = 20,
+               transportModes = { "CARGO" }
+            }
+         },
+         runways = {
+
+         },
+         terminals = {
+
+         }
+      }
+   },
+   version = 1
+} end

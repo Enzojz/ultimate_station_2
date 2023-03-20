@@ -1,0 +1,90 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { -9.199982, 0.200000, 11.655167 },
+      bbMin = { -10.336524, -20.183010, 0 }
+   },
+   collider = {
+      params = {
+         halfExtents = { 0.568271, 10.191505, 5.827583 }
+      },
+      transf = {
+         1, 0, 0, 0, 
+         0, 1, 0, 0, 
+         0, 0, 1, 0, 
+         0, 0, 0, 1, 
+      },
+      type = "BOX"
+   },
+   lods = {
+      {
+         node = {
+            children = {
+               {
+                  materials = {
+                     "station/rail/cargo/cargo_station_wall_1.mtl",
+                     "station/rail/cargo/cargo_station_borders_2.mtl",
+                     "station/rail/cargo/cargo_station_borders_1.mtl",
+                     "station/rail/cargo/cargo_station_roof_2.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_1.mtl"
+                  },
+                  mesh = "ust/main_buildings/cargo/station_3_end_l_lod0.msh",
+                  name = "station_3_end_l_lod0",
+                  transf = {
+                     1, 0, 0, 0, 
+                     0, 1, 0, 0, 
+                     0, 0, 1, 0, 
+                     0, 0, 0, 1, 
+                  }
+               }
+            },
+            name = "station_3_end_l",
+            transf = {
+               1, 0, 0, 0, 
+               0, 1, 0, 0, 
+               0, 0, 1, 0, 
+               0, 0, 0, 1, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 500
+      },
+      {
+         node = {
+            children = {
+               {
+                  materials = {
+                     "station/rail/cargo/cargo_station_wall_1.mtl",
+                     "station/rail/cargo/cargo_station_borders_1.mtl",
+                     "station/rail/cargo/cargo_station_borders_2.mtl",
+                     "station/rail/cargo/cargo_station_windows_and_doors_1.mtl",
+                     "station/rail/cargo/cargo_station_roof_2.mtl"
+                  },
+                  mesh = "ust/main_buildings/cargo/station_3_end_l_lod1.msh",
+                  name = "station_3_end_l_lod1",
+                  transf = {
+                     1.000000, 0.000000, -0.000000, 0.000000, 
+                     0.000000, 1.000000, 0.000000, 0.000000, 
+                     0.000000, 0.000000, 1.000000, 0.000000, 
+                     0.000000, 0.000000, 0.000000, 1.000000, 
+                  }
+               }
+            },
+            name = "station_3_end_l",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 500,
+         visibleTo = 3500
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end
