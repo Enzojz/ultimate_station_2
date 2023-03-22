@@ -172,7 +172,7 @@ function data()
         },
         type = "ust_component_main_40",
         order = {
-            value = 260,
+            value = 113,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/building",
@@ -182,7 +182,7 @@ function data()
             isBuilding = true,
             typeId = 33,
             moreCapacity = {
-                passenger = 200
+                cargo = 80
             }
         },
         

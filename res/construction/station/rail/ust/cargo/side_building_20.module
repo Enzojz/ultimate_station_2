@@ -117,8 +117,8 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_MAIN_ENTRY_CARGO_20"),
-            description = _("MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC"),
+            name = _("MENU_MODULE_SIDE_ENTRY_CARGO_20"),
+            description = _("MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC"),
             icon = "ui/construction/station/rail/modular_station/side_building_2_cargo.tga"
         },
         category = {
@@ -126,7 +126,7 @@ function data()
         },
         type = "ust_component_main_20",
         order = {
-            value = 260,
+            value = 115,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/building",
@@ -136,7 +136,7 @@ function data()
             isBuilding = true,
             typeId = 32,
             moreCapacity = {
-                passenger = 50
+                cargo = 40
             }
         },
         

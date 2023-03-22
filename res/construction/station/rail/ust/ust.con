@@ -466,7 +466,7 @@ local updateFn = function(params, closureParams)
 
         for i, station in ipairs(result.stations) do
             station.pool = {
-                moreCapacity = moreCapacity.passenger
+                moreCapacity = station.isCargo and moreCapacity.cargo or moreCapacity.passenger
             }
         end
         

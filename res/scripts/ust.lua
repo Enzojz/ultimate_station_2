@@ -649,7 +649,8 @@ local searchTrackTerminals = function(params, result)
     if #c > 0 then
         insert(result.stations, {
             terminals = c,
-            tag = 3
+            tag = 3,
+            isCargo = true
         })
     end
 end
@@ -660,13 +661,14 @@ local searchStreetTerminals = function(params, result)
     if #p > 0 then
         insert(result.stations, {
             terminals = p,
-            tag = 1
+            tag = 2
         })
     end
     if #c > 0 then
         insert(result.stations, {
             terminals = c,
-            tag = 3
+            tag = 4,
+            isCargo = true
         })
     end
 end
