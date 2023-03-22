@@ -32,6 +32,70 @@ This mod may work differently to what you think, read the tutorial [b][url=https
 
 Hope you like it.]]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local fr = [[Ce mod vous donne la possibilité de créer une gare avec moins de contraintes possible. Peu de temps après la sortie de Transport Fever 2, j'ai commencé à réfléchir à ce mod, qui devrait tirer parti de sa construction modulaire, combinée avec la technique que j'ai utilisée en premier pour mettre en œuvre le mod "Utimate Station" pour la première édition du jeu. Le voyage n'a pas été facile, j'ai créé quelques mods en 2020 pour me familiariser avec Transport Fever 2 et découvrir toutes les techniques possibles, ainsi que pour faire des commentaires à Urban Games pour rendre le mécanisme de construction modulaire plus complet.
 
 Seulement au printemps 2021, après certaines mises à jour importantes du jeu, avec l'expérience de l'entrée de tunnel compact et de l'aperçu de la jonction en vol, "l'idée" est finalement venue à mon esprit. À ce moment-là, je pensais que le travail pourrait être fait en 3 mois, comme j'ai travaillé sur le "Ultimate Station" pour Transport Fever 1 en 3 mois, mais je me suis trompé, cela m'a pris presque deux ans pour le compléter. Peut-être est-ce tard pour le jeu, mais j'espère que vous l'apprécierez également.
@@ -66,6 +130,70 @@ Ce mod peut fonctionner différemment de ce à quoi vous vous attendez, c'est re
 
 Espère que vous l'aimez bien.]]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自己的车站。
 
 我在运输狂热2发布后不久即开始思考如何使用其模块化功能，结合我为第一代游戏设计的“终极车站”模组中使用的技术制作一个功能远远超过原生车站的、强大的车站模组。但是整个过程并不顺利，在2020年我通过为二代制作一些不同模组熟悉了游戏背后的不同机制，并且通过向Urban Games提供反馈的方式让游戏在建造车站方面进行了一些改进。
@@ -99,6 +227,68 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 
 祝使用愉快！]]
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造自己的車站。
 
 我在運輸狂熱2發佈後不久即開始思考如何使用其模組化功能，結合我為第一代遊戲設計的“終極車站”模組中使用的技術製作一個功能遠遠超過原生車站的、強大的車站模組。但是整個過程並不順利，在2020年我通過為二代製作一些不同模組熟悉了遊戲背後的不同機制，並且通過向Urban Games提供回饋的方式讓遊戲在建造車站方面進行了一些改進。
@@ -131,6 +321,68 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 本模組也許會和你認為的用法不同，建議閱讀[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]。
 
 祝使用愉快！]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function data()
     local profile = {
@@ -290,11 +542,11 @@ function data()
             MENU_MODULE_FENCE = "站台围栏",
             MENU_MODULE_FENCE_DESC = "一些站台围栏",
             MENU_MODULE_MAIN_ENTRY_10 = "车站入口（小）",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米宽的车站入口",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米宽的车站入口，提供额外30名旅客的候车容量。",
             MENU_MODULE_MAIN_ENTRY_20 = "车站入口（中）",
-            MENU_MODULE_MAIN_ENTRY_20_DESC = "20米宽的车站入口",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "20米宽的车站入口，提供额外50名旅客的候车容量。",
             MENU_MODULE_MAIN_ENTRY_40 = "车站入口（大）",
-            MENU_MODULE_MAIN_ENTRY_40_DESC = "40米宽的车站入口",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "40米宽的车站入口，提供额外200名旅客的候车容量。",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "站台天桥",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在站台上放置一个天桥节点。",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "站台天桥楼梯",
@@ -352,80 +604,81 @@ function data()
             MENU_MODULE_COLOR_BLACK = "黑色",
             MENU_MODULE_COLOR_BLACK_DESC = "把适用的组件刷成黑色。",
             MENU_MODULE_MAIN_ENTRY_CARGO_10 = "货站入口（小）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "20米宽的货站入口，提供20件额外的货物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "20米宽的货站入口，提供额外20件的货物容量。",
             MENU_MODULE_MAIN_ENTRY_CARGO_20 = "货站入口（中）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "20米宽的货站入口，提供40件额外的货物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "20米宽的货站入口，提供额外40件的货物容量。",
             MENU_MODULE_MAIN_ENTRY_CARGO_40 = "货站入口（大）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "40米宽的货站入口，提供80件额外的货物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "40米宽的货站入口，提供额外80件的货物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_10 = "货站侧入口（小）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "10米宽的货站侧入口，提供10件额外的货物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "10米宽的货站侧入口，提供额外10件的货物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_20 = "货站侧入口（中）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "20米宽的货站侧入口，提供30件额外的货物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "20米宽的货站侧入口，提供额外30件的货物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_40 = "货站侧入口（大）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米宽的货站侧入口，提供60件额外的货物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米宽的货站侧入口，提供额外60件的货物容量。",
             MENU_MODULE_PLATFORM_CARGO = "货运站台",
             MENU_MODULE_PLATFORM_CARGO_DESC = "货运站台，一段约20米长。",
         },
-        zh_TW = {MOD_NAME = "終極車站",
+        zh_TW = {
+            MOD_NAME = "終極車站",
             MOD_DESC = zhhkmotw,
             MENU_NAME = "終極車站",
             MENU_DESC = "充滿無盡定制可能性的車站.",
             UST_CAT_TRACK = "股道",
-            UST_CAT_PLATFORM = "月臺",
+            UST_CAT_PLATFORM = "站台",
             UST_CAT_MODIFIER = "幾何修改器",
             UST_CAT_ENTRY = "入口",
-            UST_CAT_COMP = "月臺組件",
+            UST_CAT_COMP = "站台組件",
             UST_CAT_BRIDGE = "橋樑",
             UST_CAT_TUNNEL = "隧道",
             UST_CAT_WALL = "圍欄和牆",
             UST_CAT_COLOR = "紋理和色彩",
-            MENU_DEBUG = "佈局資訊",
+            MENU_DEBUG = "佈局信息",
             MENU_RADIUS_PRECISE_MODIFIER = "半徑值修改器",
             MENU_RADIUS_PRECISE_MODIFIER_DESC = "以最精確的方式改變軌道的半徑。",
             MENU_RADIUS_ROUGH_MODIFIER = "快速半徑修改器",
             MENU_RADIUS_ROUGH_MODIFIER_DESC = "以符合直覺的方式改變軌道的半徑。",
             MENU_REF_MODIFIER = "參考點修改器",
-            MENU_REF_MODIFIER_DESC = "改變月臺和軌道在位置幾何之間的依賴關係。",
-            MENU_HEIGHT_MODIFIER = "月臺高度修改器",
-            MENU_HEIGHT_MODIFIER_DESC = "單獨改變月臺的高度。",
-            MENU_WIDTH_MODIFIER = "月臺寬度修改器",
-            MENU_WIDTH_MODIFIER_DESC = "改變月臺的寬度。",
+            MENU_REF_MODIFIER_DESC = "改變站台和軌道在位置幾何之間的依賴關係。",
+            MENU_HEIGHT_MODIFIER = "站台高度修改器",
+            MENU_HEIGHT_MODIFIER_DESC = "單獨改變站台的高度。",
+            MENU_WIDTH_MODIFIER = "站台寬度修改器",
+            MENU_WIDTH_MODIFIER_DESC = "改變站台的寬度。",
             MENU_TRACK_NR = "股道數量",
             MENU_TRACK_TYPE = "軌道類型",
             MENU_TRACK_CAT = "接觸網",
             YES = "是",
             NO = "否",
             MENU_RADIUS = "半徑(米)",
-            MENU_PLATFORM_LENGTH = "月臺長度(米)",
-            MENU_PLATFORM_HEIGHT = "月臺高度(米)",
-            MENU_PLATFORM_WIDTH = "月臺寬度(米)",
-            MENU_PLATFORM_LEFT = "左側月臺",
-            MENU_PLATFORM_RIGHT = "右側月臺",
+            MENU_PLATFORM_LENGTH = "站台長度(米)",
+            MENU_PLATFORM_HEIGHT = "站台高度(米)",
+            MENU_PLATFORM_WIDTH = "站台寬度(米)",
+            MENU_PLATFORM_LEFT = "左側站台",
+            MENU_PLATFORM_RIGHT = "右側站台",
             AUTO = "自動",
-            MENU_MODULE_FENCE = "月臺圍欄",
-            MENU_MODULE_FENCE_DESC = "一些月臺圍欄",
+            MENU_MODULE_FENCE = "站台圍欄",
+            MENU_MODULE_FENCE_DESC = "一些站台圍欄",
             MENU_MODULE_MAIN_ENTRY_10 = "車站入口（小）",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米寬的車站入口",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米寬的車站入口，提供額外30名旅客的候車容量。",
             MENU_MODULE_MAIN_ENTRY_20 = "車站入口（中）",
-            MENU_MODULE_MAIN_ENTRY_20_DESC = "20米寬的車站入口",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "20米寬的車站入口，提供額外50名旅客的候車容量。",
             MENU_MODULE_MAIN_ENTRY_40 = "車站入口（大）",
-            MENU_MODULE_MAIN_ENTRY_40_DESC = "40米寬的車站入口",
-            MENU_MODULE_PLATFORM_OVERPASS_COL = "月臺天橋",
-            MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在月臺上放置一個天橋節點。",
-            MENU_MODULE_PLATFORM_OVERPASS_STEP = "月臺天橋樓梯",
-            MENU_MODULE_PLATFORM_OVERPASS_STEP_DESC = "在月臺上方式通往天橋的樓梯。",
-            MENU_MODULE_PLATFORM_PLACEHOLDER = "佈局占位",
-            MENU_MODULE_PLATFORM_PLACEHOLDER_DESC = "在股道和月臺之間創建空的間隔。",
-            MENU_MODULE_PLATFORM = "月臺",
-            MENU_MODULE_PLATFORM_DESC = "一節月臺，約20米長。",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "40米寬的車站入口，提供額外200名旅客的候車容量。",
+            MENU_MODULE_PLATFORM_OVERPASS_COL = "站台天橋",
+            MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在站台上放置一個天橋節點。",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP = "站台天橋樓梯",
+            MENU_MODULE_PLATFORM_OVERPASS_STEP_DESC = "在站台上方式通往天橋的樓梯。",
+            MENU_MODULE_PLATFORM_PLACEHOLDER = "佈局佔位",
+            MENU_MODULE_PLATFORM_PLACEHOLDER_DESC = "在股道和站台之間創建空的間隔。",
+            MENU_MODULE_PLATFORM = "客運站台",
+            MENU_MODULE_PLATFORM_DESC = "一節客運站台，一段約20米長。",
             MENU_MODULE_PLATFORM_ROOF = "雨棚",
             MENU_MODULE_PLATFORM_ROOF_DESC = "最常見的雨棚",
             MENU_MODULE_STAIRS_ENTRY = "簡易入口",
             MENU_MODULE_STAIRS_ENTRY_DESC = "10米寬的簡易車站入口",
-            MENU_MODULE_PLATFORM_UNDERPASS = "月臺地道入口",
-            MENU_MODULE_PLATFORM_UNDERPASS_DESC = "在月臺上放置一個地道入口",
+            MENU_MODULE_PLATFORM_UNDERPASS = "站台地道入口",
+            MENU_MODULE_PLATFORM_UNDERPASS_DESC = "在站台上放置一個地道入口",
             MENU_MODULE_WALL_CONCRETE = "混凝土牆",
-            MENU_MODULE_WALL_CONCRETE_DESC = "混凝土制擋土牆",
+            MENU_MODULE_WALL_CONCRETE_DESC = "混凝土製擋土牆",
             MENU_MODULE_WALL_BRICK = "磚牆",
             MENU_MODULE_WALL_BRICK_DESC = "磚制擋土牆",
             MENU_MODULE_WALL_ARCH = "拱牆",
@@ -433,9 +686,9 @@ function data()
             MENU_MODULE_SOUND_INSULATION = "隔音牆",
             MENU_MODULE_SOUND_INSULATION_DESC = "常見的隔音牆",
             MENU_MODULE_BRIDGE_VOID = "懸浮器",
-            MENU_MODULE_BRIDGE_VOID_DESC = "配合高度修改器使用，讓軌道或者月臺懸浮在空中。",
+            MENU_MODULE_BRIDGE_VOID_DESC = "配合高度修改器使用，讓軌道或者站台懸浮在空中。",
             MODULE_REMOVE_HELPER = "移除助手",
-            MODULE_REMOVE_HELPER_DESC = "方便移除月臺或者軌道。",
+            MODULE_REMOVE_HELPER_DESC = "方便移除站台或者軌道。",
             MENU_MODULE_COLOR_GREEN = "綠色",
             MENU_MODULE_COLOR_GREEN_DESC = "把適用的組件刷成綠色。",
             MENU_MODULE_COLOR_RED = "紅色",
@@ -449,14 +702,14 @@ function data()
             MENU_MODULE_PLATFORM_SEATS = "候車座椅",
             MENU_MODULE_PLATFORM_SEATS_DESC = "為旅客準備一些候車座椅。",
             MENU_MODULE_PLATFORM_TRASHBIN = "垃圾桶",
-            MENU_MODULE_PLATFORM_TRASHBIN_DESC = "在月臺上放置一些垃圾桶。",
+            MENU_MODULE_PLATFORM_TRASHBIN_DESC = "在站台上放置一些垃圾桶。",
             MENU_MODULE_PLATFORM_SIGN = "時鐘與標識",
-            MENU_MODULE_PLATFORM_SIGN_DESC = "在月臺上佈置月臺號、車站站牌名與時鐘。",
+            MENU_MODULE_PLATFORM_SIGN_DESC = "在站台上佈置站台號、車站站牌名與時鐘。",
             MENU_MODULE_OPEN_CUT = "開洞",
-            MENU_MODULE_OPEN_CUT_DESC = "在月臺和軌道上方的地面開洞",
+            MENU_MODULE_OPEN_CUT_DESC = "在站台和軌道上方的地面開洞",
             MENU_MODULE_VOID_TUNNEL = "無入口隧道",
             MENU_OVERLAP_MODIFIER = "交疊修改器",
-            MENU_OVERLAP_MODIFIER_DESC = "讓月臺離軌道更近一些。",
+            MENU_OVERLAP_MODIFIER_DESC = "讓站台離軌道更近一些。",
             UST_CAT_STREET = "道路",
             MENU_MODULE_TRAM = "安裝/拆除電車軌道",
             MENU_MODULE_TRAM_DESC = "在道路上安裝或者拆除有軌電車軌道。",
@@ -467,17 +720,17 @@ function data()
             MENU_MODULE_COLOR_BLACK = "黑色",
             MENU_MODULE_COLOR_BLACK_DESC = "把適用的組件刷成黑色。",
             MENU_MODULE_MAIN_ENTRY_CARGO_10 = "貨站入口（小）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "20米寬的貨站入口，提供20件額外的貨物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "20米寬的貨站入口，提供額外20件的貨物容量。",
             MENU_MODULE_MAIN_ENTRY_CARGO_20 = "貨站入口（中）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "20米寬的貨站入口，提供40件額外的貨物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "20米寬的貨站入口，提供額外40件的貨物容量。",
             MENU_MODULE_MAIN_ENTRY_CARGO_40 = "貨站入口（大）",
-            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "40米寬的貨站入口，提供80件額外的貨物容量。",
+            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "40米寬的貨站入口，提供額外80件的貨物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_10 = "貨站側入口（小）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "10米寬的貨站側入口，提供10件額外的貨物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "10米寬的貨站側入口，提供額外10件的貨物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_20 = "貨站側入口（中）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "20米寬的貨站側入口，提供30件額外的貨物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "20米寬的貨站側入口，提供額外30件的貨物容量。",
             MENU_MODULE_SIDE_ENTRY_CARGO_40 = "貨站側入口（大）",
-            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米寬的貨站側入口，提供60件額外的貨物容量。",
+            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米寬的貨站側入口，提供額外60件的貨物容量。",
             MENU_MODULE_PLATFORM_CARGO = "貨運站台",
             MENU_MODULE_PLATFORM_CARGO_DESC = "貨運站台，一段約20米長。",
         },
@@ -521,11 +774,11 @@ function data()
             MENU_MODULE_FENCE = "Clôtures de plateforme verte",
             MENU_MODULE_FENCE_DESC = "Certaines clôtures de plateforme verte",
             MENU_MODULE_MAIN_ENTRY_10 = "Petite entrée principale de la station",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "Entrée principale de la station de 10m de large.",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Entrée principale de la station de 10m de large, offrant une capacité supplémentaire de 30 voyageurs.",
             MENU_MODULE_MAIN_ENTRY_20 = "Entrée principale de la station moyenne",
-            MENU_MODULE_MAIN_ENTRY_20_DESC = "Entrée principale de la station de 20m de large.",
+            MENU_MODULE_MAIN_ENTRY_20_DESC = "Entrée principale de la station de 20m de large, offrant une capacité supplémentaire de 50 voyageurs.",
             MENU_MODULE_MAIN_ENTRY_40 = "Entrée principale de la grande station",
-            MENU_MODULE_MAIN_ENTRY_40_DESC = "Entrée principale de la station de 40m de large.",
+            MENU_MODULE_MAIN_ENTRY_40_DESC = "Entrée principale de la station de 40m de large, offrant une capacité supplémentaire de 200 voyageurs.",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "Passerelle de plateforme",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Placez un nœud de passerelle de plateforme.",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "Accès par escalier à la passerelle de plateforme",
@@ -582,17 +835,17 @@ function data()
             MENU_MODULE_COLOR_BLACK = "Noir",
             MENU_MODULE_COLOR_BLACK_DESC = "Noir pour certains composants applicables",
             MENU_MODULE_MAIN_ENTRY_CARGO_10 = "Entrée principale de la gare de fret",
-            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "Entrée principale de la gare de 20 m de large, offrez une capacité de 20 frets dans la gare.",
+            MENU_MODULE_MAIN_ENTRY_CARGO_10_DESC = "Entrée principale de la gare de 20 m de large, offrant une capacité supplémentaire de 20 marchandise.",
             MENU_MODULE_MAIN_ENTRY_CARGO_20 = "Entrée principale de la gare de fret moyenne",
-            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "Entrée principale de la gare de fret de 20 m de large, offrez une capacité de 40 frets dans la gare.",
+            MENU_MODULE_MAIN_ENTRY_CARGO_20_DESC = "Entrée principale de la gare de fret de 20 m de large, offrant une capacité supplémentaire de 40 marchandise.",
             MENU_MODULE_MAIN_ENTRY_CARGO_40 = "Entrée principale de la gare de fret",
-            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "Entrée principale de la gare de fret de 40 m de large, offrez une capacité de 80 frets dans la gare.",
+            MENU_MODULE_MAIN_ENTRY_CARGO_40_DESC = "Entrée principale de la gare de fret de 40 m de large, offrant une capacité supplémentaire de 80 marchandise.",
             MENU_MODULE_SIDE_ENTRY_CARGO_10 = "entrée latérale de la gare de fret",
-            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "Entrée latérale de la gare de 10 m de large, offrez une capacité de 10 frets à la gare.",
+            MENU_MODULE_SIDE_ENTRY_CARGO_10_DESC = "Entrée latérale de la gare de 10 m de large, offrant une capacité supplémentaire de 10 marchandise.",
             MENU_MODULE_SIDE_ENTRY_CARGO_20 = "Entrée latérale de la gare de fret moyenne",
-            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "Entrée latérale de la gare de fret de 20 m de large, offrez une capacité de 30 frets dans la gare.",
+            MENU_MODULE_SIDE_ENTRY_CARGO_20_DESC = "Entrée latérale de la gare de fret de 20 m de large, offrant une capacité supplémentaire de 30 marchandise.",
             MENU_MODULE_SIDE_ENTRY_CARGO_40 = "Entrée latérale de grande gare de fret",
-            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "Entrée latérale de la gare de fret de 20 m de large, offrez une capacité de 60 frets dans la gare.",
+            MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "Entrée latérale de la gare de fret de 20 m de large, offrant une capacité supplémentaire de 60 marchandise.",
             MENU_MODULE_PLATFORM_CARGO = "Plateforme pour fret",
             MENU_MODULE_PLATFORM_CARGO_DESC = "Une section de plateforme pour fret d'environ 20 m long."
         
