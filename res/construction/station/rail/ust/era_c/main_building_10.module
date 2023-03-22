@@ -1,4 +1,5 @@
 local coor = require "ust/coor"
+local ust = require "ust"
 
 local generatedData = {
     ["assets"] = {
@@ -14,6 +15,17 @@ local generatedData = {
             {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 5.00000, -16.30000, 0.00000, 1.00000},
         },
     }
+}
+
+local fitModels = {
+    surface = ust.fitModel(3.3, 5, -2, true, true),
+    edge = ust.fitModel(0.85, 5, -2, true, true),
+}
+
+local fitMdl = {
+    ["xe_yi_left"] = fitModels.edge,
+    ["xe_yi_right"] = fitModels.edge,
+    ["yi_centre"] = fitModels.surface,
 }
 
 local mdls = {
@@ -34,11 +46,15 @@ local config = {
     }, 
     connectors = {
         coor.xyz(0, -2.5, 0),
-    }
+    },
+	fitMdl = fitMdl,
+	edgeWidth = 0.85,
+	depth = 5,
+	path = "ust/platform/era_c/"
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    game.res.script["construction/station/rail/ust/era_c/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+    game.res.script["construction/station/rail/ust/struct/building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
 end
 
 function data()

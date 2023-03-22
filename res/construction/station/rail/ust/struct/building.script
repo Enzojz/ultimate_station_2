@@ -165,18 +165,6 @@ local function addSlot(params, result)
     addSlotFn(params, result, 40, {20, 20, 38, 0}, 33)
 end
 
-
-local fitModels = {
-    surface = ust.fitModel(4.4, 5, -2, true, true),
-    edge = ust.fitModel(0.3, 5, -2, true, true),
-}
-
-local fitMdl = {
-    ["xe_yi_left"] = fitModels.edge,
-    ["xe_yi_right"] = fitModels.edge,
-    ["yi_centre"] = fitModels.surface,
-}
-
 local function addModels(mdlList, transf, tag, result)
     for mdl, transfs in pairs(mdlList) do
         for _, t in ipairs(transfs) do
@@ -196,10 +184,10 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     local extra = params.extra[slotId]
     
     local arcs = extra.arcs
-    local ptBuildingInfEdge = extra.xInfo.inf.pt + extra.vecNormal * 2.25
-    local ptBuildingSupEdge = extra.xInfo.sup.pt + extra.vecNormal * 2.25
+    local ptBuildingInfEdge = coor.xyz((data < 5 and -config.width or config.width) / 2, -config.depth, 0) .. transform
+    local ptBuildingSupEdge = coor.xyz((data < 5 and config.width or -config.width) / 2, -config.depth, 0) .. transform
     
-    local vecEdge = (ptBuildingSupEdge - ptBuildingInfEdge):normalized() * 0.3
+    local vecEdge = (ptBuildingSupEdge - ptBuildingInfEdge):normalized() * config.edgeWidth
     
     local ptBuildingInf = ptBuildingInfEdge + vecEdge
     local ptBuildingSup = ptBuildingSupEdge - vecEdge
@@ -209,10 +197,10 @@ local updateFnSide = function(result, transform, tag, slotId, addModelFn, params
     
     local addBlock = function(mdl, pos)
         if data < 5 then
-            pos.lt, pos.lb, pos.rt, pos.rb = pos.rt, pos.rb, pos.lt, pos.lb
+            pos.lt, pos.lb, pos.rt, pos.rb = pos.lb, pos.lt, pos.rb, pos.rt
         end
-        insert(result.models, ust.newModel("ust/platform/cargo/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true)));
-        insert(result.models, ust.newModel("ust/platform/cargo/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false)));
+        insert(result.models, ust.newModel(config.path .. mdl .. "_tl.mdl", tag, config.fitMdl[mdl](pos, true)));
+        insert(result.models, ust.newModel(config.path .. mdl .. "_br.mdl", tag, config.fitMdl[mdl](pos, false)));
     end
     
     local platformPts = {}
@@ -354,16 +342,16 @@ local updateFnHead = function(result, transform, tag, slotId, addModelFn, params
     end
     
     local addBlock = function(mdl, pos)
-        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_tl.mdl", tag, fitMdl[mdl](pos, true) * transform));
-        insert(result.models, ust.newModel("ust/platform/era_c/" .. mdl .. "_br.mdl", tag, fitMdl[mdl](pos, false) * transform));
+        insert(result.models, ust.newModel(config.path .. mdl .. "_tl.mdl", tag, config.fitMdl[mdl](pos, true) * transform));
+        insert(result.models, ust.newModel(config.path .. mdl .. "_br.mdl", tag, config.fitMdl[mdl](pos, false) * transform));
     end
     
     local blocks = pipe.new
         * func.seq(-config.width / 10, config.width / 10)
         * pipe.map(function(x) return x * 5 end)
     
-    blocks[1] = -config.width * 0.5 + 0.85
-    blocks[#blocks] = config.width * 0.5 - 0.85
+    blocks[1] = -config.width * 0.5 + config.edgeWidth
+    blocks[#blocks] = config.width * 0.5 - config.edgeWidth
     
     for _, x in ipairs(blocks * pipe.interlace()) do
         local r, l = unpack(x)

@@ -1,9 +1,9 @@
 local coor = require "ust/coor"
+local ust = require "ust"
 
 --Begin Generated
 local generatedData = {
 	["cargo_station_main_1_assets_1"] = {
-		models = {
 			["asset/ground/barrel_wood.mdl"] = {
 				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -7.70000, -0.96000, 0.79500, 1.00000 },
 				{ 0.41628, 0.90924, 0.00000, 0.00000, -0.90924, 0.41628, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -8.88000, -1.38000, 0.79500, 1.00000 },
@@ -59,7 +59,6 @@ local generatedData = {
 			["station/rail/asset/cargo_speakers.mdl"] = {
 				{ 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -0.40000, -5.95000, 0.80000, 1.00000 },
 			},
-		},
 	},
 }
 --End Generated
@@ -68,6 +67,17 @@ local mdls = {
     main = "ust/main_buildings/cargo/station_1_main.mdl",
     end_left = "ust/main_buildings/cargo/station_1_main_end_l.mdl",
     end_right = "ust/main_buildings/cargo/station_1_main_end_r.mdl",
+}
+
+local fitModels = {
+    surface = ust.fitModel(4.4, 5, -2, true, true),
+    edge = ust.fitModel(0.3, 5, -2, true, true),
+}
+
+local fitMdl = {
+    ["xe_yi_left"] = fitModels.edge,
+    ["xe_yi_right"] = fitModels.edge,
+    ["yi_centre"] = fitModels.surface,
 }
 
 local config = {
@@ -81,11 +91,15 @@ local config = {
     }, 
     connectors = {
         coor.xyz(0, -2.5, 0),
-    }
+    },
+	fitMdl = fitMdl,
+	edgeWidth = 0.3,
+	depth = 2.5,
+	path = "ust/platform/cargo/"
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
-    game.res.script["construction/station/rail/ust/cargo/main_building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+    game.res.script["construction/station/rail/ust/struct/building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
 end
 
 function data()
@@ -111,7 +125,7 @@ function data()
             value = 260,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/era_c/main_building",
+            scriptName = "construction/station/rail/ust/struct/building",
             classify = "classify",
             typeName = "ust_component_main_20",
             isComponent = true,
