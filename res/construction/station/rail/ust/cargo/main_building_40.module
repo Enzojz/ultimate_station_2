@@ -127,7 +127,7 @@ local mdls = {
 
 local config = {
     width = 40,
-    extend = {21, -21, 0, -38, 4, 0},
+    extend = { 21, -21, 0, -38, 4, 0 },
     generatedData = generatedData,
     mdlList = {
         mdls.end_left,

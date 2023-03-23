@@ -82,7 +82,7 @@ local fitMdl = {
 
 local config = {
     width = 20,
-    extend = {6, -6, 0, -17, 4, 0},
+    extend = { 11, -11, 0, -17, 4, 0 },
     generatedData = generatedData,
     mdlList = {
         mdls.end_left,
@@ -91,6 +91,8 @@ local config = {
     }, 
     connectors = {
         coor.xyz(0, -2.5, 0),
+        coor.xyz(10, -2.5, 0),
+        coor.xyz(-10, -2.5, 0),
     },
 	fitMdl = fitMdl,
 	edgeWidth = 0.3,
