@@ -52,12 +52,12 @@ return {
 								name = "station_1_end_l",
 								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -45, 0, 0, 1, },
 							},
-							{
-								materials = { "station/rail/era_c/era_c_trainstation_borders_3.mtl", },
-								mesh = "station/rail/era_c/station_1_end_l/station_1_end_l_perron_lod1.msh",
-								name = "station_1_end_l_perron",
-								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -49.76392364502, 0, 0, 1, },
-							},
+							-- {
+							-- 	materials = { "station/rail/era_c/era_c_trainstation_borders_3.mtl", },
+							-- 	mesh = "station/rail/era_c/station_1_end_l/station_1_end_l_perron_lod1.msh",
+							-- 	name = "station_1_end_l_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -49.76392364502, 0, 0, 1, },
+							-- },
 						},
 						name = "station_1_end_l_grp",
 						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 45, 0, 0, 1, },

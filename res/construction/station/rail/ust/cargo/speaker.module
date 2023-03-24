@@ -1,0 +1,55 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+
+local insert = table.insert
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local data = params.modules[slotId].info.data
+    
+    if data < 10 then
+        insert(result.models, ust.newModel("station/rail/asset/cargo_speakers.mdl", tag, transform))
+    elseif data < 20 then
+        insert(result.models, ust.newModel("station/rail/asset/cargo_speakers.mdl", tag, coor.transX(-1.5) * transform))
+    else
+        insert(result.models, ust.newModel("station/rail/asset/cargo_speakers.mdl", tag, coor.transX(-1.5) * coor.rotZ180 * transform))
+    end
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_CARGO_PLATFORM_SPEAKERS"),
+            description = _("MENU_MODULE_CARGO_PLATFORM_SPEAKERS_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_component_general",
+        order = {
+            value = 300,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/comp",
+            classify = "classify",
+            typeName = "ust_component_general",
+            isComponent = true,
+            typeId = 40,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -62,7 +62,7 @@ local config = {
         coor.xyz(-10, -2.5, 0),
     },
 	fitMdl = fitMdl,
-	edgeWidth = 0.3,
+	edgeWidth = 0.25,
 	depth = 2.5,
 	path = "ust/platform/cargo/"
 }

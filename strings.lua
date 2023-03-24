@@ -96,6 +96,38 @@ Hope you like it.]]
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local fr = [[Ce mod vous donne la possibilité de créer une gare avec moins de contraintes possible. Peu de temps après la sortie de Transport Fever 2, j'ai commencé à réfléchir à ce mod, qui devrait tirer parti de sa construction modulaire, combinée avec la technique que j'ai utilisée en premier pour mettre en œuvre le mod "Utimate Station" pour la première édition du jeu. Le voyage n'a pas été facile, j'ai créé quelques mods en 2020 pour me familiariser avec Transport Fever 2 et découvrir toutes les techniques possibles, ainsi que pour faire des commentaires à Urban Games pour rendre le mécanisme de construction modulaire plus complet.
 
 Seulement au printemps 2021, après certaines mises à jour importantes du jeu, avec l'expérience de l'entrée de tunnel compact et de l'aperçu de la jonction en vol, "l'idée" est finalement venue à mon esprit. À ce moment-là, je pensais que le travail pourrait être fait en 3 mois, comme j'ai travaillé sur le "Ultimate Station" pour Transport Fever 1 en 3 mois, mais je me suis trompé, cela m'a pris presque deux ans pour le compléter. Peut-être est-ce tard pour le jeu, mais j'espère que vous l'apprécierez également.
@@ -129,6 +161,38 @@ Inconvénient majeur de ce mod : il n'est pas compatible avec aucun mod conçu p
 Ce mod peut fonctionner différemment de ce à quoi vous vous attendez, c'est recommandé a lire tout à bord [b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]tutorial[/url][/b] le tutoriel.
 
 Espère que vous l'aimez bien.]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -289,6 +353,37 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造自己的車站。
 
 我在運輸狂熱2發佈後不久即開始思考如何使用其模組化功能，結合我為第一代遊戲設計的“終極車站”模組中使用的技術製作一個功能遠遠超過原生車站的、強大的車站模組。但是整個過程並不順利，在2020年我通過為二代製作一些不同模組熟悉了遊戲背後的不同機制，並且通過向Urban Games提供回饋的方式讓遊戲在建造車站方面進行了一些改進。
@@ -321,6 +416,37 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 本模組也許會和你認為的用法不同，建議閱讀[b][url=https://github.com/Enzojz/ultimate_station_2/tree/master/tutorial]教程[/url][/b]。
 
 祝使用愉快！]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -426,11 +552,17 @@ function data()
             MENU_MODULE_FENCE = "Green platform fences",
             MENU_MODULE_FENCE_DESC = "Some green platform fences",
             MENU_MODULE_MAIN_ENTRY_10 = "Small station main entry",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "Station main entry of 10m wide, provide capacity of 30 of passengers to the station.",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Station main entry of 20m wide, provide capacity of 30 of passengers to the station.",
             MENU_MODULE_MAIN_ENTRY_20 = "Medium station main entry",
             MENU_MODULE_MAIN_ENTRY_20_DESC = "Station main entry of 20m wide, provide capacity of 50 of passengers to the station.",
             MENU_MODULE_MAIN_ENTRY_40 = "Large station main entry",
             MENU_MODULE_MAIN_ENTRY_40_DESC = "Station main entry of 40m wide, provide capacity of 200 of passengers to the station.",
+            MENU_MODULE_SIDE_ENTRY_10 = "Small station side entry",
+            MENU_MODULE_SIDE_ENTRY_10_DESC = "Station side entry of 10m wide, provide capacity of 20 of passengers to the station.",
+            MENU_MODULE_SIDE_ENTRY_20 = "Medium station side entry",
+            MENU_MODULE_SIDE_ENTRY_20_DESC = "Station side entry of 20m wide, provide capacity of 40 of passengers to the station.",
+            MENU_MODULE_SIDE_ENTRY_40 = "Large station side entry",
+            MENU_MODULE_SIDE_ENTRY_40_DESC = "Station side entry of 40m wide, provide capacity of 150 of passengers to the station.",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "Platform overpass",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Place a platform overpass node.",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "Step access to platform overpass",
@@ -501,6 +633,12 @@ function data()
             MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "Cargo station side entry of 20m wide, provide capacity of 60 goods to the station.",
             MENU_MODULE_PLATFORM_CARGO = "Cargo Platform",
             MENU_MODULE_PLATFORM_CARGO_DESC = "A section of cargo's platform of approximately 20m long.",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS = "Platform Speakers",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS_DESC = "Put speakers on platforms.",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS = "Platform Lamps",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "Put lamps on platforms.",
+            MENU_MODULE_CARGO_PLATFORM_SIGN = "Platform Sign",
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Put station name on platform."
         },
         zh_CN = {
             MOD_NAME = "终极车站",
@@ -542,11 +680,17 @@ function data()
             MENU_MODULE_FENCE = "站台围栏",
             MENU_MODULE_FENCE_DESC = "一些站台围栏",
             MENU_MODULE_MAIN_ENTRY_10 = "车站入口（小）",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "10米宽的车站入口，提供额外30名旅客的候车容量。",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "20米宽的车站入口，提供额外30名旅客的候车容量。",
             MENU_MODULE_MAIN_ENTRY_20 = "车站入口（中）",
             MENU_MODULE_MAIN_ENTRY_20_DESC = "20米宽的车站入口，提供额外50名旅客的候车容量。",
             MENU_MODULE_MAIN_ENTRY_40 = "车站入口（大）",
             MENU_MODULE_MAIN_ENTRY_40_DESC = "40米宽的车站入口，提供额外200名旅客的候车容量。",
+            MENU_MODULE_SIDE_ENTRY_10 = "车站侧入口（小）",
+            MENU_MODULE_SIDE_ENTRY_10_DESC = "10米宽的车站入口，提供额外20名旅客的候车容量。",
+            MENU_MODULE_SIDE_ENTRY_20 = "车站侧入口（中）",
+            MENU_MODULE_SIDE_ENTRY_20_DESC = "20米宽的车站入口，提供额外40名旅客的候车容量。",
+            MENU_MODULE_SIDE_ENTRY_40 = "车站侧入口（大）",
+            MENU_MODULE_SIDE_ENTRY_40_DESC = "40米宽的车站入口，提供额外150名旅客的候车容量。",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "站台天桥",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在站台上放置一个天桥节点。",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "站台天桥楼梯",
@@ -617,6 +761,12 @@ function data()
             MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米宽的货站侧入口，提供额外60件的货物容量。",
             MENU_MODULE_PLATFORM_CARGO = "货运站台",
             MENU_MODULE_PLATFORM_CARGO_DESC = "货运站台，一段约20米长。",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS = "扬声器",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS_DESC = "在站台上设置扬声器。",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS = "站台灯",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "在站台上设置灯。",
+            MENU_MODULE_CARGO_PLATFORM_SIGN = "车站站名牌",
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在站台上设置站名牌。"
         },
         zh_TW = {
             MOD_NAME = "終極車站",
@@ -663,6 +813,12 @@ function data()
             MENU_MODULE_MAIN_ENTRY_20_DESC = "20米寬的車站入口，提供額外50名旅客的候車容量。",
             MENU_MODULE_MAIN_ENTRY_40 = "車站入口（大）",
             MENU_MODULE_MAIN_ENTRY_40_DESC = "40米寬的車站入口，提供額外200名旅客的候車容量。",
+            MENU_MODULE_SIDE_ENTRY_10 = "車站側入口（小）",
+            MENU_MODULE_SIDE_ENTRY_10_DESC = "10米寬的車站入口，提供額外20名旅客的候車容量。",
+            MENU_MODULE_SIDE_ENTRY_20 = "車站側入口（中）",
+            MENU_MODULE_SIDE_ENTRY_20_DESC = "20米寬的車站入口，提供額外40名旅客的候車容量。",
+            MENU_MODULE_SIDE_ENTRY_40 = "車站側入口（大）",
+            MENU_MODULE_SIDE_ENTRY_40_DESC = "40米寬的車站入口，提供額外150名旅客的候車容量。",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "站台天橋",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "在站台上放置一個天橋節點。",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "站台天橋樓梯",
@@ -733,6 +889,12 @@ function data()
             MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "20米寬的貨站側入口，提供額外60件的貨物容量。",
             MENU_MODULE_PLATFORM_CARGO = "貨運站台",
             MENU_MODULE_PLATFORM_CARGO_DESC = "貨運站台，一段約20米長。",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS = "揚聲器",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS_DESC = "在站台上設置揚聲器。",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS = "站檯燈",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "在站台上設置燈。",
+            MENU_MODULE_CARGO_PLATFORM_SIGN = "車站站名牌",
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在站台上設置站名牌。"
         },
         fr = {
             MOD_NAME = "Gare ultime",
@@ -774,11 +936,17 @@ function data()
             MENU_MODULE_FENCE = "Clôtures de plateforme verte",
             MENU_MODULE_FENCE_DESC = "Certaines clôtures de plateforme verte",
             MENU_MODULE_MAIN_ENTRY_10 = "Petite entrée principale de la station",
-            MENU_MODULE_MAIN_ENTRY_10_DESC = "Entrée principale de la station de 10m de large, offrant une capacité supplémentaire de 30 voyageurs.",
+            MENU_MODULE_MAIN_ENTRY_10_DESC = "Entrée principale de la station de 20m de large, offrant une capacité supplémentaire de 30 voyageurs.",
             MENU_MODULE_MAIN_ENTRY_20 = "Entrée principale de la station moyenne",
             MENU_MODULE_MAIN_ENTRY_20_DESC = "Entrée principale de la station de 20m de large, offrant une capacité supplémentaire de 50 voyageurs.",
             MENU_MODULE_MAIN_ENTRY_40 = "Entrée principale de la grande station",
             MENU_MODULE_MAIN_ENTRY_40_DESC = "Entrée principale de la station de 40m de large, offrant une capacité supplémentaire de 200 voyageurs.",
+            MENU_MODULE_SIDE_ENTRY_10 = "Petite entrée latérale de la station",
+            MENU_MODULE_SIDE_ENTRY_10_DESC = "Entrée latérale de la station de 10m de large, offrant une capacité supplémentaire de 20 voyageurs.",
+            MENU_MODULE_SIDE_ENTRY_20 = "Entrée latérale de la station moyenne",
+            MENU_MODULE_SIDE_ENTRY_20_DESC = "Entrée latérale de la station de 20m de large, offrant une capacité supplémentaire de 40 voyageurs.",
+            MENU_MODULE_SIDE_ENTRY_40 = "Entrée latérale de la grande station",
+            MENU_MODULE_SIDE_ENTRY_40_DESC = "Entrée latérale de la station de 40m de large, offrant une capacité supplémentaire de 1500 voyageurs.",
             MENU_MODULE_PLATFORM_OVERPASS_COL = "Passerelle de plateforme",
             MENU_MODULE_PLATFORM_OVERPASS_COL_DESC = "Placez un nœud de passerelle de plateforme.",
             MENU_MODULE_PLATFORM_OVERPASS_STEP = "Accès par escalier à la passerelle de plateforme",
@@ -847,7 +1015,13 @@ function data()
             MENU_MODULE_SIDE_ENTRY_CARGO_40 = "Entrée latérale de grande gare de fret",
             MENU_MODULE_SIDE_ENTRY_CARGO_40_DESC = "Entrée latérale de la gare de fret de 20 m de large, offrant une capacité supplémentaire de 60 marchandise.",
             MENU_MODULE_PLATFORM_CARGO = "Plateforme pour fret",
-            MENU_MODULE_PLATFORM_CARGO_DESC = "Une section de plateforme pour fret d'environ 20 m long."
+            MENU_MODULE_PLATFORM_CARGO_DESC = "Une section de plateforme pour fret d'environ 20 m long.",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS = "Haut-parleurs",
+            MENU_MODULE_CARGO_PLATFORM_SPEAKERS_DESC = "Mettre en place des haut-parleurs sur les platesformes.",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS = "Lampadaire",
+            MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "Mettre en place des lampadaire sur les plateformes",
+            MENU_MODULE_CARGO_PLATFORM_SIGN = "Signes",
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Mettez le nom de la gare sur la plateforme."
         
         },
     }
