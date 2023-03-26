@@ -259,9 +259,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, pr
         if info.trackGroup.right then
             local trackGroup = params.trackGroup[info.trackGroup.right]
             local n = #trackGroup
-            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
-            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
-            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos
+            
+            local hasCenterNode, hasInfNode, hasSupNode = false, false, false
+            
+            local infModule = params.modules[trackGroup[1]]
+            local supModule = params.modules[trackGroup[#trackGroup]]
+            if infModule.info.octa[5] and params.modules[infModule.info.octa[5]].metadata.isPlatform then
+                if info.trackGroup.rightPos == 1 then
+                    hasInfNode = true
+                end
+            elseif supModule.info.octa[1] and params.modules[supModule.info.octa[1]].metadata.isPlatform then
+                if info.trackGroup.rightPos == #trackGroup then
+                    hasSupNode = true
+                end
+            else
+                hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+                hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
+                hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos
+            end
             
             if hasCenterNode then
                 local pos = {{0, 0.3}, {0.7, 1}}
@@ -288,9 +303,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, pr
         elseif info.trackGroup.left then
             local trackGroup = params.trackGroup[info.trackGroup.left]
             local n = #trackGroup
-            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
-            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos - 1
-            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+            
+            local hasCenterNode, hasInfNode, hasSupNode = false, false, false
+
+            local infModule = params.modules[trackGroup[1]]
+            local supModule = params.modules[trackGroup[#trackGroup]]
+            if infModule.info.octa[5] and params.modules[infModule.info.octa[5]].metadata.isPlatform then
+                if info.trackGroup.leftPos == 1 then
+                    hasInfNode = true
+                end
+            elseif supModule.info.octa[1] and params.modules[supModule.info.octa[1]].metadata.isPlatform then
+                if info.trackGroup.leftPos == #trackGroup then
+                    hasSupNode = true
+                end
+            else
+                hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+                hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos - 1
+                hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+            end
             
             if hasCenterNode then
                 local pos = {{1, 0.7}, {0.3, 0}}
