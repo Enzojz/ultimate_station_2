@@ -4,19 +4,19 @@ function data() return {
          indices = {
             normal = {
                count = 12,
-               offset = 180
+               offset = 156
             },
             position = {
                count = 12,
-               offset = 168
+               offset = 144
             },
             tangent = {
                count = 12,
-               offset = 192
+               offset = 168
             },
             uv0 = {
                count = 12,
-               offset = 204
+               offset = 180
             }
          }
       }
@@ -38,7 +38,7 @@ function data() return {
          offset = 72
       },
       uv0 = {
-         count = 48,
+         count = 24,
          numComp = 2,
          offset = 120
       }

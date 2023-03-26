@@ -11,7 +11,7 @@ local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17,
 
 local templatePlatform = {
     "station/rail/ust/era_c/platform.module",
-    "station/rail/ust/cargo/platform.module"
+    "station/rail/ust/cargo/platform_era_b.module"
 }
 
 local createTemplateFn = function(params)
@@ -83,8 +83,17 @@ local createTemplateFn = function(params)
                     end
                 end
                 
-                result[ust.base(info.id, 28)] = "station/rail/ust/era_c/sign.module"
-                result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_c/seats.module"
+                if (params.templateIndex == 0) then
+                    result[ust.base(info.id, 28)] = "station/rail/ust/era_c/sign.module"
+                    result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_c/seats.module"
+                end
+                if (params.templateIndex == 1) then
+                    if y % 2 == 0 then
+                        result[ust.base(info.id, 28)] = "station/rail/ust/cargo/sign.module"
+                    else
+                        result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/cargo/lamps.module"
+                    end
+                end
             end
         end
     end

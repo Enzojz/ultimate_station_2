@@ -3,40 +3,20 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 24,
-               offset = 536
+               count = 48,
+               offset = 552
             },
             position = {
-               count = 24,
-               offset = 512
+               count = 48,
+               offset = 504
             },
             tangent = {
-               count = 24,
-               offset = 560
+               count = 48,
+               offset = 600
             },
             uv0 = {
-               count = 24,
-               offset = 584
-            }
-         }
-      },
-      {
-         indices = {
-            normal = {
-               count = 24,
-               offset = 632
-            },
-            position = {
-               count = 24,
-               offset = 608
-            },
-            tangent = {
-               count = 24,
-               offset = 656
-            },
-            uv0 = {
-               count = 24,
-               offset = 680
+               count = 48,
+               offset = 648
             }
          }
       }
@@ -45,22 +25,22 @@ function data() return {
       normal = {
          count = 144,
          numComp = 3,
-         offset = 96
+         offset = 120
       },
       position = {
-         count = 96,
+         count = 120,
          numComp = 3,
          offset = 0
       },
       tangent = {
-         count = 192,
+         count = 160,
          numComp = 4,
-         offset = 240
+         offset = 264
       },
       uv0 = {
          count = 80,
          numComp = 2,
-         offset = 432
+         offset = 424
       }
    }
 } end

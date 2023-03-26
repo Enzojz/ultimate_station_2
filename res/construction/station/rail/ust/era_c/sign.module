@@ -68,7 +68,7 @@ function data()
         },
         type = "ust_roof",
         order = {
-            value = 3,
+            value = 301,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/roof",

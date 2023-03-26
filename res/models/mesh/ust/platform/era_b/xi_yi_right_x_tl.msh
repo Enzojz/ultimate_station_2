@@ -3,64 +3,64 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 36,
-               offset = 1256
+               count = 24,
+               offset = 392
             },
             position = {
-               count = 36,
-               offset = 1220
+               count = 24,
+               offset = 368
             },
             tangent = {
-               count = 36,
-               offset = 1292
+               count = 24,
+               offset = 416
             },
             uv0 = {
-               count = 36,
-               offset = 1328
+               count = 24,
+               offset = 440
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 96,
-               offset = 1460
+               count = 12,
+               offset = 476
             },
             position = {
-               count = 96,
-               offset = 1364
+               count = 12,
+               offset = 464
             },
             tangent = {
-               count = 96,
-               offset = 1556
+               count = 12,
+               offset = 488
             },
             uv0 = {
-               count = 96,
-               offset = 1652
+               count = 12,
+               offset = 500
             }
          }
       }
    },
    vertexAttr = {
       normal = {
-         count = 396,
+         count = 108,
          numComp = 3,
-         offset = 144
+         offset = 60
       },
       position = {
-         count = 144,
+         count = 60,
          numComp = 3,
          offset = 0
       },
       tangent = {
-         count = 528,
+         count = 144,
          numComp = 4,
-         offset = 540
+         offset = 168
       },
       uv0 = {
-         count = 152,
+         count = 56,
          numComp = 2,
-         offset = 1068
+         offset = 312
       }
    }
 } end

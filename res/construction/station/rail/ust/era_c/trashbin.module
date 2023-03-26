@@ -26,7 +26,7 @@ function data()
         },
         type = "ust_component_general",
         order = {
-            value = 301,
+            value = 311,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/comp",

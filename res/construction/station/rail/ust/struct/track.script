@@ -229,25 +229,24 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     
     local info = params.modules[slotId].info
     
-    local hasCenterNodeLeft, hasCenterNodeRight, hasInfNode, hasSupNode = false, false, false, false
-    
-    if info.trackGroup.left then
-        local trackGroup = params.trackGroup[info.trackGroup.left]
-        local n = #trackGroup
-        hasCenterNodeLeft = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
-        hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
-    end
-    
-    if info.trackGroup.right then
-        local trackGroup = params.trackGroup[info.trackGroup.right]
-        local n = #trackGroup
-        hasCenterNodeRight = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
-        hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
-    end
-    
-    local rev = info.trackGroup.left and not info.trackGroup.right
-    
     local function setPos()
+        local hasCenterNodeLeft, hasCenterNodeRight, hasInfNode, hasSupNode = false, false, false, false
+        if info.trackGroup.left then
+            local trackGroup = params.trackGroup[info.trackGroup.left]
+            local n = #trackGroup
+            hasCenterNodeLeft = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+        end
+        
+        if info.trackGroup.right then
+            local trackGroup = params.trackGroup[info.trackGroup.right]
+            local n = #trackGroup
+            hasCenterNodeRight = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
+        end
+        
+        local rev = info.trackGroup.left and not info.trackGroup.right
+        
         if hasCenterNodeLeft or hasCenterNodeRight or hasInfNode or hasSupNode then
             local pos = {{0, 0.05}, {0.05, 0.45}, {0.45, 0.5}, {1, 0.95}, {0.95, 0.55}, {0.55, 0.5}}
             local leftNode, rightNode = nil, nil

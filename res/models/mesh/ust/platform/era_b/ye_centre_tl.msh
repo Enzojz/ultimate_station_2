@@ -4,19 +4,19 @@ function data() return {
          indices = {
             normal = {
                count = 24,
-               offset = 520
+               offset = 392
             },
             position = {
                count = 24,
-               offset = 496
+               offset = 368
             },
             tangent = {
                count = 24,
-               offset = 544
+               offset = 416
             },
             uv0 = {
                count = 24,
-               offset = 568
+               offset = 440
             }
          }
       },
@@ -24,19 +24,19 @@ function data() return {
          indices = {
             normal = {
                count = 12,
-               offset = 604
+               offset = 476
             },
             position = {
                count = 12,
-               offset = 592
+               offset = 464
             },
             tangent = {
                count = 12,
-               offset = 616
+               offset = 488
             },
             uv0 = {
                count = 12,
-               offset = 628
+               offset = 500
             }
          }
       }
@@ -58,7 +58,7 @@ function data() return {
          offset = 168
       },
       uv0 = {
-         count = 184,
+         count = 56,
          numComp = 2,
          offset = 312
       }

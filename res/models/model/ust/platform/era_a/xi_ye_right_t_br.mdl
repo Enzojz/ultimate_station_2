@@ -1,0 +1,34 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 0.300001, 0, 0 },
+      bbMin = { 0.000001, -5.000002, -2 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/era_a/floor.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl" },
+            mesh = "ust/platform/era_b/xi_ye_right_t_br.msh",
+            name = "xi_ye_right_t_br",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

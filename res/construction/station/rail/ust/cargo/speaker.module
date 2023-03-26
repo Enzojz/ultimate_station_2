@@ -34,7 +34,7 @@ function data()
         },
         type = "ust_component_general",
         order = {
-            value = 300,
+            value = 402,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/comp",

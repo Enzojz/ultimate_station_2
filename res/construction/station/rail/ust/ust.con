@@ -114,7 +114,7 @@ local constructionTemplates = {
         description = {
             name = _("MENU_NAME"),
             description = _("MENU_DESC"),
-            icon = "ui/construction/station/rail/ust/era_c.tga"
+            icon = "ui/construction/station/rail/ust/cargo.tga"
         },
         data = {
             params = {
@@ -194,7 +194,7 @@ local preProcessFn = function(modules, change)
     local classedModules = classifyModules(modules)
     
     local type, id, data = ust.slotInfo(change.slotId)
-    
+
     local info = {
         type = type,
         id = id,

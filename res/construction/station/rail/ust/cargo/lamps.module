@@ -36,15 +36,15 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_CARGO_PLATFORM_SIGN"),
-            description = _("MENU_MODULE_CARGO_PLATFORM_SIGN_DESC"),
+            name = _("MENU_MODULE_CARGO_PLATFORM_LAMPS"),
+            description = _("MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC"),
         },
         category = {
             categories = {"ust_cat_comp"},
         },
         type = "ust_roof",
         order = {
-            value = 3,
+            value = 403,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/roof",
