@@ -12,28 +12,28 @@ local addSlot = function(params, result)
             local makeData = module.makeData
             
             local n = 4
-            local leftPts = ust.basePts(info.arcs.left, n)
-            local rightPts = ust.basePts(info.arcs.right, n)
-            local centerPts, vecs = ust.basePts(info.arcs.center, n)
+            local leftPts, leftVecs = ust.basePts(info.arcs.left, n)
+            local rightPts, rightVecs = ust.basePts(info.arcs.right, n)
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, n)
             
             for i = 1, (info.octa[1] and 4 or 5) do
                 insert(result.slots, {
                     id = makeData(40, i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(centerPts[i]),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), centerVecs[i]):mRot() * coor.trans(centerPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })
 
                 insert(result.slots, {
                     id = makeData(40, 10 + i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(leftPts[i]),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), leftVecs[i]):mRot() * coor.trans(leftPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })
                 
                 insert(result.slots, {
                     id = makeData(40, 20 + i),
-                    transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i]):mRot() * coor.trans(rightPts[i]),
+                    transf = quat.byVec(coor.xyz(0, -1, 0), rightVecs[i]):mRot() * coor.trans(rightPts[i]),
                     type = "ust_component_general",
                     spacing = {0, 0, 0, 0}
                 })
