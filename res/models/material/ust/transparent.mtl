@@ -40,8 +40,8 @@ function data() return {
          normalScale = 1
       },
       polygon_offset = {
-         factor = 0,
-         units = 0,
+         factor = -4,
+         units = -4,
 			forceDepthWrite = true,
       },
       two_sided = {

@@ -230,44 +230,19 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, cl
     local info = params.modules[slotId].info
     
     local hasCenterNodeLeft, hasCenterNodeRight, hasInfNode, hasSupNode = false, false, false, false
+    
     if info.trackGroup.left then
         local trackGroup = params.trackGroup[info.trackGroup.left]
         local n = #trackGroup
-        
-        local infModule = params.modules[trackGroup[1]]
-        local supModule = params.modules[trackGroup[#trackGroup]]
-        if infModule.info.octa[5] and params.modules[infModule.info.octa[5]].metadata.isPlatform then
-            if info.trackGroup.leftPos == 1 then
-                hasInfNode = true
-            end
-        elseif supModule.info.octa[1] and params.modules[supModule.info.octa[1]].metadata.isPlatform then
-            if info.trackGroup.leftPos == #trackGroup then
-                hasSupNode = true
-            end
-        else
-            hasCenterNodeLeft = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
-            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
-        end
+        hasCenterNodeLeft = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+        hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
     end
     
     if info.trackGroup.right then
         local trackGroup = params.trackGroup[info.trackGroup.right]
         local n = #trackGroup
-        
-        local infModule = params.modules[trackGroup[1]]
-        local supModule = params.modules[trackGroup[#trackGroup]]
-        if infModule.info.octa[5] and params.modules[infModule.info.octa[5]].metadata.isPlatform then
-            if info.trackGroup.rightPos == 1 then
-                hasInfNode = true
-            end
-        elseif supModule.info.octa[1] and params.modules[supModule.info.octa[1]].metadata.isPlatform then
-            if info.trackGroup.rightPos == #trackGroup then
-                hasSupNode = true
-            end
-        else
-            hasCenterNodeRight = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
-            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
-        end
+        hasCenterNodeRight = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+        hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
     end
     
     local rev = info.trackGroup.left and not info.trackGroup.right

@@ -50,11 +50,6 @@ function data() return {
 			opacity = 0.25,
 			scale = { 0.34999999403954, 0.34999999403954, },
 		},
-      polygon_offset = {
-         factor = 4,
-         units = 4,
-			forceDepthWrite = true,
-      },
       two_sided = {
          flipNormal = false,
          twoSided = false
