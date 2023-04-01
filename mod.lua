@@ -72,57 +72,6 @@ function data()
                 table.insert(trackNames, track.name)
             end
             
-            
-            -- local streets = api.res.streetTypeRep.getAll()
-            -- for i, streetName in pairs(streets) do
-            --     local street = api.res.streetTypeRep.get(api.res.streetTypeRep.find(streetName))
-            --     if (#street.categories > 0 and not streetName:match("street_depot/") and not streetName:match("street_station/")) then
-            --         local nBackward = #func.filter(street.laneConfigs, function(l) return (l.forward == false) end)
-            --         local mod = api.type.ModuleDesc.new()
-                    
-            --         mod.fileName = ("station/rail/ust/streets/%s.module"):format(streetName)
-                    
-            --         mod.availability.yearFrom = street.yearFrom
-            --         mod.availability.yearTo = street.yearTo
-            --         mod.cost.price = 0
-                    
-            --         mod.description.name = street.name
-            --         mod.description.description = street.desc
-            --         mod.description.icon = street.icon
-                    
-            --         mod.type = "ust_street"
-            --         mod.order.value = i + 1
-            --         mod.metadata = {
-            --             typeName = "ust_street",
-            --             isStreet = true,
-            --             nBackward = nBackward,
-            --             isOneWay = nBackward == 0,
-            --             width = street.streetWidth + street.sidewalkWidth * 2,
-            --             height = 0,
-            --             typeId = 4,
-            --             scriptName = "construction/station/rail/ust/struct/street",
-            --             preProcessAdd = "preProcessAdd",
-            --             preProcessRemove = "preProcessRemove",
-            --             slotSetup = "slotSetup",
-            --             preClassify = "preClassify",
-            --             postClassify = "postClassify",
-            --             gridization = "gridization"
-            --         }
-                    
-            --         mod.category.categories = {"ust_cat_street"}
-                        
-            --         mod.updateScript.fileName = "construction/station/rail/ust/struct/street.updateFn"
-            --         mod.updateScript.params = {
-            --             trackType = streetName,
-            --             trackWidth = street.streetWidth + street.sidewalkWidth * 2
-            --         }
-            --         mod.getModelsScript.fileName = "construction/station/rail/ust/struct/street.getModelsFn"
-            --         mod.getModelsScript.params = {}
-                    
-            --         api.res.moduleRep.add(mod.fileName, mod, true)
-            --     end
-            -- end
-            
             local bridges = api.res.bridgeTypeRep.getAll()
             for index, bridgeName in pairs(bridges) do
                 local bridge = api.res.bridgeTypeRep.get(index)
@@ -215,21 +164,23 @@ function data()
             con.createTemplateScript.params = {trackModuleList = trackModuleList}
             
             local data = api.type.DynamicConstructionTemplate.new()
-            for i = 1, #con.constructionTemplates[1].data.params do
-                local p = con.constructionTemplates[1].data.params[i]
-                local param = api.type.ScriptParam.new()
-                param.key = p.key
-                param.name = p.name
-                if (p.key == "trackType") then
-                    param.values = trackNames
-                else
-                    param.values = p.values
+            for n = 1, #con.constructionTemplates do
+                for i = 1, #con.constructionTemplates[n].data.params do
+                    local p = con.constructionTemplates[n].data.params[i]
+                    local param = api.type.ScriptParam.new()
+                    param.key = p.key
+                    param.name = p.name
+                    if (p.key == "trackType") then
+                        param.values = trackNames
+                    else
+                        param.values = p.values
+                    end
+                    param.defaultIndex = p.defaultIndex or 0
+                    param.uiType = p.uiType
+                    data.params[i] = param
                 end
-                param.defaultIndex = p.defaultIndex or 0
-                param.uiType = p.uiType
-                data.params[i] = param
+                con.constructionTemplates[n].data = data
             end
-            con.constructionTemplates[1].data = data
         end
     }
 end

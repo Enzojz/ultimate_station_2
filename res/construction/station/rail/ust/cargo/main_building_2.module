@@ -39,6 +39,9 @@ local fitMdl = {
     ["xe_yi_left"] = fitModels.edge,
     ["xe_yi_right"] = fitModels.edge,
     ["yi_centre"] = fitModels.surface,
+    ["ye_centre"] = fitModels.surface,
+    ["xe_ye_left"] = fitModels.edge,
+    ["xe_ye_right"] = fitModels.edge,
 }
 
 local mdls = {
@@ -63,7 +66,7 @@ local config = {
     },
 	fitMdl = fitMdl,
 	edgeWidth = 0.25,
-	depth = 2.5,
+	depth = 2.25,
 	path = "ust/platform/cargo/"
 }
 

@@ -78,6 +78,9 @@ local fitMdl = {
     ["xe_yi_left"] = fitModels.edge,
     ["xe_yi_right"] = fitModels.edge,
     ["yi_centre"] = fitModels.surface,
+    ["ye_centre"] = fitModels.surface,
+    ["xe_ye_left"] = fitModels.edge,
+    ["xe_ye_right"] = fitModels.edge,
 }
 
 local mdls = {
