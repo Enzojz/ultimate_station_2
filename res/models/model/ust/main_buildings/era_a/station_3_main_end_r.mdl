@@ -1,0 +1,89 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 20.370000839233, 0.19999998807907, 16.929769515991, },
+		bbMin = { 16.966766357422, -16.659992218018, 0, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 1.7016172409058, 8.4299964904785, 8.4648847579956, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", },
+								mesh = "station/rail/era_a/station_3_main_end_r/station_3_main_end_r_lod0.msh",
+								name = "station_3_main_end_r",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_3_main_end_r/roof_gutter_3_main_end_r_2_lod0.msh",
+								name = "roof_gutter_3_main_end_r_2",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_3_main_end_r/roof_gutter_tubes_3_main_end_r_lod0.msh",
+								name = "roof_gutter_tubes_3_main_end_r",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 20, 0, 12.539898872375, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", },
+							-- 	mesh = "station/rail/era_a/station_3_main_end_r/station_3_main_end_r_perron_lod0.msh",
+							-- 	name = "station_3_main_end_r_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							-- },
+						},
+						name = "station_3_main_end_r_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 1301.4359130859,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", "station/rail/era_a/era_a_trainstation_wall_1.mtl", },
+								mesh = "station/rail/era_a/station_3_main_end_r/station_3_main_end_r_lod1.msh",
+								name = "station_3_main_end_r",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", },
+							-- 	mesh = "station/rail/era_a/station_3_main_end_r/station_3_main_end_r_perron_lod1.msh",
+							-- 	name = "station_3_main_end_r_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							-- },
+						},
+						name = "station_3_main_end_r_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 1301.4359130859,
+			visibleTo = 3904.3076171875,
+		},
+	},
+	metadata = { },
+	version = 1,
+}
+end

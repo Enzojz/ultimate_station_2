@@ -1,0 +1,47 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+
+local insert = table.insert
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)   
+    insert(result.models, ust.newModel("station/rail/asset/era_a_trashcan.mdl", tag, transform));
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_TRASHBIN"),
+            description = _("MENU_MODULE_PLATFORM_TRASHBIN_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_component_general",
+        order = {
+            value = 111,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/comp",
+            classify = "classify",
+            typeName = "ust_component_general",
+            isComponent = true,
+            typeId = 40,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

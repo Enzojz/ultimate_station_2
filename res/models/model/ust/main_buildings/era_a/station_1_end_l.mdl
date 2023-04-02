@@ -1,0 +1,101 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { -1.0594997406006, 0.19999998807907, 8.7068996429443, },
+		bbMin = { -5.4174966812134, -11.180033683777, 0, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 2.1789984703064, 5.690016746521, 4.3534498214722, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_1.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_lod0.msh",
+								name = "station_1_end_l",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_assets.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_chimney_01_lod0.msh",
+								name = "station_1_end_l_chimney_01",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -1.7999999523163, -7.7000036239624, 7.3819994926453, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/roof_gutter_1_end_l_2_lod0.msh",
+								name = "roof_gutter_1_end_l_2",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/roof_gutter_tubes_end_l_lod0.msh",
+								name = "roof_gutter_tubes_end_l",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -4.8312492370605, -7.7824959754944, 4.9398970603943, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", },
+							-- 	mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_perron_lod0.msh",
+							-- 	name = "station_1_end_l_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 5.0000019073486, 0, 0, 1, },
+							-- },
+						},
+						name = "station_1_end_l_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 713.98291015625,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_doors_and_windows_1.mtl", "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_lod1.msh",
+								name = "station_1_end_l",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_assets.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", },
+								mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_chimney_01_lod1.msh",
+								name = "station_1_end_l_chimney_01",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -1.7999999523163, -7.7000036239624, 7.3819994926453, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", },
+							-- 	mesh = "station/rail/era_a/station_1_end_l/station_1_end_l_perron_lod1.msh",
+							-- 	name = "station_1_end_l_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 5.0000019073486, 0, 0, 1, },
+							-- },
+						},
+						name = "station_1_end_l_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 713.98291015625,
+			visibleTo = 2141.9487304688,
+		},
+	},
+	metadata = { },
+	version = 1,
+}
+end

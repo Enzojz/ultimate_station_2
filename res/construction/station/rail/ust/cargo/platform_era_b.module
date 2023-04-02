@@ -51,10 +51,9 @@ function data()
         description = {
             name = _("MENU_MODULE_PLATFORM_CARGO"),
             description = _("MENU_MODULE_PLATFORM_CARGO_DESC"),
-            icon = "ui/construction/station/rail/modular_station/platform_cargo_era_b.tga"
         },
         category = {
-            categories = {"ust_cat_platform"},
+            categories = {"ust_cat_platform_cargo"},
         },
         type = "ust_platform",
         order = {

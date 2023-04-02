@@ -1,0 +1,89 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+
+local insert = table.insert
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local module = params.modules[params.classedModules[id].slotId]
+    local info = module.info
+    local makeData = module.makeData
+    
+    local n = 4
+    local centerPts, vecs = ust.basePts(info.arcs.center, n)
+    
+    for i = 1, n do
+        if i % 2 == 1 then
+            local pos = centerPts[i + 1]
+            local transf = quat.byVec(coor.xyz(0, -1, 0), vecs[i + 1]):mRot() * coor.trans(pos)
+            
+            if i % 4 == 1 then
+                local m3 = module.info.octa[3] and (params.modules[module.info.octa[3]].metadata.isTrack or params.modules[module.info.octa[3]].metadata.isStreet) or false
+                local m7 = module.info.octa[7] and (params.modules[module.info.octa[7]].metadata.isTrack or params.modules[module.info.octa[7]].metadata.isStreet) or false
+                if m7 then
+                    local nr = tostring(params.modules[module.info.octa[7]].info.trackGroup.right)
+                    result.labelText[#result.models] = {
+                        nr, nr,
+                    }
+                    insert(result.models, ust.newModel("station/rail/asset/era_b_sign_nr_l.mdl", tag, coor.rotZ90P * coor.transX(2.3) * coor.transZ(-0.8) * transf));
+                end
+                if m3 then
+                    local nr = tostring(params.modules[module.info.octa[3]].info.trackGroup.left)
+                    result.labelText[#result.models] = {
+                        nr, nr,
+                    }
+                    insert(result.models, ust.newModel("station/rail/asset/era_b_sign_nr_r.mdl", tag, coor.rotZ90P * coor.transX(-2.3) * coor.transZ(-0.8) * transf));
+                end
+            else
+                insert(result.models, ust.newModel("station/rail/asset/era_b_name_board.mdl", tag, coor.rotZ90P * transf));
+            end
+        end
+    end
+    
+    -- SLot to replace itself
+    insert(result.slots, {
+        id = makeData(28, -1),
+        transf = module.info.transf,
+        type = "ust_roof",
+        spacing = {0, 0, 0, 0}
+    })
+end
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_PLATFORM_SIGN"),
+            description = _("MENU_MODULE_PLATFORM_SIGN_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_comp"},
+        },
+        type = "ust_roof",
+        order = {
+            value = 201,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/roof",
+            classify = "classify",
+            typeName = "ust_roof",
+            isComponent = true,
+            typeId = 28,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

@@ -29,8 +29,8 @@ local fitMdl = {
 
 local config = {
     edgeWidth = 0.3,
-    path = "ust/platform/era_a/",
-    laneMdl = "ust/cargo_lane.mdl",
+    path = "ust/platform/era_b2/",
+    laneMdl = "ust/terminal_lane.mdl",
     fitMdl = fitMdl
 }
 
@@ -49,22 +49,21 @@ function data()
             price = 0,
         },
         description = {
-            name = _("MENU_MODULE_PLATFORM_CARGO"),
-            description = _("MENU_MODULE_PLATFORM_CARGO_DESC"),
+            name = _("MENU_MODULE_PLATFORM"),
+            description = _("MENU_MODULE_PLATFORM_DESC"),
         },
         category = {
-            categories = {"ust_cat_platform_cargo"},
+            categories = {"ust_cat_platform"},
         },
         type = "ust_platform",
         order = {
-            value = 11,
+            value = 5,
         },
         metadata = {
             typeName = "ust_platform",
             isPlatform = true,
-            isCargo = true,
             typeId = 2,
-            width = 10,
+            width = 5,
             scriptName = "construction/station/rail/ust/struct/platform",
             preProcessAdd = "preProcessAdd",
             preProcessRemove = "preProcessRemove",

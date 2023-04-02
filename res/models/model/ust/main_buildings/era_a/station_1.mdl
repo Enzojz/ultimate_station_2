@@ -1,0 +1,167 @@
+function data()
+return {
+	boundingInfo = {
+		bbMax = { 4.9999990463257, 0, 7.4526052474976, },
+		bbMin = { -4.9999990463257, -11.180033683777, 9.9999999747524e-07, },
+	},
+	collider = {
+		params = {
+			halfExtents = { 4.9999990463257, 5.5900168418884, 3.7263021469116, },
+		},
+		transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+		type = "BOX",
+	},
+	lods = {
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_1.mtl", "station/rail/era_a/era_a_trainstation_borders_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_1/station_1_lod0.msh",
+								name = "station_1",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_2.mtl", },
+								mesh = "station/rail/era_a/station_1/roof_gutter_1_lod0.msh",
+								name = "roof_gutter_1",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							-- {
+							-- 	materials = { "station/rail/era_a/era_a_trainstation_floor_1.mtl", },
+							-- 	mesh = "station/rail/era_a/station_1/station_1_perron_lod0.msh",
+							-- 	name = "station_1_perron",
+							-- 	transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							-- },
+						},
+						name = "station_1_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 0,
+			visibleTo = 400,
+		},
+		{
+			node = {
+				children = {
+					{
+						children = {
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_borders_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_1.mtl", "station/rail/era_a/era_a_trainstation_wall_1.mtl", "station/rail/era_a/era_a_trainstation_doors_and_windows_2.mtl", "station/rail/era_a/era_a_trainstation_roof_1.mtl", },
+								mesh = "station/rail/era_a/station_1/station_1_lod1.msh",
+								name = "station_1",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+							{
+								materials = { "station/rail/era_a/era_a_trainstation_floor_1.mtl", },
+								mesh = "station/rail/era_a/station_1/station_1_perron_lod1.msh",
+								name = "station_1_perron",
+								transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+							},
+						},
+						name = "station_1_grp",
+						transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+					},
+				},
+				name = "RootNode",
+				transf = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, },
+			},
+			static = false,
+			visibleFrom = 400,
+			visibleTo = 3500,
+		},
+	},
+	metadata = {
+		transportNetworkProvider = {
+			laneLists = {
+				{
+					linkable = false,
+					nodes = {
+						-- {
+						-- 	{ -2.5, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 2.5, 0, 0.80000001192093, },
+						-- 	{ 2.5, 0, 0, },
+						-- 	2.4000000953674,
+						-- },
+						{
+							{ -5, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 0, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						{
+							{ 5, -2.5, 0.80000001192093, },
+							{ 5, 0, 0, },
+							2.4000000953674,
+						},
+						-- {
+						-- 	{ 5, 0, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, -2.5, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ -5, 0, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, -2.5, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, 0, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+						-- {
+						-- 	{ 0, -2.5, 0.80000001192093, },
+						-- 	{ 0, -2.5, 0, },
+						-- 	2.4000000953674,
+						-- },
+					},
+					speedLimit = 20,
+					transportModes = { "PERSON", },
+				},
+			},
+			runways = { },
+			terminals = { },
+		},
+	},
+	version = 1,
+}
+end

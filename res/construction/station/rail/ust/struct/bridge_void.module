@@ -27,6 +27,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         insert(result.invokeLater, function()
             result.terrainLists[info.id].equal = nil
             result.terrainLists[info.id].equalOpt = nil
+
+            result.groundFaceLists[info.id] = nil
         end)
     elseif module.metadata.isTrack then
         insert(result.invokeLater, function()
