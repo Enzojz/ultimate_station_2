@@ -23,7 +23,6 @@ Evoltion to come
 - Adjustable slope for each track and platform
 - Some extra components for tunnel station construction
 - Some extra components such as underpass entry
-- 1850 and 1920 era components
 
 The main disadvtange of this mod is that it is not compatible with none of module which is designed for vanilla modular construction, since they work differently. If you are an modder, you are welcomed to ask about implemention details.
 
@@ -58,7 +57,6 @@ Le mod n'est pas encore complet, mais je le publie car il est dans un état mini
 - Pente ajustable pour chaque voie et plateforme
 - Quelques composants supplémentaires pour la construction de gare de tunnel
 - Quelques composants supplémentaires tels que l'entrée de passage inférieur
-- Composants de l'ère 1850 et 1920
 
 Inconvénient majeur de ce mod : il n'est pas compatible avec aucun mod conçu pour la construction modulaire original, car ils fonctionnent différemment. Si vous êtes un moddeur, vous êtes invité à demander des détails sur l'adaptation.
 
@@ -91,7 +89,6 @@ local zhcn = [[本模组可以帮助玩家在尽少约束的情况下建造自�
 - 可以调整的站台或股道坡度
 - 一些用于半地下站台和股道的组件
 - 一些配合地道使用的组件
-- 1850和1920年组件
 
 该模组的主要缺点是无法直接使用为现有原生模块化车站开发的模组，因为本模组在技术实现上与之不同。如果你对于将其他模组内容进行适配的工作感兴趣的话，可以和我联系，我会提供一些实现细节上的帮助。
 
@@ -124,7 +121,6 @@ local zhhkmotw = [[本模組可以幫助玩家在盡少約束的情況下建造�
 - 可以調整的月臺或股道坡度
 - 一些用於半地下月臺和股道的組件
 - 一些配合地道使用的元件
-- 1850和1920年組件
 
 該模組的主要缺點是無法直接使用為現有原生模組化車站開發的模組，因為本模組在技術實現上與之不同。如果你對於將其他模組內容進行適配的工作感興趣的話，可以和我聯繫，我會提供一些實現細節上的幫助。
 
@@ -140,7 +136,8 @@ function data()
             MENU_NAME = "Ultimate Station",
             MENU_DESC = "A fully customizable station with infinit of possibilities.",
             UST_CAT_TRACK = "Tracks",
-            UST_CAT_PLATFORM = "Platforms",
+            UST_CAT_PLATFORM = "Passenger Platforms",
+            UST_CAT_PLATFORM_CARGO = "Cargo Platforms",
             UST_CAT_MODIFIER = "Geometry",
             UST_CAT_ENTRY = "Entries",
             UST_CAT_COMP = "Components",
@@ -268,7 +265,8 @@ function data()
             MENU_NAME = "终极车站",
             MENU_DESC = "充满无尽定制可能性的车站.",
             UST_CAT_TRACK = "股道",
-            UST_CAT_PLATFORM = "站台",
+            UST_CAT_PLATFORM = "客运站台",
+            UST_CAT_PLATFORM_CARGO = "货运站台",
             UST_CAT_MODIFIER = "几何修改器",
             UST_CAT_ENTRY = "入口",
             UST_CAT_COMP = "站台组件",
@@ -396,7 +394,8 @@ function data()
             MENU_NAME = "終極車站",
             MENU_DESC = "充滿無盡定制可能性的車站.",
             UST_CAT_TRACK = "股道",
-            UST_CAT_PLATFORM = "站台",
+            UST_CAT_PLATFORM = "客運站台",
+            UST_CAT_PLATFORM_CARGO = "貨運站台",
             UST_CAT_MODIFIER = "幾何修改器",
             UST_CAT_ENTRY = "入口",
             UST_CAT_COMP = "站台組件",
@@ -524,7 +523,8 @@ function data()
             MENU_NAME = "Gare ultime",
             MENU_DESC = "Une gare entièrement personnalisable avec possibilités infinies.",
             UST_CAT_TRACK = "Voies",
-            UST_CAT_PLATFORM = "Plateformes",
+            UST_CAT_PLATFORM = "Plateforme voyageur",
+            UST_CAT_PLATFORM_CARGO = "Plateforme fret",
             UST_CAT_MODIFIER = "Géométrie",
             UST_CAT_ENTRY = "Entrées",
             UST_CAT_COMP = "Composants",
