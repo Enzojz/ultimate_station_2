@@ -100,6 +100,12 @@ local constructionTemplates = {
                     name = _("MENU_PLATFORM_RIGHT"),
                     values = {_("YES"), _("AUTO")},
                     defaultIndex = 2
+                },
+                {
+                    key = "era",
+                    name = _("MENU_ERA"),
+                    values = {"A", "B1", "B2", "C"},
+                    defaultIndex = 3
                 }
             }
         },
@@ -176,6 +182,12 @@ local constructionTemplates = {
                     name = _("MENU_PLATFORM_RIGHT"),
                     values = {_("YES"), _("AUTO")},
                     defaultIndex = 2
+                },
+                {
+                    key = "era",
+                    name = _("MENU_ERA"),
+                    values = {"A", "B"},
+                    defaultIndex = 1
                 }
             }
         },

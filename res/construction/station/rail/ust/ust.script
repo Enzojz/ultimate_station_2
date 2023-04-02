@@ -9,11 +9,6 @@ rList = pipe.new * rList * pipe.map(pipe.neg()) * pipe.rev() / ust.infi + rList
 local trackLengths = {40, 60, 80, 100, 140, 160, 200, 240, 320, 400, 480, 500, 600, 800, 1000}
 local trackNumberList = {1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
 
-local templatePlatform = {
-    "station/rail/ust/era_c/platform.module",
-    "station/rail/ust/cargo/platform_era_b.module"
-}
-
 local createTemplateFn = function(params)
     local trackModule = params.capturedParams.trackModuleList[params.trackType + 1]
     local baseLength = trackLengths[params.lPlatform + 1]
@@ -76,7 +71,6 @@ local createTemplateFn = function(params)
                     info.radius = radius
                 end
                 local slotId, slotIds = ust.slotIds(info)
-                result[slotId] = templatePlatform[params.templateIndex + 1]
                 for m, slotIds in pairs(slotIds) do
                     for _, slotId in ipairs(slotIds) do
                         result[slotId] = string.format("station/rail/ust/data/%s.module", m)
@@ -84,10 +78,26 @@ local createTemplateFn = function(params)
                 end
                 
                 if (params.templateIndex == 0) then
-                    result[ust.base(info.id, 28)] = "station/rail/ust/era_c/sign.module"
-                    result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_c/seats.module"
+                    if params.era == 0 then
+                        result[slotId] = "station/rail/ust/era_a/platform.module"
+                        result[ust.base(info.id, 28)] = "station/rail/ust/era_a/sign.module"
+                        result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_a/seats.module"
+                    elseif params.era == 1 then
+                        result[slotId] = "station/rail/ust/era_b/platform.module"
+                        result[ust.base(info.id, 28)] = "station/rail/ust/era_b/sign.module"
+                        result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_b/seats.module"
+                    elseif params.era == 2 then
+                        result[slotId] = "station/rail/ust/era_b/platform_2.module"
+                        result[ust.base(info.id, 28)] = "station/rail/ust/era_b/sign.module"
+                        result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_b/seats.module"
+                    elseif params.era == 3 then
+                        result[slotId] = "station/rail/ust/era_c/platform.module"
+                        result[ust.base(info.id, 28)] = "station/rail/ust/era_c/sign.module"
+                        result[ust.mixData(ust.base(info.id, 40), 3)] = "station/rail/ust/era_c/seats.module"
+                    end
                 end
                 if (params.templateIndex == 1) then
+                    result[slotId] = "station/rail/ust/cargo/platform_era_b.module"
                     if y % 2 == 0 then
                         result[ust.base(info.id, 28)] = "station/rail/ust/cargo/sign.module"
                     else
