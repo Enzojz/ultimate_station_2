@@ -62,21 +62,18 @@ local mdls = {
 }
 
 local config = {
-    width = 40,
-    extend = {21, -21, 0, -38, 4, 0},
+    width = 20,
+    extend = {11, -11, 0, -23, 4, 0},
     generatedData = generatedData,
     mdlList = {
         mdls.end_left,
         mdls.end_right,
-        mdls.roof_side,
         mdls.main
     },
     connectors = {
         coor.xyz(0, -2.5, 0),
         coor.xyz(10, -2.5, 0),
-        coor.xyz(20, -2.5, 0),
         coor.xyz(-10, -2.5, 0),
-        coor.xyz(-20, -2.5, 0)
     },
     fitMdl = fitMdl,
 	edgeWidth = 0.25,
@@ -86,6 +83,7 @@ local config = {
 
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    print("x")
     game.res.script["construction/station/rail/ust/struct/building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
 end
 
@@ -107,17 +105,17 @@ function data()
         category = {
             categories = {"ust_cat_entry"},
         },
-        type = "ust_component_main_40",
+        type = "ust_component_main_20",
         order = {
-            value = 33,
+            value = 32,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/building",
             classify = "classify",
-            typeName = "ust_component_main_40",
+            typeName = "ust_component_main_20",
             isComponent = true,
             isBuilding = true,
-            typeId = 33,
+            typeId = 32,
             moreCapacity = {
                 passenger = 150
             }

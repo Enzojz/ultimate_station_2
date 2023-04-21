@@ -1,0 +1,119 @@
+local coor = require "ust/coor"
+local ust = require "ust"
+
+
+--Begin Generated
+local generatedData = {
+    ["era_b_station_3_assets_1"] = {
+        ["asset/roof/era_b_lamp_b_01.mdl"] = {
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -2.00000, -5.00000, 8.00000, 1.00000},
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 2.00000, -5.00000, 8.00000, 1.00000},
+        },
+        ["station/rail/asset/era_b_double_chair.mdl"] = {
+            {0.00000, -1.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -6.00000, -27.50000, 0.00000, 1.00000},
+            {-1.00000, -0.00000, 0.00000, 0.00000, 0.00000, -1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -6.00000, -2.00000, 0.80000, 1.00000},
+            {-1.00000, -0.00000, 0.00000, 0.00000, 0.00000, -1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 6.00000, -2.00000, 0.80000, 1.00000},
+            {-0.00000, -1.00000, 0.00000, 0.00000, 1.00000, -0.00000, -0.00000, 0.00000, 0.00000, -0.00000, 1.00000, 0.00000, 6.00000, -27.50000, 0.00000, 1.00000},
+        },
+        ["station/rail/asset/era_b_trashcan.mdl"] = {
+            {0.00000, -1.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -3.50000, -18.50000, 0.00000, 1.00000},
+        },
+        ["street/street_light_us_a.mdl"] = {
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -5.00000, -34.00000, 0.00000, 1.00000},
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, -5.00000, -23.00000, 0.00000, 1.00000},
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 4.50000, -34.00000, 0.00000, 1.00000},
+            {1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000, 0.00000, 4.50000, -23.00000, 0.00000, 1.00000},
+        },
+    },
+}
+--End Generated
+
+
+local fitModels = {
+    surface = ust.fitModel(4.4, 5, -2, true, true),
+    edge = ust.fitModel(0.3, 5, -2, true, true),
+}
+
+local fitMdl = {
+    ["xe_yi_left"] = fitModels.edge,
+    ["xe_yi_right"] = fitModels.edge,
+    ["yi_centre"] = fitModels.surface,
+    ["ye_centre"] = fitModels.surface,
+    ["xe_ye_left"] = fitModels.edge,
+    ["xe_ye_right"] = fitModels.edge,
+}
+
+local mdls = {
+    main = "ust/main_buildings/era_b/station_3.mdl",
+    end_left = "ust/main_buildings/era_b/station_3_end_l.mdl",
+    end_right = "ust/main_buildings/era_b/station_3_end_r.mdl"
+}
+
+local config = {
+    width = 20,
+    extend = {11, -11, 0, -23, 4, 0},
+    generatedData = generatedData,
+    mdlList = {
+        mdls.end_left,
+        mdls.end_right,
+        mdls.main
+    },
+    connectors = {
+        coor.xyz(0, -2.5, 0),
+        coor.xyz(10, -2.5, 0),
+        coor.xyz(-10, -2.5, 0),
+    },
+    fitMdl = fitMdl,
+    edgeWidth = 0.25,
+    depth = 5,
+    path = "ust/platform/era_b/"
+}
+
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    print("x")
+    game.res.script["construction/station/rail/ust/struct/building"].updateFn(result, transform, tag, slotId, addModelFn, params, config)
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_SIDE_ENTRY_40"),
+            description = _("MENU_MODULE_SIDE_ENTRY_40_DESC"),
+            icon = "ui/construction/station/rail/modular_station/side_building_3_era_b.tga"
+        },
+        category = {
+            categories = {"ust_cat_entry"},
+        },
+        type = "ust_component_main_20",
+        order = {
+            value = 32,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/building",
+            classify = "classify",
+            typeName = "ust_component_main_20",
+            isComponent = true,
+            isBuilding = true,
+            typeId = 32,
+            moreCapacity = {
+                passenger = 150
+            }
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

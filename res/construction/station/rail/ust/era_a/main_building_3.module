@@ -145,7 +145,6 @@ local config = {
     mdlList = {
         mdls.end_left,
         mdls.end_right,
-        mdls.roof_side,
         mdls.main
     },
     connectors = {
