@@ -48,8 +48,8 @@ local fitMdl = {
 
 local mdls = {
     main = "ust/main_buildings/era_b/station_2_main.mdl",
-    end_left = "ust/main_buildings/era_b/station_2_main_end_l.mdl",
-    end_right = "ust/main_buildings/era_b/station_2_main_end_r.mdl",
+    end_left = "ust/main_buildings/era_b/station_2_end_l.mdl",
+    end_right = "ust/main_buildings/era_b/station_2_end_r.mdl",
 }
 
 local config = {
@@ -69,7 +69,7 @@ local config = {
     fitMdl = fitMdl,
     edgeWidth = 0.25,
     depth = 5,
-    path = "ust/platform/era_b/"
+    path = "ust/platform/era_b2/"
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)

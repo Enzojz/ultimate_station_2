@@ -56,7 +56,7 @@ local config = {
     fitMdl = fitMdl,
     edgeWidth = 0.25,
     depth = 5,
-    path = "ust/platform/era_b/"
+    path = "ust/platform/era_b2/"
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
