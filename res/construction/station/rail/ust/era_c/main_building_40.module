@@ -132,7 +132,7 @@ function data()
         },
         type = "ust_component_main_40",
         order = {
-            value = 33,
+            value = 36,
         },
         metadata = {
             scriptName = "construction/station/rail/ust/struct/building",
