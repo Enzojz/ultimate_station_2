@@ -1,0 +1,124 @@
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+local livetext = require "ust/livetext"
+
+local unpack = table.unpack
+local insert = table.insert
+local ma = math
+local pi = ma.pi
+local abs = ma.abs
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)    
+    local id = params.modules[slotId].info.id
+    local targetSlotId = params.classedModules[id].slotId
+    local m = params.modules[targetSlotId]
+    local info = m.info
+    local makeData = m.makeData
+    
+    local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
+    
+    local arcs = info.arcs
+
+    local addText = function(text, index)
+        local nameModelsF, width = livetext(2)(text)
+        for _, m in ipairs(nameModelsF(function()
+            return 
+                coor.trans(coor.xyz(-0.5 * width, 0, -1)) 
+                * coor.rotX90N 
+                * quat.byVec(coor.xyz(0, 1, 0), centerVecs[index]):mRot() 
+                * coor.trans(centerPts[index]) 
+                * coor.transZ(m.metadata.height) end)) do
+            insert(result.models, m)
+        end
+    end
+
+    insert(result.slots, {
+        id = makeData(87, 1),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[3]):mRot() * coor.trans(centerPts[3]) * coor.transZ(m.metadata.height),
+        type = "ust_gradient_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+    insert(result.slots, {
+        id = makeData(87, 2),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[info.refPos.y < 0 and 4 or 2]):mRot() * coor.trans(centerPts[info.refPos.y < 0 and 4 or 2]) * coor.transZ(m.metadata.height),
+        type = "ust_gradient_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+    
+    insert(result.slots, {
+        id = makeData(87, 3),
+        transf = quat.byVec(coor.xyz(1, 0, 0), centerVecs[info.refPos.y < 0 and 5 or 1]):mRot() * coor.trans(centerPts[info.refPos.y < 0 and 5 or 1]) * coor.transZ(m.metadata.height),
+        type = "ust_gradient_modifier",
+        spacing = {0, 0, 0, 0}
+    })
+
+    addText((not info.gradient or info.gradient == 0) and "G0" or string.format("G%d‰(%s)", abs(info.gradient), info.gradient < 0 and "-" or "+"), info.refPos.y < 0 and 2 or 4)
+    addText("0", info.refPos.y < 0 and 4 or 2)
+    addText("⊘", info.refPos.y < 0 and 5 or 1)
+    
+    local ptS, vecS = unpack(info.pts[info.refPos.y < 0 and 2 or 1])
+    vecS = vecS:normalized()
+    if info.refPos.y < 0 then vecS = -vecS end
+    for i = -60, 60, 1 do
+        local rad = (arcs.center.inf - arcs.center.sup) + i * pi / 180
+        if info.refPos.y < 0 then rad = -rad end
+        if (abs(rad) > 10e-3) then
+            local r = 20 / rad
+            if (abs(r) >= 50) then
+                local o = ptS - (vecS * r .. coor.rotZ(pi * 0.5))
+                local dst = o + (vecS * r .. coor.rotZ(pi * 0.5 - rad))
+                insert(result.slots, {
+                    id = makeData(88, i),
+                    transf = coor.scale(coor.xyz(0.05, 0.2, 1)) * coor.rotZ((info.refPos.y < 0 and arcs.center.sup or arcs.center.inf) - rad) * coor.trans(dst) * coor.transZ(m.metadata.height),
+                    type = "ust_gradient_modifier",
+                    shape = 2,
+                    spacing = {0, 0, 0, 0}
+                })
+            end
+        end
+    end
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        visible = false,
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_GRADIENT_MODIFIER"),
+            description = _("MENU_GRADIENT_MODIFIER_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_modifier"},
+        },
+        type = "ust_gradient_modifier",
+        order = {
+            value = 3,
+        },
+        metadata = {
+            typeName = "ust_gradient_modifier",
+            isData = true,
+            type = 87,
+            scriptName = "construction/station/rail/ust/modifier/gradient",
+            preProcessAdd = "preProcessAdd",
+            preProcessPostAdd = "preProcessPostAdd",
+            classify = "classify",
+            slotSetup = "slotSetup"
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
