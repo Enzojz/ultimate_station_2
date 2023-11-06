@@ -1,0 +1,40 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 0.950001, 0, 0.000001 },
+      bbMin = { -0.950000, -5.775000, -4.399999 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = {
+               "ust/era_c/era_c_trainstation_wall_white.mtl",
+               "ust/era_c/era_c_trainstation_wall_grey.mtl",
+               "ust/era_c/floor.mtl",
+               "station/rail/era_c/era_c_trainstation_borders_1.mtl",
+               "ust/transparent.mtl"
+            },
+            mesh = "ust/platform/era_c/underpass_middle.msh",
+            name = "underpass_middle",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

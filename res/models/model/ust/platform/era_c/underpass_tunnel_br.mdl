@@ -1,0 +1,34 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 0, 1.449926, 2.200000 },
+      bbMin = { -1.900000, 0, 0 }
+   },
+   collider = {
+      params = {
+
+      },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "ust/era_c/era_c_trainstation_wall_grey.mtl", "ust/era_c/era_c_trainstation_wall_white.mtl", "ust/era_c/floor.mtl" },
+            mesh = "ust/platform/era_c/underpass_tunnel_br.msh",
+            name = "underpass_tunnel_br",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 1000
+      }
+   },
+   metadata = {
+
+   },
+   version = 1
+} end

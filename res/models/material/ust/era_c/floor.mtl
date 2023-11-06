@@ -35,7 +35,7 @@ function data() return {
       {
           op = "MULTIPLICATION",
           mode = "NORMAL",
-          scale = { 0.2, 0.2 },
+          scale = { 0.3, 0.3 },
           opacity = -300.0
       },
       two_sided = {

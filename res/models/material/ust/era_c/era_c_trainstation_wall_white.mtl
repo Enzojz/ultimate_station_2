@@ -1,0 +1,77 @@
+function data()
+return {
+	order = 0,
+	params = {
+		albedo_scale = {
+			albedoScale = { 1, 1, 1, },
+		},
+		fade_out_range = {
+			fadeOutEndDist = 20000,
+			fadeOutStartDist = 10000,
+		},
+		map_albedo = {
+			fileName = "models/station/rail/era_c/era_c_trainstation_wall_white_albedo.dds",
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+		},
+		map_metal_gloss_ao = {
+			fileName = "models/station/rail/era_c/era_c_trainstation_wall_white_metal_gloss_ao.dds",
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+		},
+		map_normal = {
+			fileName = "models/station/rail/era_c/era_c_trainstation_wall_white_normal.dds",
+			redGreen = true,
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+		},
+		map_op_2 = {
+			fileName = "buildings/dirtmap.dds",
+			type = "TWOD",
+			wrapS = "REPEAT",
+			wrapT = "REPEAT",
+		},
+		normal_scale = {
+			normalScale = 1,
+		},
+		map_op_1 =
+		{
+			fileName = "models/ust/op/uz.dds",
+			magFilter = "LINEAR",
+			minFilter = "LINEAR_MIPMAP_LINEAR",
+		},
+		operation_1 =
+		{
+			op = "MULTIPLICATION",
+			mode = "NORMAL",
+			scale = { 1.5, 1.5 },
+			opacity = -300.0
+		},
+		-- operation_1 = {
+		-- 	mode = "TEXCOORD",
+		-- 	op = "NO_OP",
+		-- 	opacity = 1,
+		-- 	scale = { 1, 1, },
+		-- },
+		operation_2 = {
+			mode = "TEXCOORD",
+			op = "MULTIPLICATION",
+			opacity = 0.30000001192093,
+			scale = { 0.050000000745058, 0.050000000745058, },
+		},
+		polygon_offset = {
+			factor = 0,
+			forceDepthWrite = true,
+			units = 0,
+		},
+		two_sided = {
+			flipNormal = true,
+			twoSided = false,
+		},
+	},
+	type = "PHYSICAL_NRML_MAP_OP"
+}
+end
