@@ -1,0 +1,100 @@
+local coor = require "ust/coor"
+local ust = require "ust"
+local func = require "ust/func"
+
+local insert = table.insert
+
+local fitModels = {
+    beam = ust.fitModel(0.5, 2.9, 1, true, true),
+    wall = ust.fitModel(0.5, 5, 5, true, true)
+}
+
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    local id = params.modules[slotId].info.id
+    local m = params.modules[params.classedModules[id].slotId]
+    local info = m.info
+    local data = params.modules[slotId].info.data
+    
+    if data == 3 or data == 7 then
+        local n = 4
+        local cpts = ust.basePts(info.arcs.center, n)
+        local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
+        
+        for i = 1, n do
+            local ptsBaseLength = (pts[i + 1] - pts[i]):length()
+            local ptsSideLength = (ptsBaseLength - 1.45) * 0.5
+            local ptsVec = (pts[i + 1] - pts[i]):normalized() * ptsSideLength;
+            
+            local cptsBaseLength = (cpts[i + 1] - cpts[i]):length()
+            local cptsSideLength = (cptsBaseLength - 1.45) * 0.5
+            local cptsVec = (cpts[i + 1] - cpts[i]):normalized() * cptsSideLength;
+            
+            local coords = func.map2(
+                func.interlace({pts[i], pts[i] + ptsVec, pts[i + 1] - ptsVec, pts[i + 1]}), 
+                func.interlace({cpts[i], cpts[i] + cptsVec, cpts[i + 1] - cptsVec, cpts[i + 1]}), 
+                function(pts, cpts)
+                return data == 7 and {
+                    rt = pts[1],
+                    rb = pts[2],
+                    lt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
+                    lb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
+                } or {
+                    lt = pts[1],
+                    lb = pts[2],
+                    rt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
+                    rb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
+                }
+            end)
+            
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], false)))
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], false)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_tl.mdl", tag, coor.scaleZ(1.7) * coor.transZ(-2) * fitModels.beam(coords[2], true)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_br.mdl", tag, coor.scaleZ(1.7) * coor.transZ(-2) * fitModels.beam(coords[2], false)))
+        end
+    end
+
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_ENTRY_UNDERPASS"),
+            description = _("MENU_MODULE_ENTRY_UNDERPASS_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_entry"},
+        },
+        type = "ust_component_fence",
+        order = {
+            value = 201,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/fence",
+            classify = "classify",
+            preProcessRemove = "preProcessRemoveWall",
+            typeName = "ust_component_fence",
+            isComponent = true,
+            isFence = true,
+            isWall = true,
+            typeId = 24,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end
