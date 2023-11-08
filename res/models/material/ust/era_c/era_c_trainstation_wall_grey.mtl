@@ -6,8 +6,8 @@ return {
 			albedoScale = { 1, 1, 1, },
 		},
 		fade_out_range = {
-			fadeOutEndDist = 20000,
-			fadeOutStartDist = 10000,
+			fadeOutEndDist = 200,
+			fadeOutStartDist = 100,
 		},
 		map_albedo = {
 			fileName = "models/station/rail/era_c/era_c_trainstation_wall_grey_albedo.dds",
@@ -33,7 +33,7 @@ return {
 		},
 		map_op_1 =
 		{
-			fileName = "models/ust/op/uz.dds",
+			fileName = "models/ust/op/nz.dds",
 			magFilter = "LINEAR",
 			minFilter = "LINEAR_MIPMAP_LINEAR",
 		},
@@ -41,16 +41,15 @@ return {
 		{
 			op = "MULTIPLICATION",
 			mode = "NORMAL",
-			scale = { 1.5, 1.5 },
-			opacity = -300.0
+			scale = { 0.75, 0.75 },
+			opacity = -515.0
 		},
 		polygon_offset = {
 			factor = 0,
-			forceDepthWrite = true,
 			units = 0,
 		},
 		two_sided = {
-			flipNormal = true,
+			flipNormal = false,
 			twoSided = false,
 		},
 	},

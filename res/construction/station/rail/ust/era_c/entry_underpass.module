@@ -6,7 +6,8 @@ local insert = table.insert
 
 local fitModels = {
     beam = ust.fitModel(0.5, 2.9, 1, true, true),
-    wall = ust.fitModel(0.5, 5, 5, true, true)
+    wall = ust.fitModel(0.5, 5, 5, true, true),
+    underpass = ust.fitModel(1.9, 1.45, -1, true, true)
 }
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
@@ -20,41 +21,83 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         local cpts = ust.basePts(info.arcs.center, n)
         local pts = ust.basePts(data == 3 and info.arcs.right or info.arcs.left, n)
         
-        for i = 1, n do
+        do
+            local i = 1
             local ptsBaseLength = (pts[i + 1] - pts[i]):length()
-            local ptsSideLength = (ptsBaseLength - 1.45) * 0.5
-            local ptsVec = (pts[i + 1] - pts[i]):normalized() * ptsSideLength;
+            local ptsVec = (pts[i + 1] - pts[i]):normalized() * (ptsBaseLength - 1.45);
+            local pts = {pts[i], pts[i] + ptsVec * 0.75, pts[i + 1] - ptsVec * 0.25, pts[i + 1]}
             
             local cptsBaseLength = (cpts[i + 1] - cpts[i]):length()
-            local cptsSideLength = (cptsBaseLength - 1.45) * 0.5
-            local cptsVec = (cpts[i + 1] - cpts[i]):normalized() * cptsSideLength;
+            local cptsVec = (cpts[i + 1] - cpts[i]):normalized() * (cptsBaseLength - 1.45);
+            local cpts = {cpts[i], cpts[i] + cptsVec * 0.75, cpts[i + 1] - cptsVec * 0.25, cpts[i + 1]}
             
             local coords = func.map2(
-                func.interlace({pts[i], pts[i] + ptsVec, pts[i + 1] - ptsVec, pts[i + 1]}), 
-                func.interlace({cpts[i], cpts[i] + cptsVec, cpts[i + 1] - cptsVec, cpts[i + 1]}), 
+                func.interlace(pts),
+                func.interlace(cpts),
                 function(pts, cpts)
-                return data == 7 and {
-                    rt = pts[1],
-                    rb = pts[2],
-                    lt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
-                    lb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
-                } or {
-                    lt = pts[1],
-                    lb = pts[2],
-                    rt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
-                    rb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
-                }
-            end)
+                    return data == 7 and {
+                        rt = pts[1],
+                        rb = pts[2],
+                        lt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
+                        lb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
+                    } or {
+                        lt = pts[1],
+                        lb = pts[2],
+                        rt = (cpts[1] - pts[1]):normalized() * 0.25 + pts[1],
+                        rb = (cpts[2] - pts[2]):normalized() * 0.25 + pts[2]
+                    }
+                end)
+            
+            result.connectors.underpass[slotId] = data == 7 and {
+                pos = info.pos + coor.xyz(info.pos.x * 2 - 1, 0, 0),
+                bottomPts = {
+                    rt = pts[3] .. coor.transZ(-4.4),
+                    rb = pts[2] .. coor.transZ(-4.4),
+                    lt = cpts[3] .. coor.transZ(-4.4),
+                    lb = cpts[2] .. coor.transZ(-4.4),
+                },
+                connectors = {cpts[2]:avg(cpts[3]) .. coor.transZ(-4.4), pts[2]:avg(pts[3]) .. coor.transZ(-4.4)}
+            } or {
+                pos = info.pos + coor.xyz(info.pos.x * 2 + 1, 0, 0),
+                bottomPts = {
+                    lt = pts[3] .. coor.transZ(-4.4),
+                    lb = pts[2] .. coor.transZ(-4.4),
+                    rt = cpts[3] .. coor.transZ(-4.4),
+                    rb = cpts[2] .. coor.transZ(-4.4),
+                },
+                connectors = {pts[2]:avg(pts[3]) .. coor.transZ(-4.4), cpts[2]:avg(cpts[3]) .. coor.transZ(-4.4)}
+            }
             
             insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], true)))
             insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], false)))
             insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], true)))
             insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], false)))
-            insert(result.models, ust.newModel("ust/platform/underpass_concrete_tl.mdl", tag, coor.scaleZ(1.7) * coor.transZ(-2) * fitModels.beam(coords[2], true)))
-            insert(result.models, ust.newModel("ust/platform/underpass_concrete_br.mdl", tag, coor.scaleZ(1.7) * coor.transZ(-2) * fitModels.beam(coords[2], false)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_tl.mdl", tag, coor.scaleZ(1.9) * coor.transZ(-2.2) * fitModels.beam(coords[2], true)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_br.mdl", tag, coor.scaleZ(1.9) * coor.transZ(-2.2) * fitModels.beam(coords[2], false)))
+            
+            insert(
+                result.invokeLater,
+                game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModels.underpass)
+            )
+        end
+        
+        for i = 2, n do
+            local coords = data == 7 and {
+                rt = pts[i],
+                rb = pts[i + 1],
+                lt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i],
+                lb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
+            } or {
+                lt = pts[i],
+                lb = pts[i + 1],
+                rt = (cpts[i] - pts[i]):normalized() * 0.25 + pts[i],
+                rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
+            }
+            
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords, false)))
         end
     end
-
 end
 
 function data()

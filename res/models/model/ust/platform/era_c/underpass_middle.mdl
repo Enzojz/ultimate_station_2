@@ -15,7 +15,7 @@ function data() return {
             materials = {
                "ust/era_c/era_c_trainstation_wall_white.mtl",
                "ust/era_c/era_c_trainstation_wall_grey.mtl",
-               "ust/era_c/floor.mtl",
+               "ust/era_c/underpass_floor.mtl",
                "station/rail/era_c/era_c_trainstation_borders_1.mtl",
                "ust/transparent.mtl"
             },

@@ -12,7 +12,7 @@ function data() return {
    lods = {
       {
          node = {
-            materials = { "ust/era_c/era_c_trainstation_wall_white.mtl", "ust/era_c/floor.mtl" },
+            materials = { "ust/era_c/era_c_trainstation_wall_white.mtl", "ust/era_c/underpass_floor.mtl" },
             mesh = "ust/platform/era_c/underpass_tunnel.msh",
             name = "underpass_tunnel",
             transf = {

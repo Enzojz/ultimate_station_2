@@ -2,7 +2,6 @@ local func = require "ust/func"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local ust = require "ust"
-local unpack = table.unpack
 local insert = table.insert
 --
 local bottomConnector = {
@@ -10,9 +9,7 @@ local bottomConnector = {
     coor.xyz(0.95, -6.5, -4.4)
 }
 
-local fitModels = {
-    surface = ust.fitModel(1.9, 1.45, -1, true, true),
-}
+local fitModel = ust.fitModel(1.9, 1.45, -1, true, true)
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
@@ -54,92 +51,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         rt = coor.xyz(0.95, -5.775, -4.4) .. trans
     }
     result.connectors.underpass[slotId] = {
-        pos = info.pos,
+        pos = info.pos + coor.xyz(info.pos.x * 2, 0, 0),
         bottomPts = bottomPts,
         connectors = func.map(bottomConnector, function(pt) return pt .. trans end)
     }
     
-    local invokeLater = function()
-        local leftConnector = result.connectors.underpass[slotId].connectors[info.pos.y < 0 and 1 or 2]
-        local rightConnector = result.connectors.underpass[slotId].connectors[info.pos.y < 0 and 2 or 1]
-        
-        local leftTarget = nil
-        local rightTarget = nil
-        
-        for slotIdTarget, c in pairs(result.connectors.underpass) do
-            if slotId ~= slotIdTarget then
-                local pos = c.pos
-                local xyc = c.connectors
-                if pos.x < info.pos.x then
-                    local target = xyc[pos.y < 0 and 2 or 1]
-                    local vec = leftConnector - target
-                    if leftTarget then
-                        local distance = unpack(leftTarget)
-                        if vec:length2() < distance then
-                            leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
-                        end
-                    else
-                        leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
-                    end
-                elseif pos.x > info.pos.x then
-                    local target = xyc[pos.y < 0 and 1 or 2]
-                    local vec = rightConnector - target
-                    if rightTarget then
-                        local distance = unpack(rightTarget)
-                        if vec:length2() < distance then
-                            rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
-                        end
-                    else
-                        rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
-                    end
-                end
-            end
-        end
-        
-        if leftTarget then
-            local _, from, to, slotIdTarget = unpack(leftTarget)
-            insert(result.models, ust.unitLane(leftConnector, from:avg(to), nil))
-            
-            local targetBottomPts = result.connectors.underpass[slotIdTarget].bottomPts
-            
-            local pts = {
-                lt = bottomPts.lt:avg(targetBottomPts.rt),
-                lb = bottomPts.lb:avg(targetBottomPts.rb),
-                rb = bottomPts.lb,
-                rt = bottomPts.lt
-            }
-            
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.surface(pts, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.surface(pts, false)));
-        else
-            local vec = bottomPts.lt - bottomPts.lb
-            local pt = bottomPts.lt:avg(bottomPts.lb)
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt)));
-        end
-        
-        if rightTarget then
-            local _, from, to, slotIdTarget = unpack(rightTarget)
-            insert(result.models, ust.unitLane(rightConnector, from:avg(to), nil))
-            
-            local targetBottomPts = result.connectors.underpass[slotIdTarget].bottomPts
-            
-            local pts = {
-                rt = bottomPts.rt:avg(targetBottomPts.lt),
-                rb = bottomPts.rb:avg(targetBottomPts.lb),
-                lb = bottomPts.rb,
-                lt = bottomPts.rt
-            }
-            
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.surface(pts, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.surface(pts, false)));
-        else
-            local vec = bottomPts.rt - bottomPts.rb
-            local pt = bottomPts.rt:avg(bottomPts.rb)
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt)));
-        end
-    end
-    
-    insert(result.invokeLater, invokeLater)
+    insert(
+        result.invokeLater,
+        game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModel, true)
+    )
 end
 function data()
     return {

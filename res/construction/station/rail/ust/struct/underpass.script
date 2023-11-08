@@ -2,13 +2,16 @@ local ust = require "ust"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 
+local insert = table.insert
+local unpack = table.unpack
+
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
         if (module.metadata and module.metadata.isPlatform) then
             local info = module.info
             local makeData = module.makeData
-
+            
             local centerPts, centerVecs = ust.basePts(info.arcs.center, 2)
             
             local centerPt = centerPts[2]
@@ -26,11 +29,94 @@ local addSlot = function(params, result)
     end
 
 end
-
+local invokeLater = function(result, tag, slotId, fitModel, hasDeadend)
+    return function()
+        local bottomPts = result.connectors.underpass[slotId].bottomPts
+        local pos = result.connectors.underpass[slotId].pos
+        local leftConnector = result.connectors.underpass[slotId].connectors[pos.y < 0 and 1 or 2]
+        local rightConnector = result.connectors.underpass[slotId].connectors[pos.y < 0 and 2 or 1]
+        
+        local leftTarget = nil
+        local rightTarget = nil
+        
+        for slotIdTarget, c in pairs(result.connectors.underpass) do
+            if slotId ~= slotIdTarget then
+                local cpos = c.pos
+                local xyc = c.connectors
+                if cpos.x < pos.x then
+                    local target = xyc[cpos.y < 0 and 2 or 1]
+                    local vec = leftConnector - target
+                    if leftTarget then
+                        local distance = unpack(leftTarget)
+                        if vec:length2() < distance then
+                            leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
+                        end
+                    else
+                        leftTarget = {vec:length2(), leftConnector, target, slotIdTarget}
+                    end
+                elseif cpos.x > pos.x then
+                    local target = xyc[cpos.y < 0 and 1 or 2]
+                    local vec = rightConnector - target
+                    if rightTarget then
+                        local distance = unpack(rightTarget)
+                        if vec:length2() < distance then
+                            rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
+                        end
+                    else
+                        rightTarget = {vec:length2(), rightConnector, target, slotIdTarget}
+                    end
+                end
+            end
+        end
+        
+        if leftTarget then
+            local _, from, to, slotIdTarget = unpack(leftTarget)
+            insert(result.models, ust.unitLane(leftConnector, from:avg(to), nil))
+            
+            local targetBottomPts = result.connectors.underpass[slotIdTarget].bottomPts
+            
+            local pts = {
+                lt = bottomPts.lt:avg(targetBottomPts.rt),
+                lb = bottomPts.lb:avg(targetBottomPts.rb),
+                rb = bottomPts.lb,
+                rt = bottomPts.lt
+            }
+            
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
+        elseif hasDeadend then
+            local vec = bottomPts.lt - bottomPts.lb
+            local pt = bottomPts.lt:avg(bottomPts.lb)
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt)));
+        end
+        
+        if rightTarget then
+            local _, from, to, slotIdTarget = unpack(rightTarget)
+            insert(result.models, ust.unitLane(rightConnector, from:avg(to), nil))
+            
+            local targetBottomPts = result.connectors.underpass[slotIdTarget].bottomPts
+            
+            local pts = {
+                rt = bottomPts.rt:avg(targetBottomPts.lt),
+                rb = bottomPts.rb:avg(targetBottomPts.lb),
+                lb = bottomPts.rb,
+                lt = bottomPts.rt
+            }
+            
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
+        elseif hasDeadend then
+            local vec = bottomPts.rt - bottomPts.rb
+            local pt = bottomPts.rt:avg(bottomPts.rb)
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt)));
+        end
+    end
+end
 
 function data()
     return {
         classify = ust.classifyComp,
-        addSlot = addSlot
+        addSlot = addSlot,
+        invokeLater = invokeLater
     }
 end
