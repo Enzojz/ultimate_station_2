@@ -1,0 +1,111 @@
+local ust = require "ust"
+local coor = require "ust/coor"
+local quat = require "ust/quaternion"
+
+local insert = table.insert
+
+local addSlot = function(params, result)
+    for id, info in pairs(params.classedModules) do
+        local module = params.modules[info.slotId]
+        if module.metadata and (module.metadata.isPlatform or module.metadata.isTrack or module.metadata.isStreet) then
+            local info = module.info
+            local makeData = module.makeData
+            
+            local octa7 = params.modules[info.octa[7]]
+            local octa3 = params.modules[info.octa[3]]
+            
+            local n = 2
+            
+            local ptsL, vecL = ust.basePts(info.arcs.left, n)
+            local ptsR, vecR = ust.basePts(info.arcs.right, n)
+            
+            if not octa7 or info.height - octa7.info.height >= 4.4 then
+                local refPtL = ptsL[2]
+                local refVecL = vecL[2]
+                
+                local transfL =
+                    quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
+                    * coor.trans(refPtL)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(34, 7),
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfL,
+                        type = "ust_component_underpass_entry",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+            
+            if not octa3 or info.height - octa3.info.height >= 4.4 then
+                local refPtR = ptsR[2]
+                local refVecR = vecR[2]
+                
+                local transfR =
+                    quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
+                    * coor.trans(refPtR)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(34, 3),
+                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfR,
+                        type = "ust_component_underpass_entry",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+        end
+    end
+end
+
+local slotSetup = function(params, result, slotId)
+    local id = params.modules[slotId].info.id
+    local m = params.modules[params.classedModules[id].slotId]
+    local data = params.modules[slotId].info.data
+    
+    local info = m.info
+    local hPlatform = info.height > 4.4 and info.height or 4.4
+    
+    local rightPlatform = m.info.octa[3] and (params.modules[m.info.octa[3]].metadata.isPlatform or params.modules[m.info.octa[3]].metadata.isPlaceholder)
+    local leftPlatform = m.info.octa[7] and (params.modules[m.info.octa[7]].metadata.isPlatform or params.modules[m.info.octa[7]].metadata.isPlaceholder)
+    if data == 3 and rightPlatform then
+        if params.modules[m.info.octa[3]].metadata.isPlatform then
+            params.modules[slotId].info.rightPlatform = m.info.octa[3]
+        end
+        local mRight = params.modules[m.info.octa[3]]
+        local hPlatformRight = mRight.info.height
+        if hPlatform - hPlatformRight > 4.4 then
+            hPlatform = hPlatform - hPlatformRight
+        end
+    elseif data == 7 and leftPlatform then
+        if params.modules[m.info.octa[7]].metadata.isPlatform then
+            params.modules[slotId].info.leftPlatform = m.info.octa[7]
+        end
+        local mLeft = params.modules[m.info.octa[7]]
+        local hPlatformLeft = mLeft.info.height
+        if hPlatform - hPlatformLeft > 4.4 then
+            hPlatform = hPlatform - hPlatformLeft
+        end
+    end
+    
+    params.modules[slotId].info.height = hPlatform
+end
+
+local preProcessRemove = function(modules, change, classedModules, info)
+    local type, id = ust.slotInfo(change.slotId)
+    modules[change.slotId] = nil
+    
+    if modules[ust.mixData(ust.base(id, 89), 3)] then
+        modules[ust.mixData(ust.base(id, 89), 3)] = nil
+    end
+    if modules[ust.mixData(ust.base(id, 89), 7)] then
+        modules[ust.mixData(ust.base(id, 89), 7)] = nil
+    end
+end
+
+function data()
+    return {
+        classify = ust.classifyComp,
+        addSlot = addSlot,
+        slotSetup = slotSetup,
+        preProcessRemove = preProcessRemove,
+    }
+end

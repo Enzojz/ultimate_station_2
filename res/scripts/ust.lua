@@ -125,7 +125,7 @@ ust.slotInfo = function(slotId)
         -- 1 ~ 2 : 01 : track 02 platform 03 placeholder 04 streets
         -- 3 ~ 6 : id
         -- Component
-        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 24 fences/walls 25 bridge 26 tunnel 27 catenary 28 roof 29 type 31 5m Entry 32 10m Entry 33 20m Entry
+        -- 1 ~ 2 : 20 reserved 21 underpass 22 overpass 24 fences/walls 25 bridge 26 tunnel 27 catenary 28 roof 29 type 31 5m Entry 32 10m Entry 33 20m Entry 34 Underpass entry
         --         40 general comp
         -- 3 ~ 6 : id
         -- Information

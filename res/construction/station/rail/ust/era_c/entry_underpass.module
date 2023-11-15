@@ -1,6 +1,10 @@
 local coor = require "ust/coor"
-local ust = require "ust"
 local func = require "ust/func"
+local pipe = require "ust/pipe"
+local quat = require "ust/quaternion"
+local ust = require "ust"
+
+local dump = require "luadump"
 
 local insert = table.insert
 
@@ -13,8 +17,11 @@ local fitModels = {
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
     local m = params.modules[params.classedModules[id].slotId]
-    local info = m.info
     local data = params.modules[slotId].info.data
+    
+    local info = m.info
+    local hPlatform = params.modules[slotId].info.height
+    local hRef = -hPlatform
     
     if data == 3 or data == 7 then
         local n = 4
@@ -51,34 +58,86 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
             result.connectors.underpass[slotId] = data == 7 and {
                 pos = info.pos + coor.xyz(info.pos.x * 2 - 1, 0, 0),
                 bottomPts = {
-                    rt = pts[3] .. coor.transZ(-4.4),
-                    rb = pts[2] .. coor.transZ(-4.4),
-                    lt = cpts[3] .. coor.transZ(-4.4),
-                    lb = cpts[2] .. coor.transZ(-4.4),
+                    rt = pts[3] .. coor.transZ(hRef),
+                    rb = pts[2] .. coor.transZ(hRef),
+                    lt = cpts[3] .. coor.transZ(hRef),
+                    lb = cpts[2] .. coor.transZ(hRef),
                 },
-                connectors = {cpts[2]:avg(cpts[3]) .. coor.transZ(-4.4), pts[2]:avg(pts[3]) .. coor.transZ(-4.4)}
+                connectors = {
+                    right = pts[2]:avg(pts[3]) .. coor.transZ(hRef)
+                },
+                height = hPlatform
             } or {
                 pos = info.pos + coor.xyz(info.pos.x * 2 + 1, 0, 0),
                 bottomPts = {
-                    lt = pts[3] .. coor.transZ(-4.4),
-                    lb = pts[2] .. coor.transZ(-4.4),
-                    rt = cpts[3] .. coor.transZ(-4.4),
-                    rb = cpts[2] .. coor.transZ(-4.4),
+                    lt = pts[3] .. coor.transZ(hRef),
+                    lb = pts[2] .. coor.transZ(hRef),
+                    rt = cpts[3] .. coor.transZ(hRef),
+                    rb = cpts[2] .. coor.transZ(hRef),
                 },
-                connectors = {pts[2]:avg(pts[3]) .. coor.transZ(-4.4), cpts[2]:avg(cpts[3]) .. coor.transZ(-4.4)}
+                connectors = {
+                    left = pts[2]:avg(pts[3]) .. coor.transZ(hRef),
+                },
+                height = hPlatform
             }
             
-            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], true)))
-            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[1], false)))
-            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], true)))
-            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords[3], false)))
-            insert(result.models, ust.newModel("ust/platform/underpass_concrete_tl.mdl", tag, coor.scaleZ(1.9) * coor.transZ(-2.2) * fitModels.beam(coords[2], true)))
-            insert(result.models, ust.newModel("ust/platform/underpass_concrete_br.mdl", tag, coor.scaleZ(1.9) * coor.transZ(-2.2) * fitModels.beam(coords[2], false)))
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords[1], true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords[1], false)))
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords[3], true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords[3], false)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_tl.mdl", tag, coor.scaleZ(hPlatform - 2.5) * coor.transZ(hRef + 2.2) * fitModels.beam(coords[2], true)))
+            insert(result.models, ust.newModel("ust/platform/underpass_concrete_br.mdl", tag, coor.scaleZ(hPlatform - 2.5) * coor.transZ(hRef + 2.2) * fitModels.beam(coords[2], false)))
+            
+            insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag,
+                coor.rotZ90N * coor.trans(coor.xyz(data == 7 and -0.18 or 0.18, 0, hRef + 2.2)) * quat.byVec(coor.xyz(0, 1, 0), (pts[2] - pts[3]):normalized()):mRot() * coor.trans(pts[2]:avg(pts[3]))));
             
             insert(
                 result.invokeLater,
                 game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModels.underpass)
             )
+            function platformConnection(lane, connector)
+                if lane then
+                    local connections = pipe.new * lane
+                        * pipe.map(function(pt) return {pt = pt, distance = (pt - connector):length2()} end)
+                        * pipe.sort(function(lhs, rhs) return lhs.distance < rhs.distance end)
+                    
+                    if #connections > 0 then
+                        insert(result.models, ust.unitLane(connections[1].pt, connector, tag))
+                    end
+                    
+                    if #connections > 1 then
+                        insert(result.models, ust.unitLane(connections[2].pt, connector, tag))
+                    end
+                end
+            end
+            
+            function extConnection(connector)
+                for _, pt in ipairs({pts[2], pts[3]}) do
+                    insert(result.models, ust.unitLane(connector, (pt  .. coor.transZ(hRef)):avg(connector), tag, "ust/linking_lane.mdl"))
+                end
+            end
+            
+            if data == 7 then
+                if params.modules[slotId].info.leftPlatform then
+                    platformConnection(
+                        params.extra[params.modules[slotId].info.leftPlatform].rightLane,
+                        result.connectors.underpass[slotId].connectors.right
+                )
+                else
+                    extConnection(result.connectors.underpass[slotId].connectors.right)
+                end
+            end
+            
+            if data == 3 then
+                if params.modules[slotId].info.rightPlatform then
+                    platformConnection(
+                        params.extra[params.modules[slotId].info.rightPlatform].leftLane,
+                        result.connectors.underpass[slotId].connectors.left
+                )
+                else
+                    extConnection(result.connectors.underpass[slotId].connectors.left)
+                end
+            end
         end
         
         for i = 2, n do
@@ -94,8 +153,8 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
                 rb = (cpts[i + 1] - pts[i + 1]):normalized() * 0.25 + pts[i + 1]
             }
             
-            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords, true)))
-            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(4.1) * coor.transZ(-4.4) * fitModels.wall(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/concrete_tl.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/concrete_br.mdl", tag, coor.scaleZ(hPlatform - 0.3) * coor.transZ(hRef) * fitModels.wall(coords, false)))
         end
     end
 end
@@ -117,19 +176,20 @@ function data()
         category = {
             categories = {"ust_cat_entry"},
         },
-        type = "ust_component_fence",
+        type = "ust_component_underpass_entry",
         order = {
             value = 201,
         },
         metadata = {
-            scriptName = "construction/station/rail/ust/struct/fence",
+            scriptName = "construction/station/rail/ust/struct/entry_underpass",
             classify = "classify",
-            preProcessRemove = "preProcessRemoveWall",
-            typeName = "ust_component_fence",
+            slotSetup = "slotSetup",
+            preProcessRemove = "preProcessRemove",
+            typeName = "ust_component_underpass_entry",
             isComponent = true,
             isFence = true,
             isWall = true,
-            typeId = 24,
+            typeId = 34,
             width = 5
         },
         

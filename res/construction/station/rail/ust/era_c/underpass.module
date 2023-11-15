@@ -3,17 +3,35 @@ local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local ust = require "ust"
 local insert = table.insert
---
+
 local bottomConnector = {
-    coor.xyz(-0.95, -6.5, -4.4),
-    coor.xyz(0.95, -6.5, -4.4)
+    coor.xyz(-0.95, -6.5, 0),
+    coor.xyz(0.95, -6.5, 0)
 }
 
 local fitModel = ust.fitModel(1.9, 1.45, -1, true, true)
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
-    local info = params.modules[params.classedModules[id].slotId].info
+    local m = params.modules[params.classedModules[id].slotId]
+    local info = m.info
+    
+    local hPlatform = 4.4
+
+    if info.comp[34] then
+        local leftWall = params.modules[m.makeData(34, 7)]
+        local rightWall = params.modules[m.makeData(34, 3)]
+
+        if leftWall and rightWall then
+            local hLeft = leftWall.info.height
+            local hRight = rightWall.info.height
+            hPlatform = (hLeft + hRight) * 0.5
+        elseif rightWall then
+            hPlatform = rightWall.info.height
+        elseif leftWall then
+            hPlatform = leftWall.info.height
+        end
+    end
     
     local n = 4
     local centerPts = ust.basePts(info.arcs.center, n)
@@ -24,9 +42,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         * coor.trans(refPos)
     
     insert(result.models, ust.newModel("ust/platform/era_c/underpass_top.mdl", tag, trans));
-    insert(result.models, ust.newModel("ust/platform/era_c/underpass_middle.mdl", tag, trans));
-    insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel.mdl", tag, coor.trans(coor.xyz(0, -6.5, -4.4)) * trans));
-    insert(result.models, ust.newModel("ust/platform/era_c/underpass_wall.mdl", tag, coor.rotZ180 * coor.trans(coor.xyz(0, -7.225, -4.4)) * trans));
+    insert(result.models, ust.newModel("ust/platform/era_c/underpass_middle.mdl", tag, coor.scaleZ(hPlatform / 4.4) * trans));
+    insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel.mdl", tag, coor.trans(coor.xyz(0, -6.5, -hPlatform)) * trans));
+    insert(result.models, ust.newModel("ust/platform/era_c/underpass_wall.mdl", tag, coor.rotZ180 * coor.trans(coor.xyz(0, -7.225, -hPlatform)) * trans));
     
     local pts = func.map({
         coor.xyz(-2, 1, 0),
@@ -36,30 +54,33 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     }, function(pt) return pt .. trans end)
     
     insert(result.models, ust.unitLane(coor.xyz(0, 0.1, 0) .. trans, coor.xyz(0, -0.25, 0) .. trans, nil))
-    insert(result.models, ust.unitLane(coor.xyz(0, -0.25, 0) .. trans, coor.xyz(0, -5.75, -4.4) .. trans, nil))
-    insert(result.models, ust.unitLane(coor.xyz(0, -5.75, -4.4) .. trans, coor.xyz(0, -6.5, -4.4) .. trans, nil))
-    insert(result.models, ust.unitLane(coor.xyz(0, -6.5, -4.4) .. trans, coor.xyz(0.95, -6.5, -4.4) .. trans, nil))
-    insert(result.models, ust.unitLane(coor.xyz(0, -6.5, -4.4) .. trans, coor.xyz(-0.95, -6.5, -4.4) .. trans, nil))
+    insert(result.models, ust.unitLane(coor.xyz(0, -0.25, 0) .. trans, coor.xyz(0, -5.75, -hPlatform) .. trans, nil))
+    insert(result.models, ust.unitLane(coor.xyz(0, -5.75, -hPlatform) .. trans, coor.xyz(0, -6.5, -hPlatform) .. trans, nil))
+    insert(result.models, ust.unitLane(coor.xyz(0, -6.5, -hPlatform) .. trans, coor.xyz(0.95, -6.5, -hPlatform) .. trans, nil))
+    insert(result.models, ust.unitLane(coor.xyz(0, -6.5, -hPlatform) .. trans, coor.xyz(-0.95, -6.5, -hPlatform) .. trans, nil))
     
     -- insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
     insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
     
     local bottomPts = {
-        lt = coor.xyz(-0.95, -5.775, -4.4) .. trans,
-        lb = coor.xyz(-0.95, -7.225, -4.4) .. trans,
-        rb = coor.xyz(0.95, -7.225, -4.4) .. trans,
-        rt = coor.xyz(0.95, -5.775, -4.4) .. trans
+        lt = coor.xyz(-0.95, -5.775, -hPlatform) .. trans,
+        lb = coor.xyz(-0.95, -7.225, -hPlatform) .. trans,
+        rb = coor.xyz(0.95, -7.225, -hPlatform) .. trans,
+        rt = coor.xyz(0.95, -5.775, -hPlatform) .. trans
     }
     result.connectors.underpass[slotId] = {
         pos = info.pos + coor.xyz(info.pos.x * 2, 0, 0),
         bottomPts = bottomPts,
-        connectors = func.map(bottomConnector, function(pt) return pt .. trans end)
+        connectors = {
+            left = bottomConnector[1] .. coor.transZ(-hPlatform) * trans,
+            right = bottomConnector[2] .. coor.transZ(-hPlatform) * trans
+        }
     }
     
     insert(
         result.invokeLater,
         game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModel, true)
-    )
+)
 end
 function data()
     return {
