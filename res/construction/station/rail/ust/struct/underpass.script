@@ -1,10 +1,8 @@
 local ust = require "ust"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
-local dump = require "luadump"
 
 local insert = table.insert
-local unpack = table.unpack
 
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
@@ -13,34 +11,47 @@ local addSlot = function(params, result)
             local info = module.info
             local makeData = module.makeData
             
-            local centerPts, centerVecs = ust.basePts(info.arcs.center, 2)
+            local centerPts, centerVecs = ust.basePts(info.arcs.center, 4)
             
-            local centerPt = centerPts[2]
-            local centerVec = centerVecs[2]
+            local centerPt0 = centerPts[3]:avg(centerPts[2])
+            local centerVec0 = centerVecs[3]:avg(centerVecs[2])
+            local centerPt1 = centerPts[3]:avg(centerPts[4])
+            local centerVec1 = centerVecs[3]:avg(centerVecs[4])
             
-            local centerTransf = (quat.byVec(coor.xyz(0, 1, 0), centerVec):mRot()) * coor.trans(centerPt)
+            local centerTransf0 = (quat.byVec(coor.xyz(1, 0, 0), centerVec0):mRot()) * coor.trans(centerPt0)
+            local centerTransf1 = (quat.byVec(coor.xyz(-1, 0, 0), centerVec1):mRot()) * coor.trans(centerPt1)
             
             table.insert(result.slots, {
                 id = makeData(21, 0),
-                transf = centerTransf,
+                transf = centerTransf0,
                 type = "ust_underpass",
+                shape = 1,
+                spacing = {0, 0, 0, 0}
+            })
+            
+            table.insert(result.slots, {
+                id = makeData(21, 1),
+                transf = centerTransf1,
+                type = "ust_underpass",
+                shape = 1,
                 spacing = {0, 0, 0, 0}
             })
         end
     end
 end
 
-local invokeLater2 = function(result, tag, slotId, fitModel, hasDeadend)
+local invokeLater2 = function(result, tag, slotId, fitModel)
     local current = result.connectors.underpass[slotId]
     local leftConnector = current.connectors.left
     local rightConnector = current.connectors.right
     local targets = current.targets
     
-    do
-        if targets.left and result.connectors.underpass[targets.left.slotId].targets.right.slotId == slotId then
+    if targets.left then
+        local mTarget = result.connectors.underpass[targets.left.slotId]
+        if mTarget.targets.right and mTarget.targets.right.slotId == slotId then
             insert(result.models, ust.unitLane(leftConnector, targets.left.from:avg(targets.left.to), tag))
             
-            local targetBottomPts = result.connectors.underpass[targets.left.slotId].bottomPts
+            local targetBottomPts = mTarget.bottomPts
             
             local pts = {
                 lt = current.bottomPts.lt:avg(targetBottomPts.rt),
@@ -51,18 +62,24 @@ local invokeLater2 = function(result, tag, slotId, fitModel, hasDeadend)
             
             insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
             insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
-        elseif hasDeadend then
-            local vec = current.bottomPts.lt - current.bottomPts.lb
-            local pt = current.bottomPts.lt:avg(current.bottomPts.lb)
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt)));
+            
+            if current.fnOpen and current.fnOpen.left then
+                insert(result.invokeLater, current.fnOpen.left)
+            end
+        elseif current.fnClosed and current.fnClosed.left then
+            insert(result.invokeLater, current.fnClosed.left)
         end
+    elseif current.fnClosed and current.fnClosed.left then
+        insert(result.invokeLater, current.fnClosed.left)
     end
     
-    do
-        if targets.right and result.connectors.underpass[targets.right.slotId].targets.left.slotId == slotId then
+    
+    if targets.right then
+        local mTarget = result.connectors.underpass[targets.right.slotId]
+        if mTarget.targets and mTarget.targets.left.slotId == slotId then
             insert(result.models, ust.unitLane(rightConnector, targets.right.from:avg(targets.right.to), tag))
             
-            local targetBottomPts = result.connectors.underpass[targets.right.slotId].bottomPts
+            local targetBottomPts = mTarget.bottomPts
             
             local pts = {
                 rt = current.bottomPts.rt:avg(targetBottomPts.lt),
@@ -73,15 +90,19 @@ local invokeLater2 = function(result, tag, slotId, fitModel, hasDeadend)
             
             insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
             insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
-        elseif hasDeadend then
-            local vec = current.bottomPts.rt - current.bottomPts.rb
-            local pt = current.bottomPts.rt:avg(current.bottomPts.rb)
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt)));
+            
+            if current.fnOpen and current.fnOpen.right then
+                insert(result.invokeLater, current.fnOpen.right)
+            end
+        elseif current.fnClosed and current.fnClosed.right then
+            insert(result.invokeLater, current.fnClosed.right)
         end
+    elseif current.fnClosed and current.fnClosed.right then
+        insert(result.invokeLater, current.fnClosed.right)
     end
 end
 
-local invokeLater = function(result, tag, slotId, fitModel, hasDeadend)
+local invokeLater = function(result, tag, slotId, fitModel)
     local current = result.connectors.underpass[slotId]
     return function()
         local leftConnector = current.connectors.left
@@ -89,43 +110,41 @@ local invokeLater = function(result, tag, slotId, fitModel, hasDeadend)
         
         local targets = {
             left = nil,
-            right = nil
+            right = nil,
         }
         
         for slotIdTarget, target in pairs(result.connectors.underpass) do
-            if slotId ~= slotIdTarget then
-                if target.pos.x < current.pos.x and leftConnector then
-                    local targetConnector = target.connectors.right
-                    if targetConnector and ((current.pos.x - target.pos.x == 1 and current.pos.y == target.pos.y) or (current.pos.x - target.pos.x > 1)) then
-                        local vec = leftConnector - targetConnector
+            if slotId ~= slotIdTarget and (not target.front or target.front.slotId ~= slotIdTarget) then
+                if ((current.pos.x - target.pos.x == 1 and current.pos.y == target.pos.y) or (current.pos.x - target.pos.x > 1)) and leftConnector and target.connectors.right then
+                    local vec = leftConnector - target.connectors.right
+                    if math.abs(vec:normalized():dot(current.vec)) < 0.72 then
                         if not targets.left
-                            or (targets.left and current.pos.y ~= targets.left.distance and target.pos.y == current.pos.y)
-                            or (targets.left and targets.left.distance == current.pos.y and target.pos.y == current.pos.y and vec:length2() < targets.left.distance)
-                            or (targets.left and targets.left.distance ~= current.pos.y and vec:length2() < targets.left.distance)
+                            or (targets.left and current.pos.y ~= targets.left.y and target.pos.y == current.pos.y)
+                            or (targets.left and targets.left.y == current.pos.y and target.pos.y == current.pos.y and vec:length2() < targets.left.distance)
+                            or (targets.left and targets.left.y ~= current.pos.y and vec:length2() < targets.left.distance)
                         then
                             targets.left = {
                                 distance = vec:length2(),
                                 y = target.pos.y,
                                 from = leftConnector,
-                                to = targetConnector,
+                                to = target.connectors.right,
                                 slotId = slotIdTarget
                             }
                         end
                     end
-                elseif target.pos.x > current.pos.x and rightConnector then
-                    local targetConnector = target.connectors.left
-                    if targetConnector and ((target.pos.x - current.pos.x == 1 and current.pos.y == target.pos.y) or (target.pos.x - current.pos.x > 1)) then
-                        local vec = rightConnector - targetConnector
+                elseif ((target.pos.x - current.pos.x == 1 and current.pos.y == target.pos.y) or (target.pos.x - current.pos.x > 1)) and rightConnector and target.connectors.left then
+                    local vec = rightConnector - target.connectors.left
+                    if math.abs(vec:normalized():dot(current.vec)) < 0.72 then
                         if not targets.right
-                            or (targets.right and current.pos.y ~= targets.right.distance and target.pos.y == current.pos.y)
-                            or (targets.right and targets.right.distance == current.pos.y and target.pos.y == current.pos.y and vec:length2() < targets.right.distance)
-                            or (targets.right and targets.right.distance ~= current.pos.y and vec:length2() < targets.right.distance)
+                            or (targets.right and current.pos.y ~= targets.right.y and target.pos.y == current.pos.y)
+                            or (targets.right and targets.right.y == current.pos.y and target.pos.y == current.pos.y and vec:length2() < targets.right.distance)
+                            or (targets.right and targets.right.y ~= current.pos.y and vec:length2() < targets.right.distance)
                         then
                             targets.right = {
                                 distance = vec:length2(),
                                 y = target.pos.y,
                                 from = rightConnector,
-                                to = targetConnector,
+                                to = target.connectors.left,
                                 slotId = slotIdTarget
                             }
                         end
@@ -139,7 +158,7 @@ local invokeLater = function(result, tag, slotId, fitModel, hasDeadend)
         insert(
             result.invokeLater,
             function()
-                invokeLater2(result, tag, slotId, fitModel, hasDeadend)
+                invokeLater2(result, tag, slotId, fitModel)
             end
     )
     end

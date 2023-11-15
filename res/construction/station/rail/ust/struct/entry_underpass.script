@@ -14,43 +14,47 @@ local addSlot = function(params, result)
             local octa7 = params.modules[info.octa[7]]
             local octa3 = params.modules[info.octa[3]]
             
-            local n = 2
+            local n = 4
             
             local ptsL, vecL = ust.basePts(info.arcs.left, n)
             local ptsR, vecR = ust.basePts(info.arcs.right, n)
             
             if not octa7 or info.height - octa7.info.height >= 4.4 then
-                local refPtL = ptsL[2]
-                local refVecL = vecL[2]
-                
-                local transfL =
-                    quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
-                    * coor.trans(refPtL)
-                
-                insert(
-                    result.slots, {
-                        id = makeData(34, 7),
-                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfL,
-                        type = "ust_component_underpass_entry",
-                        spacing = {0, 0, 0, 0}
-                    })
+                for i = 1, 4 do
+                    local refPtL = ptsL[i + 1]:avg(ptsL[i])
+                    local refVecL = vecL[i + 1]:avg(vecL[i])
+                    
+                    local transfL =
+                        quat.byVec(coor.xyz(1, 0, 0), refVecL):mRot()
+                        * coor.trans(refPtL)
+                    
+                    insert(
+                        result.slots, {
+                            id = makeData(34, i * 10 + 7),
+                            transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfL,
+                            type = "ust_component_underpass_entry",
+                            spacing = {0, 0, 0, 0}
+                        })
+                end
             end
             
             if not octa3 or info.height - octa3.info.height >= 4.4 then
-                local refPtR = ptsR[2]
-                local refVecR = vecR[2]
-                
-                local transfR =
-                    quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
-                    * coor.trans(refPtR)
-                
-                insert(
-                    result.slots, {
-                        id = makeData(34, 3),
-                        transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfR,
-                        type = "ust_component_underpass_entry",
-                        spacing = {0, 0, 0, 0}
-                    })
+                for i = 1, 4 do
+                    local refPtR = ptsR[i + 1]:avg(ptsR[i])
+                    local refVecR = vecR[i + 1]:avg(vecR[i])
+                    
+                    local transfR =
+                        quat.byVec(coor.xyz(1, 0, 0), refVecR):mRot()
+                        * coor.trans(refPtR)
+                    
+                    insert(
+                        result.slots, {
+                            id = makeData(34, i * 10 + 3),
+                            transf = coor.scale(coor.xyz(2.5, 0.25, 1)) * transfR,
+                            type = "ust_component_underpass_entry",
+                            spacing = {0, 0, 0, 0}
+                        })
+                end
             end
         end
     end
@@ -60,13 +64,14 @@ local slotSetup = function(params, result, slotId)
     local id = params.modules[slotId].info.id
     local m = params.modules[params.classedModules[id].slotId]
     local data = params.modules[slotId].info.data
+    local octa = data % 10
     
     local info = m.info
     local hPlatform = info.height > 4.4 and info.height or 4.4
     
     local rightPlatform = m.info.octa[3] and (params.modules[m.info.octa[3]].metadata.isPlatform or params.modules[m.info.octa[3]].metadata.isPlaceholder)
     local leftPlatform = m.info.octa[7] and (params.modules[m.info.octa[7]].metadata.isPlatform or params.modules[m.info.octa[7]].metadata.isPlaceholder)
-    if data == 3 and rightPlatform then
+    if octa == 3 and rightPlatform then
         if params.modules[m.info.octa[3]].metadata.isPlatform then
             params.modules[slotId].info.rightPlatform = m.info.octa[3]
         end
@@ -75,7 +80,7 @@ local slotSetup = function(params, result, slotId)
         if hPlatform - hPlatformRight > 4.4 then
             hPlatform = hPlatform - hPlatformRight
         end
-    elseif data == 7 and leftPlatform then
+    elseif octa == 7 and leftPlatform then
         if params.modules[m.info.octa[7]].metadata.isPlatform then
             params.modules[slotId].info.leftPlatform = m.info.octa[7]
         end

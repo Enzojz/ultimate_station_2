@@ -3,20 +3,20 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 36,
-               offset = 620
+               count = 60,
+               offset = 748
             },
             position = {
-               count = 36,
-               offset = 584
+               count = 60,
+               offset = 688
             },
             tangent = {
-               count = 36,
-               offset = 656
+               count = 60,
+               offset = 808
             },
             uv0 = {
-               count = 36,
-               offset = 692
+               count = 60,
+               offset = 868
             }
          }
       },
@@ -24,26 +24,26 @@ function data() return {
          indices = {
             normal = {
                count = 12,
-               offset = 740
+               offset = 940
             },
             position = {
                count = 12,
-               offset = 728
+               offset = 928
             },
             tangent = {
                count = 12,
-               offset = 752
+               offset = 952
             },
             uv0 = {
                count = 12,
-               offset = 764
+               offset = 964
             }
          }
       }
    },
    vertexAttr = {
       normal = {
-         count = 144,
+         count = 216,
          numComp = 3,
          offset = 72
       },
@@ -53,14 +53,14 @@ function data() return {
          offset = 0
       },
       tangent = {
-         count = 192,
+         count = 288,
          numComp = 4,
-         offset = 216
+         offset = 288
       },
       uv0 = {
-         count = 176,
+         count = 112,
          numComp = 2,
-         offset = 408
+         offset = 576
       }
    }
 } end

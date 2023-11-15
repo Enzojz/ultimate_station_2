@@ -258,7 +258,9 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_LAMPS = "Platform Lamps",
             MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "Put lamps on platforms.",
             MENU_MODULE_CARGO_PLATFORM_SIGN = "Platform Sign",
-            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Put station name on platform."
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Put station name on platform.",
+            MENU_MODULE_ENTRY_UNDERPASS = "Underpass Entry",
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "An entry underneath a platform."
         },
         zh_CN = {
             MOD_NAME = "终极车站",
@@ -388,7 +390,9 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_LAMPS = "站台灯",
             MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "在站台上设置灯。",
             MENU_MODULE_CARGO_PLATFORM_SIGN = "车站站名牌",
-            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在站台上设置站名牌。"
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在站台上设置站名牌。",
+            MENU_MODULE_ENTRY_UNDERPASS = "地道入口",
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "从站台下穿过的车站入口"
         },
         zh_TW = {
             MOD_NAME = "終極車站",
@@ -518,7 +522,9 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_LAMPS = "站檯燈",
             MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "在月臺上設置燈。",
             MENU_MODULE_CARGO_PLATFORM_SIGN = "車站站名牌",
-            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在月臺上設置站名牌。"
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在月臺上設置站名牌。",
+            MENU_MODULE_ENTRY_UNDERPASS = "地道入口",
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "從月臺下穿過的車站入口"
         },
         fr = {
             MOD_NAME = "Gare ultime",
@@ -647,7 +653,9 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_LAMPS = "Lampadaire",
             MENU_MODULE_CARGO_PLATFORM_LAMPS_DESC = "Mettre en place des lampadaire sur les plateformes",
             MENU_MODULE_CARGO_PLATFORM_SIGN = "Signes",
-            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Mettez le nom de la gare sur la plateforme."
+            MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Mettez le nom de la gare sur la plateforme.",
+            MENU_MODULE_ENTRY_UNDERPASS = "Entrée souterrain",
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "Une entrée traverse sous les plateforme."
         
         },
     }
