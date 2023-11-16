@@ -28,6 +28,7 @@ function data()
             classify = "classify",
             slotSetup = "slotSetup",
             preProcessRemove = "preProcessRemove",
+            preProcessAdd = "preProcessAdd",
             typeName = "ust_component_underpass_entry",
             isComponent = true,
             isFence = true,

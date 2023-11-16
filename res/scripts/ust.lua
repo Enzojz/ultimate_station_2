@@ -99,7 +99,7 @@ ust.slotIds = function(info)
             ust.mixData(ust.base(info.id, 57), info.length),
             ust.mixData(ust.base(info.id, 59), math.floor((info.extraHeight or 0) * 10)),
             info.width and ust.mixData(ust.base(info.id, 58), info.width * 10) or false,
-            info.gradient and ust.mixData(ust.base(info.id, 61), info.gradient * 1000) or false,
+            -- info.gradient and ust.mixData(ust.base(info.id, 61), info.gradient * 1000) or false,
             info.leftOverlap and ust.mixData(ust.base(info.id, 67), info.leftOverlap * 10) or false,
             info.rightOverlap and ust.mixData(ust.base(info.id, 68), info.rightOverlap * 10) or false,
         }, pipe.noop()),

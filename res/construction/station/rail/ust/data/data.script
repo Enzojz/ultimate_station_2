@@ -39,8 +39,8 @@ local classifyGeometry = function(modules, classified, slotId)
         modules[slotId].info.width = data * 0.1
     elseif (type == 59) then
         modules[slotId].info.extraHeight = data * 0.1
-    elseif (type == 61) then
-        modules[slotId].info.gradient = data * 0.001
+    -- elseif (type == 61) then
+    --     modules[slotId].info.gradient = data * 0.001
     elseif (type == 67) then
         modules[slotId].info.leftOverlap = data * 0.1
     elseif (type == 68) then
