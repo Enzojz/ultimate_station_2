@@ -3,47 +3,47 @@ function data() return {
       {
          indices = {
             normal = {
-               count = 36,
-               offset = 724
+               count = 24,
+               offset = 512
             },
             position = {
-               count = 36,
-               offset = 688
+               count = 24,
+               offset = 488
             },
             tangent = {
-               count = 36,
-               offset = 760
+               count = 24,
+               offset = 536
             },
             uv0 = {
-               count = 36,
-               offset = 796
+               count = 24,
+               offset = 560
             }
          }
       },
       {
          indices = {
             normal = {
-               count = 36,
-               offset = 868
+               count = 24,
+               offset = 608
             },
             position = {
-               count = 36,
-               offset = 832
+               count = 24,
+               offset = 584
             },
             tangent = {
-               count = 36,
-               offset = 904
+               count = 24,
+               offset = 632
             },
             uv0 = {
-               count = 36,
-               offset = 940
+               count = 24,
+               offset = 656
             }
          }
       }
    },
    vertexAttr = {
       normal = {
-         count = 216,
+         count = 144,
          numComp = 3,
          offset = 72
       },
@@ -53,14 +53,14 @@ function data() return {
          offset = 0
       },
       tangent = {
-         count = 288,
+         count = 192,
          numComp = 4,
-         offset = 288
+         offset = 216
       },
       uv0 = {
-         count = 112,
+         count = 80,
          numComp = 2,
-         offset = 576
+         offset = 408
       }
    }
 } end

@@ -1,0 +1,46 @@
+local updateFn = function(result, transform, tag, slotId, addModelFn, params)
+    game.res.script["construction/station/rail/ust/struct/entry_underpass"].updateFn(result, transform, tag, slotId, addModelFn, params, "concrete")
+end
+
+function data()
+    return {
+        availability = {
+            yearFrom = 0,
+            yearTo = 0,
+        },
+        buildMode = "SINGLE",
+        cost = {
+            price = 0,
+        },
+        description = {
+            name = _("MENU_MODULE_ENTRY_UNDERPASS"),
+            description = _("MENU_MODULE_ENTRY_UNDERPASS_DESC"),
+        },
+        category = {
+            categories = {"ust_cat_entry"},
+        },
+        type = "ust_component_underpass_entry",
+        order = {
+            value = 2,
+        },
+        metadata = {
+            scriptName = "construction/station/rail/ust/struct/entry_underpass",
+            classify = "classify",
+            slotSetup = "slotSetup",
+            preProcessRemove = "preProcessRemove",
+            typeName = "ust_component_underpass_entry",
+            isComponent = true,
+            isFence = true,
+            isWall = true,
+            typeId = 34,
+            width = 5
+        },
+        
+        updateFn = updateFn,
+        
+        getModelsFn = function(params)
+            return {}
+        end
+    }
+
+end

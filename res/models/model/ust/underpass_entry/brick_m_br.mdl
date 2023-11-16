@@ -1,20 +1,18 @@
 function data() return {
    boundingInfo = {
-      bbMax = { 0.500000, 0, 1 },
-      bbMin = { 0, -0.725000, 0 }
+      bbMax = { 0.000000, 1.450000, 1.000000 },
+      bbMin = { -0.500000, -0.000000, -0.000000 }
    },
    collider = {
-      params = {
-
-      },
+      params = {  },
       type = "MESH"
    },
    lods = {
       {
          node = {
-            materials = { "ust/uz/concrete.mtl", "ust/uv/concrete.mtl" },
-            mesh = "ust/platform/underpass_concrete_r_tl.msh",
-            name = "underpass_concrete_r_tl",
+            materials = { "ust/uz/brick.mtl", "ust/uv/brick.mtl" },
+            mesh = "ust/underpass_entry/brick_m_br.msh",
+            name = "brick_m_br",
             transf = {
                1.000000, 0.000000, 0.000000, 0.000000, 
                0.000000, 1.000000, 0.000000, 0.000000, 
@@ -24,7 +22,7 @@ function data() return {
          },
          static = false,
          visibleFrom = 0,
-         visibleTo = 1000
+         visibleTo = 2000
       }
    },
    metadata = {

@@ -4,7 +4,7 @@ function data()
     return {
         info = {
             severityAdd = "NONE",
-            minorVersion = 2,
+            minorVersion = 3,
             severityRemove = "CRITICAL",
             name = _("MOD_NAME"),
             description = _("MOD_DESC"),
