@@ -1,4 +1,5 @@
 local func = require "ust/func"
+local pipe = require "ust/pipe"
 local coor = require "ust/coor"
 local quat = require "ust/quaternion"
 local ust = require "ust"
@@ -7,10 +8,67 @@ local insert = table.insert
 local bottomConnector = {
     coor.xyz(-0.95, -7.5, 0),
     coor.xyz(0.95, -7.5, 0),
-    coor.xyz(0, -8.225, 0)
+    coor.xyz(0, -7.5, 0)
 }
 
-local fitModel = ust.fitModel(1.9, 1.45, -1, true, true)
+local bottomPts = {
+    left = {coor.xyz(-0.95, -6.775, 0), coor.xyz(-0.95, -8.225, 0)},
+    right = {coor.xyz(0.95, -8.225, 0), coor.xyz(0.95, -6.775, 0)},
+    front = {coor.xyz(-0.95, -8.225, 0), coor.xyz(0.95, -8.225, 0)}
+}
+
+local fitModel = function(w, h, d, fitTop, fitLeft)
+    local s = {
+        coor.xyz(h, 0, 0),
+        coor.xyz(0, fitLeft and w or -w, 0),
+        coor.xyz(0, 0, fitTop and -d or d),
+        coor.xyz(0, 0, 0)
+    }
+    
+    local mX = {
+        {s[1].x, s[1].y, s[1].z, 1},
+        {s[2].x, s[2].y, s[2].z, 1},
+        {s[3].x, s[3].y, s[3].z, 1},
+        {s[4].x, s[4].y, s[4].z, 1}
+    }
+    
+    local mXI = coor.inv(mX)
+    
+    ---@param size projection_size
+    ---@return matrix
+    return function(size)
+        local t = {
+            size.lt,
+            size.rt,
+            size.lb,
+        }
+        
+        ---@type matrix
+        local mU = {
+            t[1].x, t[1].y, t[1].z, 1,
+            t[2].x, t[2].y, t[2].z, 1,
+            t[3].x, t[3].y, t[3].z, 1,
+            t[1].x + h, t[1].y, t[1].z, 1
+        }
+        
+        return mXI * mU
+    end
+end
+
+
+local fitModels = {
+    dark = ust.fitModel(1.275, 0.502, 1, true, true),
+    light = ust.fitModel(1.275, 1.698, 1, true, true),
+    tunnel = ust.fitModel(1.9, 1.45, -1, true, true)
+}
+
+local stripHeight = 0.502
+local passWidth = 0.95
+local passHeight = 2.2
+local passLength = 6.775
+local stepLength = 6
+local openingLength = 3.471
+local rampLenght = stepLength - openingLength
 
 local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local id = params.modules[slotId].info.id
@@ -21,17 +79,15 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     local hPlatform = 4.4
     
     if info.comp[34] then
-        local leftWall = data == 0 and params.modules[m.makeData(34, 17)] or params.modules[m.makeData(34, 47)]
-        local rightWall = data == 0 and params.modules[m.makeData(34, 13)] or params.modules[m.makeData(34, 43)]
+        local walls = func.filter({
+            data == 0 and params.modules[m.makeData(34, 17)] or params.modules[m.makeData(34, 47)] or false,
+            data == 0 and params.modules[m.makeData(34, 13)] or params.modules[m.makeData(34, 43)] or false,
+            data == 0 and params.modules[m.makeData(34, 5)] or false,
+            data == 1 and params.modules[m.makeData(34, 1)] or false
+        }, pipe.noop())
         
-        if leftWall and rightWall then
-            local hLeft = leftWall.info.height
-            local hRight = rightWall.info.height
-            hPlatform = (hLeft + hRight) * 0.5
-        elseif rightWall then
-            hPlatform = rightWall.info.height
-        elseif leftWall then
-            hPlatform = leftWall.info.height
+        if #walls > 0 then
+            hPlatform = func.fold(walls, 0, function(h, wall) return wall.info.height + h end) / #walls
         end
     end
     
@@ -43,10 +99,69 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
         * quat.byVec(coor.xyz(0, 1, 0), refVec):mRot()
         * coor.trans(refPos)
     
+    do
+        local gradient = hPlatform / stepLength
+        local rampHeight = rampLenght * gradient
+        
+        local rampCoords = {
+            lt = coor.xyz(-passWidth, -stepLength, -hPlatform) .. trans,
+            lb = coor.xyz(passWidth, -stepLength, -hPlatform) .. trans,
+            rt = coor.xyz(-passWidth, -openingLength, -hPlatform + rampHeight) .. trans,
+            rb = coor.xyz(passWidth, -openingLength, -hPlatform + rampHeight) .. trans
+        }
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(rampCoords, true)));
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(rampCoords, false)));
+        
+        local intersectionCoords = {
+            rt = coor.xyz(-passWidth, -stepLength, -hPlatform) .. trans,
+            rb = coor.xyz(passWidth, -stepLength, -hPlatform) .. trans,
+            lt = coor.xyz(-passWidth, -passLength, -hPlatform) .. trans,
+            lb = coor.xyz(passWidth, -passLength, -hPlatform) .. trans
+        }
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(intersectionCoords, true)));
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(intersectionCoords, false)));
+        
+        local stripBase = hPlatform - rampHeight
+        local wallBase = hPlatform - rampHeight - stripHeight
+        local wallfaceCoords = {
+            lt = coor.xyz(0, 0, 0),
+            lb = coor.xyz(-wallBase, 0, 0),
+            rt = coor.xyz(0, wallBase / gradient, 0),
+            rb = coor.xyz(-wallBase, wallBase / gradient, 0)
+        }
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_white_tl.mdl", tag, fitModels.light(wallfaceCoords, true) * coor.xXZ() * coor.trans(coor.xyz(-passWidth, -openingLength, 0)) * trans))
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_white_tl.mdl", tag, fitModels.light(wallfaceCoords, true) * coor.flipZ() * coor.xXZ() * coor.trans(coor.xyz(passWidth, -openingLength, 0)) * trans))
+        
+        local stripfaceCoords = {
+            lt = coor.xyz(-wallBase, 0, 0),
+            lb = coor.xyz(-stripBase, 0, 0),
+            rb = coor.xyz(0, openingLength, 0),
+            rt = coor.xyz(0, wallBase / gradient, 0)
+        }
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_grey_tl.mdl", tag, fitModels.dark(stripfaceCoords, true) * coor.xXZ() * coor.trans(coor.xyz(-passWidth, -openingLength, 0)) * trans))
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_grey_br.mdl", tag, fitModels.dark(stripfaceCoords, false) * coor.xXZ() * coor.trans(coor.xyz(-passWidth, -openingLength, 0)) * trans))
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_grey_tl.mdl", tag, fitModels.dark(stripfaceCoords, true) * coor.flipZ() * coor.xXZ() * coor.trans(coor.xyz(passWidth, -openingLength, 0)) * trans))
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_grey_br.mdl", tag, fitModels.dark(stripfaceCoords, false) * coor.flipZ() * coor.xXZ() * coor.trans(coor.xyz(passWidth, -openingLength, 0)) * trans))
+        
+        local backfaceCoords = {
+            lt = coor.xyz(passWidth, 0, 0),
+            lb = coor.xyz(passWidth, -(stripBase - passHeight), 0),
+            rt = coor.xyz(-passWidth, 0, 0),
+            rb = coor.xyz(-passWidth, -(stripBase - passHeight), 0)
+        }
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_white_tl.mdl", tag, fitModels.light(backfaceCoords, true) * coor.xYZ() * coor.transY(-openingLength) * trans))
+        insert(result.models, ust.newModel("ust/platform/era_c/underpass_sidewall_white_br.mdl", tag, fitModels.light(backfaceCoords, false) * coor.xYZ() * coor.transY(-openingLength) * trans))
+        
+        local nSteps = math.ceil(hPlatform / 0.2)
+        local lStep = 6 / nSteps
+        for i = 0, nSteps - 1 do
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_steps.mdl", tag,
+                coor.trans(coor.xyz(0, -lStep * i, -0.2 * i)) * trans))
+        end
+    end
+    
     insert(result.models, ust.newModel("ust/platform/era_c/underpass_top.mdl", tag, trans));
-    insert(result.models, ust.newModel("ust/platform/era_c/underpass_middle.mdl", tag, coor.scaleZ(hPlatform / 4.4) * trans));
     insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel.mdl", tag, coor.trans(coor.xyz(0, -7.5, -hPlatform)) * trans));
-    insert(result.models, ust.newModel("ust/platform/era_c/underpass_wall.mdl", tag, coor.rotZ180 * coor.trans(coor.xyz(0, -8.225, -hPlatform)) * trans));
     
     local pts = func.map({
         coor.xyz(-2, 1, 0),
@@ -56,45 +171,50 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params)
     }, function(pt) return pt .. trans end)
     
     insert(result.models, ust.unitLane(coor.xyz(0, 0.1, 0) .. trans, coor.xyz(0, -0.25, 0) .. trans, tag))
-    insert(result.models, ust.unitLane(coor.xyz(0, -0.25, 0) .. trans, coor.xyz(0, -6.75, -hPlatform) .. trans, tag))
-    insert(result.models, ust.unitLane(coor.xyz(0, -6.75, -hPlatform) .. trans, coor.xyz(0, -7.5, -hPlatform) .. trans, tag))
+    insert(result.models, ust.unitLane(coor.xyz(0, -0.25, 0) .. trans, coor.xyz(0, -stepLength, -hPlatform) .. trans, tag))
+    insert(result.models, ust.unitLane(coor.xyz(0, -stepLength, -hPlatform) .. trans, coor.xyz(0, -7.5, -hPlatform) .. trans, tag))
     insert(result.models, ust.unitLane(coor.xyz(0, -7.5, -hPlatform) .. trans, coor.xyz(0.95, -7.5, -hPlatform) .. trans, tag))
     insert(result.models, ust.unitLane(coor.xyz(0, -7.5, -hPlatform) .. trans, coor.xyz(-0.95, -7.5, -hPlatform) .. trans, tag))
     
-    -- insert(result.models, ust.unitLane(centerPts[3] .. hTrans, topConnector .. trans, tag))
     insert(result.groundFaces, {face = func.map(pts, coor.vec2Tuple), modes = {{type = "FILL", key = "hole.lua"}}})
     
-    local bottomPts = data == 0 and {
-        lt = coor.xyz(-0.95, -6.775, -hPlatform) .. trans,
-        lb = coor.xyz(-0.95, -8.225, -hPlatform) .. trans,
-        rb = coor.xyz(0.95, -8.225, -hPlatform) .. trans,
-        rt = coor.xyz(0.95, -6.775, -hPlatform) .. trans
-    } or {
-        rb = coor.xyz(-0.95, -6.775, -hPlatform) .. trans,
-        rt = coor.xyz(-0.95, -8.225, -hPlatform) .. trans,
-        lt = coor.xyz(0.95, -8.225, -hPlatform) .. trans,
-        lb = coor.xyz(0.95, -6.775, -hPlatform) .. trans
-    }
+    local leftInterface = func.map((data == 0 and bottomPts.left or bottomPts.right), function(pt) return pt .. coor.transZ(-hPlatform) * trans end)
+    local rightInterface = func.map((data == 0 and bottomPts.right or bottomPts.left), function(pt) return pt .. coor.transZ(-hPlatform) * trans end)
+    local frontInterface = func.map(bottomPts.front, function(pt) return pt .. coor.transZ(-hPlatform) * trans end)
+    
     result.connectors.underpass[slotId] = {
         pos = info.pos + coor.xyz(info.pos.x * 2, 0, 0),
-        bottomPts = bottomPts,
+        interfaces = {
+            left = leftInterface,
+            right = rightInterface,
+            front = frontInterface,
+            back = frontInterface
+        },
         connectors = {
             left = bottomConnector[data == 0 and 1 or 2] .. coor.transZ(-hPlatform) * trans,
             right = bottomConnector[data == 0 and 2 or 1] .. coor.transZ(-hPlatform) * trans,
+            front = data == 0 and (bottomConnector[3] .. coor.transZ(-hPlatform) * trans) or nil,
+            back = data == 1 and (bottomConnector[3] .. coor.transZ(-hPlatform) * trans) or nil,
         },
         data = data,
         vec = refVec:normalized(),
         fnClosed = {
             left = function()
-                local vec = bottomPts.lt - bottomPts.lb
-                local pt = bottomPts.lt:avg(bottomPts.lb)
+                local vec = leftInterface[1] - leftInterface[2]
+                local pt = leftInterface[1]:avg(leftInterface[2])
                 insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt)));
             end,
             right = function()
-                local vec = bottomPts.rt - bottomPts.rb
-                local pt = bottomPts.rt:avg(bottomPts.rb)
-                insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, -1, 0), vec):mRot() * coor.trans(pt)));
-            end
+                local vec = rightInterface[1] - rightInterface[2]
+                local pt = rightInterface[1]:avg(rightInterface[2])
+                insert(result.models, ust.newModel("ust/platform/era_c/underpass_deadend.mdl", tag, quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(pt)));
+            end,
+            front = data == 0 and function()
+                insert(result.models, ust.newModel("ust/platform/era_c/underpass_wall.mdl", tag, coor.rotZ180 * coor.trans(coor.xyz(0, -8.225, -hPlatform)) * trans));
+            end or nil,
+            back = data == 1 and function()
+                insert(result.models, ust.newModel("ust/platform/era_c/underpass_wall.mdl", tag, coor.rotZ180 * coor.trans(coor.xyz(0, -8.225, -hPlatform)) * trans));
+            end or nil
         }
     }
     

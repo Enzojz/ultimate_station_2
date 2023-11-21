@@ -44,7 +44,7 @@ function data()
                opacity = -256,
                scale = {0.4, 0.4}
            },
-           polygon_offset = {facste = 0, units = 0},
+           polygon_offset = {factor = -0.5, units = 0.25, forceDepthWrite = true},
            two_sided = {twoSided = false}
        },
        type = "PHYSICAL_NRML_MAP_OP"

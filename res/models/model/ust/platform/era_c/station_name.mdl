@@ -1,0 +1,43 @@
+function data() return {
+   boundingInfo = {
+      bbMax = { 1.450620, 0.024650, 0.290000 },
+      bbMin = { -1.450620, -0.024650, -0.290000 }
+   },
+   collider = {
+      params = {  },
+      type = "MESH"
+   },
+   lods = {
+      {
+         node = {
+            materials = { "station/rail/era_c/era_c_trainstation_assets.mtl", },
+            mesh = "ust/platform/era_c/station_name.msh",
+            name = "RootNode",
+            transf = {
+               1.000000, 0.000000, 0.000000, 0.000000, 
+               0.000000, 1.000000, 0.000000, 0.000000, 
+               0.000000, 0.000000, 1.000000, 0.000000, 
+               0.000000, 0.000000, 0.000000, 1.000000, 
+            }
+         },
+         static = false,
+         visibleFrom = 0,
+         visibleTo = 500
+      }
+   },
+	metadata = {
+		labelList = {
+			labels = {
+				{
+					transf = { 1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, -1.3, -0.05, 0.12, 1, },
+					size = { 2.6, .3 },
+					type = "STATION_NAME",
+					alphaMode = "BLEND",
+					fitting = "SCALE",
+					childId = "RootNode",
+				},
+			},
+		},
+	},
+   version = 1
+} end

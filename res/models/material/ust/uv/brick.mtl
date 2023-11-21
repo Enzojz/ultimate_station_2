@@ -33,7 +33,7 @@ function data()
                wrapS = "REPEAT",
                wrapT = "REPEAT"
            },
-           polygon_offset = { facste = 0, units = 0 },
+           polygon_offset = {factor = -0.5, units = 0.25, forceDepthWrite = true},
            two_sided = { twoSided = false }
        },
        type = "PHYSICAL_NRML_MAP"

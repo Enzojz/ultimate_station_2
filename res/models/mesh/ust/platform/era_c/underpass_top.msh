@@ -4,19 +4,19 @@ function data() return {
          indices = {
             normal = {
                count = 372,
-               offset = 11732
+               offset = 11932
             },
             position = {
                count = 372,
-               offset = 11360
+               offset = 11560
             },
             tangent = {
                count = 372,
-               offset = 12104
+               offset = 12304
             },
             uv0 = {
                count = 372,
-               offset = 12476
+               offset = 12676
             }
          }
       },
@@ -24,26 +24,46 @@ function data() return {
          indices = {
             normal = {
                count = 960,
-               offset = 13808
+               offset = 14008
             },
             position = {
                count = 960,
-               offset = 12848
+               offset = 13048
             },
             tangent = {
                count = 960,
-               offset = 14768
+               offset = 14968
             },
             uv0 = {
                count = 960,
-               offset = 15728
+               offset = 15928
+            }
+         }
+      },
+      {
+         indices = {
+            normal = {
+               count = 24,
+               offset = 16912
+            },
+            position = {
+               count = 24,
+               offset = 16888
+            },
+            tangent = {
+               count = 24,
+               offset = 16936
+            },
+            uv0 = {
+               count = 24,
+               offset = 16960
             }
          }
       }
    },
    vertexAttr = {
       normal = {
-         count = 3996,
+         count = 4068,
          numComp = 3,
          offset = 684
       },
@@ -53,14 +73,14 @@ function data() return {
          offset = 0
       },
       tangent = {
-         count = 5328,
+         count = 5424,
          numComp = 4,
-         offset = 4680
+         offset = 4752
       },
       uv0 = {
-         count = 1352,
+         count = 1384,
          numComp = 2,
-         offset = 10008
+         offset = 10176
       }
    }
 } end

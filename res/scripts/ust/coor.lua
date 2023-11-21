@@ -513,6 +513,16 @@ function coor.xXZ()
 end
 
 ---@return matrix
+function coor.xYZ()
+    return init * {
+        1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+    }
+end
+
+---@return matrix
 function coor.flipX()
     return init * {
         -1, 0, 0, 0,

@@ -9,8 +9,7 @@ local insert = table.insert
 local fitModels = {
     middle = ust.fitModel(0.5, 1.45, 1, true, true),
     side = ust.fitModel(0.5, 1.775, 1, true, true),
-    wall = ust.fitModel(0.5, 5, 1, true, true),
-    underpass = ust.fitModel(1.9, 1.45, -1, true, true)
+    wall = ust.fitModel(0.5, 5, 1, true, true)
 }
 
 local addSlot = function(params, result)
@@ -65,6 +64,40 @@ local addSlot = function(params, result)
                         })
                 end
             end
+            
+            do
+                local refPt = ptsR[5]:avg(ptsL[5])
+                local refVec = (ptsR[5] - ptsL[5]):normalized()
+                
+                local transf =
+                    quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(34, 1),
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * transf,
+                        type = "ust_component_underpass_entry",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
+            
+            do
+                local refPt = ptsR[1]:avg(ptsL[1])
+                local refVec = (ptsR[1] - ptsL[1]):normalized()
+                
+                local transf =
+                    quat.byVec(coor.xyz(1, 0, 0), refVec):mRot()
+                    * coor.trans(refPt)
+                
+                insert(
+                    result.slots, {
+                        id = makeData(34, 5),
+                        transf = coor.scale(coor.xyz(2, 0.25, 1)) * transf,
+                        type = "ust_component_underpass_entry",
+                        spacing = {0, 0, 0, 0}
+                    })
+            end
         end
     end
 end
@@ -80,6 +113,8 @@ local slotSetup = function(params, result, slotId)
     
     local rightPlatform = m.info.octa[3] and (params.modules[m.info.octa[3]].metadata.isPlatform or params.modules[m.info.octa[3]].metadata.isPlaceholder)
     local leftPlatform = m.info.octa[7] and (params.modules[m.info.octa[7]].metadata.isPlatform or params.modules[m.info.octa[7]].metadata.isPlaceholder)
+    local frontPlatform = m.info.octa[1] and (params.modules[m.info.octa[1]].metadata.isPlatform or params.modules[m.info.octa[1]].metadata.isPlaceholder)
+    local backPlatform = m.info.octa[5] and (params.modules[m.info.octa[5]].metadata.isPlatform or params.modules[m.info.octa[5]].metadata.isPlaceholder)
     if octa == 3 and rightPlatform then
         if params.modules[m.info.octa[3]].metadata.isPlatform then
             params.modules[slotId].info.rightPlatform = m.info.octa[3]
@@ -94,6 +129,24 @@ local slotSetup = function(params, result, slotId)
             params.modules[slotId].info.leftPlatform = m.info.octa[7]
         end
         local mLeft = params.modules[m.info.octa[7]]
+        local hPlatformLeft = mLeft.info.height
+        if hPlatform - hPlatformLeft > 4.4 then
+            hPlatform = hPlatform - hPlatformLeft
+        end
+    elseif octa == 1 and frontPlatform then
+        if params.modules[m.info.octa[1]].metadata.isPlatform then
+            params.modules[slotId].info.frontPlatform = m.info.octa[1]
+        end
+        local mLeft = params.modules[m.info.octa[1]]
+        local hPlatformLeft = mLeft.info.height
+        if hPlatform - hPlatformLeft > 4.4 then
+            hPlatform = hPlatform - hPlatformLeft
+        end
+    elseif octa == 5 and backPlatform then
+        if params.modules[m.info.octa[5]].metadata.isPlatform then
+            params.modules[slotId].info.backPlatform = m.info.octa[5]
+        end
+        local mLeft = params.modules[m.info.octa[5]]
         local hPlatformLeft = mLeft.info.height
         if hPlatform - hPlatformLeft > 4.4 then
             hPlatform = hPlatform - hPlatformLeft
@@ -152,21 +205,22 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, mo
                 shape = params.modules[slotId].variant % 2,
                 spacing = {0, 0, 0, 0}
             })
+                
+        local innerPts = func.map(innerPts, function(pt) return pt .. coor.transZ(hRef) end)
+        local outerPts = func.map(outerPts, function(pt) return pt .. coor.transZ(hRef) end)
+        
+        local leftPts = octa == 3 and innerPts or outerPts
+        local rightPts = octa == 3 and outerPts or innerPts
         
         local fnClosed = function()
-            local coords = octa == 7 and {
-                lt = innerPts[1],
-                lb = innerPts[2],
-                rt = outerPts[1],
-                rb = outerPts[2]
-            } or {
-                rt = innerPts[1],
-                rb = innerPts[2],
-                lt = outerPts[1],
-                lb = outerPts[2]
+            local coords = {
+                lt = leftPts[2],
+                lb = leftPts[1],
+                rt = rightPts[2],
+                rb = rightPts[1]
             }
-            insert(result.models, ust.newModel("ust/walls/" .. model .. "_tl.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.wall(coords, true)))
-            insert(result.models, ust.newModel("ust/walls/" .. model .. "_br.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.wall(coords, false)))
+            insert(result.models, ust.newModel("ust/walls/" .. model .. "_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.wall(coords, true)))
+            insert(result.models, ust.newModel("ust/walls/" .. model .. "_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.wall(coords, false)))
         end
         
         if params.modules[slotId].variant == 1 or params.modules[slotId].variant == 3 then
@@ -180,72 +234,11 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, mo
             local outerVec = (outerPts[2] - outerPts[1]):normalized() * (outerBaseLength - 1.45) * 0.5;
             local outerPts = {outerPts[1], outerPts[1] + outerVec, outerPts[2] - outerVec, outerPts[2]}
             
-            local fnOpen = function()
-                local coords = func.map2(
-                    func.interlace(innerPts),
-                    func.interlace(outerPts),
-                    function(innerPts, outerPts)
-                        return octa == 7 and {
-                            lt = innerPts[1],
-                            lb = innerPts[2],
-                            rt = outerPts[1],
-                            rb = outerPts[2]
-                        } or {
-                            rt = innerPts[1],
-                            rb = innerPts[2],
-                            lt = outerPts[1],
-                            lb = outerPts[2]
-                        }
-                    end)
-                
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_tl.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.side(coords[1], true)))
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_br.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.side(coords[1], false)))
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_tl.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.side(coords[3], true)))
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_br.mdl", tag, coor.scaleZ(hPlatform) * coor.transZ(hRef) * fitModels.side(coords[3], false)))
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_tl.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(hRef + 2.2) * fitModels.middle(coords[2], true)))
-                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_br.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(hRef + 2.2) * fitModels.middle(coords[2], false)))
-                
-                insert(result.models, ust.newModel("station/rail/asset/era_c_station_name.mdl", tag,
-                    coor.rotZ90N * coor.trans(coor.xyz(octa == 7 and 0.03 or -0.03, 0, hRef + 2.2)) * quat.byVec(coor.xyz(0, 1, 0), (innerPts[2] - innerPts[3]):normalized()):mRot() * coor.trans(innerPts[2]:avg(innerPts[3]))));
-            end
+            local leftPts = octa == 3 and innerPts or outerPts
+            local rightPts = octa == 3 and outerPts or innerPts
             
-            result.connectors.underpass[slotId] = octa == 7 and {
-                pos = info.pos + coor.xyz(info.pos.x * 2 - 1, 0, 0),
-                bottomPts = {
-                    rt = innerPts[3] .. coor.transZ(hRef),
-                    rb = innerPts[2] .. coor.transZ(hRef),
-                    lt = outerPts[3] .. coor.transZ(hRef),
-                    lb = outerPts[2] .. coor.transZ(hRef),
-                },
-                connectors = {
-                    right = innerPts[2]:avg(innerPts[3]) .. coor.transZ(hRef)
-                },
-                height = hPlatform,
-                vec = innerVec:normalized(),
-                fnOpen = {right = fnOpen},
-                fnClosed = {right = fnClosed}
-            } or {
-                pos = info.pos + coor.xyz(info.pos.x * 2 + 1, 0, 0),
-                bottomPts = {
-                    lt = innerPts[3] .. coor.transZ(hRef),
-                    lb = innerPts[2] .. coor.transZ(hRef),
-                    rt = outerPts[3] .. coor.transZ(hRef),
-                    rb = outerPts[2] .. coor.transZ(hRef),
-                },
-                connectors = {
-                    left = innerPts[2]:avg(innerPts[3]) .. coor.transZ(hRef),
-                },
-                height = hPlatform,
-                vec = innerVec:normalized(),
-                fnOpen = {left = fnOpen},
-                fnClosed = {left = fnClosed}
-            }
-            
-            insert(
-                result.invokeLater,
-                game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModels.underpass)
-            )
-            function platformConnection(lane, connector)
+            local connector = innerPts[2]:avg(innerPts[3])
+            function platformConnection(lane)
                 if lane then
                     local connections = pipe.new * lane
                         * pipe.map(function(pt) return {pt = pt, distance = (pt - connector):length2()} end)
@@ -261,35 +254,177 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, mo
                 end
             end
             
-            function extConnection(connector)
+            function extConnection()
                 for _, pt in ipairs({innerPts[2], innerPts[3]}) do
-                    insert(result.models, ust.unitLane(connector, (pt .. coor.transZ(hRef)):avg(connector), tag, "ust/linking_lane.mdl"))
+                    insert(result.models, ust.unitLane(connector, pt:avg(connector), tag, "ust/linking_lane.mdl"))
                 end
             end
             
+            local fnOpen = function()
+                local coords = func.map2(
+                    func.interlace(leftPts),
+                    func.interlace(rightPts),
+                    function(leftPts, rightPts)
+                        return {
+                            lt = leftPts[2],
+                            lb = leftPts[1],
+                            rt = rightPts[2],
+                            rb = rightPts[1]
+                        }
+                    end)
+                
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[1], true)))
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[1], false)))
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[3], true)))
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[3], false)))
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_tl.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(2.2) * fitModels.middle(coords[2], true)))
+                insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_br.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(2.2) * fitModels.middle(coords[2], false)))
+                
+                insert(result.models, ust.newModel("ust/platform/era_c/station_name.mdl", tag,
+                    coor.rotZ90N
+                    * coor.transZ(2.5)
+                    * quat.byVec(coor.xyz(0, octa == 3 and 1 or -1, 0), (innerPts[2] - innerPts[3]):normalized()):mRot()
+                    * coor.trans(outerPts[2]:avg(outerPts[3]))));
+            end
+            
+            result.connectors.underpass[slotId] = {
+                pos = info.pos + coor.xyz(info.pos.x * 2 + (octa == 3 and 1 or -1), 0, 0),
+                interfaces = {
+                    left = {leftPts[3], leftPts[2]},
+                    right = {rightPts[2], rightPts[3]},
+                },
+                connectors = {
+                    left = octa == 3 and connector or nil,
+                    right = octa == 7 and connector or nil
+                },
+                height = hPlatform,
+                vec = innerVec:normalized(),
+                fnOpen = octa == 7 and {right = fnOpen} or {left = fnOpen},
+                fnClosed = octa == 7 and {right = fnClosed} or {left = fnClosed}
+            }
+            
+            insert(
+                result.invokeLater,
+                game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId, fitModels.underpass)
+            )
+
             if octa == 7 then
                 if params.modules[slotId].info.leftPlatform then
-                    platformConnection(
-                        params.extra[params.modules[slotId].info.leftPlatform].rightLane,
-                        result.connectors.underpass[slotId].connectors.right
-                )
+                    platformConnection(params.extra[params.modules[slotId].info.leftPlatform].rightLane)
                 else
-                    extConnection(result.connectors.underpass[slotId].connectors.right)
+                    extConnection()
                 end
             end
             
             if octa == 3 then
                 if params.modules[slotId].info.rightPlatform then
-                    platformConnection(
-                        params.extra[params.modules[slotId].info.rightPlatform].leftLane,
-                        result.connectors.underpass[slotId].connectors.left
-                )
+                    platformConnection(params.extra[params.modules[slotId].info.rightPlatform].leftLane)
                 else
-                    extConnection(result.connectors.underpass[slotId].connectors.left)
+                    extConnection()
                 end
             end
         end
     
+    else
+        local ptL = info.arcs.left:pt(octa == 1 and info.arcs.left.sup or info.arcs.left.inf) .. coor.transZ(hRef)
+        local ptR = info.arcs.right:pt(octa == 1 and info.arcs.right.sup or info.arcs.right.inf) .. coor.transZ(hRef)
+        
+        local width = (ptL - ptR):length()
+        local n = math.ceil((width - 5 - 9) / 10) * 2 + 1
+        
+        local vec = (ptR - ptL) / n
+        local vecP = (vec .. coor.rotZ90P):normalized() * 0.25
+        local vecN = (vec .. coor.rotZ90N):normalized() * 0.25
+        
+        insert(
+            result.slots, {
+                id = -slotId,
+                transf = quat.byVec(coor.xyz(0, 1, 0), vec):mRot() * coor.trans(octa == 1 and info.pts[2][1] or info.pts[1][1]),
+                type = "ust_component_underpass_entry",
+                spacing = {0, 0, 0, 0}
+            })
+
+        for i = 1, n do
+            local ptL, ptR = ptL + vec * (i - 1), ptL + vec * i
+            
+            local outerPts = octa == 1 and {ptL, ptR} or {ptR, ptL}
+            local innerPts = func.map(outerPts, function(pt) return pt + (octa == 1 and vecN or vecP) end)
+            
+            local fnClosed = function()
+                local coords = {
+                    lt = innerPts[1],
+                    lb = innerPts[2],
+                    rt = outerPts[1],
+                    rb = outerPts[2]
+                }
+                insert(result.models, ust.newModel("ust/walls/" .. model .. "_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.wall(coords, true)))
+                insert(result.models, ust.newModel("ust/walls/" .. model .. "_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.wall(coords, false)))
+            end
+            
+            if i ~= (n - 1) / 2 + 1 then
+                fnClosed()
+            elseif params.modules[slotId].variant == 1 or params.modules[slotId].variant == 3 then
+                fnClosed()
+            else
+                local innerBaseLength = (innerPts[2] - innerPts[1]):length()
+                local innerVec = (innerPts[2] - innerPts[1]):normalized() * (innerBaseLength - 1.9) * 0.5;
+                local innerPts = {innerPts[1], innerPts[1] + innerVec, innerPts[2] - innerVec, innerPts[2]}
+                
+                local outerBaseLength = (outerPts[2] - outerPts[1]):length()
+                local outerVec = (outerPts[2] - outerPts[1]):normalized() * (outerBaseLength - 1.9) * 0.5;
+                local outerPts = {outerPts[1], outerPts[1] + outerVec, outerPts[2] - outerVec, outerPts[2]}
+                
+                local fnOpen = function()
+                    local coords = func.map2(
+                        func.interlace(innerPts),
+                        func.interlace(outerPts),
+                        function(innerPts, outerPts)
+                            return {
+                                lt = innerPts[1],
+                                lb = innerPts[2],
+                                rt = outerPts[1],
+                                rb = outerPts[2]
+                            }
+                        end)
+                    
+                    insert(result.models, ust.unitLane(innerPts[2]:avg(innerPts[3]), outerPts[2]:avg(outerPts[3]), tag, "ust/linking_lane.mdl"))
+                    
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[1], true)))
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_l_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[1], false)))
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_tl.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[3], true)))
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_r_br.mdl", tag, coor.scaleZ(hPlatform) * fitModels.side(coords[3], false)))
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_tl.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(2.2) * fitModels.middle(coords[2], true)))
+                    insert(result.models, ust.newModel("ust/underpass_entry/" .. model .. "_m_br.mdl", tag, coor.scaleZ(hPlatform - 2.2) * coor.transZ(2.2) * fitModels.middle(coords[2], false)))
+                    
+                    insert(result.models, ust.newModel("ust/platform/era_c/station_name.mdl", tag,
+                        coor.rotZ90N
+                        * coor.transZ(2.5)
+                        * quat.byVec(coor.xyz(0, 1, 0), (innerPts[3] - innerPts[2]):normalized()):mRot()
+                        * coor.trans(outerPts[2]:avg(outerPts[3]))));
+                end
+                
+                result.connectors.underpass[slotId] = {
+                    pos = info.pos + coor.xyz(info.pos.x * 2, 0, 0),
+                    interfaces = {
+                        front = {innerPts[2], innerPts[3]},
+                        back = {innerPts[2], innerPts[3]},
+                    },
+                    connectors = {
+                        front = octa == 1 and innerPts[2]:avg(innerPts[3]) or nil,
+                        back = octa == 5 and innerPts[2]:avg(innerPts[3]) or nil
+                    },
+                    height = hPlatform,
+                    vec = innerVec:normalized(),
+                    fnOpen = octa == 1 and {front = fnOpen} or {back = fnOpen},
+                    fnClosed = octa == 1 and {front = fnClosed} or {back = fnClosed}
+                }
+                
+                insert(
+                    result.invokeLater,
+                    game.res.script["construction/station/rail/ust/struct/underpass"].invokeLater(result, tag, slotId)
+            )
+            end
+        end
     end
 end
 

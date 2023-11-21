@@ -4,6 +4,10 @@ local quat = require "ust/quaternion"
 
 local insert = table.insert
 
+local fitModels = {
+    tunnel = ust.fitModel(1.9, 1.45, -1, true, true)
+}
+
 local addSlot = function(params, result)
     for id, info in pairs(params.classedModules) do
         local module = params.modules[info.slotId]
@@ -40,10 +44,12 @@ local addSlot = function(params, result)
     end
 end
 
-local invokeLater2 = function(result, tag, slotId, fitModel)
+local invokeLater2 = function(result, tag, slotId)
     local current = result.connectors.underpass[slotId]
     local leftConnector = current.connectors.left
     local rightConnector = current.connectors.right
+    local frontConnector = current.connectors.front
+    local backConnector = current.connectors.back
     local targets = current.targets
     
     if targets.left then
@@ -51,17 +57,17 @@ local invokeLater2 = function(result, tag, slotId, fitModel)
         if mTarget.targets.right and mTarget.targets.right.slotId == slotId then
             insert(result.models, ust.unitLane(leftConnector, targets.left.from:avg(targets.left.to), tag))
             
-            local targetBottomPts = mTarget.bottomPts
+            local targetPts = mTarget.interfaces.right
             
             local pts = {
-                lt = current.bottomPts.lt:avg(targetBottomPts.rt),
-                lb = current.bottomPts.lb:avg(targetBottomPts.rb),
-                rb = current.bottomPts.lb,
-                rt = current.bottomPts.lt
+                lt = current.interfaces.left[1]:avg(targetPts[2]),
+                lb = current.interfaces.left[2]:avg(targetPts[1]),
+                rb = current.interfaces.left[2],
+                rt = current.interfaces.left[1]
             }
             
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(pts, false)));
             
             if current.fnOpen and current.fnOpen.left then
                 insert(result.invokeLater, current.fnOpen.left)
@@ -76,20 +82,19 @@ local invokeLater2 = function(result, tag, slotId, fitModel)
     
     if targets.right then
         local mTarget = result.connectors.underpass[targets.right.slotId]
-        if mTarget.targets and mTarget.targets.left.slotId == slotId then
+        if mTarget.targets.left and mTarget.targets.left.slotId == slotId then
             insert(result.models, ust.unitLane(rightConnector, targets.right.from:avg(targets.right.to), tag))
             
-            local targetBottomPts = mTarget.bottomPts
-            
+            local targetPts = mTarget.interfaces.left
             local pts = {
-                rt = current.bottomPts.rt:avg(targetBottomPts.lt),
-                rb = current.bottomPts.rb:avg(targetBottomPts.lb),
-                lb = current.bottomPts.rb,
-                lt = current.bottomPts.rt
+                lb = current.interfaces.right[1],
+                lt = current.interfaces.right[2],
+                rt = current.interfaces.right[2]:avg(targetPts[1]),
+                rb = current.interfaces.right[1]:avg(targetPts[2])
             }
             
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModel(pts, true)));
-            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModel(pts, false)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(pts, false)));
             
             if current.fnOpen and current.fnOpen.right then
                 insert(result.invokeLater, current.fnOpen.right)
@@ -100,21 +105,77 @@ local invokeLater2 = function(result, tag, slotId, fitModel)
     elseif current.fnClosed and current.fnClosed.right then
         insert(result.invokeLater, current.fnClosed.right)
     end
+    
+    if targets.front then
+        local mTarget = result.connectors.underpass[targets.front.slotId]
+        if mTarget.targets.back and mTarget.targets.back.slotId == slotId then
+            insert(result.models, ust.unitLane(frontConnector, targets.front.from:avg(targets.front.to), tag))
+            
+            local targetPts = mTarget.interfaces.back
+            local pts = {
+                lt = current.interfaces.front[2],
+                lb = current.interfaces.front[1],
+                rt = current.interfaces.front[2]:avg(targetPts[1]),
+                rb = current.interfaces.front[1]:avg(targetPts[2]),
+            }
+            
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(pts, false)));
+            
+            if current.fnOpen and current.fnOpen.front then
+                insert(result.invokeLater, current.fnOpen.front)
+            end
+        elseif current.fnClosed and current.fnClosed.front then
+            insert(result.invokeLater, current.fnClosed.front)
+        end
+    elseif current.fnClosed and current.fnClosed.front then
+        insert(result.invokeLater, current.fnClosed.front)
+    end
+    
+    if targets.back then
+        local mTarget = result.connectors.underpass[targets.back.slotId]
+        if mTarget.targets.front and mTarget.targets.front.slotId == slotId then
+            insert(result.models, ust.unitLane(backConnector, targets.back.from:avg(targets.back.to), tag))
+            
+            local targetPts = mTarget.interfaces.front
+            local pts = {
+                lt = current.interfaces.back[2],
+                lb = current.interfaces.back[1],
+                rt = current.interfaces.back[2]:avg(targetPts[1]),
+                rb = current.interfaces.back[1]:avg(targetPts[2]),
+            }
+            
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_tl.mdl", tag, fitModels.tunnel(pts, true)));
+            insert(result.models, ust.newModel("ust/platform/era_c/underpass_tunnel_br.mdl", tag, fitModels.tunnel(pts, false)));
+            
+            if current.fnOpen and current.fnOpen.back then
+                insert(result.invokeLater, current.fnOpen.back)
+            end
+        elseif current.fnClosed and current.fnClosed.back then
+            insert(result.invokeLater, current.fnClosed.back)
+        end
+    elseif current.fnClosed and current.fnClosed.back then
+        insert(result.invokeLater, current.fnClosed.back)
+    end
 end
 
-local invokeLater = function(result, tag, slotId, fitModel)
+local invokeLater = function(result, tag, slotId)
     local current = result.connectors.underpass[slotId]
     return function()
         local leftConnector = current.connectors.left
         local rightConnector = current.connectors.right
+        local frontConnector = current.connectors.front
+        local backConnector = current.connectors.back
         
         local targets = {
             left = nil,
             right = nil,
+            front = nil,
+            back = nil
         }
         
         for slotIdTarget, target in pairs(result.connectors.underpass) do
-            if slotId ~= slotIdTarget and (not target.front or target.front.slotId ~= slotIdTarget) then
+            if slotId ~= slotIdTarget then
                 if ((current.pos.x - target.pos.x == 1 and current.pos.y == target.pos.y) or (current.pos.x - target.pos.x > 1)) and leftConnector and target.connectors.right then
                     local vec = leftConnector - target.connectors.right
                     if math.abs(vec:normalized():dot(current.vec)) < 0.72 then
@@ -149,6 +210,28 @@ local invokeLater = function(result, tag, slotId, fitModel)
                             }
                         end
                     end
+                elseif target.pos.x == current.pos.x and current.pos.y >= target.pos.y and frontConnector and target.connectors.back then
+                    local vec = frontConnector - target.connectors.back
+                    if not targets.front or (targets.front and vec:length2() < targets.front.distance) then
+                        targets.front = {
+                            distance = vec:length2(),
+                            y = target.pos.y,
+                            from = frontConnector,
+                            to = target.connectors.back,
+                            slotId = slotIdTarget
+                        }
+                    end
+                elseif target.pos.x == current.pos.x and current.pos.y <= target.pos.y and backConnector and target.connectors.front then
+                    local vec = backConnector - target.connectors.front
+                    if not targets.back or (targets.back and vec:length2() < targets.back.distance) then
+                        targets.back = {
+                            distance = vec:length2(),
+                            y = target.pos.y,
+                            from = backConnector,
+                            to = target.connectors.front,
+                            slotId = slotIdTarget
+                        }
+                    end
                 end
             end
         end
@@ -158,7 +241,7 @@ local invokeLater = function(result, tag, slotId, fitModel)
         insert(
             result.invokeLater,
             function()
-                invokeLater2(result, tag, slotId, fitModel)
+                invokeLater2(result, tag, slotId)
             end
     )
     end
