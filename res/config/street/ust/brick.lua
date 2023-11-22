@@ -11,7 +11,8 @@ function data()
         speed = 60.0,
         type = "one way old small",
         name = _("MENU_STREET_BRICK"),
-        desc = _("MENU_STREET_BRICK_DEC"),
+        desc = _("MENU_STREET_BRICK_DESC"),
+        icon = "ui/construction/station/rail/ust/streets/brick.tga",
         categories = {"one-way"},
         borderGroundTex = "street_border.lua",
         materials = {

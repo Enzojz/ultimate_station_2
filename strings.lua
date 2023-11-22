@@ -256,7 +256,11 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_SIGN = "Platform Sign",
             MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Put station name on platform.",
             MENU_MODULE_ENTRY_UNDERPASS = "Underpass Entry",
-            MENU_MODULE_ENTRY_UNDERPASS_DESC = "An entry underneath a platform."
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "An entry underneath a platform.",
+            MENU_MENU_BRICK = "Bricked road from Ultimate Station",
+            MENU_MENU_BRICK_DESC = "Bricked streets to connect bus or tram terminals with others.",
+            MENU_MENU_ASPHALT = "Asphalt road from Ultimate Station",
+            MENU_MENU_ASPHALT_DESC = "Asphalt streets to connect bus or tram terminals with others.",
         },
         zh_CN = {
             MOD_NAME = "终极车站",
@@ -388,7 +392,11 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_SIGN = "车站站名牌",
             MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在站台上设置站名牌。",
             MENU_MODULE_ENTRY_UNDERPASS = "地道入口",
-            MENU_MODULE_ENTRY_UNDERPASS_DESC = "从站台下穿过的车站入口"
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "从站台下穿过的车站入口",
+            MENU_STREET_BRICK = "砖石路面(终极车站)",
+            MENU_STREET_BRICK_DESC = "连接普通街道和终极车站中的巴士/有轨电车轨道。",
+            MENU_STREET_ASPHALT = "沥青路面(终极车站)",
+            MENU_STREET_ASPHALT_DESC = "连接普通街道和终极车站中的巴士/有轨电车轨道。",
         },
         zh_TW = {
             MOD_NAME = "終極車站",
@@ -520,7 +528,11 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_SIGN = "車站站名牌",
             MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "在月臺上設置站名牌。",
             MENU_MODULE_ENTRY_UNDERPASS = "地道入口",
-            MENU_MODULE_ENTRY_UNDERPASS_DESC = "從月臺下穿過的車站入口"
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "從月臺下穿過的車站入口",
+            MENU_STREET_BRICK = "磚石路面(終極車站)",
+            MENU_STREET_BRICK_DESC = "連接普通街道和終極車站中的巴士/有軌電車軌道。",
+            MENU_STREET_ASPHALT = "瀝青路面(終極車站)",
+            MENU_STREET_ASPHALT_DESC = "連接普通街道和終極車站中的巴士/有軌電車軌道。",
         },
         fr = {
             MOD_NAME = "Gare ultime",
@@ -598,7 +610,7 @@ function data()
             MENU_MODULE_SOUND_INSULATION_DESC = "Murs d'isolation acoustique",
             MENU_MODULE_BRIDGE_VOID = "Structure flottante",
             MENU_MODULE_BRIDGE_VOID_DESC = "Placez ceci pour faire flotter des voies ou des plateformes dans les airs.",
-            MODULE_REMOVE_HELPER = "Assistant de suppression de plateforme/voie",
+            MODULE_REMOVE_HELPER = "Assistant de suppression de plateforme ou de voie",
             MODULE_REMOVE_HELPER_DESC = "Aidez à supprimer des plateformes ou des voies.",
             MENU_MODULE_COLOR_GREEN = "Vert",
             MENU_MODULE_COLOR_GREEN_DESC = "Vert pour certains composants applicables",
@@ -625,9 +637,9 @@ function data()
             MENU_MODULE_TRAM = "Commutateur de rail tram",
             MENU_MODULE_TRAM_DESC = "Mise en place d'une rail du tram sur la route.",
             MENU_MODULE_STREET_BRICK = "Route en pierre",
-            MENU_MODULE_STREET_BRICK_DESC = "Mise en place d'une terminale routier en pierre dans la gare.",
+            MENU_MODULE_STREET_BRICK_DESC = "Mise en place d'une terminale routier ou tram en pierre dans la gare.",
             MENU_MODULE_STREET_ASPHALT = "Route en asphalte",
-            MENU_MODULE_STREET_ASPHALT_DESC = "Mise en place d'une terminale routier en asphalte dans la gare.",
+            MENU_MODULE_STREET_ASPHALT_DESC = "Mise en place d'une terminale routier ou tram en asphalte dans la gare.",
             MENU_MODULE_COLOR_BLACK = "Noir",
             MENU_MODULE_COLOR_BLACK_DESC = "Noir pour certains composants applicables",
             MENU_MODULE_MAIN_ENTRY_CARGO_10 = "Entrée principale de la gare de fret",
@@ -651,7 +663,11 @@ function data()
             MENU_MODULE_CARGO_PLATFORM_SIGN = "Signes",
             MENU_MODULE_CARGO_PLATFORM_SIGN_DESC = "Mettez le nom de la gare sur la plateforme.",
             MENU_MODULE_ENTRY_UNDERPASS = "Entrée souterrain",
-            MENU_MODULE_ENTRY_UNDERPASS_DESC = "Une entrée traverse sous les plateforme."
+            MENU_MODULE_ENTRY_UNDERPASS_DESC = "Une entrée traverse sous les plateforme.",
+            MENU_STREET_BRICK = "Route en pierre de la gare ultime",
+            MENU_STREET_BRICK_DESC = "Pour la connexion entre terminale de la gare ultime et d'autre type de routes.",
+            MENU_STREET_ASPHALT = "Route en asphalte de la gare ultime",
+            MENU_STREET_ASPHALT_DESC = "Pour la connexion entre terminale de la gare ultime et d'autre type de routes.",
         
         },
     }
