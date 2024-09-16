@@ -44,9 +44,9 @@ function data()
 			},
 			operation_1 = {
 				op = "MULTIPLICATION",
-				mode = "NORMAL",
+				mode = "UV_MODE_SCALE",
 				scale = { 1.0, 1.0 },
-				opacity = -128
+				opacity = 1
 			}, 
         
         },

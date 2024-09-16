@@ -42,9 +42,9 @@ function data()
             operation_1 =
             {
                 op = "MULTIPLICATION",
-                mode = "NORMAL",
+                mode = "UV_MODE_WORLD",
                 scale = {1, 0.2},
-                opacity = -300.0
+                opacity = 1
             },
             polygon_offset = {factor = -0.5, units = 0.25, forceDepthWrite = true},
             two_sided = {twoSided = false}
