@@ -42,9 +42,9 @@ function data() return {
             minFilter = "LINEAR_MIPMAP_LINEAR"
         },
         operation_1 = {
-            mode = "NORMAL",
+            mode = "UV_MODE_WORLD",
             op = "MULTIPLICATION",
-            opacity = -256,
+            opacity = 1,
             scale = {1 / 12, 1 / 12}
         },
         map_op_2 = {

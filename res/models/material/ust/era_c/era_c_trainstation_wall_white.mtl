@@ -46,9 +46,9 @@ return {
 		operation_1 =
 		{
 			op = "MULTIPLICATION",
-			mode = "NORMAL",
+			mode = "UV_MODE_REF_NRML",
 			scale = { 0.75, 0.75 },
-			opacity = -515.0
+			opacity = 1
 		},
 		operation_2 = {
 			mode = "TEXCOORD",

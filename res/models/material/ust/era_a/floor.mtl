@@ -34,9 +34,9 @@ function data() return {
       operation_1 =
       {
           op = "MULTIPLICATION",
-          mode = "NORMAL",
+          mode = "UV_MODE_WORLD",
           scale = { 0.2, 0.2 },
-          opacity = -300.0
+          opacity = 1
       },
       two_sided = {
          flipNormal = false,

@@ -8,7 +8,7 @@ local lshift = bit32.lshift
 local bor = bit32.bor
 
 local unpack = table.unpack
-local abc, kern = unpack(require "ust/alte_din_1451_mittelschrift_bold")
+local abc = unpack(require "ust/alte_din_1451_mittelschrift_bold")
 
 local function utf2unicode(str)
     if (str == nil) then return pipe.new / 0 end
@@ -44,9 +44,8 @@ local gen = function(scale, z)
                 function(r, c)
                     local lastPos = #r > 0 and r[#r].to or 0
                     local abc = abc[c]
-                    local kern = kern[c]
                     if (abc) then
-                        local pos = lastPos + abc.a + (#r > 0 and kern and kern[r[#r].c] or 0)
+                        local pos = lastPos + abc.a
                         local nextPos = pos + abc.b + abc.c
                         return r / {c = c, from = pos, to = nextPos}
                     else
