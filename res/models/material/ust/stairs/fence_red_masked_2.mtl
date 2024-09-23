@@ -10,7 +10,8 @@ function data() return {
             type = "TWOD",
             wrapS = "REPEAT",
             wrapT = "REPEAT",
-            magFilter = "NEAREST"
+            magFilter = "NEAREST",
+            minFilter = "NEAREST"
         },
         map_metal_gloss_ao = {
             fileName = "default_metal_gloss_ao.dds",
