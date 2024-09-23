@@ -7,6 +7,7 @@ function data() return {
          fadeOutStartDist = 10000
       },
       map_albedo_opacity = {
+         compressionAllowed = false,
          fileName = "models/ust/transparent.tga",
          type = "TWOD",
          wrapS = "REPEAT",
@@ -25,7 +26,7 @@ function data() return {
          wrapT = "REPEAT"
       },
       map_op_1 = {
-			fileName = "unknown_texture.tga",
+			fileName = "unknown_texture.dds",
           magFilter = "LINEAR",
           minFilter = "LINEAR_MIPMAP_LINEAR"
       },
