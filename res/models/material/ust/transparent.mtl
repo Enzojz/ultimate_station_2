@@ -7,8 +7,7 @@ function data() return {
          fadeOutStartDist = 10000
       },
       map_albedo_opacity = {
-         compressionAllowed = false,
-         fileName = "models/ust/transparent.tga",
+         fileName = "models/ust/transparent.dds",
          type = "TWOD",
          wrapS = "REPEAT",
          wrapT = "REPEAT"
