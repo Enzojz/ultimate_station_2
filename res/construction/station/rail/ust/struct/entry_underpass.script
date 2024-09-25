@@ -238,7 +238,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, mo
             local rightPts = octa == 3 and outerPts or innerPts
             
             local connector = innerPts[2]:avg(innerPts[3])
-            function platformConnection(lane)
+            local platformConnection = function(lane)
                 if lane then
                     local connections = pipe.new * lane
                         * pipe.map(function(pt) return {pt = pt, distance = (pt - connector):length2()} end)
@@ -254,7 +254,7 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, mo
                 end
             end
             
-            function extConnection()
+            local extConnection = function()
                 for _, pt in ipairs({innerPts[2], innerPts[3]}) do
                     insert(result.models, ust.unitLane(connector, pt:avg(connector), tag, "ust/linking_lane.mdl"))
                 end

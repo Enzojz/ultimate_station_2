@@ -259,9 +259,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, pr
         if info.trackGroup.right then
             local trackGroup = params.trackGroup[info.trackGroup.right]
             local n = #trackGroup
-            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
-            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
-            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos
+            local hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.rightPos
+            local hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos - 1
+            local hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.rightPos
             
             if hasCenterNode then
                 local pos = {{0, 0.3}, {0.7, 1}}
@@ -288,9 +288,9 @@ local updateFn = function(result, transform, tag, slotId, addModelFn, params, pr
         elseif info.trackGroup.left then
             local trackGroup = params.trackGroup[info.trackGroup.left]
             local n = #trackGroup
-            hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
-            hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos - 1
-            hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
+            local hasCenterNode = n % 2 == 1 and (n + 1) / 2 == info.trackGroup.leftPos
+            local hasInfNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos - 1
+            local hasSupNode = n % 2 == 0 and (n / 2) == info.trackGroup.leftPos
             
             if hasCenterNode then
                 local pos = {{1, 0.7}, {0.3, 0}}
